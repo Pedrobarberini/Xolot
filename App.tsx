@@ -15,21 +15,6 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import {
-  BadgeCheck,
-  ChevronRight,
-  Heart,
-  Home,
-  LogOut,
-  MessageCircle,
-  MoreVertical,
-  Repeat2,
-  Send,
-  ShieldCheck,
-  UploadCloud,
-  UserRound,
-  WalletCards
-} from "lucide-react-native";
 import { players } from "./src/data/players";
 import {
   AppUser,
@@ -57,9 +42,8 @@ const SYSTEM_NAV_CLEARANCE =
   }) ?? 24;
 const TAB_BAR_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 92;
 const DETAIL_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 36;
-const FEED_TEXT_LIMIT_COMPACT = 132;
-const FEED_TEXT_LIMIT_WIDE = 220;
-const LUCIDE_STROKE_WIDTH = 2.35;
+const FEED_TEXT_LIMIT_COMPACT = 108;
+const FEED_TEXT_LIMIT_WIDE = 230;
 
 type Tab = "feed" | "portfolio" | "submit" | "admin" | "profile";
 
@@ -656,7 +640,6 @@ function Header({
           <Text style={styles.walletValue}>{badgeValue}</Text>
         </View>
         <Pressable onPress={onSignOut} style={styles.signOutButton}>
-          <LogOut color="#F7C84B" size={15} strokeWidth={LUCIDE_STROKE_WIDTH} />
           <Text style={styles.signOutText}>Sair</Text>
         </Pressable>
       </View>
@@ -826,20 +809,19 @@ function FeedReel({
     !isExpanded && hasMoreText
       ? `${presentationText.slice(0, textLimit).trim()}...`
       : presentationText;
-  const likeCount = String(Math.max(10, player.score - 68 + index * 3));
-  const commentCount = String(index + 1);
-  const saveCount = String(Math.max(2, Math.round(player.score / 18)));
+  const fundingProgressLabel = `${Math.round(progress * 100)}%`;
+  const minimumTicketLabel = formatBRL(player.minimumTicket);
+  const projectedMonthlyLabel = formatBRL(player.projectedMonthlyEarnings);
   const initials = player.name
     .split(" ")
     .slice(0, 2)
     .map((part) => part[0])
     .join("")
     .toUpperCase();
-  const canvasHeight = Math.max(
-    520,
-    Math.min(reelHeight - TAB_BAR_CONTENT_PADDING - 40, 720)
-  );
-  const canvasWidth = Math.min(width * 0.42, 480);
+  const canvasHeight = isWide
+    ? Math.max(540, Math.min(reelHeight - TAB_BAR_CONTENT_PADDING - 44, 700))
+    : reelHeight;
+  const canvasWidth = isWide ? Math.min(width - 80, 1080) : width;
 
   useEffect(() => {
     revealProgress.setValue(0);
@@ -902,6 +884,9 @@ function FeedReel({
               ]}
             />
             <View style={styles.feedVideoTexture} />
+            <View style={[styles.feedVideoLane, styles.feedVideoLaneLeft]} />
+            <View style={[styles.feedVideoLane, styles.feedVideoLaneRight]} />
+            <View style={styles.feedVideoFocusBox} />
             <View style={styles.feedVideoShadeTop} />
             <View style={styles.feedVideoShadeBottom} />
           </View>
@@ -909,10 +894,10 @@ function FeedReel({
           <View style={styles.feedReelHeaderOverlay}>
             <View>
               <Text style={[styles.feedReelKicker, { color: palette.accent }]}>
-                NextStar Reels
+                Radar NextStar
               </Text>
               <Text style={[styles.feedReelCount, { color: palette.text }]}>
-                {index + 1}/{total} | {approvedCount} aprovadas
+                Ficha {index + 1}/{total} | {approvedCount} aprovadas
               </Text>
             </View>
             <View style={[styles.scoreBadge, styles.feedScoreBadge, { borderColor: scoreColor }]}>
@@ -925,20 +910,15 @@ function FeedReel({
             </View>
           </View>
 
-          <View style={[styles.feedActionRail, isWide ? styles.feedActionRailWide : null]}>
-            <FeedActionButton Icon={Heart} count={likeCount} />
-            <FeedActionButton Icon={MessageCircle} count={commentCount} />
-            <FeedActionButton Icon={Repeat2} count={saveCount} />
-            <FeedActionButton Icon={Send} />
-            <FeedActionButton Icon={MoreVertical} />
-          </View>
-
           <View
             style={[
               styles.feedTextOverlay,
               isWide ? styles.feedTextOverlayWide : null
             ]}
           >
+            <Text style={[styles.feedOverlayEyebrow, { color: palette.accent }]}>
+              Ficha de observacao
+            </Text>
             <View style={styles.feedProfileRow}>
               <View
                 style={[styles.feedAvatar, { borderColor: palette.accent }]}
@@ -948,29 +928,24 @@ function FeedReel({
                 </Text>
               </View>
               <View style={styles.feedProfileTextBlock}>
-                <View style={styles.feedProfileNameRow}>
-                  <Text
-                    numberOfLines={1}
-                    style={[styles.feedProfileName, { color: palette.text }]}
-                  >
-                    {player.name.toLowerCase().replace(/\s+/g, "")}
-                  </Text>
-                  <BadgeCheck
-                    color={palette.accent}
-                    size={15}
-                    strokeWidth={LUCIDE_STROKE_WIDTH}
-                  />
-                </View>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.feedProfileName, { color: palette.text }]}
+                >
+                  {player.name}
+                </Text>
                 <Text
                   numberOfLines={1}
                   style={[styles.feedSponsorLabel, { color: palette.muted }]}
                 >
-                  Patrocinado | {player.position}
+                  {player.position} | {player.city}
                 </Text>
               </View>
-              <Pressable style={styles.feedFollowButton}>
-                <Text style={styles.feedFollowText}>Seguir</Text>
-              </Pressable>
+              <View style={[styles.feedStatusPill, { borderColor: palette.border }]}>
+                <Text style={[styles.feedStatusText, { color: palette.accent }]}>
+                  Verificado
+                </Text>
+              </View>
             </View>
 
             <Text
@@ -989,6 +964,20 @@ function FeedReel({
             >
               {player.age} anos | {player.club} | risco {player.riskLevel}
             </Text>
+            <View style={styles.feedTagRow}>
+              {player.tags.slice(0, 3).map((tag) => (
+                <Text
+                  key={tag}
+                  numberOfLines={1}
+                  style={[
+                    styles.feedTag,
+                    { borderColor: palette.border, color: palette.text }
+                  ]}
+                >
+                  {tag}
+                </Text>
+              ))}
+            </View>
             <Text style={[styles.feedReelHighlight, { color: palette.text }]}>
               {visibleText}
             </Text>
@@ -1002,6 +991,33 @@ function FeedReel({
                 </Text>
               </Pressable>
             ) : null}
+
+            <View style={styles.feedInsightStrip}>
+              <View style={styles.feedInsightItem}>
+                <Text style={[styles.feedInsightValue, { color: scoreColor }]}>
+                  {player.score}
+                </Text>
+                <Text style={[styles.feedInsightLabel, { color: palette.muted }]}>
+                  score
+                </Text>
+              </View>
+              <View style={styles.feedInsightItem}>
+                <Text style={[styles.feedInsightValue, { color: palette.accent }]}>
+                  {fundingProgressLabel}
+                </Text>
+                <Text style={[styles.feedInsightLabel, { color: palette.muted }]}>
+                  captado
+                </Text>
+              </View>
+              <View style={styles.feedInsightItem}>
+                <Text style={[styles.feedInsightValue, { color: palette.accent }]}>
+                  {minimumTicketLabel}
+                </Text>
+                <Text style={[styles.feedInsightLabel, { color: palette.muted }]}>
+                  ticket
+                </Text>
+              </View>
+            </View>
 
             <View style={styles.feedReelMetricRow}>
               {player.metrics.slice(0, 3).map((metric) => (
@@ -1067,36 +1083,34 @@ function FeedReel({
                 pressed ? styles.feedReelButtonPressed : null
               ]}
             >
-              <Text style={styles.feedLearnMoreText}>Saiba mais</Text>
-              <ChevronRight
-                color="#FFFFFF"
-                size={20}
-                strokeWidth={LUCIDE_STROKE_WIDTH}
-              />
+              <Text style={styles.feedLearnMoreText}>Abrir ficha completa</Text>
             </Pressable>
           </View>
+
+          {isWide ? (
+            <View style={styles.feedDesktopPanel}>
+              <Text style={styles.feedDesktopPanelTitle}>
+                Leitura de investimento
+              </Text>
+              <View style={styles.feedDesktopPanelRow}>
+                <Text style={styles.feedDesktopPanelLabel}>Projecao mensal</Text>
+                <Text style={styles.feedDesktopPanelValue}>{projectedMonthlyLabel}</Text>
+              </View>
+              <View style={styles.feedDesktopPanelRow}>
+                <Text style={styles.feedDesktopPanelLabel}>Participacao atleta</Text>
+                <Text style={styles.feedDesktopPanelValue}>
+                  {formatPercent(player.athleteSharePercent)}
+                </Text>
+              </View>
+              <View style={styles.feedDesktopPanelRow}>
+                <Text style={styles.feedDesktopPanelLabel}>Perfil de risco</Text>
+                <Text style={styles.feedDesktopPanelValue}>{player.riskLevel}</Text>
+              </View>
+            </View>
+          ) : null}
         </View>
       </Animated.View>
     </View>
-  );
-}
-
-function FeedActionButton({
-  Icon,
-  count
-}: {
-  Icon: React.ComponentType<{
-    color?: string;
-    size?: number;
-    strokeWidth?: number;
-  }>;
-  count?: string;
-}) {
-  return (
-    <Pressable style={styles.feedActionButton}>
-      <Icon color="#FFFFFF" size={31} strokeWidth={LUCIDE_STROKE_WIDTH} />
-      {count ? <Text style={styles.feedActionCount}>{count}</Text> : null}
-    </Pressable>
   );
 }
 
@@ -1997,35 +2011,29 @@ function BottomTabs({
   const tabs: Array<{
     id: Tab;
     label: string;
-    Icon: React.ComponentType<{
-      color?: string;
-      size?: number;
-      strokeWidth?: number;
-    }>;
   }> =
     role === "Atleta"
       ? [
-          { id: "submit", label: "Envio", Icon: UploadCloud },
-          { id: "feed", label: "Feed", Icon: Home },
-          { id: "profile", label: "Perfil", Icon: UserRound }
+          { id: "submit", label: "Envio" },
+          { id: "feed", label: "Feed" },
+          { id: "profile", label: "Perfil" }
         ]
       : role === "Admin"
         ? [
-            { id: "admin", label: "Admin", Icon: ShieldCheck },
-            { id: "feed", label: "Feed", Icon: Home },
-            { id: "profile", label: "Perfil", Icon: UserRound }
+            { id: "admin", label: "Admin" },
+            { id: "feed", label: "Feed" },
+            { id: "profile", label: "Perfil" }
           ]
         : [
-            { id: "feed", label: "Feed", Icon: Home },
-            { id: "portfolio", label: "Carteira", Icon: WalletCards },
-            { id: "profile", label: "Perfil", Icon: UserRound }
+            { id: "feed", label: "Feed" },
+            { id: "portfolio", label: "Carteira" },
+            { id: "profile", label: "Perfil" }
           ];
 
   return (
     <View style={[styles.tabBar, isDesktop ? styles.tabBarDesktop : null]}>
       {tabs.map((item) => {
         const isActive = item.id === activeTab;
-        const iconColor = isActive ? "#090805" : "#F5DEB2";
 
         return (
           <Pressable
@@ -2033,11 +2041,7 @@ function BottomTabs({
             onPress={() => onChange(item.id)}
             style={[styles.tabButton, isActive ? styles.tabButtonActive : null]}
           >
-            <item.Icon
-              color={iconColor}
-              size={isDesktop ? 18 : 21}
-              strokeWidth={LUCIDE_STROKE_WIDTH}
-            />
+            <View style={[styles.tabMarker, isActive ? styles.tabMarkerActive : null]} />
             <Text style={[styles.tabText, isActive ? styles.tabTextActive : null]}>
               {item.label}
             </Text>
@@ -2290,8 +2294,36 @@ const styles = StyleSheet.create({
     transform: [{ rotate: "12deg" }],
     width: 1
   },
+  feedVideoLane: {
+    borderColor: "rgba(247, 200, 75, 0.11)",
+    borderWidth: 1,
+    height: "62%",
+    position: "absolute",
+    top: "13%",
+    width: "26%"
+  },
+  feedVideoLaneLeft: {
+    borderBottomRightRadius: 8,
+    borderTopRightRadius: 8,
+    left: "-8%"
+  },
+  feedVideoLaneRight: {
+    borderBottomLeftRadius: 8,
+    borderTopLeftRadius: 8,
+    right: "-8%"
+  },
+  feedVideoFocusBox: {
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 8,
+    borderWidth: 1,
+    height: "18%",
+    left: "24%",
+    position: "absolute",
+    top: "26%",
+    width: "52%"
+  },
   feedVideoShadeTop: {
-    backgroundColor: "rgba(5, 5, 3, 0.28)",
+    backgroundColor: "rgba(5, 5, 3, 0.22)",
     height: "34%",
     left: 0,
     position: "absolute",
@@ -2299,7 +2331,7 @@ const styles = StyleSheet.create({
     top: 0
   },
   feedVideoShadeBottom: {
-    backgroundColor: "rgba(5, 5, 3, 0.84)",
+    backgroundColor: "rgba(5, 5, 3, 0.9)",
     bottom: 0,
     height: "64%",
     left: 0,
@@ -2330,47 +2362,30 @@ const styles = StyleSheet.create({
   feedScoreBadge: {
     backgroundColor: "rgba(5, 5, 3, 0.52)"
   },
-  feedActionRail: {
-    alignItems: "center",
-    bottom: 126,
-    gap: 18,
-    justifyContent: "center",
-    position: "absolute",
-    right: 13,
-    zIndex: 5
-  },
-  feedActionRailWide: {
-    bottom: TAB_BAR_CONTENT_PADDING + 48,
-    right: 18
-  },
-  feedActionButton: {
-    alignItems: "center",
-    minHeight: 43,
-    minWidth: 44
-  },
-  feedActionCount: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "900",
-    marginTop: 4
-  },
   feedTextOverlay: {
-    backgroundColor: "rgba(5, 5, 3, 0.52)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: "rgba(5, 5, 3, 0.66)",
+    borderColor: "rgba(255, 255, 255, 0.14)",
     borderRadius: 8,
     borderWidth: 1,
     bottom: TAB_BAR_CONTENT_PADDING + 8,
     left: 18,
     padding: 14,
     position: "absolute",
-    right: 78,
+    right: 18,
     zIndex: 4
   },
   feedTextOverlayWide: {
-    bottom: TAB_BAR_CONTENT_PADDING + 8,
-    left: 18,
+    bottom: 18,
+    left: 30,
     padding: 18,
-    right: 82
+    right: 340
+  },
+  feedOverlayEyebrow: {
+    fontSize: 10,
+    fontWeight: "900",
+    letterSpacing: 0,
+    marginBottom: 9,
+    textTransform: "uppercase"
   },
   feedProfileRow: {
     alignItems: "center",
@@ -2395,11 +2410,6 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0
   },
-  feedProfileNameRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 5
-  },
   feedProfileName: {
     flexShrink: 1,
     fontSize: 15,
@@ -2410,18 +2420,17 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     marginTop: 2
   },
-  feedFollowButton: {
+  feedStatusPill: {
     alignItems: "center",
-    borderColor: "rgba(255, 255, 255, 0.86)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 8,
     borderWidth: 1,
-    minHeight: 34,
     justifyContent: "center",
-    paddingHorizontal: 13
+    minHeight: 31,
+    paddingHorizontal: 10
   },
-  feedFollowText: {
-    color: "#FFFFFF",
-    fontSize: 13,
+  feedStatusText: {
+    fontSize: 11,
     fontWeight: "900"
   },
   feedReelVideoTitle: {
@@ -2439,6 +2448,22 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     marginTop: 4
   },
+  feedTagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 9
+  },
+  feedTag: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 999,
+    borderWidth: 1,
+    fontSize: 10,
+    fontWeight: "900",
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    textTransform: "uppercase"
+  },
   feedReelHighlight: {
     fontSize: 14,
     fontWeight: "700",
@@ -2453,6 +2478,31 @@ const styles = StyleSheet.create({
   feedReadMoreText: {
     fontSize: 13,
     fontWeight: "900"
+  },
+  feedInsightStrip: {
+    backgroundColor: "rgba(255, 255, 255, 0.045)",
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 10,
+    paddingHorizontal: 9,
+    paddingVertical: 8
+  },
+  feedInsightItem: {
+    flex: 1,
+    minWidth: 0
+  },
+  feedInsightValue: {
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  feedInsightLabel: {
+    fontSize: 9,
+    fontWeight: "900",
+    marginTop: 2,
+    textTransform: "uppercase"
   },
   feedReelMetricRow: {
     flexDirection: "row",
@@ -2480,10 +2530,10 @@ const styles = StyleSheet.create({
   },
   feedLearnMoreButton: {
     alignItems: "center",
-    backgroundColor: "#3F8DE0",
+    backgroundColor: "#D6A326",
     borderRadius: 8,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     marginTop: 12,
     minHeight: 48,
     paddingHorizontal: 15
@@ -2493,9 +2543,44 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }]
   },
   feedLearnMoreText: {
-    color: "#FFFFFF",
+    color: "#080604",
     fontSize: 14,
     fontWeight: "900"
+  },
+  feedDesktopPanel: {
+    backgroundColor: "rgba(5, 5, 3, 0.62)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    borderRadius: 8,
+    borderWidth: 1,
+    bottom: 18,
+    padding: 16,
+    position: "absolute",
+    right: 30,
+    width: 280,
+    zIndex: 4
+  },
+  feedDesktopPanelTitle: {
+    color: "#FFF4CC",
+    fontSize: 16,
+    fontWeight: "900",
+    marginBottom: 12
+  },
+  feedDesktopPanelRow: {
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderTopWidth: 1,
+    paddingVertical: 11
+  },
+  feedDesktopPanelLabel: {
+    color: "#A98A4A",
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase"
+  },
+  feedDesktopPanelValue: {
+    color: "#F7C84B",
+    fontSize: 15,
+    fontWeight: "900",
+    marginTop: 4
   },
   feedStatsGrid: {
     flexDirection: "row",
@@ -3387,11 +3472,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
     flex: 1,
-    gap: 4,
+    gap: 6,
     paddingVertical: 12
   },
   tabButtonActive: {
     backgroundColor: "#D6A326"
+  },
+  tabMarker: {
+    backgroundColor: "rgba(245, 222, 178, 0.26)",
+    borderRadius: 999,
+    height: 3,
+    width: 22
+  },
+  tabMarkerActive: {
+    backgroundColor: "#090805",
+    width: 34
   },
   tabText: {
     color: "#C6A96A",
