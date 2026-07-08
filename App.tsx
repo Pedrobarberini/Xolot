@@ -15,6 +15,21 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
+import {
+  BadgeCheck,
+  ChevronRight,
+  Heart,
+  Home,
+  LogOut,
+  MessageCircle,
+  MoreVertical,
+  Repeat2,
+  Send,
+  ShieldCheck,
+  UploadCloud,
+  UserRound,
+  WalletCards
+} from "lucide-react-native";
 import { players } from "./src/data/players";
 import {
   AppUser,
@@ -44,6 +59,7 @@ const TAB_BAR_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 92;
 const DETAIL_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 36;
 const FEED_TEXT_LIMIT_COMPACT = 132;
 const FEED_TEXT_LIMIT_WIDE = 220;
+const LUCIDE_STROKE_WIDTH = 2.35;
 
 type Tab = "feed" | "portfolio" | "submit" | "admin" | "profile";
 
@@ -315,7 +331,7 @@ export default function App() {
   if (!user) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar barStyle="light-content" />
         <AuthScreen onComplete={handleAuth} />
       </SafeAreaView>
     );
@@ -323,7 +339,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.keyboardView}
@@ -640,6 +656,7 @@ function Header({
           <Text style={styles.walletValue}>{badgeValue}</Text>
         </View>
         <Pressable onPress={onSignOut} style={styles.signOutButton}>
+          <LogOut color="#F7C84B" size={15} strokeWidth={LUCIDE_STROKE_WIDTH} />
           <Text style={styles.signOutText}>Sair</Text>
         </Pressable>
       </View>
@@ -799,7 +816,7 @@ function FeedReel({
   const { width } = useWindowDimensions();
   const [isExpanded, setIsExpanded] = useState(false);
   const revealProgress = useRef(new Animated.Value(0)).current;
-  const isWide = width >= 860;
+  const isWide = width >= 900;
   const progress = Math.min(player.funded / player.fundingGoal, 1);
   const scoreColor = getScoreColor(player.score);
   const presentationText = `${player.highlight} ${player.thesis}`.trim();
@@ -809,6 +826,20 @@ function FeedReel({
     !isExpanded && hasMoreText
       ? `${presentationText.slice(0, textLimit).trim()}...`
       : presentationText;
+  const likeCount = String(Math.max(10, player.score - 68 + index * 3));
+  const commentCount = String(index + 1);
+  const saveCount = String(Math.max(2, Math.round(player.score / 18)));
+  const initials = player.name
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+  const canvasHeight = Math.max(
+    520,
+    Math.min(reelHeight - TAB_BAR_CONTENT_PADDING - 40, 720)
+  );
+  const canvasWidth = Math.min(width * 0.42, 480);
 
   useEffect(() => {
     revealProgress.setValue(0);
@@ -828,7 +859,6 @@ function FeedReel({
           styles.feedReelStage,
           isWide ? styles.feedReelStageWide : null,
           {
-            backgroundColor: palette.media,
             opacity: revealProgress,
             transform: [
               {
@@ -841,34 +871,51 @@ function FeedReel({
           }
         ]}
       >
-        <View style={styles.feedVideoBackground}>
-          <View
-            style={[
-              styles.feedVideoAccent,
-              { backgroundColor: palette.accentSoft, borderColor: palette.border }
-            ]}
-          />
-          <View
-            style={[
-              styles.feedVideoFrame,
-              { borderColor: palette.border, backgroundColor: palette.media }
-            ]}
-          />
-          <View style={styles.feedVideoShadeTop} />
-          <View style={styles.feedVideoShadeBottom} />
-        </View>
+        <View
+          style={[
+            styles.feedReelCanvas,
+            isWide
+              ? [
+                  styles.feedReelCanvasWide,
+                  {
+                    flexBasis: canvasHeight,
+                    flexGrow: 0,
+                    flexShrink: 0,
+                    height: canvasHeight,
+                    width: canvasWidth
+                  }
+                ]
+              : null
+          ]}
+        >
+          <View style={styles.feedVideoBackground}>
+            <View
+              style={[
+                styles.feedVideoAccent,
+                { backgroundColor: palette.accentSoft, borderColor: palette.border }
+              ]}
+            />
+            <View
+              style={[
+                styles.feedVideoFrame,
+                { borderColor: palette.border, backgroundColor: palette.media }
+              ]}
+            />
+            <View style={styles.feedVideoTexture} />
+            <View style={styles.feedVideoShadeTop} />
+            <View style={styles.feedVideoShadeBottom} />
+          </View>
 
-        <View style={[styles.feedReelContent, isWide ? styles.feedReelContentWide : null]}>
-          <View style={styles.feedReelTopRow}>
+          <View style={styles.feedReelHeaderOverlay}>
             <View>
               <Text style={[styles.feedReelKicker, { color: palette.accent }]}>
-                Feed {index + 1}/{total}
+                NextStar Reels
               </Text>
               <Text style={[styles.feedReelCount, { color: palette.text }]}>
-                {total} oportunidades | {approvedCount} aprovadas
+                {index + 1}/{total} | {approvedCount} aprovadas
               </Text>
             </View>
-            <View style={[styles.scoreBadge, { borderColor: scoreColor }]}>
+            <View style={[styles.scoreBadge, styles.feedScoreBadge, { borderColor: scoreColor }]}>
               <Text style={[styles.scoreValue, { color: scoreColor }]}>
                 {player.score}
               </Text>
@@ -878,157 +925,178 @@ function FeedReel({
             </View>
           </View>
 
+          <View style={[styles.feedActionRail, isWide ? styles.feedActionRailWide : null]}>
+            <FeedActionButton Icon={Heart} count={likeCount} />
+            <FeedActionButton Icon={MessageCircle} count={commentCount} />
+            <FeedActionButton Icon={Repeat2} count={saveCount} />
+            <FeedActionButton Icon={Send} />
+            <FeedActionButton Icon={MoreVertical} />
+          </View>
+
           <View
             style={[
-              styles.feedReelMain,
-              isWide ? styles.feedReelMainWide : null
+              styles.feedTextOverlay,
+              isWide ? styles.feedTextOverlayWide : null
             ]}
           >
-            <View
-              style={[
-                styles.feedReelOverlay,
-                isWide ? styles.feedReelOverlayWide : null
-              ]}
-            >
-              <View style={[styles.paletteBadge, { borderColor: palette.border }]}>
-                <Text style={[styles.paletteBadgeText, { color: palette.accent }]}>
-                  NEXTSTAR
-                </Text>
-              </View>
-
-              <Text
-                numberOfLines={isWide ? 2 : 3}
-                style={[
-                  styles.feedReelVideoTitle,
-                  isWide ? styles.feedReelVideoTitleWide : null,
-                  { color: palette.text }
-                ]}
-              >
-                {player.videoTitle}
-              </Text>
-              <Text
-                numberOfLines={1}
-                style={[
-                  styles.feedReelName,
-                  isWide ? styles.feedReelNameWide : null,
-                  { color: palette.text }
-                ]}
-              >
-                {player.name}
-              </Text>
-              <Text
-                numberOfLines={1}
-                style={[styles.feedReelMeta, { color: palette.muted }]}
-              >
-                {player.age} anos | {player.position} | {player.club}
-              </Text>
-              <Text style={[styles.feedReelHighlight, { color: palette.text }]}>
-                {visibleText}
-              </Text>
-              {hasMoreText ? (
-                <Pressable
-                  onPress={() => setIsExpanded((current) => !current)}
-                  style={styles.feedReadMoreButton}
-                >
-                  <Text style={[styles.feedReadMoreText, { color: palette.accent }]}>
-                    {isExpanded ? "Ver menos" : "Ver mais"}
-                  </Text>
-                </Pressable>
-              ) : null}
-
-              <View style={styles.feedReelMetricRow}>
-                {player.metrics.slice(0, 3).map((metric) => (
-                  <View
-                    key={metric.label}
-                    style={[
-                      styles.feedReelMetric,
-                      {
-                        backgroundColor: palette.accentSoft,
-                        borderColor: palette.border
-                      }
-                    ]}
-                  >
-                    <Text
-                      numberOfLines={1}
-                      style={[styles.feedReelMetricValue, { color: palette.accent }]}
-                    >
-                      {metric.value}
-                    </Text>
-                    <Text
-                      numberOfLines={1}
-                      style={[styles.feedReelMetricLabel, { color: palette.muted }]}
-                    >
-                      {metric.label}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-
-              <View style={styles.progressLabelRow}>
-                <Text style={[styles.progressText, { color: palette.muted }]}>
-                  {formatBRL(player.funded)}
-                </Text>
-                <Text style={[styles.progressText, { color: palette.muted }]}>
-                  {formatBRL(player.fundingGoal)}
-                </Text>
-              </View>
+            <View style={styles.feedProfileRow}>
               <View
-                style={[
-                  styles.progressTrack,
-                  { backgroundColor: palette.progressTrack }
-                ]}
+                style={[styles.feedAvatar, { borderColor: palette.accent }]}
               >
-                <View
-                  style={[
-                    styles.progressFill,
-                    {
-                      backgroundColor: palette.accent,
-                      width: `${progress * 100}%`
-                    }
-                  ]}
-                />
-              </View>
-
-              <Pressable
-                onPress={onOpen}
-                style={({ pressed }) => [
-                  styles.feedReelButton,
-                  pressed ? styles.feedReelButtonPressed : null,
-                  { backgroundColor: palette.accent }
-                ]}
-              >
-                <Text
-                  style={[styles.feedReelButtonText, { color: palette.onAccent }]}
-                >
-                  Abrir oportunidade
+                <Text style={[styles.feedAvatarText, { color: palette.accent }]}>
+                  {initials}
                 </Text>
+              </View>
+              <View style={styles.feedProfileTextBlock}>
+                <View style={styles.feedProfileNameRow}>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.feedProfileName, { color: palette.text }]}
+                  >
+                    {player.name.toLowerCase().replace(/\s+/g, "")}
+                  </Text>
+                  <BadgeCheck
+                    color={palette.accent}
+                    size={15}
+                    strokeWidth={LUCIDE_STROKE_WIDTH}
+                  />
+                </View>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.feedSponsorLabel, { color: palette.muted }]}
+                >
+                  Patrocinado | {player.position}
+                </Text>
+              </View>
+              <Pressable style={styles.feedFollowButton}>
+                <Text style={styles.feedFollowText}>Seguir</Text>
               </Pressable>
             </View>
 
-            {isWide ? (
-              <View style={styles.feedVideoControlPanel}>
+            <Text
+              numberOfLines={2}
+              style={[
+                styles.feedReelVideoTitle,
+                isWide ? styles.feedReelVideoTitleWide : null,
+                { color: palette.text }
+              ]}
+            >
+              {player.videoTitle}
+            </Text>
+            <Text
+              numberOfLines={1}
+              style={[styles.feedReelMeta, { color: palette.muted }]}
+            >
+              {player.age} anos | {player.club} | risco {player.riskLevel}
+            </Text>
+            <Text style={[styles.feedReelHighlight, { color: palette.text }]}>
+              {visibleText}
+            </Text>
+            {hasMoreText ? (
+              <Pressable
+                onPress={() => setIsExpanded((current) => !current)}
+                style={styles.feedReadMoreButton}
+              >
+                <Text style={[styles.feedReadMoreText, { color: palette.accent }]}>
+                  {isExpanded ? "Ver menos" : "Ver mais"}
+                </Text>
+              </Pressable>
+            ) : null}
+
+            <View style={styles.feedReelMetricRow}>
+              {player.metrics.slice(0, 3).map((metric) => (
                 <View
+                  key={metric.label}
                   style={[
-                    styles.reelPlayButton,
-                    { backgroundColor: palette.accent }
+                    styles.feedReelMetric,
+                    {
+                      backgroundColor: palette.accentSoft,
+                      borderColor: palette.border
+                    }
                   ]}
                 >
-                  <Text style={[styles.reelPlayText, { color: palette.onAccent }]}>
-                    PLAY
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.feedReelMetricValue, { color: palette.accent }]}
+                  >
+                    {metric.value}
+                  </Text>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.feedReelMetricLabel, { color: palette.muted }]}
+                  >
+                    {metric.label}
                   </Text>
                 </View>
-                <Text style={[styles.feedVideoControlTitle, { color: palette.text }]}>
-                  Video de avaliacao
-                </Text>
-                <Text style={[styles.feedVideoControlMeta, { color: palette.muted }]}>
-                  {player.videoLength} | risco {player.riskLevel}
-                </Text>
-              </View>
-            ) : null}
+              ))}
+            </View>
+
+            <View style={styles.progressLabelRow}>
+              <Text
+                style={[styles.progressText, { color: palette.muted }]}
+              >
+                {formatBRL(player.funded)}
+              </Text>
+              <Text
+                style={[styles.progressText, { color: palette.muted }]}
+              >
+                {formatBRL(player.fundingGoal)}
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.progressTrack,
+                { backgroundColor: palette.progressTrack }
+              ]}
+            >
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    backgroundColor: palette.accent,
+                    width: `${progress * 100}%`
+                  }
+                ]}
+              />
+            </View>
+
+            <Pressable
+              onPress={onOpen}
+              style={({ pressed }) => [
+                styles.feedLearnMoreButton,
+                pressed ? styles.feedReelButtonPressed : null
+              ]}
+            >
+              <Text style={styles.feedLearnMoreText}>Saiba mais</Text>
+              <ChevronRight
+                color="#FFFFFF"
+                size={20}
+                strokeWidth={LUCIDE_STROKE_WIDTH}
+              />
+            </Pressable>
           </View>
         </View>
       </Animated.View>
     </View>
+  );
+}
+
+function FeedActionButton({
+  Icon,
+  count
+}: {
+  Icon: React.ComponentType<{
+    color?: string;
+    size?: number;
+    strokeWidth?: number;
+  }>;
+  count?: string;
+}) {
+  return (
+    <Pressable style={styles.feedActionButton}>
+      <Icon color="#FFFFFF" size={31} strokeWidth={LUCIDE_STROKE_WIDTH} />
+      {count ? <Text style={styles.feedActionCount}>{count}</Text> : null}
+    </Pressable>
   );
 }
 
@@ -1924,29 +1992,40 @@ function BottomTabs({
   onChange: (tab: Tab) => void;
   role: UserRole;
 }) {
-  const tabs: Array<{ id: Tab; label: string }> =
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 860;
+  const tabs: Array<{
+    id: Tab;
+    label: string;
+    Icon: React.ComponentType<{
+      color?: string;
+      size?: number;
+      strokeWidth?: number;
+    }>;
+  }> =
     role === "Atleta"
       ? [
-          { id: "submit", label: "Envio" },
-          { id: "feed", label: "Feed" },
-          { id: "profile", label: "Perfil" }
+          { id: "submit", label: "Envio", Icon: UploadCloud },
+          { id: "feed", label: "Feed", Icon: Home },
+          { id: "profile", label: "Perfil", Icon: UserRound }
         ]
       : role === "Admin"
         ? [
-            { id: "admin", label: "Admin" },
-            { id: "feed", label: "Feed" },
-            { id: "profile", label: "Perfil" }
+            { id: "admin", label: "Admin", Icon: ShieldCheck },
+            { id: "feed", label: "Feed", Icon: Home },
+            { id: "profile", label: "Perfil", Icon: UserRound }
           ]
         : [
-            { id: "feed", label: "Feed" },
-            { id: "portfolio", label: "Carteira" },
-            { id: "profile", label: "Perfil" }
+            { id: "feed", label: "Feed", Icon: Home },
+            { id: "portfolio", label: "Carteira", Icon: WalletCards },
+            { id: "profile", label: "Perfil", Icon: UserRound }
           ];
 
   return (
-    <View style={styles.tabBar}>
+    <View style={[styles.tabBar, isDesktop ? styles.tabBarDesktop : null]}>
       {tabs.map((item) => {
         const isActive = item.id === activeTab;
+        const iconColor = isActive ? "#090805" : "#F5DEB2";
 
         return (
           <Pressable
@@ -1954,6 +2033,11 @@ function BottomTabs({
             onPress={() => onChange(item.id)}
             style={[styles.tabButton, isActive ? styles.tabButtonActive : null]}
           >
+            <item.Icon
+              color={iconColor}
+              size={isDesktop ? 18 : 21}
+              strokeWidth={LUCIDE_STROKE_WIDTH}
+            />
             <Text style={[styles.tabText, isActive ? styles.tabTextActive : null]}>
               {item.label}
             </Text>
@@ -2045,14 +2129,17 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     alignSelf: "center",
+    backgroundColor: "rgba(5, 5, 3, 0.82)",
+    borderBottomColor: "rgba(247, 200, 75, 0.16)",
+    borderBottomWidth: 1,
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
     justifyContent: "space-between",
-    maxWidth: 760,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 14,
+    maxWidth: 1180,
+    paddingHorizontal: 22,
+    paddingTop: 14,
+    paddingBottom: 16,
     width: "100%"
   },
   headerIdentity: {
@@ -2117,6 +2204,8 @@ const styles = StyleSheet.create({
     borderColor: "#6F4C16",
     borderWidth: 1,
     borderRadius: 8,
+    flexDirection: "row",
+    gap: 6,
     justifyContent: "center",
     minHeight: 42,
     paddingHorizontal: 12
@@ -2128,8 +2217,9 @@ const styles = StyleSheet.create({
   },
   screenContent: {
     alignSelf: "center",
-    maxWidth: 760,
-    paddingHorizontal: 20,
+    maxWidth: 1080,
+    paddingHorizontal: 22,
+    paddingTop: 18,
     paddingBottom: TAB_BAR_CONTENT_PADDING,
     width: "100%"
   },
@@ -2147,11 +2237,24 @@ const styles = StyleSheet.create({
   },
   feedReelStage: {
     backgroundColor: "#050503",
+    alignItems: "stretch",
     flex: 1,
+    justifyContent: "center",
     overflow: "hidden"
   },
   feedReelStageWide: {
     alignItems: "center"
+  },
+  feedReelCanvas: {
+    alignSelf: "stretch",
+    flex: 1,
+    overflow: "hidden"
+  },
+  feedReelCanvasWide: {
+    alignSelf: "center",
+    borderColor: "rgba(247, 200, 75, 0.18)",
+    borderRadius: 8,
+    borderWidth: 1
   },
   feedVideoBackground: {
     ...StyleSheet.absoluteFillObject,
@@ -2160,58 +2263,59 @@ const styles = StyleSheet.create({
   feedVideoAccent: {
     borderRadius: 8,
     borderWidth: 1,
-    height: "52%",
-    opacity: 0.78,
+    height: "58%",
+    opacity: 0.62,
     position: "absolute",
     right: -48,
-    top: 64,
-    transform: [{ rotate: "-7deg" }],
-    width: "58%"
+    top: 42,
+    transform: [{ rotate: "-8deg" }],
+    width: "68%"
   },
   feedVideoFrame: {
     borderRadius: 8,
     borderWidth: 1,
-    bottom: "18%",
-    left: "8%",
-    opacity: 0.48,
+    bottom: "17%",
+    left: "6%",
+    opacity: 0.34,
     position: "absolute",
-    right: "8%",
-    top: "12%"
+    right: "6%",
+    top: "10%"
+  },
+  feedVideoTexture: {
+    backgroundColor: "rgba(255, 255, 255, 0.025)",
+    height: "100%",
+    left: "50%",
+    position: "absolute",
+    top: 0,
+    transform: [{ rotate: "12deg" }],
+    width: 1
   },
   feedVideoShadeTop: {
-    backgroundColor: "rgba(5, 5, 3, 0.48)",
-    height: "38%",
+    backgroundColor: "rgba(5, 5, 3, 0.28)",
+    height: "34%",
     left: 0,
     position: "absolute",
     right: 0,
     top: 0
   },
   feedVideoShadeBottom: {
-    backgroundColor: "rgba(5, 5, 3, 0.86)",
+    backgroundColor: "rgba(5, 5, 3, 0.84)",
     bottom: 0,
-    height: "62%",
+    height: "64%",
     left: 0,
     position: "absolute",
     right: 0
   },
-  feedReelContent: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingBottom: TAB_BAR_CONTENT_PADDING + 8,
-    paddingHorizontal: 20,
-    paddingTop: 18
-  },
-  feedReelContentWide: {
-    maxWidth: 1180,
-    paddingHorizontal: 36,
-    paddingTop: 30,
-    width: "100%"
-  },
-  feedReelTopRow: {
+  feedReelHeaderOverlay: {
     alignItems: "flex-start",
     flexDirection: "row",
     gap: 12,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    left: 18,
+    position: "absolute",
+    right: 18,
+    top: 18,
+    zIndex: 4
   },
   feedReelKicker: {
     fontSize: 12,
@@ -2223,58 +2327,112 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     marginTop: 4
   },
-  feedReelMain: {
-    flex: 1,
-    justifyContent: "flex-end"
+  feedScoreBadge: {
+    backgroundColor: "rgba(5, 5, 3, 0.52)"
   },
-  feedReelMainWide: {
+  feedActionRail: {
     alignItems: "center",
-    flexDirection: "row",
-    gap: 24,
-    justifyContent: "space-between"
+    bottom: 126,
+    gap: 18,
+    justifyContent: "center",
+    position: "absolute",
+    right: 13,
+    zIndex: 5
   },
-  feedReelOverlay: {
-    backgroundColor: "rgba(5, 5, 3, 0.72)",
-    borderColor: "rgba(247, 200, 75, 0.22)",
+  feedActionRailWide: {
+    bottom: TAB_BAR_CONTENT_PADDING + 48,
+    right: 18
+  },
+  feedActionButton: {
+    alignItems: "center",
+    minHeight: 43,
+    minWidth: 44
+  },
+  feedActionCount: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "900",
+    marginTop: 4
+  },
+  feedTextOverlay: {
+    backgroundColor: "rgba(5, 5, 3, 0.52)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderRadius: 8,
     borderWidth: 1,
-    padding: 16
+    bottom: TAB_BAR_CONTENT_PADDING + 8,
+    left: 18,
+    padding: 14,
+    position: "absolute",
+    right: 78,
+    zIndex: 4
   },
-  feedReelOverlayWide: {
-    flex: 1,
-    maxWidth: 680,
-    padding: 24
+  feedTextOverlayWide: {
+    bottom: TAB_BAR_CONTENT_PADDING + 8,
+    left: 18,
+    padding: 18,
+    right: 82
   },
-  reelPlayButton: {
+  feedProfileRow: {
     alignItems: "center",
-    borderRadius: 8,
-    height: 72,
-    justifyContent: "center",
-    width: 112
+    flexDirection: "row",
+    gap: 9,
+    marginBottom: 10
   },
-  reelPlayText: {
+  feedAvatar: {
+    alignItems: "center",
+    backgroundColor: "rgba(5, 5, 3, 0.72)",
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 42,
+    justifyContent: "center",
+    width: 42
+  },
+  feedAvatarText: {
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  feedProfileTextBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  feedProfileNameRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 5
+  },
+  feedProfileName: {
+    flexShrink: 1,
     fontSize: 15,
     fontWeight: "900"
   },
+  feedSponsorLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    marginTop: 2
+  },
+  feedFollowButton: {
+    alignItems: "center",
+    borderColor: "rgba(255, 255, 255, 0.86)",
+    borderRadius: 8,
+    borderWidth: 1,
+    minHeight: 34,
+    justifyContent: "center",
+    paddingHorizontal: 13
+  },
+  feedFollowText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "900"
+  },
   feedReelVideoTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "900",
     letterSpacing: 0,
-    lineHeight: 29
+    lineHeight: 24
   },
   feedReelVideoTitleWide: {
-    fontSize: 38,
-    lineHeight: 44
-  },
-  feedReelName: {
-    fontSize: 21,
-    fontWeight: "900",
-    letterSpacing: 0,
-    marginTop: 10
-  },
-  feedReelNameWide: {
-    fontSize: 28,
-    marginTop: 14
+    fontSize: 24,
+    lineHeight: 29
   },
   feedReelMeta: {
     fontSize: 13,
@@ -2284,8 +2442,8 @@ const styles = StyleSheet.create({
   feedReelHighlight: {
     fontSize: 14,
     fontWeight: "700",
-    lineHeight: 20,
-    marginTop: 10
+    lineHeight: 19,
+    marginTop: 8
   },
   feedReadMoreButton: {
     alignSelf: "flex-start",
@@ -2302,15 +2460,16 @@ const styles = StyleSheet.create({
     marginTop: 12
   },
   feedReelMetric: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     borderRadius: 8,
     borderWidth: 1,
     flex: 1,
-    minHeight: 56,
+    minHeight: 50,
     paddingHorizontal: 9,
-    paddingVertical: 8
+    paddingVertical: 7
   },
   feedReelMetricValue: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "900"
   },
   feedReelMetricLabel: {
@@ -2319,42 +2478,24 @@ const styles = StyleSheet.create({
     marginTop: 3,
     textTransform: "uppercase"
   },
-  feedReelButton: {
+  feedLearnMoreButton: {
     alignItems: "center",
+    backgroundColor: "#3F8DE0",
     borderRadius: 8,
-    marginTop: 14,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
     minHeight: 48,
-    justifyContent: "center",
-    paddingHorizontal: 14
+    paddingHorizontal: 15
   },
   feedReelButtonPressed: {
     opacity: 0.84,
     transform: [{ scale: 0.98 }]
   },
-  feedReelButtonText: {
+  feedLearnMoreText: {
+    color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "900"
-  },
-  feedVideoControlPanel: {
-    alignItems: "center",
-    backgroundColor: "rgba(5, 5, 3, 0.58)",
-    borderColor: "rgba(247, 200, 75, 0.2)",
-    borderRadius: 8,
-    borderWidth: 1,
-    minHeight: 260,
-    justifyContent: "center",
-    padding: 22,
-    width: 280
-  },
-  feedVideoControlTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    marginTop: 16
-  },
-  feedVideoControlMeta: {
-    fontSize: 13,
-    fontWeight: "800",
-    marginTop: 6
   },
   feedStatsGrid: {
     flexDirection: "row",
@@ -2418,16 +2559,16 @@ const styles = StyleSheet.create({
     padding: 18
   },
   submitHero: {
-    backgroundColor: "#101010",
-    borderColor: "#6F4C16",
+    backgroundColor: "rgba(18, 16, 10, 0.86)",
+    borderColor: "rgba(247, 200, 75, 0.22)",
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 16,
     padding: 18
   },
   adminHero: {
-    backgroundColor: "#120D05",
-    borderColor: "#6F4C16",
+    backgroundColor: "rgba(18, 13, 5, 0.86)",
+    borderColor: "rgba(247, 200, 75, 0.22)",
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 16,
@@ -2623,8 +2764,8 @@ const styles = StyleSheet.create({
   },
   detailContent: {
     alignSelf: "center",
-    maxWidth: 760,
-    paddingHorizontal: 20,
+    maxWidth: 1080,
+    paddingHorizontal: 22,
     paddingBottom: DETAIL_CONTENT_PADDING,
     width: "100%"
   },
@@ -2728,16 +2869,16 @@ const styles = StyleSheet.create({
     marginTop: 3
   },
   infoPanel: {
-    backgroundColor: "#12100A",
-    borderColor: "#46300F",
+    backgroundColor: "rgba(18, 16, 10, 0.86)",
+    borderColor: "rgba(247, 200, 75, 0.18)",
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 14,
     padding: 16
   },
   infoPanelCompact: {
-    backgroundColor: "#12100A",
-    borderColor: "#46300F",
+    backgroundColor: "rgba(18, 16, 10, 0.86)",
+    borderColor: "rgba(247, 200, 75, 0.18)",
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 14,
@@ -2767,8 +2908,8 @@ const styles = StyleSheet.create({
     textTransform: "uppercase"
   },
   formInput: {
-    backgroundColor: "#080704",
-    borderColor: "#5E4215",
+    backgroundColor: "rgba(8, 7, 4, 0.86)",
+    borderColor: "rgba(247, 200, 75, 0.24)",
     borderRadius: 8,
     borderWidth: 1,
     color: "#FFF4CC",
@@ -2880,6 +3021,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#D6A326",
     borderRadius: 8,
     marginTop: 14,
+    minHeight: 50,
+    justifyContent: "center",
     paddingVertical: 15
   },
   primaryButtonDisabled: {
@@ -2892,8 +3035,8 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     alignItems: "center",
-    backgroundColor: "#14110A",
-    borderColor: "#6F4C16",
+    backgroundColor: "rgba(20, 17, 10, 0.86)",
+    borderColor: "rgba(247, 200, 75, 0.24)",
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 12,
@@ -3067,8 +3210,8 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   summaryBand: {
-    backgroundColor: "#0D0B07",
-    borderColor: "#6F4C16",
+    backgroundColor: "rgba(13, 11, 7, 0.9)",
+    borderColor: "rgba(247, 200, 75, 0.22)",
     borderWidth: 1,
     borderRadius: 8,
     padding: 18
@@ -3093,8 +3236,8 @@ const styles = StyleSheet.create({
     marginTop: 8
   },
   emptyState: {
-    backgroundColor: "#12100A",
-    borderColor: "#46300F",
+    backgroundColor: "rgba(18, 16, 10, 0.86)",
+    borderColor: "rgba(247, 200, 75, 0.18)",
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 16,
@@ -3112,8 +3255,8 @@ const styles = StyleSheet.create({
     marginTop: 6
   },
   portfolioItemBlock: {
-    backgroundColor: "#12100A",
-    borderColor: "#46300F",
+    backgroundColor: "rgba(18, 16, 10, 0.86)",
+    borderColor: "rgba(247, 200, 75, 0.18)",
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 12,
@@ -3165,8 +3308,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#D6A326"
   },
   profileHero: {
-    backgroundColor: "#0D0B07",
-    borderColor: "#6F4C16",
+    backgroundColor: "rgba(13, 11, 7, 0.9)",
+    borderColor: "rgba(247, 200, 75, 0.22)",
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 14,
@@ -3185,8 +3328,8 @@ const styles = StyleSheet.create({
     marginTop: 5
   },
   profilePanel: {
-    backgroundColor: "#12100A",
-    borderColor: "#46300F",
+    backgroundColor: "rgba(18, 16, 10, 0.86)",
+    borderColor: "rgba(247, 200, 75, 0.18)",
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 12,
@@ -3220,8 +3363,8 @@ const styles = StyleSheet.create({
     textAlign: "right"
   },
   tabBar: {
-    backgroundColor: "#0D0B07",
-    borderColor: "#6F4C16",
+    backgroundColor: "rgba(8, 8, 7, 0.92)",
+    borderColor: "rgba(247, 200, 75, 0.28)",
     borderRadius: 8,
     borderWidth: 1,
     bottom: SYSTEM_NAV_CLEARANCE,
@@ -3232,10 +3375,19 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 20
   },
+  tabBarDesktop: {
+    alignSelf: "center",
+    left: "50%",
+    maxWidth: 620,
+    right: undefined,
+    transform: [{ translateX: -310 }],
+    width: 620
+  },
   tabButton: {
     alignItems: "center",
     borderRadius: 8,
     flex: 1,
+    gap: 4,
     paddingVertical: 12
   },
   tabButtonActive: {
