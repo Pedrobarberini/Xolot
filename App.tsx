@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -655,7 +655,43 @@ function FeedScreen({
 }) {
   const { height } = useWindowDimensions();
   const [feedHeight, setFeedHeight] = useState(0);
+  const feedListRef = useRef<FlatList<Player> | null>(null);
+  const activeFeedIndexRef = useRef(0);
+  const gestureStartIndexRef = useRef(0);
+  const gestureStartOffsetRef = useRef(0);
+  const gestureSettledRef = useRef(false);
   const pageHeight = feedHeight || height;
+  const lastFeedIndex = Math.max(feedPlayers.length - 1, 0);
+
+  function scrollToFeed(index: number) {
+    feedListRef.current?.scrollToOffset({
+      animated: true,
+      offset: index * pageHeight
+    });
+  }
+
+  function settleFeedGesture(offsetY: number) {
+    if (!pageHeight || feedPlayers.length === 0) {
+      return;
+    }
+
+    if (gestureSettledRef.current) {
+      scrollToFeed(activeFeedIndexRef.current);
+      return;
+    }
+
+    const delta = offsetY - gestureStartOffsetRef.current;
+    const threshold = Math.max(pageHeight * 0.12, 48);
+    const direction = Math.abs(delta) < threshold ? 0 : delta > 0 ? 1 : -1;
+    const nextIndex = Math.min(
+      Math.max(gestureStartIndexRef.current + direction, 0),
+      lastFeedIndex
+    );
+
+    activeFeedIndexRef.current = nextIndex;
+    gestureSettledRef.current = true;
+    scrollToFeed(nextIndex);
+  }
 
   return (
     <View
@@ -671,7 +707,7 @@ function FeedScreen({
       <FlatList
         bounces={false}
         data={feedPlayers}
-        decelerationRate="fast"
+        decelerationRate="normal"
         disableIntervalMomentum
         extraData={pageHeight}
         getItemLayout={(_, index) => ({
@@ -680,7 +716,23 @@ function FeedScreen({
           index
         })}
         keyExtractor={(player) => player.id}
-        pagingEnabled
+        onMomentumScrollEnd={(event) => {
+          settleFeedGesture(event.nativeEvent.contentOffset.y);
+        }}
+        onScrollBeginDrag={(event) => {
+          const offsetY = event.nativeEvent.contentOffset.y;
+
+          gestureStartIndexRef.current = Math.min(
+            Math.max(Math.round(offsetY / pageHeight), 0),
+            lastFeedIndex
+          );
+          activeFeedIndexRef.current = gestureStartIndexRef.current;
+          gestureStartOffsetRef.current = offsetY;
+          gestureSettledRef.current = false;
+        }}
+        onScrollEndDrag={(event) => {
+          settleFeedGesture(event.nativeEvent.contentOffset.y);
+        }}
         renderItem={({ item, index }) => (
           <FeedReel
             approvedCount={approvedCount}
@@ -693,8 +745,6 @@ function FeedScreen({
           />
         )}
         showsVerticalScrollIndicator={false}
-        snapToAlignment="start"
-        snapToInterval={pageHeight}
         style={styles.feedPager}
       />
     </View>
