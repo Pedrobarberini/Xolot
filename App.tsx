@@ -1,5 +1,7 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Animated,
+  Easing,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -40,6 +42,8 @@ const SYSTEM_NAV_CLEARANCE =
   }) ?? 24;
 const TAB_BAR_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 92;
 const DETAIL_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 36;
+const FEED_TEXT_LIMIT_COMPACT = 132;
+const FEED_TEXT_LIMIT_WIDE = 220;
 
 type Tab = "feed" | "portfolio" | "submit" | "admin" | "profile";
 
@@ -792,138 +796,238 @@ function FeedReel({
   reelHeight: number;
   total: number;
 }) {
+  const { width } = useWindowDimensions();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const revealProgress = useRef(new Animated.Value(0)).current;
+  const isWide = width >= 860;
   const progress = Math.min(player.funded / player.fundingGoal, 1);
   const scoreColor = getScoreColor(player.score);
+  const presentationText = `${player.highlight} ${player.thesis}`.trim();
+  const textLimit = isWide ? FEED_TEXT_LIMIT_WIDE : FEED_TEXT_LIMIT_COMPACT;
+  const hasMoreText = presentationText.length > textLimit;
+  const visibleText =
+    !isExpanded && hasMoreText
+      ? `${presentationText.slice(0, textLimit).trim()}...`
+      : presentationText;
+
+  useEffect(() => {
+    revealProgress.setValue(0);
+
+    Animated.timing(revealProgress, {
+      duration: 420,
+      easing: Easing.out(Easing.cubic),
+      toValue: 1,
+      useNativeDriver: true
+    }).start();
+  }, [player.id, revealProgress]);
 
   return (
     <View style={[styles.feedReel, { height: reelHeight }]}>
-      <View
+      <Animated.View
         style={[
           styles.feedReelStage,
-          { backgroundColor: palette.media, borderColor: palette.border }
+          isWide ? styles.feedReelStageWide : null,
+          {
+            backgroundColor: palette.media,
+            opacity: revealProgress,
+            transform: [
+              {
+                translateY: revealProgress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [18, 0]
+                })
+              }
+            ]
+          }
         ]}
       >
-        <View style={styles.feedReelTopRow}>
-          <View>
-            <Text style={[styles.feedReelKicker, { color: palette.accent }]}>
-              Feed {index + 1}/{total}
-            </Text>
-            <Text style={[styles.feedReelCount, { color: palette.text }]}>
-              {total} oportunidades | {approvedCount} aprovadas
-            </Text>
-          </View>
-          <View style={[styles.scoreBadge, { borderColor: scoreColor }]}>
-            <Text style={[styles.scoreValue, { color: scoreColor }]}>
-              {player.score}
-            </Text>
-            <Text style={[styles.scoreLabel, { color: palette.muted }]}>
-              score
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.feedReelCenter}>
-          <View style={[styles.reelPlayButton, { backgroundColor: palette.accent }]}>
-            <Text style={[styles.reelPlayText, { color: palette.onAccent }]}>
-              PLAY
-            </Text>
-          </View>
-          <View style={[styles.paletteBadge, { borderColor: palette.border }]}>
-            <Text style={[styles.paletteBadgeText, { color: palette.accent }]}>
-              NEXTSTAR
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.feedReelBottom}>
-          <Text
-            numberOfLines={2}
-            style={[styles.feedReelVideoTitle, { color: palette.text }]}
-          >
-            {player.videoTitle}
-          </Text>
-          <Text
-            numberOfLines={1}
-            style={[styles.feedReelName, { color: palette.text }]}
-          >
-            {player.name}
-          </Text>
-          <Text
-            numberOfLines={1}
-            style={[styles.feedReelMeta, { color: palette.muted }]}
-          >
-            {player.age} anos | {player.position} | {player.club}
-          </Text>
-          <Text
-            numberOfLines={3}
-            style={[styles.feedReelHighlight, { color: palette.text }]}
-          >
-            {player.highlight}
-          </Text>
-
-          <View style={styles.feedReelMetricRow}>
-            {player.metrics.slice(0, 3).map((metric) => (
-              <View
-                key={metric.label}
-                style={[
-                  styles.feedReelMetric,
-                  {
-                    backgroundColor: palette.accentSoft,
-                    borderColor: palette.border
-                  }
-                ]}
-              >
-                <Text
-                  numberOfLines={1}
-                  style={[styles.feedReelMetricValue, { color: palette.accent }]}
-                >
-                  {metric.value}
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  style={[styles.feedReelMetricLabel, { color: palette.muted }]}
-                >
-                  {metric.label}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.progressLabelRow}>
-            <Text style={[styles.progressText, { color: palette.muted }]}>
-              {formatBRL(player.funded)}
-            </Text>
-            <Text style={[styles.progressText, { color: palette.muted }]}>
-              {formatBRL(player.fundingGoal)}
-            </Text>
-          </View>
+        <View style={styles.feedVideoBackground}>
           <View
             style={[
-              styles.progressTrack,
-              { backgroundColor: palette.progressTrack }
+              styles.feedVideoAccent,
+              { backgroundColor: palette.accentSoft, borderColor: palette.border }
+            ]}
+          />
+          <View
+            style={[
+              styles.feedVideoFrame,
+              { borderColor: palette.border, backgroundColor: palette.media }
+            ]}
+          />
+          <View style={styles.feedVideoShadeTop} />
+          <View style={styles.feedVideoShadeBottom} />
+        </View>
+
+        <View style={[styles.feedReelContent, isWide ? styles.feedReelContentWide : null]}>
+          <View style={styles.feedReelTopRow}>
+            <View>
+              <Text style={[styles.feedReelKicker, { color: palette.accent }]}>
+                Feed {index + 1}/{total}
+              </Text>
+              <Text style={[styles.feedReelCount, { color: palette.text }]}>
+                {total} oportunidades | {approvedCount} aprovadas
+              </Text>
+            </View>
+            <View style={[styles.scoreBadge, { borderColor: scoreColor }]}>
+              <Text style={[styles.scoreValue, { color: scoreColor }]}>
+                {player.score}
+              </Text>
+              <Text style={[styles.scoreLabel, { color: palette.muted }]}>
+                score
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={[
+              styles.feedReelMain,
+              isWide ? styles.feedReelMainWide : null
             ]}
           >
             <View
               style={[
-                styles.progressFill,
-                {
-                  backgroundColor: palette.accent,
-                  width: `${progress * 100}%`
-                }
+                styles.feedReelOverlay,
+                isWide ? styles.feedReelOverlayWide : null
               ]}
-            />
-          </View>
+            >
+              <View style={[styles.paletteBadge, { borderColor: palette.border }]}>
+                <Text style={[styles.paletteBadgeText, { color: palette.accent }]}>
+                  NEXTSTAR
+                </Text>
+              </View>
 
-          <Pressable
-            onPress={onOpen}
-            style={[styles.feedReelButton, { backgroundColor: palette.accent }]}
-          >
-            <Text style={[styles.feedReelButtonText, { color: palette.onAccent }]}>
-              Abrir oportunidade
-            </Text>
-          </Pressable>
+              <Text
+                numberOfLines={isWide ? 2 : 3}
+                style={[
+                  styles.feedReelVideoTitle,
+                  isWide ? styles.feedReelVideoTitleWide : null,
+                  { color: palette.text }
+                ]}
+              >
+                {player.videoTitle}
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.feedReelName,
+                  isWide ? styles.feedReelNameWide : null,
+                  { color: palette.text }
+                ]}
+              >
+                {player.name}
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={[styles.feedReelMeta, { color: palette.muted }]}
+              >
+                {player.age} anos | {player.position} | {player.club}
+              </Text>
+              <Text style={[styles.feedReelHighlight, { color: palette.text }]}>
+                {visibleText}
+              </Text>
+              {hasMoreText ? (
+                <Pressable
+                  onPress={() => setIsExpanded((current) => !current)}
+                  style={styles.feedReadMoreButton}
+                >
+                  <Text style={[styles.feedReadMoreText, { color: palette.accent }]}>
+                    {isExpanded ? "Ver menos" : "Ver mais"}
+                  </Text>
+                </Pressable>
+              ) : null}
+
+              <View style={styles.feedReelMetricRow}>
+                {player.metrics.slice(0, 3).map((metric) => (
+                  <View
+                    key={metric.label}
+                    style={[
+                      styles.feedReelMetric,
+                      {
+                        backgroundColor: palette.accentSoft,
+                        borderColor: palette.border
+                      }
+                    ]}
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.feedReelMetricValue, { color: palette.accent }]}
+                    >
+                      {metric.value}
+                    </Text>
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.feedReelMetricLabel, { color: palette.muted }]}
+                    >
+                      {metric.label}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.progressLabelRow}>
+                <Text style={[styles.progressText, { color: palette.muted }]}>
+                  {formatBRL(player.funded)}
+                </Text>
+                <Text style={[styles.progressText, { color: palette.muted }]}>
+                  {formatBRL(player.fundingGoal)}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.progressTrack,
+                  { backgroundColor: palette.progressTrack }
+                ]}
+              >
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      backgroundColor: palette.accent,
+                      width: `${progress * 100}%`
+                    }
+                  ]}
+                />
+              </View>
+
+              <Pressable
+                onPress={onOpen}
+                style={({ pressed }) => [
+                  styles.feedReelButton,
+                  pressed ? styles.feedReelButtonPressed : null,
+                  { backgroundColor: palette.accent }
+                ]}
+              >
+                <Text
+                  style={[styles.feedReelButtonText, { color: palette.onAccent }]}
+                >
+                  Abrir oportunidade
+                </Text>
+              </Pressable>
+            </View>
+
+            {isWide ? (
+              <View style={styles.feedVideoControlPanel}>
+                <View
+                  style={[
+                    styles.reelPlayButton,
+                    { backgroundColor: palette.accent }
+                  ]}
+                >
+                  <Text style={[styles.reelPlayText, { color: palette.onAccent }]}>
+                    PLAY
+                  </Text>
+                </View>
+                <Text style={[styles.feedVideoControlTitle, { color: palette.text }]}>
+                  Video de avaliacao
+                </Text>
+                <Text style={[styles.feedVideoControlMeta, { color: palette.muted }]}>
+                  {player.videoLength} | risco {player.riskLevel}
+                </Text>
+              </View>
+            ) : null}
+          </View>
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -2042,11 +2146,66 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   feedReelStage: {
+    backgroundColor: "#050503",
+    flex: 1,
+    overflow: "hidden"
+  },
+  feedReelStageWide: {
+    alignItems: "center"
+  },
+  feedVideoBackground: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: "hidden"
+  },
+  feedVideoAccent: {
+    borderRadius: 8,
+    borderWidth: 1,
+    height: "52%",
+    opacity: 0.78,
+    position: "absolute",
+    right: -48,
+    top: 64,
+    transform: [{ rotate: "-7deg" }],
+    width: "58%"
+  },
+  feedVideoFrame: {
+    borderRadius: 8,
+    borderWidth: 1,
+    bottom: "18%",
+    left: "8%",
+    opacity: 0.48,
+    position: "absolute",
+    right: "8%",
+    top: "12%"
+  },
+  feedVideoShadeTop: {
+    backgroundColor: "rgba(5, 5, 3, 0.48)",
+    height: "38%",
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0
+  },
+  feedVideoShadeBottom: {
+    backgroundColor: "rgba(5, 5, 3, 0.86)",
+    bottom: 0,
+    height: "62%",
+    left: 0,
+    position: "absolute",
+    right: 0
+  },
+  feedReelContent: {
     flex: 1,
     justifyContent: "space-between",
-    overflow: "hidden",
+    paddingBottom: TAB_BAR_CONTENT_PADDING + 8,
     paddingHorizontal: 20,
     paddingTop: 18
+  },
+  feedReelContentWide: {
+    maxWidth: 1180,
+    paddingHorizontal: 36,
+    paddingTop: 30,
+    width: "100%"
   },
   feedReelTopRow: {
     alignItems: "flex-start",
@@ -2064,12 +2223,27 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     marginTop: 4
   },
-  feedReelCenter: {
-    alignItems: "center",
+  feedReelMain: {
     flex: 1,
-    gap: 14,
-    justifyContent: "center",
-    minHeight: 130
+    justifyContent: "flex-end"
+  },
+  feedReelMainWide: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 24,
+    justifyContent: "space-between"
+  },
+  feedReelOverlay: {
+    backgroundColor: "rgba(5, 5, 3, 0.72)",
+    borderColor: "rgba(247, 200, 75, 0.22)",
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 16
+  },
+  feedReelOverlayWide: {
+    flex: 1,
+    maxWidth: 680,
+    padding: 24
   },
   reelPlayButton: {
     alignItems: "center",
@@ -2082,21 +2256,25 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "900"
   },
-  feedReelBottom: {
-    paddingBottom: TAB_BAR_CONTENT_PADDING + 8,
-    paddingTop: 12
-  },
   feedReelVideoTitle: {
     fontSize: 24,
     fontWeight: "900",
     letterSpacing: 0,
     lineHeight: 29
   },
+  feedReelVideoTitleWide: {
+    fontSize: 38,
+    lineHeight: 44
+  },
   feedReelName: {
     fontSize: 21,
     fontWeight: "900",
     letterSpacing: 0,
     marginTop: 10
+  },
+  feedReelNameWide: {
+    fontSize: 28,
+    marginTop: 14
   },
   feedReelMeta: {
     fontSize: 13,
@@ -2108,6 +2286,15 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 20,
     marginTop: 10
+  },
+  feedReadMoreButton: {
+    alignSelf: "flex-start",
+    marginTop: 6,
+    paddingVertical: 4
+  },
+  feedReadMoreText: {
+    fontSize: 13,
+    fontWeight: "900"
   },
   feedReelMetricRow: {
     flexDirection: "row",
@@ -2140,9 +2327,34 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 14
   },
+  feedReelButtonPressed: {
+    opacity: 0.84,
+    transform: [{ scale: 0.98 }]
+  },
   feedReelButtonText: {
     fontSize: 14,
     fontWeight: "900"
+  },
+  feedVideoControlPanel: {
+    alignItems: "center",
+    backgroundColor: "rgba(5, 5, 3, 0.58)",
+    borderColor: "rgba(247, 200, 75, 0.2)",
+    borderRadius: 8,
+    borderWidth: 1,
+    minHeight: 260,
+    justifyContent: "center",
+    padding: 22,
+    width: 280
+  },
+  feedVideoControlTitle: {
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 16
+  },
+  feedVideoControlMeta: {
+    fontSize: 13,
+    fontWeight: "800",
+    marginTop: 6
   },
   feedStatsGrid: {
     flexDirection: "row",
