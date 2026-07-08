@@ -1960,23 +1960,19 @@ const styles = StyleSheet.create({
     flex: 1
   },
   feedPager: {
+    backgroundColor: "#050503",
     flex: 1
   },
   feedReel: {
-    alignSelf: "center",
-    maxWidth: 760,
-    paddingBottom: TAB_BAR_CONTENT_PADDING,
-    paddingHorizontal: 10,
-    paddingTop: 10,
+    alignSelf: "stretch",
     width: "100%"
   },
   feedReelStage: {
-    borderRadius: 8,
-    borderWidth: 1,
     flex: 1,
     justifyContent: "space-between",
     overflow: "hidden",
-    padding: 16
+    paddingHorizontal: 20,
+    paddingTop: 18
   },
   feedReelTopRow: {
     alignItems: "flex-start",
@@ -2013,6 +2009,7 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   feedReelBottom: {
+    paddingBottom: TAB_BAR_CONTENT_PADDING + 8,
     paddingTop: 12
   },
   feedReelVideoTitle: {
