@@ -329,12 +329,14 @@ export default function App() {
         style={styles.keyboardView}
       >
         {selectedPlayer ? (
-          <PlayerDetail
-            canInvest={user.role === "Investidor"}
-            onBack={() => setSelectedPlayer(null)}
-            onInvest={handleInvest}
-            player={selectedPlayer}
-          />
+          <ScreenFrame>
+            <PlayerDetail
+              canInvest={user.role === "Investidor"}
+              onBack={() => setSelectedPlayer(null)}
+              onInvest={handleInvest}
+              player={selectedPlayer}
+            />
+          </ScreenFrame>
         ) : (
           <>
             {tab !== "feed" ? (
@@ -353,31 +355,39 @@ export default function App() {
               />
             ) : null}
             {tab === "portfolio" ? (
-              <PortfolioScreen
-                investments={investments}
-                onAdvance={handleAdvanceInvestment}
-              />
+              <ScreenFrame>
+                <PortfolioScreen
+                  investments={investments}
+                  onAdvance={handleAdvanceInvestment}
+                />
+              </ScreenFrame>
             ) : null}
             {tab === "submit" ? (
-              <SubmitVideoScreen
-                onSubmit={handleSubmitVideo}
-                submissions={submissions.filter((item) => item.userId === user.id)}
-                user={user}
-              />
+              <ScreenFrame>
+                <SubmitVideoScreen
+                  onSubmit={handleSubmitVideo}
+                  submissions={submissions.filter((item) => item.userId === user.id)}
+                  user={user}
+                />
+              </ScreenFrame>
             ) : null}
             {tab === "admin" ? (
-              <AdminScreen
-                onReview={handleReviewSubmission}
-                submissions={submissions}
-              />
+              <ScreenFrame>
+                <AdminScreen
+                  onReview={handleReviewSubmission}
+                  submissions={submissions}
+                />
+              </ScreenFrame>
             ) : null}
             {tab === "profile" ? (
-              <ProfileScreen
-                investments={investments}
-                onSignOut={handleSignOut}
-                submissions={submissions}
-                user={user}
-              />
+              <ScreenFrame>
+                <ProfileScreen
+                  investments={investments}
+                  onSignOut={handleSignOut}
+                  submissions={submissions}
+                  user={user}
+                />
+              </ScreenFrame>
             ) : null}
             <BottomTabs activeTab={tab} onChange={setTab} role={user.role} />
           </>
@@ -445,6 +455,69 @@ function getScoreColor(score: number) {
   return "#F87171";
 }
 
+function ScreenBackdrop() {
+  return (
+    <View pointerEvents="none" style={styles.screenBackdrop}>
+      <View style={styles.screenBackdropAccent} />
+      <View style={styles.screenBackdropFrame} />
+      <View style={styles.screenBackdropLaneLeft} />
+      <View style={styles.screenBackdropLaneRight} />
+      <View style={styles.screenBackdropShade} />
+    </View>
+  );
+}
+
+function ScreenTransition({
+  children,
+  style
+}: {
+  children: React.ReactNode;
+  style?: object;
+}) {
+  const progress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    progress.setValue(0);
+
+    Animated.timing(progress, {
+      duration: 360,
+      easing: Easing.out(Easing.cubic),
+      toValue: 1,
+      useNativeDriver: true
+    }).start();
+  }, [progress]);
+
+  return (
+    <Animated.View
+      style={[
+        style,
+        {
+          opacity: progress,
+          transform: [
+            {
+              translateY: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [16, 0]
+              })
+            }
+          ]
+        }
+      ]}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
+function ScreenFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <ScreenTransition style={styles.tabScene}>
+      <ScreenBackdrop />
+      {children}
+    </ScreenTransition>
+  );
+}
+
 function AuthScreen({
   onComplete
 }: {
@@ -457,6 +530,13 @@ function AuthScreen({
   const [email, setEmail] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const isCompact = width < 380;
+  const authModeLabel = mode === "create" ? "Cadastro" : "Login";
+  const roleSummary =
+    role === "Investidor"
+      ? "Carteira"
+      : role === "Atleta"
+        ? "Envio"
+        : "Moderacao";
 
   const cleanName = name.trim();
   const cleanEmail = email.trim().toLowerCase();
@@ -484,7 +564,15 @@ function AuthScreen({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.authShell}
     >
+      <ScreenBackdrop />
       <ScrollView contentContainerStyle={styles.authContent}>
+        <ScreenTransition style={styles.authCard}>
+          <View style={styles.authTopRow}>
+            <Text style={styles.authPanelKicker}>Radar NextStar</Text>
+            <View style={styles.authModePill}>
+              <Text style={styles.authModeText}>{authModeLabel}</Text>
+            </View>
+          </View>
         <Image
           accessibilityLabel="Logo NextStar"
           resizeMode="contain"
@@ -496,6 +584,16 @@ function AuthScreen({
         <Text style={styles.authTitle}>
           {mode === "create" ? "Criar conta" : "Entrar"}
         </Text>
+        <View style={styles.authSignalStrip}>
+          <View style={styles.authSignalItem}>
+            <Text style={styles.authSignalValue}>{role}</Text>
+            <Text style={styles.authSignalLabel}>perfil</Text>
+          </View>
+          <View style={styles.authSignalItem}>
+            <Text style={styles.authSignalValue}>{roleSummary}</Text>
+            <Text style={styles.authSignalLabel}>fluxo</Text>
+          </View>
+        </View>
 
         <View style={styles.segmentedControl}>
           {(["Investidor", "Atleta", "Admin"] as UserRole[]).map((item) => {
@@ -584,6 +682,7 @@ function AuthScreen({
             {mode === "create" ? "Ja tenho conta" : "Criar nova conta"}
           </Text>
         </Pressable>
+        </ScreenTransition>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -1789,6 +1888,8 @@ function PortfolioScreen({
   investments: Investment[];
   onAdvance: (investmentId: string) => void;
 }) {
+  const { width } = useWindowDimensions();
+  const isWide = width >= 840;
   const total = investments.reduce((sum, item) => sum + item.amount, 0);
   const monthlyProjection = investments.reduce(
     (sum, item) => sum + item.simulatedMonthlyReturn,
@@ -1798,85 +1899,114 @@ function PortfolioScreen({
   return (
     <ScrollView contentContainerStyle={styles.screenContent}>
       <View style={styles.summaryBand}>
-        <Text style={styles.summaryLabel}>Carteira simulada</Text>
+        <View style={styles.summaryTopRow}>
+          <Text style={styles.summaryLabel}>Carteira</Text>
+          <View style={styles.summaryBadge}>
+            <Text style={styles.summaryBadgeText}>Simulada</Text>
+          </View>
+        </View>
         <Text style={styles.summaryValue}>{formatBRL(total)}</Text>
+        <View style={styles.summaryInsightStrip}>
+          <View style={styles.summaryInsightItem}>
+            <Text style={styles.summaryInsightValue}>{investments.length}</Text>
+            <Text style={styles.summaryInsightLabel}>reservas</Text>
+          </View>
+          <View style={styles.summaryInsightItem}>
+            <Text style={styles.summaryInsightValue}>
+              {formatBRL(monthlyProjection)}
+            </Text>
+            <Text style={styles.summaryInsightLabel}>projecao</Text>
+          </View>
+          <View style={styles.summaryInsightItem}>
+            <Text style={styles.summaryInsightValue}>
+              {investmentStages.length}
+            </Text>
+            <Text style={styles.summaryInsightLabel}>etapas</Text>
+          </View>
+        </View>
         <Text style={styles.summaryBody}>
           Projecao mensal hipotetica: {formatBRL(monthlyProjection)}. Esta
           carteira nao faz cobranca, assinatura ou transferencia.
         </Text>
       </View>
 
-      <View style={styles.infoPanel}>
-        <Text style={styles.sectionTitle}>Fluxo futuro</Text>
-        {investmentStages.map((stage, index) => (
-          <View key={stage} style={styles.timelineRow}>
-            <View style={styles.timelineDot}>
-              <Text style={styles.timelineDotText}>{index + 1}</Text>
-            </View>
-            <Text style={styles.timelineText}>{stage}</Text>
+      <View style={isWide ? styles.portfolioDesktopGrid : null}>
+        <View style={isWide ? styles.portfolioDesktopColumn : null}>
+          <View style={styles.infoPanel}>
+            <Text style={styles.sectionTitle}>Fluxo futuro</Text>
+            {investmentStages.map((stage, index) => (
+              <View key={stage} style={styles.timelineRow}>
+                <View style={styles.timelineDot}>
+                  <Text style={styles.timelineDotText}>{index + 1}</Text>
+                </View>
+                <Text style={styles.timelineText}>{stage}</Text>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
-
-      {investments.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
-          <Text style={styles.emptyBody}>
-            Abra um perfil no feed e crie uma reserva simulada.
-          </Text>
         </View>
-      ) : (
-        investments.map((investment) => {
-          const currentIndex = investmentStages.indexOf(investment.status);
-          const isComplete = currentIndex === investmentStages.length - 1;
 
-          return (
-            <View key={investment.id} style={styles.portfolioItemBlock}>
-              <View style={styles.portfolioItemHeader}>
-                <View style={styles.submissionTextBlock}>
-                  <Text style={styles.portfolioName}>
-                    {investment.playerName}
-                  </Text>
-                  <Text style={styles.portfolioMeta}>{investment.status}</Text>
-                </View>
-                <View style={styles.portfolioNumbers}>
-                  <Text style={styles.portfolioAmount}>
-                    {formatBRL(investment.amount)}
-                  </Text>
-                  <Text style={styles.portfolioShare}>
-                    {formatBRL(investment.simulatedMonthlyReturn)} proj.
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.stepRail}>
-                {investmentStages.map((stage, index) => (
-                  <View
-                    key={stage}
-                    style={[
-                      styles.stepMarker,
-                      index <= currentIndex ? styles.stepMarkerActive : null
-                    ]}
-                  />
-                ))}
-              </View>
-
-              <Pressable
-                disabled={isComplete}
-                onPress={() => onAdvance(investment.id)}
-                style={[
-                  styles.secondaryButton,
-                  isComplete ? styles.secondaryButtonDisabled : null
-                ]}
-              >
-                <Text style={styles.secondaryButtonText}>
-                  {isComplete ? "Simulacao concluida" : "Avancar simulacao"}
-                </Text>
-              </Pressable>
+        <View style={isWide ? styles.portfolioDesktopColumn : null}>
+          {investments.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
+              <Text style={styles.emptyBody}>
+                Abra um perfil no feed e crie uma reserva simulada.
+              </Text>
             </View>
-          );
-        })
-      )}
+          ) : (
+            investments.map((investment) => {
+              const currentIndex = investmentStages.indexOf(investment.status);
+              const isComplete = currentIndex === investmentStages.length - 1;
+
+              return (
+                <View key={investment.id} style={styles.portfolioItemBlock}>
+                  <View style={styles.portfolioItemHeader}>
+                    <View style={styles.submissionTextBlock}>
+                      <Text style={styles.portfolioName}>
+                        {investment.playerName}
+                      </Text>
+                      <Text style={styles.portfolioMeta}>{investment.status}</Text>
+                    </View>
+                    <View style={styles.portfolioNumbers}>
+                      <Text style={styles.portfolioAmount}>
+                        {formatBRL(investment.amount)}
+                      </Text>
+                      <Text style={styles.portfolioShare}>
+                        {formatBRL(investment.simulatedMonthlyReturn)} proj.
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.stepRail}>
+                    {investmentStages.map((stage, index) => (
+                      <View
+                        key={stage}
+                        style={[
+                          styles.stepMarker,
+                          index <= currentIndex ? styles.stepMarkerActive : null
+                        ]}
+                      />
+                    ))}
+                  </View>
+
+                  <Pressable
+                    disabled={isComplete}
+                    onPress={() => onAdvance(investment.id)}
+                    style={[
+                      styles.secondaryButton,
+                      isComplete ? styles.secondaryButtonDisabled : null
+                    ]}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {isComplete ? "Simulacao concluida" : "Avancar simulacao"}
+                    </Text>
+                  </Pressable>
+                </View>
+              );
+            })
+          )}
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -1892,75 +2022,123 @@ function ProfileScreen({
   submissions: VideoSubmission[];
   user: AppUser;
 }) {
+  const { width } = useWindowDimensions();
+  const isWide = width >= 840;
   const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const mySubmissions = submissions.filter((item) => item.userId === user.id);
   const approved = submissions.filter((item) => item.status === "Aprovado").length;
   const pending = submissions.filter((item) => item.status === "Em revisao").length;
+  const profileInitials = user.name
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+  const profilePrimaryMetric =
+    user.role === "Investidor"
+      ? formatBRL(totalInvested)
+      : user.role === "Atleta"
+        ? String(mySubmissions.length)
+        : String(pending);
+  const profilePrimaryLabel =
+    user.role === "Investidor"
+      ? "total"
+      : user.role === "Atleta"
+        ? "envios"
+        : "pendentes";
 
   return (
     <ScrollView contentContainerStyle={styles.screenContent}>
       <View style={styles.profileHero}>
-        <Text style={styles.profileName}>{user.name}</Text>
-        <Text style={styles.profileMeta}>
-          {user.role} | {user.email}
-        </Text>
+        <View style={styles.profileHeroTopRow}>
+          <View style={styles.profileAvatar}>
+            <Text style={styles.profileAvatarText}>{profileInitials}</Text>
+          </View>
+          <View style={styles.profileTitleBlock}>
+            <Text style={styles.profileName}>{user.name}</Text>
+            <Text style={styles.profileMeta}>
+              {user.role} | {user.email}
+            </Text>
+          </View>
+          <View style={styles.profileStatusPill}>
+            <Text style={styles.profileStatusText}>{user.kycStatus}</Text>
+          </View>
+        </View>
+        <View style={styles.profileQuickStats}>
+          <View style={styles.profileQuickItem}>
+            <Text style={styles.profileQuickValue}>{profilePrimaryMetric}</Text>
+            <Text style={styles.profileQuickLabel}>{profilePrimaryLabel}</Text>
+          </View>
+          <View style={styles.profileQuickItem}>
+            <Text style={styles.profileQuickValue}>
+              {user.acceptedTerms ? "OK" : "Pendente"}
+            </Text>
+            <Text style={styles.profileQuickLabel}>termos</Text>
+          </View>
+          <View style={styles.profileQuickItem}>
+            <Text style={styles.profileQuickValue}>{approved}</Text>
+            <Text style={styles.profileQuickLabel}>aprovados</Text>
+          </View>
+        </View>
       </View>
 
-      <View style={styles.profilePanel}>
-        <Text style={styles.sectionTitle}>Verificacao</Text>
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Identidade</Text>
-          <Text style={styles.profileValue}>{user.kycStatus}</Text>
+      <View style={isWide ? styles.profileDesktopGrid : null}>
+        <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
+          <Text style={styles.sectionTitle}>Verificacao</Text>
+          <View style={styles.profileRow}>
+            <Text style={styles.profileLabel}>Identidade</Text>
+            <Text style={styles.profileValue}>{user.kycStatus}</Text>
+          </View>
+          <View style={styles.profileRow}>
+            <Text style={styles.profileLabel}>Termos</Text>
+            <Text style={styles.profileValue}>
+              {user.acceptedTerms ? "Aceitos" : "Pendente"}
+            </Text>
+          </View>
         </View>
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Termos</Text>
-          <Text style={styles.profileValue}>
-            {user.acceptedTerms ? "Aceitos" : "Pendente"}
-          </Text>
-        </View>
+
+        {user.role === "Investidor" ? (
+          <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
+            <Text style={styles.sectionTitle}>Investidor</Text>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Reservas simuladas</Text>
+              <Text style={styles.profileValue}>{investments.length}</Text>
+            </View>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Total</Text>
+              <Text style={styles.profileValue}>{formatBRL(totalInvested)}</Text>
+            </View>
+          </View>
+        ) : null}
+
+        {user.role === "Atleta" ? (
+          <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
+            <Text style={styles.sectionTitle}>Atleta</Text>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Videos enviados</Text>
+              <Text style={styles.profileValue}>{mySubmissions.length}</Text>
+            </View>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Status padrao</Text>
+              <Text style={styles.profileValue}>Moderacao manual</Text>
+            </View>
+          </View>
+        ) : null}
+
+        {user.role === "Admin" ? (
+          <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
+            <Text style={styles.sectionTitle}>Admin</Text>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Pendentes</Text>
+              <Text style={styles.profileValue}>{pending}</Text>
+            </View>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Aprovados</Text>
+              <Text style={styles.profileValue}>{approved}</Text>
+            </View>
+          </View>
+        ) : null}
       </View>
-
-      {user.role === "Investidor" ? (
-        <View style={styles.profilePanel}>
-          <Text style={styles.sectionTitle}>Investidor</Text>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Reservas simuladas</Text>
-            <Text style={styles.profileValue}>{investments.length}</Text>
-          </View>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Total</Text>
-            <Text style={styles.profileValue}>{formatBRL(totalInvested)}</Text>
-          </View>
-        </View>
-      ) : null}
-
-      {user.role === "Atleta" ? (
-        <View style={styles.profilePanel}>
-          <Text style={styles.sectionTitle}>Atleta</Text>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Videos enviados</Text>
-            <Text style={styles.profileValue}>{mySubmissions.length}</Text>
-          </View>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Status padrao</Text>
-            <Text style={styles.profileValue}>Moderacao manual</Text>
-          </View>
-        </View>
-      ) : null}
-
-      {user.role === "Admin" ? (
-        <View style={styles.profilePanel}>
-          <Text style={styles.sectionTitle}>Admin</Text>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Pendentes</Text>
-            <Text style={styles.profileValue}>{pending}</Text>
-          </View>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Aprovados</Text>
-            <Text style={styles.profileValue}>{approved}</Text>
-          </View>
-        </View>
-      ) : null}
 
       <View style={styles.profilePanel}>
         <Text style={styles.sectionTitle}>Maquete ativa</Text>
@@ -2060,64 +2238,185 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1
   },
+  tabScene: {
+    backgroundColor: "#050503",
+    flex: 1,
+    overflow: "hidden"
+  },
+  screenBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: "hidden"
+  },
+  screenBackdropAccent: {
+    backgroundColor: "rgba(247, 200, 75, 0.1)",
+    borderColor: "rgba(247, 200, 75, 0.16)",
+    borderRadius: 8,
+    borderWidth: 1,
+    height: "46%",
+    position: "absolute",
+    right: "-18%",
+    top: "7%",
+    transform: [{ rotate: "-7deg" }],
+    width: "68%"
+  },
+  screenBackdropFrame: {
+    borderColor: "rgba(255, 255, 255, 0.07)",
+    borderRadius: 8,
+    borderWidth: 1,
+    bottom: "18%",
+    left: "8%",
+    position: "absolute",
+    right: "8%",
+    top: "12%"
+  },
+  screenBackdropLaneLeft: {
+    borderColor: "rgba(247, 200, 75, 0.08)",
+    borderRadius: 8,
+    borderWidth: 1,
+    height: "44%",
+    left: "-14%",
+    position: "absolute",
+    top: "22%",
+    width: "32%"
+  },
+  screenBackdropLaneRight: {
+    borderColor: "rgba(247, 200, 75, 0.08)",
+    borderRadius: 8,
+    borderWidth: 1,
+    height: "44%",
+    position: "absolute",
+    right: "-14%",
+    top: "22%",
+    width: "32%"
+  },
+  screenBackdropShade: {
+    backgroundColor: "rgba(5, 5, 3, 0.78)",
+    bottom: 0,
+    height: "62%",
+    left: 0,
+    position: "absolute",
+    right: 0
+  },
   authShell: {
-    flex: 1
+    backgroundColor: "#050503",
+    flex: 1,
+    overflow: "hidden"
   },
   authContent: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 22,
-    width: "100%",
+    padding: 16,
     maxWidth: 520,
-    alignSelf: "center"
+    alignSelf: "center",
+    width: "100%"
+  },
+  authCard: {
+    backgroundColor: "rgba(5, 5, 3, 0.72)",
+    borderColor: "rgba(247, 200, 75, 0.22)",
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 16,
+    width: "100%"
+  },
+  authTopRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8
+  },
+  authPanelKicker: {
+    color: "#F7C84B",
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase"
+  },
+  authModePill: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: "rgba(247, 200, 75, 0.2)",
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5
+  },
+  authModeText: {
+    color: "#F7C84B",
+    fontSize: 10,
+    fontWeight: "900",
+    textTransform: "uppercase"
   },
   authLogo: {
     alignSelf: "center",
-    height: 210,
-    marginBottom: 12,
+    height: 86,
+    marginBottom: 6,
     width: "100%"
   },
   authLogoCompact: {
-    height: 168
+    height: 78
   },
   authBrand: {
     color: "#F7C84B",
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: "900",
     letterSpacing: 0,
     textAlign: "center"
   },
   authEyebrow: {
     color: "#B8892D",
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "900",
-    marginTop: 4,
+    marginTop: 2,
     textAlign: "center",
     textTransform: "uppercase"
   },
   authTitle: {
     color: "#FFF4CC",
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "900",
     letterSpacing: 0,
-    marginTop: 14,
-    marginBottom: 18
+    marginTop: 10,
+    marginBottom: 10
+  },
+  authSignalStrip: {
+    backgroundColor: "rgba(255, 255, 255, 0.045)",
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+    padding: 8
+  },
+  authSignalItem: {
+    flex: 1,
+    minWidth: 0
+  },
+  authSignalValue: {
+    color: "#FFF4CC",
+    fontSize: 11,
+    fontWeight: "900"
+  },
+  authSignalLabel: {
+    color: "#A98A4A",
+    fontSize: 9,
+    fontWeight: "900",
+    marginTop: 3,
+    textTransform: "uppercase"
   },
   segmentedControl: {
-    backgroundColor: "#14110A",
-    borderColor: "#4D3511",
+    backgroundColor: "rgba(8, 7, 4, 0.74)",
+    borderColor: "rgba(247, 200, 75, 0.2)",
     borderWidth: 1,
     borderRadius: 8,
     flexDirection: "row",
     gap: 6,
-    marginBottom: 14,
-    padding: 6
+    marginBottom: 10,
+    padding: 5
   },
   segmentButton: {
     alignItems: "center",
     borderRadius: 8,
     flex: 1,
-    paddingVertical: 12
+    paddingVertical: 10
   },
   segmentButtonActive: {
     backgroundColor: "#D6A326"
@@ -2138,10 +2437,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 8,
     justifyContent: "space-between",
     maxWidth: 1180,
-    paddingHorizontal: 22,
+    paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 16,
     width: "100%"
@@ -2150,30 +2449,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     flex: 1,
-    minWidth: 190,
-    paddingRight: 12
+    minWidth: 168,
+    paddingRight: 8
   },
   headerLogo: {
-    height: 54,
-    marginRight: 10,
-    width: 72
+    height: 42,
+    marginRight: 8,
+    width: 54
   },
   headerLogoCompact: {
-    height: 46,
-    width: 62
+    height: 38,
+    width: 48
   },
   headerTitleBlock: {
     flex: 1
   },
   brand: {
     color: "#F7C84B",
-    fontSize: 28,
+    fontSize: 23,
     fontWeight: "900",
     letterSpacing: 0
   },
   headerSubtitle: {
     color: "#C6A96A",
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
     marginTop: 2
   },
@@ -2188,8 +2487,8 @@ const styles = StyleSheet.create({
     borderColor: "#6F4C16",
     borderRadius: 8,
     borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 8
+    paddingHorizontal: 10,
+    paddingVertical: 7
   },
   walletLabel: {
     color: "#B8892D",
@@ -2211,8 +2510,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 6,
     justifyContent: "center",
-    minHeight: 42,
-    paddingHorizontal: 12
+    minHeight: 38,
+    paddingHorizontal: 10
   },
   signOutText: {
     color: "#F7C84B",
@@ -2644,16 +2943,16 @@ const styles = StyleSheet.create({
     padding: 18
   },
   submitHero: {
-    backgroundColor: "rgba(18, 16, 10, 0.86)",
-    borderColor: "rgba(247, 200, 75, 0.22)",
+    backgroundColor: "rgba(5, 5, 3, 0.68)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 16,
     padding: 18
   },
   adminHero: {
-    backgroundColor: "rgba(18, 13, 5, 0.86)",
-    borderColor: "rgba(247, 200, 75, 0.22)",
+    backgroundColor: "rgba(5, 5, 3, 0.68)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 16,
@@ -2954,16 +3253,16 @@ const styles = StyleSheet.create({
     marginTop: 3
   },
   infoPanel: {
-    backgroundColor: "rgba(18, 16, 10, 0.86)",
-    borderColor: "rgba(247, 200, 75, 0.18)",
+    backgroundColor: "rgba(5, 5, 3, 0.66)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 14,
     padding: 16
   },
   infoPanelCompact: {
-    backgroundColor: "rgba(18, 16, 10, 0.86)",
-    borderColor: "rgba(247, 200, 75, 0.18)",
+    backgroundColor: "rgba(5, 5, 3, 0.66)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 14,
@@ -2983,7 +3282,7 @@ const styles = StyleSheet.create({
     lineHeight: 21
   },
   labeledInputBlock: {
-    marginTop: 12
+    marginTop: 10
   },
   inputLabel: {
     color: "#F0D27A",
@@ -3000,7 +3299,7 @@ const styles = StyleSheet.create({
     color: "#FFF4CC",
     fontSize: 15,
     fontWeight: "700",
-    minHeight: 52,
+    minHeight: 48,
     paddingHorizontal: 12
   },
   formInputMultiline: {
@@ -3106,9 +3405,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#D6A326",
     borderRadius: 8,
     marginTop: 14,
-    minHeight: 50,
+    minHeight: 48,
     justifyContent: "center",
-    paddingVertical: 15
+    paddingVertical: 13
   },
   primaryButtonDisabled: {
     backgroundColor: "#5A4A25"
@@ -3125,7 +3424,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 12,
-    paddingVertical: 14
+    paddingVertical: 13
   },
   secondaryButtonDisabled: {
     backgroundColor: "#17140D"
@@ -3295,11 +3594,30 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   summaryBand: {
-    backgroundColor: "rgba(13, 11, 7, 0.9)",
-    borderColor: "rgba(247, 200, 75, 0.22)",
+    backgroundColor: "rgba(5, 5, 3, 0.68)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderWidth: 1,
     borderRadius: 8,
     padding: 18
+  },
+  summaryTopRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  summaryBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: "rgba(247, 200, 75, 0.22)",
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5
+  },
+  summaryBadgeText: {
+    color: "#F7C84B",
+    fontSize: 10,
+    fontWeight: "900",
+    textTransform: "uppercase"
   },
   summaryLabel: {
     color: "#F7C84B",
@@ -3314,6 +3632,33 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     marginTop: 6
   },
+  summaryInsightStrip: {
+    backgroundColor: "rgba(255, 255, 255, 0.045)",
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 10
+  },
+  summaryInsightItem: {
+    flex: 1,
+    minWidth: 0
+  },
+  summaryInsightValue: {
+    color: "#F7C84B",
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  summaryInsightLabel: {
+    color: "#A98A4A",
+    fontSize: 9,
+    fontWeight: "900",
+    marginTop: 3,
+    textTransform: "uppercase"
+  },
   summaryBody: {
     color: "#D8C48A",
     fontSize: 14,
@@ -3321,8 +3666,8 @@ const styles = StyleSheet.create({
     marginTop: 8
   },
   emptyState: {
-    backgroundColor: "rgba(18, 16, 10, 0.86)",
-    borderColor: "rgba(247, 200, 75, 0.18)",
+    backgroundColor: "rgba(5, 5, 3, 0.66)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 16,
@@ -3340,12 +3685,21 @@ const styles = StyleSheet.create({
     marginTop: 6
   },
   portfolioItemBlock: {
-    backgroundColor: "rgba(18, 16, 10, 0.86)",
-    borderColor: "rgba(247, 200, 75, 0.18)",
+    backgroundColor: "rgba(5, 5, 3, 0.66)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 12,
     padding: 14
+  },
+  portfolioDesktopGrid: {
+    flexDirection: "row",
+    gap: 14,
+    marginTop: 14
+  },
+  portfolioDesktopColumn: {
+    flex: 1,
+    minWidth: 0
   },
   portfolioItemHeader: {
     alignItems: "flex-start",
@@ -3393,12 +3747,50 @@ const styles = StyleSheet.create({
     backgroundColor: "#D6A326"
   },
   profileHero: {
-    backgroundColor: "rgba(13, 11, 7, 0.9)",
-    borderColor: "rgba(247, 200, 75, 0.22)",
+    backgroundColor: "rgba(5, 5, 3, 0.68)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 14,
     padding: 18
+  },
+  profileHeroTopRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12
+  },
+  profileAvatar: {
+    alignItems: "center",
+    backgroundColor: "rgba(5, 5, 3, 0.72)",
+    borderColor: "#F7C84B",
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 50,
+    justifyContent: "center",
+    width: 50
+  },
+  profileAvatarText: {
+    color: "#F7C84B",
+    fontSize: 15,
+    fontWeight: "900"
+  },
+  profileTitleBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  profileStatusPill: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: "rgba(247, 200, 75, 0.22)",
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 8
+  },
+  profileStatusText: {
+    color: "#F7C84B",
+    fontSize: 10,
+    fontWeight: "900",
+    textTransform: "uppercase"
   },
   profileName: {
     color: "#FFF4CC",
@@ -3412,9 +3804,43 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 5
   },
+  profileQuickStats: {
+    backgroundColor: "rgba(255, 255, 255, 0.045)",
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 16,
+    padding: 10
+  },
+  profileQuickItem: {
+    flex: 1,
+    minWidth: 0
+  },
+  profileQuickValue: {
+    color: "#F7C84B",
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  profileQuickLabel: {
+    color: "#A98A4A",
+    fontSize: 9,
+    fontWeight: "900",
+    marginTop: 3,
+    textTransform: "uppercase"
+  },
+  profileDesktopGrid: {
+    flexDirection: "row",
+    gap: 14
+  },
+  profilePanelGridItem: {
+    flex: 1,
+    minWidth: 0
+  },
   profilePanel: {
-    backgroundColor: "rgba(18, 16, 10, 0.86)",
-    borderColor: "rgba(247, 200, 75, 0.18)",
+    backgroundColor: "rgba(5, 5, 3, 0.66)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 12,
@@ -3448,7 +3874,7 @@ const styles = StyleSheet.create({
     textAlign: "right"
   },
   tabBar: {
-    backgroundColor: "rgba(8, 8, 7, 0.92)",
+    backgroundColor: "#050503",
     borderColor: "rgba(247, 200, 75, 0.28)",
     borderRadius: 8,
     borderWidth: 1,
