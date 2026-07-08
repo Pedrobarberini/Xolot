@@ -17,6 +17,17 @@ const pageShellStyle = `    <style id="nextstar-page-shell">
         overscroll-behavior: none;
       }
 
+      #nextstar-feed-scroll {
+        overscroll-behavior-y: contain;
+        scroll-behavior: smooth;
+        scroll-snap-type: y mandatory;
+      }
+
+      [id^="nextstar-feed-section-"] {
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+      }
+
       @supports (height: 100dvh) {
         html,
         body,

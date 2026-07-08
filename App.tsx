@@ -1,6 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
 import {
-  FlatList,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -655,19 +654,40 @@ function FeedScreen({
 }) {
   const { height } = useWindowDimensions();
   const [feedHeight, setFeedHeight] = useState(0);
-  const feedListRef = useRef<FlatList<Player> | null>(null);
+  const feedScrollRef = useRef<ScrollView | null>(null);
   const activeFeedIndexRef = useRef(0);
   const gestureStartIndexRef = useRef(0);
   const gestureStartOffsetRef = useRef(0);
   const gestureSettledRef = useRef(false);
+  const sectionOffsetsRef = useRef<Record<number, number>>({});
   const pageHeight = feedHeight || height;
   const lastFeedIndex = Math.max(feedPlayers.length - 1, 0);
 
   function scrollToFeed(index: number) {
-    feedListRef.current?.scrollToOffset({
+    const safeIndex = Math.min(Math.max(index, 0), lastFeedIndex);
+    const sectionOffset = sectionOffsetsRef.current[safeIndex];
+
+    feedScrollRef.current?.scrollTo({
       animated: true,
-      offset: index * pageHeight
+      y: sectionOffset ?? safeIndex * pageHeight
     });
+  }
+
+  function getNearestFeedIndex(offsetY: number) {
+    let nearestIndex = activeFeedIndexRef.current;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    for (let index = 0; index < feedPlayers.length; index += 1) {
+      const sectionOffset = sectionOffsetsRef.current[index] ?? index * pageHeight;
+      const distance = Math.abs(sectionOffset - offsetY);
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    }
+
+    return Math.min(Math.max(nearestIndex, 0), lastFeedIndex);
   }
 
   function settleFeedGesture(offsetY: number) {
@@ -704,18 +724,11 @@ function FeedScreen({
       }}
       style={styles.feedPagerShell}
     >
-      <FlatList
+      <ScrollView
         bounces={false}
-        data={feedPlayers}
         decelerationRate="normal"
-        disableIntervalMomentum
-        extraData={pageHeight}
-        getItemLayout={(_, index) => ({
-          length: pageHeight,
-          offset: pageHeight * index,
-          index
-        })}
-        keyExtractor={(player) => player.id}
+        nativeID="nextstar-feed-scroll"
+        ref={feedScrollRef}
         onMomentumScrollEnd={(event) => {
           settleFeedGesture(event.nativeEvent.contentOffset.y);
         }}
@@ -723,7 +736,7 @@ function FeedScreen({
           const offsetY = event.nativeEvent.contentOffset.y;
 
           gestureStartIndexRef.current = Math.min(
-            Math.max(Math.round(offsetY / pageHeight), 0),
+            Math.max(getNearestFeedIndex(offsetY), 0),
             lastFeedIndex
           );
           activeFeedIndexRef.current = gestureStartIndexRef.current;
@@ -733,20 +746,31 @@ function FeedScreen({
         onScrollEndDrag={(event) => {
           settleFeedGesture(event.nativeEvent.contentOffset.y);
         }}
-        renderItem={({ item, index }) => (
-          <FeedReel
-            approvedCount={approvedCount}
-            index={index}
-            onOpen={() => onOpenPlayer(item)}
-            palette={getCardPalette(index)}
-            player={item}
-            reelHeight={pageHeight}
-            total={feedPlayers.length}
-          />
-        )}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         style={styles.feedPager}
-      />
+      >
+        {feedPlayers.map((player, index) => (
+          <View
+            collapsable={false}
+            key={player.id}
+            nativeID={`nextstar-feed-section-${index}`}
+            onLayout={(event) => {
+              sectionOffsetsRef.current[index] = event.nativeEvent.layout.y;
+            }}
+          >
+            <FeedReel
+              approvedCount={approvedCount}
+              index={index}
+              onOpen={() => onOpenPlayer(player)}
+              palette={getCardPalette(index)}
+              player={player}
+              reelHeight={pageHeight}
+              total={feedPlayers.length}
+            />
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }
