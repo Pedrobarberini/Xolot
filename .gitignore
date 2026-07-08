@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+dist/
+build/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+expo-*.log
+expo-go-qr.png
+.DS_Store
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
