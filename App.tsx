@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import {
+  FlatList,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -333,12 +334,14 @@ export default function App() {
           />
         ) : (
           <>
-            <Header
-              onSignOut={handleSignOut}
-              pendingReviews={pendingReviews}
-              portfolioTotal={portfolioTotal}
-              user={user}
-            />
+            {tab !== "feed" ? (
+              <Header
+                onSignOut={handleSignOut}
+                pendingReviews={pendingReviews}
+                portfolioTotal={portfolioTotal}
+                user={user}
+              />
+            ) : null}
             {tab === "feed" ? (
               <FeedScreen
                 approvedCount={approvedSubmissionPlayers.length}
@@ -650,45 +653,204 @@ function FeedScreen({
   onOpenPlayer: (player: Player) => void;
   players: Player[];
 }) {
+  const { height } = useWindowDimensions();
+  const [feedHeight, setFeedHeight] = useState(0);
+  const pageHeight = feedHeight || height;
+
   return (
-    <ScrollView contentContainerStyle={styles.screenContent}>
-      <View style={styles.feedHero}>
-        <Text style={styles.heroKicker}>Maquete de oportunidades</Text>
-        <Text style={styles.heroTitle}>Assista, avalie e simule reservas.</Text>
-        <Text style={styles.heroBody}>
-          O feed mistura atletas mockados e atletas aprovados pelo admin. Nada
-          aqui movimenta dinheiro real.
-        </Text>
-      </View>
+    <View
+      onLayout={(event) => {
+        const nextHeight = event.nativeEvent.layout.height;
 
-      <View style={styles.feedStatsGrid}>
-        <View style={styles.feedStatCard}>
-          <Text style={styles.feedStatValue}>{feedPlayers.length}</Text>
-          <Text style={styles.feedStatLabel}>Oportunidades</Text>
+        if (Math.abs(nextHeight - feedHeight) > 1) {
+          setFeedHeight(nextHeight);
+        }
+      }}
+      style={styles.feedPagerShell}
+    >
+      <FlatList
+        bounces={false}
+        data={feedPlayers}
+        decelerationRate="fast"
+        disableIntervalMomentum
+        extraData={pageHeight}
+        getItemLayout={(_, index) => ({
+          length: pageHeight,
+          offset: pageHeight * index,
+          index
+        })}
+        keyExtractor={(player) => player.id}
+        pagingEnabled
+        renderItem={({ item, index }) => (
+          <FeedReel
+            approvedCount={approvedCount}
+            index={index}
+            onOpen={() => onOpenPlayer(item)}
+            palette={getCardPalette(index)}
+            player={item}
+            reelHeight={pageHeight}
+            total={feedPlayers.length}
+          />
+        )}
+        showsVerticalScrollIndicator={false}
+        snapToAlignment="start"
+        snapToInterval={pageHeight}
+        style={styles.feedPager}
+      />
+    </View>
+  );
+}
+
+function FeedReel({
+  approvedCount,
+  index,
+  onOpen,
+  palette,
+  player,
+  reelHeight,
+  total
+}: {
+  approvedCount: number;
+  index: number;
+  onOpen: () => void;
+  palette: CardPalette;
+  player: Player;
+  reelHeight: number;
+  total: number;
+}) {
+  const progress = Math.min(player.funded / player.fundingGoal, 1);
+  const scoreColor = getScoreColor(player.score);
+
+  return (
+    <View style={[styles.feedReel, { height: reelHeight }]}>
+      <View
+        style={[
+          styles.feedReelStage,
+          { backgroundColor: palette.media, borderColor: palette.border }
+        ]}
+      >
+        <View style={styles.feedReelTopRow}>
+          <View>
+            <Text style={[styles.feedReelKicker, { color: palette.accent }]}>
+              Feed {index + 1}/{total}
+            </Text>
+            <Text style={[styles.feedReelCount, { color: palette.text }]}>
+              {total} oportunidades | {approvedCount} aprovadas
+            </Text>
+          </View>
+          <View style={[styles.scoreBadge, { borderColor: scoreColor }]}>
+            <Text style={[styles.scoreValue, { color: scoreColor }]}>
+              {player.score}
+            </Text>
+            <Text style={[styles.scoreLabel, { color: palette.muted }]}>
+              score
+            </Text>
+          </View>
         </View>
-        <View style={styles.feedStatCard}>
-          <Text style={styles.feedStatValue}>{approvedCount}</Text>
-          <Text style={styles.feedStatLabel}>Aprovadas</Text>
+
+        <View style={styles.feedReelCenter}>
+          <View style={[styles.reelPlayButton, { backgroundColor: palette.accent }]}>
+            <Text style={[styles.reelPlayText, { color: palette.onAccent }]}>
+              PLAY
+            </Text>
+          </View>
+          <View style={[styles.paletteBadge, { borderColor: palette.border }]}>
+            <Text style={[styles.paletteBadgeText, { color: palette.accent }]}>
+              NEXTSTAR
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.feedReelBottom}>
+          <Text
+            numberOfLines={2}
+            style={[styles.feedReelVideoTitle, { color: palette.text }]}
+          >
+            {player.videoTitle}
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={[styles.feedReelName, { color: palette.text }]}
+          >
+            {player.name}
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={[styles.feedReelMeta, { color: palette.muted }]}
+          >
+            {player.age} anos | {player.position} | {player.club}
+          </Text>
+          <Text
+            numberOfLines={3}
+            style={[styles.feedReelHighlight, { color: palette.text }]}
+          >
+            {player.highlight}
+          </Text>
+
+          <View style={styles.feedReelMetricRow}>
+            {player.metrics.slice(0, 3).map((metric) => (
+              <View
+                key={metric.label}
+                style={[
+                  styles.feedReelMetric,
+                  {
+                    backgroundColor: palette.accentSoft,
+                    borderColor: palette.border
+                  }
+                ]}
+              >
+                <Text
+                  numberOfLines={1}
+                  style={[styles.feedReelMetricValue, { color: palette.accent }]}
+                >
+                  {metric.value}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.feedReelMetricLabel, { color: palette.muted }]}
+                >
+                  {metric.label}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.progressLabelRow}>
+            <Text style={[styles.progressText, { color: palette.muted }]}>
+              {formatBRL(player.funded)}
+            </Text>
+            <Text style={[styles.progressText, { color: palette.muted }]}>
+              {formatBRL(player.fundingGoal)}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.progressTrack,
+              { backgroundColor: palette.progressTrack }
+            ]}
+          >
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  backgroundColor: palette.accent,
+                  width: `${progress * 100}%`
+                }
+              ]}
+            />
+          </View>
+
+          <Pressable
+            onPress={onOpen}
+            style={[styles.feedReelButton, { backgroundColor: palette.accent }]}
+          >
+            <Text style={[styles.feedReelButtonText, { color: palette.onAccent }]}>
+              Abrir oportunidade
+            </Text>
+          </Pressable>
         </View>
       </View>
-
-      <View style={styles.sectionHeaderRow}>
-        <View>
-          <Text style={styles.sectionEyebrow}>Feed</Text>
-          <Text style={styles.sectionHeaderTitle}>Jogadores em destaque</Text>
-        </View>
-        <Text style={styles.sectionHeaderMeta}>{feedPlayers.length} perfis</Text>
-      </View>
-
-      {feedPlayers.map((player, index) => (
-        <PlayerCard
-          key={player.id}
-          onPress={() => onOpenPlayer(player)}
-          palette={getCardPalette(index)}
-          player={player}
-        />
-      ))}
-    </ScrollView>
+    </View>
   );
 }
 
@@ -1792,6 +1954,124 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: TAB_BAR_CONTENT_PADDING,
     width: "100%"
+  },
+  feedPagerShell: {
+    backgroundColor: "#050503",
+    flex: 1
+  },
+  feedPager: {
+    flex: 1
+  },
+  feedReel: {
+    alignSelf: "center",
+    maxWidth: 760,
+    paddingBottom: TAB_BAR_CONTENT_PADDING,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    width: "100%"
+  },
+  feedReelStage: {
+    borderRadius: 8,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "space-between",
+    overflow: "hidden",
+    padding: 16
+  },
+  feedReelTopRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between"
+  },
+  feedReelKicker: {
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase"
+  },
+  feedReelCount: {
+    fontSize: 12,
+    fontWeight: "800",
+    marginTop: 4
+  },
+  feedReelCenter: {
+    alignItems: "center",
+    flex: 1,
+    gap: 14,
+    justifyContent: "center",
+    minHeight: 130
+  },
+  reelPlayButton: {
+    alignItems: "center",
+    borderRadius: 8,
+    height: 72,
+    justifyContent: "center",
+    width: 112
+  },
+  reelPlayText: {
+    fontSize: 15,
+    fontWeight: "900"
+  },
+  feedReelBottom: {
+    paddingTop: 12
+  },
+  feedReelVideoTitle: {
+    fontSize: 24,
+    fontWeight: "900",
+    letterSpacing: 0,
+    lineHeight: 29
+  },
+  feedReelName: {
+    fontSize: 21,
+    fontWeight: "900",
+    letterSpacing: 0,
+    marginTop: 10
+  },
+  feedReelMeta: {
+    fontSize: 13,
+    fontWeight: "800",
+    marginTop: 4
+  },
+  feedReelHighlight: {
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+    marginTop: 10
+  },
+  feedReelMetricRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 12
+  },
+  feedReelMetric: {
+    borderRadius: 8,
+    borderWidth: 1,
+    flex: 1,
+    minHeight: 56,
+    paddingHorizontal: 9,
+    paddingVertical: 8
+  },
+  feedReelMetricValue: {
+    fontSize: 15,
+    fontWeight: "900"
+  },
+  feedReelMetricLabel: {
+    fontSize: 10,
+    fontWeight: "900",
+    marginTop: 3,
+    textTransform: "uppercase"
+  },
+  feedReelButton: {
+    alignItems: "center",
+    borderRadius: 8,
+    marginTop: 14,
+    minHeight: 48,
+    justifyContent: "center",
+    paddingHorizontal: 14
+  },
+  feedReelButtonText: {
+    fontSize: 14,
+    fontWeight: "900"
   },
   feedStatsGrid: {
     flexDirection: "row",
