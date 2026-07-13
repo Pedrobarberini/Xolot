@@ -423,6 +423,27 @@ function formatPlaybackTime(seconds: number) {
   return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
+function getPointerLocationX(nativeEvent: unknown) {
+  if (!nativeEvent || typeof nativeEvent !== "object") {
+    return null;
+  }
+
+  const { locationX, offsetX } = nativeEvent as {
+    locationX?: unknown;
+    offsetX?: unknown;
+  };
+
+  if (typeof locationX === "number" && Number.isFinite(locationX)) {
+    return locationX;
+  }
+
+  if (typeof offsetX === "number" && Number.isFinite(offsetX)) {
+    return offsetX;
+  }
+
+  return null;
+}
+
 function formatVideoFileSize(bytes?: number) {
   if (!bytes || bytes <= 0) {
     return null;
@@ -1648,13 +1669,17 @@ function FeedVideoPlayback({
       onMoveShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderGrant: (event) => {
-        if (Number.isFinite(event.nativeEvent.locationX)) {
-          seekToOffsetRef.current(event.nativeEvent.locationX);
+        const locationX = getPointerLocationX(event.nativeEvent);
+
+        if (locationX !== null) {
+          seekToOffsetRef.current(locationX);
         }
       },
       onPanResponderMove: (event) => {
-        if (Number.isFinite(event.nativeEvent.locationX)) {
-          seekToOffsetRef.current(event.nativeEvent.locationX);
+        const locationX = getPointerLocationX(event.nativeEvent);
+
+        if (locationX !== null) {
+          seekToOffsetRef.current(locationX);
         }
       },
       onPanResponderTerminationRequest: () => false,
@@ -1801,7 +1826,11 @@ function FeedVideoPlayback({
             }
           }}
           onPress={(event) => {
-            seekToOffsetRef.current(event.nativeEvent.locationX);
+            const locationX = getPointerLocationX(event.nativeEvent);
+
+            if (locationX !== null) {
+              seekToOffsetRef.current(locationX);
+            }
           }}
           style={styles.feedVideoSeekPressable}
         >
