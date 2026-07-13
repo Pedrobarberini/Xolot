@@ -5,6 +5,18 @@ export type PlayerMetric = {
   value: string;
 };
 
+export type PlayerEvaluation = {
+  thesis: string;
+  fundingGoal: number;
+  funded: number;
+  minimumTicket: number;
+  athleteSharePercent: number;
+  projectedMonthlyEarnings: number;
+  score: number;
+  riskLevel: RiskLevel;
+  metrics: PlayerMetric[];
+};
+
 export type Player = {
   id: string;
   name: string;
@@ -14,20 +26,13 @@ export type Player = {
   club: string;
   videoTitle: string;
   videoLength: string;
-  videoUri?: string;
+  videoUri: string | number;
+  hasAudio?: boolean;
+  isDemo?: boolean;
   highlight: string;
-  thesis: string;
-  fundingGoal: number;
-  funded: number;
-  minimumTicket: number;
-  athleteSharePercent: number;
-  projectedMonthlyEarnings: number;
-  score: number;
-  riskLevel: RiskLevel;
+  objective: string;
   tags: string[];
-  metrics: PlayerMetric[];
-  thumbnailColor: string;
-  accentColor: string;
+  evaluation?: PlayerEvaluation;
 };
 
 export type SimulatedInvestmentStatus =

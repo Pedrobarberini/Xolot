@@ -7,7 +7,7 @@ const pageShellStyle = `    <style id="nextstar-page-shell">
       html,
       body,
       #root {
-        background-color: #050503;
+        background-color: #F5F8F5;
         min-height: 100%;
         min-height: 100dvh;
       }

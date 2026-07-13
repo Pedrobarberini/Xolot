@@ -1,8 +1,30 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useEvent } from "expo";
 import * as ImagePicker from "expo-image-picker";
+import * as SplashScreen from "expo-splash-screen";
+import * as SystemUI from "expo-system-ui";
 import { VideoView, useVideoPlayer } from "expo-video";
 import {
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Expand,
+  LogOut,
+  Play,
+  RefreshCw,
+  Send,
+  ShieldCheck,
+  Upload,
+  UserRound,
+  Video,
+  Volume2,
+  VolumeX,
+  WalletCards,
+  X
+} from "lucide-react-native";
+import {
+  AccessibilityInfo,
   Alert,
   Animated,
   Easing,
@@ -20,7 +42,8 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { players } from "./src/data/players";
+import { demoPlayer } from "./src/data/demoPlayer";
+import { colors } from "./src/theme";
 import {
   AppUser,
   Investment,
@@ -37,7 +60,10 @@ import {
   formatPercent
 } from "./src/utils/investment";
 
-const NEXTSTAR_LOGO = require("./assets/nextstar-logo-cropped.png");
+const NEXTSTAR_SYMBOL = require("./assets/brand/nextstar-symbol.png");
+const NEXTSTAR_WORDMARK = require("./assets/brand/nextstar-wordmark.png");
+
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 const SYSTEM_NAV_CLEARANCE =
   Platform.select({
@@ -106,126 +132,49 @@ const investmentStages: SimulatedInvestmentStatus[] = [
   "Distribuicao simulada"
 ];
 
-const CARD_PALETTES: CardPalette[] = [
-  {
-    name: "Ouro Prime",
-    card: "#100B04",
-    media: "#060504",
-    border: "#8B641D",
-    accent: "#F7C84B",
-    accentSoft: "#33230A",
-    text: "#FFF4CC",
-    muted: "#C7A45A",
-    tagBackground: "#1F1607",
-    progressTrack: "#34260E",
-    onAccent: "#080604"
-  },
-  {
-    name: "Bronze Arena",
-    card: "#160C05",
-    media: "#080503",
-    border: "#8E541E",
-    accent: "#C9782B",
-    accentSoft: "#351A08",
-    text: "#FFE6BF",
-    muted: "#C48A53",
-    tagBackground: "#241106",
-    progressTrack: "#3D210D",
-    onAccent: "#080604"
-  },
-  {
-    name: "Champagne Noir",
-    card: "#11100B",
-    media: "#070705",
-    border: "#8E8059",
-    accent: "#E9D8A6",
-    accentSoft: "#302B1A",
-    text: "#FFF8DC",
-    muted: "#C9B987",
-    tagBackground: "#211E12",
-    progressTrack: "#3B3520",
-    onAccent: "#080604"
-  },
-  {
-    name: "Ambar Sprint",
-    card: "#180F04",
-    media: "#090602",
-    border: "#9A6A10",
-    accent: "#FFB703",
-    accentSoft: "#3D2704",
-    text: "#FFF1C2",
-    muted: "#D39B2C",
-    tagBackground: "#281A04",
-    progressTrack: "#4A3106",
-    onAccent: "#080604"
-  },
-  {
-    name: "Grafite Crown",
-    card: "#121211",
-    media: "#050505",
-    border: "#6F613D",
-    accent: "#B8892D",
-    accentSoft: "#292315",
-    text: "#F6EBC8",
-    muted: "#AE9764",
-    tagBackground: "#1D1A12",
-    progressTrack: "#332D1C",
-    onAccent: "#080604"
-  },
-  {
-    name: "Cobre Estelar",
-    card: "#190B06",
-    media: "#080302",
-    border: "#9A4F23",
-    accent: "#D9843A",
-    accentSoft: "#341609",
-    text: "#FFE8CF",
-    muted: "#C9824F",
-    tagBackground: "#261006",
-    progressTrack: "#3E1D0B",
-    onAccent: "#080604"
-  }
-];
-
-const initialSubmissions: VideoSubmission[] = [
-  {
-    id: "seed-rafael-admin",
-    userId: "seed-athlete",
-    athleteName: "Rafael Nunes",
-    age: 18,
-    city: "Campinas, SP",
-    position: "Volante",
-    club: "Projeto social Zona Sul",
-    videoTitle: "Desarmes e inversoes de jogo",
-    videoLink: "",
-    highlight:
-      "Boa leitura defensiva, passe longo consistente e intensidade sem bola.",
-    goals:
-      "Simular captacao para avaliacao, fisioterapia preventiva e viagem para peneira.",
-    hasGuardianConsent: false,
-    status: "Em revisao",
-    submittedAt: "2026-07-07T18:00:00.000Z"
-  }
-];
+const CARD_PALETTE: CardPalette = {
+  name: "NextStar",
+  card: colors.surface,
+  media: colors.media,
+  border: colors.border,
+  accent: colors.primary,
+  accentSoft: colors.primarySoft,
+  text: colors.text,
+  muted: colors.muted,
+  tagBackground: colors.surfaceMuted,
+  progressTrack: colors.border,
+  onAccent: colors.onPrimary
+};
 
 export default function App() {
   const [user, setUser] = useState<AppUser | null>(null);
+  const [isBrandLaunchVisible, setIsBrandLaunchVisible] = useState(true);
   const [tab, setTab] = useState<Tab>("feed");
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [submissions, setSubmissions] =
-    useState<VideoSubmission[]>(initialSubmissions);
+  const [submissions, setSubmissions] = useState<VideoSubmission[]>([]);
+
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(colors.background).catch(() => undefined);
+    SplashScreen.hideAsync().catch(() => undefined);
+  }, []);
 
   const approvedSubmissionPlayers = useMemo(
     () =>
       submissions
-        .filter((submission) => submission.status === "Aprovado")
-        .map((submission, index) => buildPlayerFromSubmission(submission, index)),
+        .filter(
+          (submission) =>
+            submission.status === "Aprovado" && submission.videoLink.trim().length > 0
+        )
+        .map(buildPlayerFromSubmission),
     [submissions]
   );
 
   const availablePlayers = useMemo(
-    () => [...players, ...approvedSubmissionPlayers],
+    () =>
+      approvedSubmissionPlayers.length > 0
+        ? approvedSubmissionPlayers
+        : [demoPlayer],
     [approvedSubmissionPlayers]
   );
 
@@ -258,11 +207,19 @@ export default function App() {
   }
 
   function handleInvest(player: Player, amount: number) {
+    if (!player.evaluation) {
+      Alert.alert(
+        "Avaliacao pendente",
+        "Esta oportunidade ainda nao possui dados validados para reserva."
+      );
+      return;
+    }
+
     const simulatedMonthlyReturn = calculateProjectedDistribution(
       amount,
-      player.funded,
-      player.athleteSharePercent,
-      player.projectedMonthlyEarnings
+      player.evaluation.funded,
+      player.evaluation.athleteSharePercent,
+      player.evaluation.projectedMonthlyEarnings
     );
 
     setInvestments((current) => [
@@ -325,95 +282,107 @@ export default function App() {
 
   if (!user) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="light-content" />
-        <AuthScreen onComplete={handleAuth} />
-      </SafeAreaView>
+      <View style={styles.appRoot}>
+        <SafeAreaView style={styles.safeArea}>
+          <StatusBar
+            backgroundColor={colors.background}
+            barStyle="dark-content"
+          />
+          <AuthScreen onComplete={handleAuth} />
+        </SafeAreaView>
+        {isBrandLaunchVisible ? (
+          <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
+        ) : null}
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.keyboardView}
-      >
-        {selectedPlayer ? (
-          <ScreenFrame>
-            <PlayerDetail
-              canInvest={user.role === "Investidor"}
-              onBack={() => setSelectedPlayer(null)}
-              onInvest={handleInvest}
-              player={selectedPlayer}
-            />
-          </ScreenFrame>
-        ) : (
-          <>
-            {tab !== "feed" ? (
-              <Header
-                onSignOut={handleSignOut}
-                pendingReviews={pendingReviews}
-                portfolioTotal={portfolioTotal}
-                user={user}
+    <View style={styles.appRoot}>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar
+          backgroundColor={colors.background}
+          barStyle="dark-content"
+        />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={styles.keyboardView}
+        >
+          {selectedPlayer ? (
+            <ScreenFrame>
+              <PlayerDetail
+                canInvest={user.role === "Investidor"}
+                onBack={() => setSelectedPlayer(null)}
+                onInvest={handleInvest}
+                player={selectedPlayer}
               />
-            ) : null}
-            {tab === "feed" ? (
-              <FeedScreen
-                approvedCount={approvedSubmissionPlayers.length}
-                onOpenPlayer={setSelectedPlayer}
-                players={availablePlayers}
-              />
-            ) : null}
-            {tab === "portfolio" ? (
-              <ScreenFrame>
-                <PortfolioScreen
-                  investments={investments}
-                  onAdvance={handleAdvanceInvestment}
-                />
-              </ScreenFrame>
-            ) : null}
-            {tab === "submit" ? (
-              <ScreenFrame>
-                <SubmitVideoScreen
-                  onSubmit={handleSubmitVideo}
-                  submissions={submissions.filter((item) => item.userId === user.id)}
-                  user={user}
-                />
-              </ScreenFrame>
-            ) : null}
-            {tab === "admin" ? (
-              <ScreenFrame>
-                <AdminScreen
-                  onReview={handleReviewSubmission}
-                  submissions={submissions}
-                />
-              </ScreenFrame>
-            ) : null}
-            {tab === "profile" ? (
-              <ScreenFrame>
-                <ProfileScreen
-                  investments={investments}
+            </ScreenFrame>
+          ) : (
+            <>
+              {tab !== "feed" ? (
+                <Header
                   onSignOut={handleSignOut}
-                  submissions={submissions}
+                  pendingReviews={pendingReviews}
+                  portfolioTotal={portfolioTotal}
                   user={user}
                 />
-              </ScreenFrame>
-            ) : null}
-            <BottomTabs activeTab={tab} onChange={setTab} role={user.role} />
-          </>
-        )}
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+              ) : null}
+              {tab === "feed" ? (
+                <FeedScreen
+                  onOpenPlayer={setSelectedPlayer}
+                  players={availablePlayers}
+                />
+              ) : null}
+              {tab === "portfolio" ? (
+                <ScreenFrame>
+                  <PortfolioScreen
+                    investments={investments}
+                    onAdvance={handleAdvanceInvestment}
+                  />
+                </ScreenFrame>
+              ) : null}
+              {tab === "submit" ? (
+                <ScreenFrame>
+                  <SubmitVideoScreen
+                    onSubmit={handleSubmitVideo}
+                    submissions={submissions.filter(
+                      (item) => item.userId === user.id
+                    )}
+                    user={user}
+                  />
+                </ScreenFrame>
+              ) : null}
+              {tab === "admin" ? (
+                <ScreenFrame>
+                  <AdminScreen
+                    onReview={handleReviewSubmission}
+                    submissions={submissions}
+                  />
+                </ScreenFrame>
+              ) : null}
+              {tab === "profile" ? (
+                <ScreenFrame>
+                  <ProfileScreen
+                    investments={investments}
+                    onSignOut={handleSignOut}
+                    submissions={submissions}
+                    user={user}
+                  />
+                </ScreenFrame>
+              ) : null}
+              <BottomTabs activeTab={tab} onChange={setTab} role={user.role} />
+            </>
+          )}
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+      {isBrandLaunchVisible ? (
+        <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
+      ) : null}
+    </View>
   );
 }
 
-function buildPlayerFromSubmission(
-  submission: VideoSubmission,
-  index: number
-): Player {
-  const colors = getCardPalette(index + players.length);
-
+function buildPlayerFromSubmission(submission: VideoSubmission): Player {
   return {
     id: `approved-${submission.id}`,
     name: submission.athleteName,
@@ -422,26 +391,12 @@ function buildPlayerFromSubmission(
     position: submission.position,
     club: submission.club,
     videoTitle: submission.videoTitle,
-    videoLength: formatVideoDuration(submission.videoDurationMs) ?? "1:30",
-    videoUri: submission.videoLink || undefined,
+    videoLength: formatVideoDuration(submission.videoDurationMs) ?? "",
+    videoUri: submission.videoLink,
+    hasAudio: true,
     highlight: submission.highlight,
-    thesis:
-      "Oportunidade aprovada na maquete. Antes de investimento real, o caso exige verificacao juridica, KYC, contrato e revisao documental.",
-    fundingGoal: 60000,
-    funded: 0,
-    minimumTicket: 250,
-    athleteSharePercent: 15,
-    projectedMonthlyEarnings: 6000,
-    score: 70 + (index % 9),
-    riskLevel: "Alto",
-    tags: ["Novo", "Aprovado", "Maquete"],
-    metrics: [
-      { label: "Status", value: "OK" },
-      { label: "Idade", value: String(submission.age) },
-      { label: "Meta", value: "R$60k" }
-    ],
-    thumbnailColor: colors.media,
-    accentColor: colors.accent
+    objective: submission.goals,
+    tags: ["Novo", "Video aprovado"]
   };
 }
 
@@ -475,7 +430,7 @@ function getVideoTitleFromFileName(fileName?: string | null) {
 }
 
 function getCardPalette(index: number) {
-  return CARD_PALETTES[index % CARD_PALETTES.length];
+  return CARD_PALETTE;
 }
 
 function getCardPaletteFromId(id: string) {
@@ -486,26 +441,86 @@ function getCardPaletteFromId(id: string) {
 
 function getScoreColor(score: number) {
   if (score >= 85) {
-    return "#4ADE80";
+    return colors.primary;
   }
 
   if (score >= 78) {
-    return "#F7C84B";
+    return colors.warning;
   }
 
-  return "#F87171";
+  return colors.danger;
+}
+
+function BrandLaunchScreen({ onFinish }: { onFinish: () => void }) {
+  const opacity = useRef(new Animated.Value(1)).current;
+  const scale = useRef(new Animated.Value(0.96)).current;
+
+  useEffect(() => {
+    let isMounted = true;
+    let animation: Animated.CompositeAnimation | null = null;
+
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then((reduceMotion) => {
+        if (!isMounted) {
+          return;
+        }
+
+        animation = reduceMotion
+          ? Animated.sequence([
+              Animated.delay(500),
+              Animated.timing(opacity, {
+                duration: 180,
+                toValue: 0,
+                useNativeDriver: true
+              })
+            ])
+          : Animated.sequence([
+              Animated.timing(scale, {
+                duration: 420,
+                easing: Easing.out(Easing.cubic),
+                toValue: 1,
+                useNativeDriver: true
+              }),
+              Animated.delay(650),
+              Animated.timing(opacity, {
+                duration: 330,
+                easing: Easing.inOut(Easing.cubic),
+                toValue: 0,
+                useNativeDriver: true
+              })
+            ]);
+
+        animation.start(({ finished }) => {
+          if (finished && isMounted) {
+            onFinish();
+          }
+        });
+      })
+      .catch(() => onFinish());
+
+    return () => {
+      isMounted = false;
+      animation?.stop();
+    };
+  }, [onFinish, opacity, scale]);
+
+  return (
+    <Animated.View
+      accessibilityLabel="Carregando NextStar"
+      accessibilityRole="progressbar"
+      style={[styles.brandLaunch, { opacity }]}
+    >
+      <Animated.Image
+        resizeMode="contain"
+        source={NEXTSTAR_WORDMARK}
+        style={[styles.brandLaunchLogo, { transform: [{ scale }] }]}
+      />
+    </Animated.View>
+  );
 }
 
 function ScreenBackdrop() {
-  return (
-    <View pointerEvents="none" style={styles.screenBackdrop}>
-      <View style={styles.screenBackdropAccent} />
-      <View style={styles.screenBackdropFrame} />
-      <View style={styles.screenBackdropLaneLeft} />
-      <View style={styles.screenBackdropLaneRight} />
-      <View style={styles.screenBackdropShade} />
-    </View>
-  );
+  return <View pointerEvents="none" style={styles.screenBackdrop} />;
 }
 
 function ScreenTransition({
@@ -609,7 +624,7 @@ function AuthScreen({
       <ScrollView contentContainerStyle={styles.authContent}>
         <ScreenTransition style={styles.authCard}>
           <View style={styles.authTopRow}>
-            <Text style={styles.authPanelKicker}>Radar NextStar</Text>
+            <Text style={styles.authPanelKicker}>Talentos em movimento</Text>
             <View style={styles.authModePill}>
               <Text style={styles.authModeText}>{authModeLabel}</Text>
             </View>
@@ -617,11 +632,10 @@ function AuthScreen({
         <Image
           accessibilityLabel="Logo NextStar"
           resizeMode="contain"
-          source={NEXTSTAR_LOGO}
+          source={NEXTSTAR_WORDMARK}
           style={[styles.authLogo, isCompact ? styles.authLogoCompact : null]}
         />
-        <Text style={styles.authBrand}>NextStar</Text>
-        <Text style={styles.authEyebrow}>Maquete mobile de talentos</Text>
+        <Text style={styles.authEyebrow}>Descubra. Avalie. Conecte.</Text>
         <Text style={styles.authTitle}>
           {mode === "create" ? "Criar conta" : "Entrar"}
         </Text>
@@ -693,11 +707,13 @@ function AuthScreen({
                 acceptedTerms ? styles.checkBoxActive : null
               ]}
             >
-              {acceptedTerms ? <Text style={styles.checkMark}>OK</Text> : null}
+              {acceptedTerms ? (
+                <Check color={colors.onPrimary} size={16} strokeWidth={3} />
+              ) : null}
             </View>
             <Text style={styles.checkText}>
-              Aceito que esta e uma maquete sem dinheiro real, contrato real ou
-              promessa de retorno.
+              Aceito que este ambiente e demonstrativo, sem dinheiro real,
+              contrato real ou promessa de retorno.
             </Text>
           </Pressable>
         ) : null}
@@ -766,7 +782,7 @@ function Header({
         <Image
           accessibilityLabel="Logo NextStar"
           resizeMode="contain"
-          source={NEXTSTAR_LOGO}
+          source={NEXTSTAR_SYMBOL}
           style={[
             styles.headerLogo,
             isCompact ? styles.headerLogoCompact : null
@@ -795,13 +811,14 @@ function Header({
           <Text style={styles.walletValue}>{badgeValue}</Text>
         </View>
         <Pressable
+          accessibilityLabel="Sair da conta"
           onPress={onSignOut}
           style={[
             styles.signOutButton,
             isCompact ? styles.signOutButtonCompact : null
           ]}
         >
-          <Text style={styles.signOutText}>Sair</Text>
+          <LogOut color={colors.primary} size={20} strokeWidth={2.2} />
         </Pressable>
       </View>
     </View>
@@ -809,11 +826,9 @@ function Header({
 }
 
 function FeedScreen({
-  approvedCount,
   onOpenPlayer,
   players: feedPlayers
 }: {
-  approvedCount: number;
   onOpenPlayer: (player: Player) => void;
   players: Player[];
 }) {
@@ -935,14 +950,11 @@ function FeedScreen({
             }}
           >
             <FeedReel
-              approvedCount={approvedCount}
-              index={index}
               isActive={index === activeFeedIndex}
               onOpen={() => onOpenPlayer(player)}
               palette={getCardPalette(index)}
               player={player}
               reelHeight={pageHeight}
-              total={feedPlayers.length}
             />
           </View>
         ))}
@@ -952,40 +964,45 @@ function FeedScreen({
 }
 
 function FeedReel({
-  approvedCount,
-  index,
   isActive,
   onOpen,
   palette,
   player,
-  reelHeight,
-  total
+  reelHeight
 }: {
-  approvedCount: number;
-  index: number;
   isActive: boolean;
   onOpen: () => void;
   palette: CardPalette;
   player: Player;
   reelHeight: number;
-  total: number;
 }) {
   const { width } = useWindowDimensions();
   const [isExpanded, setIsExpanded] = useState(false);
   const revealProgress = useRef(new Animated.Value(0)).current;
   const isWide = width >= 900;
-  const progress = Math.min(player.funded / player.fundingGoal, 1);
-  const scoreColor = getScoreColor(player.score);
-  const presentationText = `${player.highlight} ${player.thesis}`.trim();
+  const evaluation = player.evaluation;
+  const progress = evaluation
+    ? Math.min(evaluation.funded / evaluation.fundingGoal, 1)
+    : 0;
+  const scoreColor = evaluation
+    ? getScoreColor(evaluation.score)
+    : colors.muted;
+  const presentationText = `${player.highlight} ${player.objective}`.trim();
   const textLimit = isWide ? FEED_TEXT_LIMIT_WIDE : FEED_TEXT_LIMIT_COMPACT;
   const hasMoreText = presentationText.length > textLimit;
   const visibleText =
     !isExpanded && hasMoreText
       ? `${presentationText.slice(0, textLimit).trim()}...`
       : presentationText;
-  const fundingProgressLabel = `${Math.round(progress * 100)}%`;
-  const minimumTicketLabel = formatBRL(player.minimumTicket);
-  const projectedMonthlyLabel = formatBRL(player.projectedMonthlyEarnings);
+  const fundingProgressLabel = evaluation
+    ? `${Math.round(progress * 100)}%`
+    : null;
+  const minimumTicketLabel = evaluation
+    ? formatBRL(evaluation.minimumTicket)
+    : null;
+  const projectedMonthlyLabel = evaluation
+    ? formatBRL(evaluation.projectedMonthlyEarnings)
+    : null;
   const initials = player.name
     .split(" ")
     .slice(0, 2)
@@ -1057,30 +1074,10 @@ function FeedReel({
               : null
           ]}
         >
-          <View style={styles.feedVideoBackground}>
-            <View
-              style={[
-                styles.feedVideoAccent,
-                { backgroundColor: palette.accentSoft, borderColor: palette.border }
-              ]}
-            />
-            <View
-              style={[
-                styles.feedVideoFrame,
-                { borderColor: palette.border, backgroundColor: palette.media }
-              ]}
-            />
-            <View style={styles.feedVideoTexture} />
-            <View style={[styles.feedVideoLane, styles.feedVideoLaneLeft]} />
-            <View style={[styles.feedVideoLane, styles.feedVideoLaneRight]} />
-            <View style={styles.feedVideoFocusBox} />
-            <View style={styles.feedVideoShadeTop} />
-            <View style={styles.feedVideoShadeBottom} />
-          </View>
+          <View style={styles.feedVideoBackground} />
 
           <FeedVideoBox
             fundingProgressLabel={fundingProgressLabel}
-            initials={initials}
             isActive={isActive}
             isWide={isWide}
             mobileWidth={mobileVideoWidth}
@@ -1091,28 +1088,37 @@ function FeedReel({
 
           {!isWide ? (
             <View style={styles.feedReelHeaderOverlay}>
-              <View>
+              <View style={styles.feedReelBrandRow}>
+                <Image
+                  accessibilityLabel="NextStar"
+                  resizeMode="contain"
+                  source={NEXTSTAR_SYMBOL}
+                  style={styles.feedReelBrandMark}
+                />
                 <Text style={[styles.feedReelKicker, { color: palette.accent }]}>
-                  Radar NextStar
-                </Text>
-                <Text style={[styles.feedReelCount, { color: palette.text }]}>
-                  Ficha {index + 1}/{total} | {approvedCount} aprovadas
+                  Radar
                 </Text>
               </View>
-              <View
-                style={[
-                  styles.scoreBadge,
-                  styles.feedScoreBadge,
-                  { borderColor: scoreColor }
-                ]}
-              >
-                <Text style={[styles.scoreValue, { color: scoreColor }]}>
-                  {player.score}
-                </Text>
-                <Text style={[styles.scoreLabel, { color: palette.muted }]}>
-                  score
-                </Text>
-              </View>
+              {evaluation ? (
+                <View
+                  style={[
+                    styles.scoreBadge,
+                    styles.feedScoreBadge,
+                    { borderColor: scoreColor }
+                  ]}
+                >
+                  <Text style={[styles.scoreValue, { color: scoreColor }]}>
+                    {evaluation.score}
+                  </Text>
+                  <Text style={[styles.scoreLabel, { color: palette.muted }]}>
+                    score
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.feedPendingBadge}>
+                  <Text style={styles.feedPendingBadgeText}>Em avaliacao</Text>
+                </View>
+              )}
             </View>
           ) : null}
 
@@ -1181,7 +1187,7 @@ function FeedReel({
                 ]}
               >
                 <Text style={[styles.feedStatusText, { color: palette.accent }]}>
-                  Verificado
+                  {player.isDemo ? "Demonstracao" : "Aprovado"}
                 </Text>
               </View>
             </View>
@@ -1202,7 +1208,8 @@ function FeedReel({
                   numberOfLines={1}
                   style={[styles.feedReelMeta, { color: palette.muted }]}
                 >
-                  {player.age} anos | {player.club} | risco {player.riskLevel}
+                  {player.age} anos | {player.club}
+                  {evaluation ? ` | risco ${evaluation.riskLevel}` : ""}
                 </Text>
                 <View style={styles.feedTagRow}>
                   {player.tags.slice(0, 3).map((tag) => (
@@ -1252,7 +1259,8 @@ function FeedReel({
                       numberOfLines={1}
                       style={[styles.feedReelMeta, { color: palette.muted }]}
                     >
-                      {player.age} anos | {player.club} | risco {player.riskLevel}
+                      {player.age} anos | {player.club}
+                      {evaluation ? ` | risco ${evaluation.riskLevel}` : ""}
                     </Text>
                   </View>
                   <Pressable
@@ -1268,14 +1276,14 @@ function FeedReel({
                       pressed ? styles.feedCompactTogglePressed : null
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.feedCompactToggleText,
-                        { color: palette.accent }
-                      ]}
-                    >
+                    <Text style={styles.feedCompactToggleText}>
                       {isExpanded ? "Ver menos" : "Ver mais"}
                     </Text>
+                    {isExpanded ? (
+                      <ChevronUp color={colors.primary} size={16} />
+                    ) : (
+                      <ChevronDown color={colors.primary} size={16} />
+                    )}
                   </Pressable>
                 </View>
 
@@ -1309,11 +1317,11 @@ function FeedReel({
               </>
             )}
 
-            {isWide ? (
+            {isWide && evaluation ? (
               <View style={styles.feedInsightStrip}>
                 <View style={styles.feedInsightItem}>
                   <Text style={[styles.feedInsightValue, { color: scoreColor }]}>
-                    {player.score}
+                    {evaluation.score}
                   </Text>
                   <Text
                     style={[styles.feedInsightLabel, { color: palette.muted }]}
@@ -1346,11 +1354,21 @@ function FeedReel({
                   </Text>
                 </View>
               </View>
+            ) : isWide ? (
+              <View style={styles.feedEvaluationPending}>
+                <Text style={styles.feedEvaluationPendingTitle}>
+                  Avaliacao pendente
+                </Text>
+                <Text style={styles.feedEvaluationPendingBody}>
+                  Score, risco e condicoes financeiras serao publicados apenas
+                  depois da analise.
+                </Text>
+              </View>
             ) : null}
 
-            {isWide ? (
+            {isWide && evaluation ? (
               <View style={styles.feedReelMetricRow}>
-                {player.metrics.slice(0, 3).map((metric) => (
+                {evaluation.metrics.slice(0, 3).map((metric) => (
                   <View
                     key={metric.label}
                     style={[
@@ -1384,17 +1402,17 @@ function FeedReel({
               </View>
             ) : null}
 
-            {isWide ? (
+            {isWide && evaluation ? (
               <View style={styles.progressLabelRow}>
                 <Text style={[styles.progressText, { color: palette.muted }]}>
-                  {formatBRL(player.funded)}
+                  {formatBRL(evaluation.funded)}
                 </Text>
                 <Text style={[styles.progressText, { color: palette.muted }]}>
-                  {formatBRL(player.fundingGoal)}
+                  {formatBRL(evaluation.fundingGoal)}
                 </Text>
               </View>
             ) : null}
-            {isWide ? (
+            {isWide && evaluation ? (
               <View
                 style={[
                   styles.progressTrack,
@@ -1422,12 +1440,16 @@ function FeedReel({
                   pressed ? styles.feedReelButtonPressed : null
                 ]}
               >
-                <Text style={styles.feedLearnMoreText}>Abrir ficha completa</Text>
+                <Text style={styles.feedLearnMoreText}>
+                  {player.isDemo
+                    ? "Abrir perfil demonstrativo"
+                    : "Abrir ficha completa"}
+                </Text>
               </Pressable>
             ) : null}
           </View>
 
-          {isWide ? (
+          {isWide && evaluation ? (
             <View style={styles.feedDesktopPanel}>
               <Text style={styles.feedDesktopPanelTitle}>
                 Leitura de investimento
@@ -1439,12 +1461,14 @@ function FeedReel({
               <View style={styles.feedDesktopPanelRow}>
                 <Text style={styles.feedDesktopPanelLabel}>Participacao atleta</Text>
                 <Text style={styles.feedDesktopPanelValue}>
-                  {formatPercent(player.athleteSharePercent)}
+                  {formatPercent(evaluation.athleteSharePercent)}
                 </Text>
               </View>
               <View style={styles.feedDesktopPanelRow}>
                 <Text style={styles.feedDesktopPanelLabel}>Perfil de risco</Text>
-                <Text style={styles.feedDesktopPanelValue}>{player.riskLevel}</Text>
+                <Text style={styles.feedDesktopPanelValue}>
+                  {evaluation.riskLevel}
+                </Text>
               </View>
             </View>
           ) : null}
@@ -1456,7 +1480,6 @@ function FeedReel({
 
 function FeedVideoBox({
   fundingProgressLabel,
-  initials,
   isActive,
   isWide,
   mobileWidth,
@@ -1464,8 +1487,7 @@ function FeedVideoBox({
   player,
   scoreColor
 }: {
-  fundingProgressLabel: string;
-  initials: string;
+  fundingProgressLabel: string | null;
   isActive: boolean;
   isWide: boolean;
   mobileWidth: number;
@@ -1473,6 +1495,8 @@ function FeedVideoBox({
   player: Player;
   scoreColor: string;
 }) {
+  const evaluation = player.evaluation;
+
   return (
     <View
       style={[
@@ -1482,94 +1506,38 @@ function FeedVideoBox({
         { backgroundColor: palette.media, borderColor: palette.border }
       ]}
     >
-      {player.videoUri ? (
-        <FeedVideoPlayback
-          accent={palette.accent}
-          isActive={isActive}
-          onAccent={palette.onAccent}
-          uri={player.videoUri}
-        />
-      ) : (
-        <>
-          <View
-            style={[
-              styles.feedVideoBoxGlow,
-              { backgroundColor: palette.accentSoft }
-            ]}
-          />
-          <View style={styles.feedVideoPitchMarkings}>
-            <View style={styles.feedVideoPitchCenterLine} />
-            <View style={styles.feedVideoPitchCenterCircle} />
-            <View style={styles.feedVideoPitchBoxTop} />
-            <View style={styles.feedVideoPitchBoxBottom} />
-          </View>
-          <View style={styles.feedVideoNoiseWash} />
-
-          <View
-            style={[
-              styles.feedVideoSubject,
-              !isWide ? styles.feedVideoSubjectCompact : null,
-              { borderColor: palette.accent }
-            ]}
-          >
-            <Text
-              style={[styles.feedVideoSubjectText, { color: palette.accent }]}
-            >
-              {initials}
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.feedVideoPlayCircle,
-              !isWide ? styles.feedVideoPlayCircleCompact : null,
-              { backgroundColor: palette.accent }
-            ]}
-          >
-            <View
-              style={[
-                styles.feedVideoPlayTriangle,
-                { borderLeftColor: palette.onAccent }
-              ]}
-            />
-          </View>
-        </>
-      )}
+      <FeedVideoPlayback
+        accent={palette.accent}
+        hasAudio={player.hasAudio !== false}
+        isActive={isActive}
+        onAccent={palette.onAccent}
+        uri={player.videoUri}
+      />
 
       <View style={styles.feedVideoTopHud}>
-        <View
-          style={[styles.feedVideoLiveDot, { backgroundColor: palette.accent }]}
+        <Image
+          accessibilityIgnoresInvertColors
+          resizeMode="contain"
+          source={NEXTSTAR_SYMBOL}
+          style={styles.feedVideoHudLogo}
         />
-        <Text
-          numberOfLines={1}
-          style={[styles.feedVideoHudText, { color: palette.text }]}
-        >
-          NEXTSTAR
-        </Text>
+        <Text numberOfLines={1} style={styles.feedVideoHudText}>NextStar</Text>
       </View>
 
-      <View style={styles.feedVideoActionRail}>
-        <View
-          style={[styles.feedVideoActionButton, { borderColor: palette.border }]}
-        >
-          <Text style={[styles.feedVideoActionValue, { color: scoreColor }]}>
-            {player.score}
-          </Text>
-          <Text style={[styles.feedVideoActionLabel, { color: palette.muted }]}>
-            SC
-          </Text>
+      {evaluation && fundingProgressLabel ? (
+        <View style={styles.feedVideoActionRail}>
+          <View style={styles.feedVideoActionButton}>
+            <Text style={[styles.feedVideoActionValue, { color: scoreColor }]}>
+              {evaluation.score}
+            </Text>
+            <Text style={styles.feedVideoActionLabel}>SC</Text>
+          </View>
+          <View style={styles.feedVideoActionButton}>
+            <Text style={styles.feedVideoActionValue}>{fundingProgressLabel}</Text>
+            <Text style={styles.feedVideoActionLabel}>CAP</Text>
+          </View>
         </View>
-        <View
-          style={[styles.feedVideoActionButton, { borderColor: palette.border }]}
-        >
-          <Text style={[styles.feedVideoActionValue, { color: palette.accent }]}>
-            {fundingProgressLabel}
-          </Text>
-          <Text style={[styles.feedVideoActionLabel, { color: palette.muted }]}>
-            CAP
-          </Text>
-        </View>
-      </View>
+      ) : null}
 
       <View
         style={[
@@ -1579,11 +1547,11 @@ function FeedVideoBox({
       >
         <Text
           numberOfLines={1}
-          style={[styles.feedVideoCaption, { color: palette.text }]}
+          style={[styles.feedVideoCaption, { color: colors.onPrimary }]}
         >
           {player.videoTitle}
         </Text>
-        <Text style={[styles.feedVideoDuration, { color: palette.text }]}>
+        <Text style={[styles.feedVideoDuration, { color: colors.onPrimary }]}>
           {player.videoLength}
         </Text>
       </View>
@@ -1607,14 +1575,16 @@ function FeedVideoBox({
 
 function FeedVideoPlayback({
   accent,
+  hasAudio,
   isActive,
   onAccent,
   uri
 }: {
   accent: string;
+  hasAudio: boolean;
   isActive: boolean;
   onAccent: string;
-  uri: string;
+  uri: string | number;
 }) {
   const videoViewRef = useRef<VideoView | null>(null);
   const videoPlayer = useVideoPlayer(uri, (player) => {
@@ -1656,7 +1626,7 @@ function FeedVideoPlayback({
     <View style={styles.feedVideoPlayback}>
       <VideoView
         allowsFullscreen
-        contentFit="contain"
+        contentFit="cover"
         nativeControls={false}
         player={videoPlayer}
         playsInline
@@ -1678,33 +1648,34 @@ function FeedVideoPlayback({
               { backgroundColor: accent }
             ]}
           >
-            <View
-              style={[
-                styles.feedVideoPlayTriangle,
-                { borderLeftColor: onAccent }
-              ]}
-            />
+            <Play color={onAccent} fill={onAccent} size={24} />
           </View>
         ) : null}
       </Pressable>
       <View style={styles.feedVideoFloatingControls}>
-        <Pressable
-          accessibilityLabel={muted ? "Ativar som" : "Silenciar video"}
-          accessibilityRole="button"
-          onPress={() => {
-            videoPlayer.muted = !muted;
-          }}
-          style={styles.feedVideoControlButton}
-        >
-          <Text style={styles.feedVideoControlIcon}>{muted ? "🔇" : "🔊"}</Text>
-        </Pressable>
+        {hasAudio ? (
+          <Pressable
+            accessibilityLabel={muted ? "Ativar som" : "Silenciar video"}
+            accessibilityRole="button"
+            onPress={() => {
+              videoPlayer.muted = !muted;
+            }}
+            style={styles.feedVideoControlButton}
+          >
+            {muted ? (
+              <VolumeX color="#FFFFFF" size={20} />
+            ) : (
+              <Volume2 color="#FFFFFF" size={20} />
+            )}
+          </Pressable>
+        ) : null}
         <Pressable
           accessibilityLabel="Abrir video em tela cheia"
           accessibilityRole="button"
           onPress={openFullscreen}
           style={styles.feedVideoControlButton}
         >
-          <Text style={styles.feedVideoControlIcon}>⛶</Text>
+          <Expand color="#FFFFFF" size={20} />
         </Pressable>
       </View>
     </View>
@@ -1720,8 +1691,14 @@ function PlayerCard({
   palette: CardPalette;
   player: Player;
 }) {
-  const progress = Math.min(player.funded / player.fundingGoal, 1);
-  const scoreColor = getScoreColor(player.score);
+  const evaluation = player.evaluation;
+
+  if (!evaluation) {
+    return null;
+  }
+
+  const progress = Math.min(evaluation.funded / evaluation.fundingGoal, 1);
+  const scoreColor = getScoreColor(evaluation.score);
 
   return (
     <Pressable
@@ -1767,7 +1744,7 @@ function PlayerCard({
           </View>
           <View style={[styles.scoreBadge, { borderColor: scoreColor }]}>
             <Text style={[styles.scoreValue, { color: scoreColor }]}>
-              {player.score}
+              {evaluation.score}
             </Text>
             <Text style={[styles.scoreLabel, { color: palette.muted }]}>
               score
@@ -1780,7 +1757,7 @@ function PlayerCard({
         </Text>
 
         <View style={styles.cardMetricRow}>
-          {player.metrics.slice(0, 3).map((metric) => (
+          {evaluation.metrics.slice(0, 3).map((metric) => (
             <View
               key={metric.label}
               style={[
@@ -1817,10 +1794,10 @@ function PlayerCard({
 
         <View style={styles.progressLabelRow}>
           <Text style={[styles.progressText, { color: palette.muted }]}>
-            {formatBRL(player.funded)}
+            {formatBRL(evaluation.funded)}
           </Text>
           <Text style={[styles.progressText, { color: palette.muted }]}>
-            {formatBRL(player.fundingGoal)}
+            {formatBRL(evaluation.fundingGoal)}
           </Text>
         </View>
         <View
@@ -1853,31 +1830,60 @@ function PlayerDetail({
   player: Player;
 }) {
   const palette = getCardPaletteFromId(player.id);
-  const scoreColor = getScoreColor(player.score);
-  const [amountText, setAmountText] = useState(String(player.minimumTicket));
+  const evaluation = player.evaluation;
+  const scoreColor = evaluation
+    ? getScoreColor(evaluation.score)
+    : colors.muted;
+  const [amountText, setAmountText] = useState(
+    evaluation ? String(evaluation.minimumTicket) : ""
+  );
   const amount = Number(amountText.replace(/\D/g, "")) || 0;
   const share = calculatePoolShare(
     amount,
-    player.funded,
-    player.athleteSharePercent
+    evaluation?.funded ?? 0,
+    evaluation?.athleteSharePercent ?? 0
   );
   const projectedDistribution = calculateProjectedDistribution(
     amount,
-    player.funded,
-    player.athleteSharePercent,
-    player.projectedMonthlyEarnings
+    evaluation?.funded ?? 0,
+    evaluation?.athleteSharePercent ?? 0,
+    evaluation?.projectedMonthlyEarnings ?? 0
   );
-  const hasMinimumTicket = amount >= player.minimumTicket;
-  const canSubmitInvestment = canInvest && hasMinimumTicket;
+  const hasMinimumTicket = evaluation
+    ? amount >= evaluation.minimumTicket
+    : false;
+  const canSubmitInvestment = Boolean(
+    evaluation && canInvest && hasMinimumTicket
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.detailContent}>
       <View style={styles.detailTopBar}>
-        <Pressable onPress={onBack} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Voltar</Text>
+        <Pressable
+          accessibilityLabel="Voltar"
+          onPress={onBack}
+          style={styles.backButton}
+        >
+          <ArrowLeft color={colors.primary} size={22} />
         </Pressable>
-        <Text style={styles.detailRisk}>Risco {player.riskLevel}</Text>
+        <Text style={styles.detailRisk}>
+          {player.isDemo
+            ? "Demonstracao"
+            : evaluation
+              ? `Risco ${evaluation.riskLevel}`
+              : "Avaliacao pendente"}
+        </Text>
       </View>
+
+      {player.isDemo ? (
+        <View style={styles.demoNotice}>
+          <Text style={styles.demoNoticeTitle}>Perfil demonstrativo</Text>
+          <Text style={styles.demoNoticeBody}>
+            Video, identidade, metricas e valores abaixo sao exclusivamente
+            ilustrativos.
+          </Text>
+        </View>
+      ) : null}
 
       <View
         style={[
@@ -1889,30 +1895,7 @@ function PlayerDetail({
           }
         ]}
       >
-        {player.videoUri ? (
-          <DetailVideoPlayback uri={player.videoUri} />
-        ) : (
-          <>
-            <View
-              style={[
-                styles.detailPlayButton,
-                { backgroundColor: palette.accent }
-              ]}
-            >
-              <Text style={[styles.detailPlayText, { color: palette.onAccent }]}>
-                PLAY
-              </Text>
-            </View>
-            <View style={[styles.paletteBadge, { borderColor: palette.border }]}>
-              <Text style={[styles.paletteBadgeText, { color: palette.accent }]}>
-                NEXTSTAR
-              </Text>
-            </View>
-            <Text style={[styles.detailVideoTitle, { color: palette.text }]}>
-              {player.videoTitle}
-            </Text>
-          </>
-        )}
+        <DetailVideoPlayback uri={player.videoUri} />
       </View>
 
       <View style={styles.detailTitleRow}>
@@ -1922,16 +1905,19 @@ function PlayerDetail({
             {player.age} anos | {player.position} | {player.club}
           </Text>
         </View>
-        <View style={[styles.scoreBadge, { borderColor: scoreColor }]}>
-          <Text style={[styles.scoreValue, { color: scoreColor }]}>
-            {player.score}
-          </Text>
-          <Text style={[styles.scoreLabel, { color: palette.muted }]}>score</Text>
-        </View>
+        {evaluation ? (
+          <View style={[styles.scoreBadge, { borderColor: scoreColor }]}>
+            <Text style={[styles.scoreValue, { color: scoreColor }]}>
+              {evaluation.score}
+            </Text>
+            <Text style={[styles.scoreLabel, { color: palette.muted }]}>score</Text>
+          </View>
+        ) : null}
       </View>
 
-      <View style={styles.metricGrid}>
-        {player.metrics.map((metric) => (
+      {evaluation ? (
+        <View style={styles.metricGrid}>
+        {evaluation.metrics.map((metric) => (
           <View
             key={metric.label}
             style={[
@@ -1947,17 +1933,31 @@ function PlayerDetail({
             </Text>
           </View>
         ))}
+        </View>
+      ) : null}
+
+      <View style={styles.infoPanel}>
+        <Text style={styles.sectionTitle}>Principal destaque</Text>
+        <Text style={styles.bodyText}>{player.highlight}</Text>
       </View>
 
       <View style={styles.infoPanel}>
-        <Text style={styles.sectionTitle}>Tese</Text>
-        <Text style={styles.bodyText}>{player.thesis}</Text>
+        <Text style={styles.sectionTitle}>Objetivo do aporte</Text>
+        <Text style={styles.bodyText}>{player.objective}</Text>
       </View>
 
+      {evaluation ? (
+      <View style={styles.infoPanel}>
+        <Text style={styles.sectionTitle}>Avaliacao</Text>
+        <Text style={styles.bodyText}>{evaluation.thesis}</Text>
+      </View>
+      ) : null}
+
+      {evaluation ? (
       <View style={styles.infoPanel}>
         <Text style={styles.sectionTitle}>Simular reserva</Text>
         <Text style={styles.bodyText}>
-          {formatPercent(player.athleteSharePercent)} dos ganhos do atleta seriam
+          {formatPercent(evaluation.athleteSharePercent)} dos ganhos do atleta seriam
           destinados ao pool de investidores. Esta tela apenas simula o modelo.
         </Text>
 
@@ -1967,7 +1967,7 @@ function PlayerDetail({
             keyboardType="number-pad"
             onChangeText={setAmountText}
             placeholder="Valor"
-            placeholderTextColor="#806B3D"
+            placeholderTextColor={colors.muted}
             style={styles.amountInput}
             value={amountText}
           />
@@ -1999,7 +1999,7 @@ function PlayerDetail({
 
         {!hasMinimumTicket ? (
           <Text style={styles.validationText}>
-            Ticket minimo: {formatBRL(player.minimumTicket)}
+            Ticket minimo: {formatBRL(evaluation.minimumTicket)}
           </Text>
         ) : null}
         {!canInvest ? (
@@ -2019,11 +2019,23 @@ function PlayerDetail({
           <Text style={styles.primaryButtonText}>Criar reserva simulada</Text>
         </Pressable>
       </View>
+      ) : (
+        <View style={styles.evaluationPendingPanel}>
+          <ShieldCheck color={colors.primary} size={24} />
+          <View style={styles.evaluationPendingTextBlock}>
+            <Text style={styles.evaluationPendingTitle}>Avaliacao pendente</Text>
+            <Text style={styles.evaluationPendingBody}>
+              Score, risco, metricas e condicoes financeiras ainda nao foram
+              publicados. Reservas permanecem indisponiveis ate a analise.
+            </Text>
+          </View>
+        </View>
+      )}
     </ScrollView>
   );
 }
 
-function DetailVideoPlayback({ uri }: { uri: string }) {
+function DetailVideoPlayback({ uri }: { uri: string | number }) {
   const detailPlayer = useVideoPlayer(uri, (player) => {
     player.loop = true;
   });
@@ -2293,7 +2305,7 @@ function SubmitVideoScreen({
             pressed ? styles.feedReelButtonPressed : null
           ]}
         >
-          <Text style={styles.videoPickerIcon}>+</Text>
+          <Upload color={colors.primary} size={21} />
           <Text style={styles.videoPickerButtonText}>
             Escolher video da galeria
           </Text>
@@ -2323,7 +2335,7 @@ function SubmitVideoScreen({
               onPress={removeSelectedVideo}
               style={styles.removeVideoButton}
             >
-              <Text style={styles.removeVideoButtonText}>×</Text>
+              <X color={colors.danger} size={19} />
             </Pressable>
           </View>
         ) : (
@@ -2378,7 +2390,7 @@ function SubmitVideoScreen({
               ]}
             >
               {draft.hasGuardianConsent ? (
-                <Text style={styles.checkMark}>OK</Text>
+                <Check color={colors.onPrimary} size={17} strokeWidth={3} />
               ) : null}
             </View>
             <Text style={styles.checkText}>
@@ -2409,6 +2421,7 @@ function SubmitVideoScreen({
             !canSubmit ? styles.primaryButtonDisabled : null
           ]}
         >
+          <Send color={colors.onPrimary} size={19} />
           <Text style={styles.primaryButtonText}>Enviar para moderacao</Text>
         </Pressable>
       </View>
@@ -2438,7 +2451,7 @@ function SubmitVideoScreen({
             ]}
           >
             <View style={styles.submissionToastIcon}>
-              <Text style={styles.submissionToastIconText}>OK</Text>
+              <Check color={colors.primary} size={19} strokeWidth={3} />
             </View>
             <View style={styles.submissionToastTextBlock}>
               <Text style={styles.submissionToastTitle}>Video enviado</Text>
@@ -2508,10 +2521,10 @@ function AdminScreen({
     <ScrollView contentContainerStyle={styles.screenContent}>
       <View style={styles.adminHero}>
         <Text style={styles.heroKicker}>Painel admin</Text>
-        <Text style={styles.heroTitle}>Controle da maquete.</Text>
+        <Text style={styles.heroTitle}>Moderacao de videos.</Text>
         <Text style={styles.heroBody}>
-          Aprove oportunidades, peca ajustes e simule o funil antes de qualquer
-          backend ou pagamento real.
+          Revise os envios dos atletas e publique somente os videos que atendem
+          aos criterios da plataforma.
         </Text>
       </View>
 
@@ -2559,11 +2572,12 @@ function AdminScreen({
                     onReview(
                       submission.id,
                       "Aprovado",
-                      "Aprovado na maquete. Agora aparece no feed."
+                      "Aprovado pela moderacao e publicado no feed."
                     )
                   }
                   style={[styles.smallButton, styles.approveButton]}
                 >
+                  <Check color={colors.onPrimary} size={17} />
                   <Text style={styles.smallButtonText}>Aprovar</Text>
                 </Pressable>
                 <Pressable
@@ -2576,6 +2590,7 @@ function AdminScreen({
                   }
                   style={[styles.smallButton, styles.adjustButton]}
                 >
+                  <RefreshCw color={colors.onPrimary} size={16} />
                   <Text style={styles.smallButtonTextDark}>Ajustes</Text>
                 </Pressable>
                 <Pressable
@@ -2583,11 +2598,12 @@ function AdminScreen({
                     onReview(
                       submission.id,
                       "Reprovado",
-                      "Reprovado na maquete por falta de informacoes suficientes."
+                      "Reprovado por falta de informacoes suficientes."
                     )
                   }
                   style={[styles.smallButton, styles.rejectButton]}
                 >
+                  <X color={colors.onPrimary} size={17} />
                   <Text style={styles.smallButtonText}>Reprovar</Text>
                 </Pressable>
               </View>
@@ -2930,7 +2946,12 @@ function ProfileScreen({
         </Text>
       </View>
 
-      <Pressable onPress={onSignOut} style={styles.secondaryButton}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onSignOut}
+        style={styles.secondaryButton}
+      >
+        <LogOut color={colors.primary} size={18} />
         <Text style={styles.secondaryButtonText}>Sair da conta</Text>
       </Pressable>
     </ScrollView>
@@ -2947,7 +2968,7 @@ function LabeledInput({
       <Text style={styles.inputLabel}>{label}</Text>
       <TextInput
         multiline={multiline}
-        placeholderTextColor="#806B3D"
+        placeholderTextColor={colors.muted}
         style={[styles.formInput, multiline ? styles.formInputMultiline : null]}
         textAlignVertical={multiline ? "top" : "center"}
         {...props}
@@ -2993,14 +3014,31 @@ function BottomTabs({
     <View style={[styles.tabBar, isDesktop ? styles.tabBarDesktop : null]}>
       {tabs.map((item) => {
         const isActive = item.id === activeTab;
+        const TabIcon =
+          item.id === "submit"
+            ? Upload
+            : item.id === "admin"
+              ? ShieldCheck
+              : item.id === "portfolio"
+                ? WalletCards
+                : item.id === "profile"
+                  ? UserRound
+                  : Video;
 
         return (
           <Pressable
+            accessibilityLabel={item.label}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isActive }}
             key={item.id}
             onPress={() => onChange(item.id)}
             style={[styles.tabButton, isActive ? styles.tabButtonActive : null]}
           >
-            <View style={[styles.tabMarker, isActive ? styles.tabMarkerActive : null]} />
+            <TabIcon
+              color={isActive ? colors.primary : colors.muted}
+              size={22}
+              strokeWidth={isActive ? 2.4 : 2}
+            />
             <Text style={[styles.tabText, isActive ? styles.tabTextActive : null]}>
               {item.label}
             </Text>
@@ -3012,15 +3050,32 @@ function BottomTabs({
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: "#050503",
+  appRoot: {
+    backgroundColor: colors.background,
     flex: 1
+  },
+  safeArea: {
+    backgroundColor: colors.background,
+    flex: 1
+  },
+  brandLaunch: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    backgroundColor: "#F7FAF7",
+    justifyContent: "center",
+    paddingHorizontal: 36,
+    zIndex: 100
+  },
+  brandLaunchLogo: {
+    height: 230,
+    maxWidth: 420,
+    width: "86%"
   },
   keyboardView: {
     flex: 1
   },
   tabScene: {
-    backgroundColor: "#050503",
+    backgroundColor: colors.background,
     flex: 1,
     overflow: "hidden"
   },
@@ -3029,6 +3084,7 @@ const styles = StyleSheet.create({
   },
   screenBackdrop: {
     ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.background,
     overflow: "hidden"
   },
   screenBackdropAccent: {
@@ -3082,7 +3138,7 @@ const styles = StyleSheet.create({
     right: 0
   },
   authShell: {
-    backgroundColor: "#050503",
+    backgroundColor: colors.background,
     flex: 1,
     overflow: "hidden"
   },
@@ -3095,11 +3151,16 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   authCard: {
-    backgroundColor: "rgba(5, 5, 3, 0.72)",
-    borderColor: "rgba(247, 200, 75, 0.22)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
+    elevation: 2,
     padding: 16,
+    shadowColor: "#10261A",
+    shadowOffset: { height: 4, width: 0 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
     width: "100%"
   },
   authTopRow: {
@@ -3109,43 +3170,43 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   authPanelKicker: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 11,
     fontWeight: "900",
     textTransform: "uppercase"
   },
   authModePill: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderColor: "rgba(247, 200, 75, 0.2)",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
     borderRadius: 999,
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 5
   },
   authModeText: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 10,
     fontWeight: "900",
     textTransform: "uppercase"
   },
   authLogo: {
     alignSelf: "center",
-    height: 86,
-    marginBottom: 6,
+    height: 138,
+    marginBottom: 2,
     width: "100%"
   },
   authLogoCompact: {
-    height: 78
+    height: 122
   },
   authBrand: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 28,
     fontWeight: "900",
     letterSpacing: 0,
     textAlign: "center"
   },
   authEyebrow: {
-    color: "#B8892D",
+    color: colors.muted,
     fontSize: 11,
     fontWeight: "900",
     marginTop: 2,
@@ -3153,7 +3214,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase"
   },
   authTitle: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 22,
     fontWeight: "900",
     letterSpacing: 0,
@@ -3161,8 +3222,8 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   authSignalStrip: {
-    backgroundColor: "rgba(255, 255, 255, 0.045)",
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
@@ -3175,20 +3236,20 @@ const styles = StyleSheet.create({
     minWidth: 0
   },
   authSignalValue: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 11,
     fontWeight: "900"
   },
   authSignalLabel: {
-    color: "#A98A4A",
+    color: colors.muted,
     fontSize: 9,
     fontWeight: "900",
     marginTop: 3,
     textTransform: "uppercase"
   },
   segmentedControl: {
-    backgroundColor: "rgba(8, 7, 4, 0.74)",
-    borderColor: "rgba(247, 200, 75, 0.2)",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     flexDirection: "row",
@@ -3203,21 +3264,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10
   },
   segmentButtonActive: {
-    backgroundColor: "#D6A326"
+    backgroundColor: colors.surface
   },
   segmentText: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "900"
   },
   segmentTextActive: {
-    color: "#090805"
+    color: colors.primary
   },
   header: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: "rgba(5, 5, 3, 0.82)",
-    borderBottomColor: "rgba(247, 200, 75, 0.16)",
+    backgroundColor: colors.surface,
+    borderBottomColor: colors.border,
     borderBottomWidth: 1,
     flexDirection: "row",
     flexWrap: "wrap",
@@ -3267,13 +3328,13 @@ const styles = StyleSheet.create({
     flex: 1
   },
   brand: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 23,
     fontWeight: "900",
     letterSpacing: 0
   },
   headerSubtitle: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "600",
     marginTop: 2
@@ -3290,8 +3351,8 @@ const styles = StyleSheet.create({
   },
   walletBadge: {
     alignItems: "flex-end",
-    backgroundColor: "#14110A",
-    borderColor: "#6F4C16",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     paddingHorizontal: 10,
@@ -3304,20 +3365,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12
   },
   walletLabel: {
-    color: "#B8892D",
+    color: colors.muted,
     fontSize: 11,
     fontWeight: "700"
   },
   walletValue: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 14,
     fontWeight: "900",
     marginTop: 2
   },
   signOutButton: {
     alignItems: "center",
-    backgroundColor: "#21190B",
-    borderColor: "#6F4C16",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     flexDirection: "row",
@@ -3331,7 +3392,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18
   },
   signOutText: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 12,
     fontWeight: "900"
   },
@@ -3347,11 +3408,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14
   },
   feedPagerShell: {
-    backgroundColor: "#050503",
+    backgroundColor: colors.background,
     flex: 1
   },
   feedPager: {
-    backgroundColor: "#050503",
+    backgroundColor: colors.background,
     flex: 1
   },
   feedReel: {
@@ -3359,7 +3420,7 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   feedReelStage: {
-    backgroundColor: "#050503",
+    backgroundColor: colors.background,
     alignItems: "stretch",
     flex: 1,
     justifyContent: "center",
@@ -3375,7 +3436,7 @@ const styles = StyleSheet.create({
   },
   feedReelCanvasWide: {
     alignSelf: "center",
-    borderColor: "rgba(247, 200, 75, 0.18)",
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1
   },
@@ -3513,7 +3574,7 @@ const styles = StyleSheet.create({
     width: 34
   },
   feedVideoControlIcon: {
-    color: "#FFF4CC",
+    color: colors.onPrimary,
     fontSize: 15,
     fontWeight: "900"
   },
@@ -3593,8 +3654,13 @@ const styles = StyleSheet.create({
     width: 7
   },
   feedVideoHudText: {
+    color: colors.onPrimary,
     fontSize: 10,
     fontWeight: "900"
+  },
+  feedVideoHudLogo: {
+    height: 18,
+    width: 18
   },
   feedVideoSubject: {
     alignItems: "center",
@@ -3654,10 +3720,12 @@ const styles = StyleSheet.create({
     width: 46
   },
   feedVideoActionValue: {
+    color: colors.onPrimary,
     fontSize: 12,
     fontWeight: "900"
   },
   feedVideoActionLabel: {
+    color: "#DCE8E0",
     fontSize: 8,
     fontWeight: "900",
     marginTop: 1
@@ -3714,6 +3782,15 @@ const styles = StyleSheet.create({
     top: 18,
     zIndex: 4
   },
+  feedReelBrandRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 7
+  },
+  feedReelBrandMark: {
+    height: 25,
+    width: 25
+  },
   feedReelKicker: {
     fontSize: 12,
     fontWeight: "900",
@@ -3725,11 +3802,28 @@ const styles = StyleSheet.create({
     marginTop: 4
   },
   feedScoreBadge: {
-    backgroundColor: "rgba(5, 5, 3, 0.52)"
+    backgroundColor: colors.surface
+  },
+  feedPendingBadge: {
+    alignItems: "center",
+    backgroundColor: colors.warningSoft,
+    borderColor: "#E9C985",
+    borderRadius: 8,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 46,
+    paddingHorizontal: 10
+  },
+  feedPendingBadgeText: {
+    color: colors.warning,
+    fontSize: 10,
+    fontWeight: "900",
+    textAlign: "center",
+    textTransform: "uppercase"
   },
   feedTextOverlay: {
-    backgroundColor: "rgba(5, 5, 3, 0.66)",
-    borderColor: "rgba(255, 255, 255, 0.14)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     bottom: TAB_BAR_CONTENT_PADDING + 8,
@@ -3737,6 +3831,10 @@ const styles = StyleSheet.create({
     padding: 14,
     position: "absolute",
     right: 18,
+    shadowColor: "#10261A",
+    shadowOffset: { height: -4, width: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
     zIndex: 4
   },
   feedTextOverlayWide: {
@@ -3746,16 +3844,16 @@ const styles = StyleSheet.create({
     right: 340
   },
   feedTextOverlayCompact: {
-    backgroundColor: "rgba(5, 5, 3, 0.96)",
+    backgroundColor: colors.surface,
     bottom: TAB_BAR_CONTENT_PADDING - 16,
     padding: 12
   },
   feedTextOverlayCompactExpanded: {
-    backgroundColor: "rgba(5, 5, 3, 0.99)",
+    backgroundColor: colors.surface,
     elevation: 12,
     shadowColor: "#000000",
     shadowOffset: { height: -5, width: 0 },
-    shadowOpacity: 0.34,
+    shadowOpacity: 0.14,
     shadowRadius: 12
   },
   feedOverlayEyebrow: {
@@ -3776,7 +3874,7 @@ const styles = StyleSheet.create({
   },
   feedAvatar: {
     alignItems: "center",
-    backgroundColor: "rgba(5, 5, 3, 0.72)",
+    backgroundColor: colors.primarySoft,
     borderRadius: 999,
     borderWidth: 2,
     height: 42,
@@ -3810,7 +3908,7 @@ const styles = StyleSheet.create({
   },
   feedStatusPill: {
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: colors.primarySoft,
     borderRadius: 8,
     borderWidth: 1,
     justifyContent: "center",
@@ -3850,7 +3948,8 @@ const styles = StyleSheet.create({
   },
   feedCompactToggle: {
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     justifyContent: "center",
@@ -3866,6 +3965,7 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   feedCompactExpandedContent: {
+    borderColor: colors.border,
     borderTopWidth: 1,
     marginTop: 10,
     paddingTop: 10
@@ -3887,7 +3987,7 @@ const styles = StyleSheet.create({
     marginTop: 9
   },
   feedTag: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 999,
     borderWidth: 1,
     fontSize: 10,
@@ -3917,8 +4017,8 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   feedInsightStrip: {
-    backgroundColor: "rgba(255, 255, 255, 0.045)",
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
@@ -3945,13 +4045,34 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textTransform: "uppercase"
   },
+  feedEvaluationPending: {
+    backgroundColor: colors.warningSoft,
+    borderColor: "#E9C985",
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 10,
+    paddingHorizontal: 11,
+    paddingVertical: 9
+  },
+  feedEvaluationPendingTitle: {
+    color: colors.warning,
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  feedEvaluationPendingBody: {
+    color: colors.text,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 3
+  },
   feedReelMetricRow: {
     flexDirection: "row",
     gap: 8,
     marginTop: 12
   },
   feedReelMetric: {
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     flex: 1,
@@ -3971,7 +4092,7 @@ const styles = StyleSheet.create({
   },
   feedLearnMoreButton: {
     alignItems: "center",
-    backgroundColor: "#D6A326",
+    backgroundColor: colors.primary,
     borderRadius: 8,
     flexDirection: "row",
     justifyContent: "center",
@@ -3995,13 +4116,13 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }]
   },
   feedLearnMoreText: {
-    color: "#080604",
+    color: colors.onPrimary,
     fontSize: 14,
     fontWeight: "900"
   },
   feedDesktopPanel: {
-    backgroundColor: "rgba(5, 5, 3, 0.62)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     bottom: 18,
@@ -4012,24 +4133,24 @@ const styles = StyleSheet.create({
     zIndex: 4
   },
   feedDesktopPanelTitle: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 16,
     fontWeight: "900",
     marginBottom: 12
   },
   feedDesktopPanelRow: {
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderColor: colors.border,
     borderTopWidth: 1,
     paddingVertical: 11
   },
   feedDesktopPanelLabel: {
-    color: "#A98A4A",
+    color: colors.muted,
     fontSize: 11,
     fontWeight: "900",
     textTransform: "uppercase"
   },
   feedDesktopPanelValue: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 15,
     fontWeight: "900",
     marginTop: 4
@@ -4040,8 +4161,8 @@ const styles = StyleSheet.create({
     marginBottom: 14
   },
   feedStatCard: {
-    backgroundColor: "#12100A",
-    borderColor: "#46300F",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     flex: 1,
@@ -4049,13 +4170,13 @@ const styles = StyleSheet.create({
     paddingVertical: 13
   },
   feedStatValue: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 24,
     fontWeight: "900",
     letterSpacing: 0
   },
   feedStatLabel: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "900",
     marginTop: 2,
@@ -4069,56 +4190,56 @@ const styles = StyleSheet.create({
     marginTop: 2
   },
   sectionEyebrow: {
-    color: "#B8892D",
+    color: colors.primary,
     fontSize: 11,
     fontWeight: "900",
     textTransform: "uppercase"
   },
   sectionHeaderTitle: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 20,
     fontWeight: "900",
     letterSpacing: 0,
     marginTop: 3
   },
   sectionHeaderMeta: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "900",
     paddingBottom: 2
   },
   feedHero: {
-    backgroundColor: "#0D0B07",
-    borderColor: "#6F4C16",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 16,
     padding: 18
   },
   submitHero: {
-    backgroundColor: "rgba(5, 5, 3, 0.68)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 16,
     padding: 18
   },
   adminHero: {
-    backgroundColor: "rgba(5, 5, 3, 0.68)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 16,
     padding: 18
   },
   heroKicker: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 12,
     fontWeight: "800",
     textTransform: "uppercase"
   },
   heroTitle: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 25,
     fontWeight: "900",
     letterSpacing: 0,
@@ -4126,14 +4247,14 @@ const styles = StyleSheet.create({
     marginTop: 8
   },
   heroBody: {
-    color: "#D8C48A",
+    color: colors.muted,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 8
   },
   card: {
-    backgroundColor: "#100B04",
-    borderColor: "#8B641D",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 16,
@@ -4147,14 +4268,14 @@ const styles = StyleSheet.create({
   },
   playButton: {
     alignItems: "center",
-    backgroundColor: "#F7C84B",
+    backgroundColor: colors.primary,
     borderRadius: 8,
     height: 44,
     justifyContent: "center",
     width: 70
   },
   playText: {
-    color: "#090805",
+    color: colors.onPrimary,
     fontSize: 12,
     fontWeight: "900"
   },
@@ -4202,13 +4323,13 @@ const styles = StyleSheet.create({
     flex: 1
   },
   playerName: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 21,
     fontWeight: "900",
     letterSpacing: 0
   },
   playerMeta: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 13,
     fontWeight: "600",
     marginTop: 4
@@ -4221,17 +4342,17 @@ const styles = StyleSheet.create({
     paddingVertical: 5
   },
   scoreValue: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 18,
     fontWeight: "900"
   },
   scoreLabel: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 10,
     fontWeight: "800"
   },
   highlight: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 12
@@ -4266,15 +4387,15 @@ const styles = StyleSheet.create({
     textTransform: "uppercase"
   },
   tag: {
-    backgroundColor: "#1F1607",
-    borderColor: "#8B641D",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 6
   },
   tagText: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 12,
     fontWeight: "800"
   },
@@ -4284,12 +4405,12 @@ const styles = StyleSheet.create({
     marginTop: 14
   },
   progressText: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "800"
   },
   progressTrack: {
-    backgroundColor: "#34260E",
+    backgroundColor: colors.border,
     borderRadius: 999,
     height: 8,
     marginTop: 7,
@@ -4313,20 +4434,22 @@ const styles = StyleSheet.create({
     paddingVertical: 12
   },
   backButton: {
-    backgroundColor: "#14110A",
-    borderColor: "#6F4C16",
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 9
+    height: 42,
+    justifyContent: "center",
+    width: 42
   },
   backButtonText: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 13,
     fontWeight: "900"
   },
   detailRisk: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 13,
     fontWeight: "900"
   },
@@ -4346,14 +4469,14 @@ const styles = StyleSheet.create({
   },
   detailPlayButton: {
     alignItems: "center",
-    backgroundColor: "#F7C84B",
+    backgroundColor: colors.primary,
     borderRadius: 8,
     height: 54,
     justifyContent: "center",
     width: 86
   },
   detailPlayText: {
-    color: "#090805",
+    color: colors.onPrimary,
     fontSize: 13,
     fontWeight: "900"
   },
@@ -4375,17 +4498,37 @@ const styles = StyleSheet.create({
     flex: 1
   },
   detailName: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 30,
     fontWeight: "900",
     letterSpacing: 0,
     marginTop: 0
   },
   detailMeta: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 14,
     fontWeight: "700",
     marginTop: 5
+  },
+  demoNotice: {
+    backgroundColor: colors.infoSoft,
+    borderColor: "#BFD2FF",
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 12,
+    paddingHorizontal: 13,
+    paddingVertical: 10
+  },
+  demoNoticeTitle: {
+    color: colors.info,
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  demoNoticeBody: {
+    color: colors.text,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 3
   },
   metricGrid: {
     flexDirection: "row",
@@ -4393,8 +4536,8 @@ const styles = StyleSheet.create({
     marginTop: 16
   },
   metricBox: {
-    backgroundColor: "#14110A",
-    borderColor: "#46300F",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     flex: 1,
@@ -4402,19 +4545,19 @@ const styles = StyleSheet.create({
     paddingVertical: 14
   },
   metricValue: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 20,
     fontWeight: "900"
   },
   metricLabel: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "800",
     marginTop: 3
   },
   infoPanel: {
-    backgroundColor: "rgba(5, 5, 3, 0.66)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 14,
@@ -4424,8 +4567,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12
   },
   infoPanelCompact: {
-    backgroundColor: "rgba(5, 5, 3, 0.66)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 14,
@@ -4433,33 +4576,59 @@ const styles = StyleSheet.create({
     paddingVertical: 4
   },
   sectionTitle: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 18,
     fontWeight: "900",
     letterSpacing: 0,
     marginBottom: 8
   },
   bodyText: {
-    color: "#D8C48A",
+    color: colors.muted,
     fontSize: 14,
     lineHeight: 21
+  },
+  evaluationPendingPanel: {
+    alignItems: "flex-start",
+    backgroundColor: colors.warningSoft,
+    borderColor: "#E9C985",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 11,
+    marginTop: 14,
+    padding: 14
+  },
+  evaluationPendingTextBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  evaluationPendingTitle: {
+    color: colors.warning,
+    fontSize: 15,
+    fontWeight: "900"
+  },
+  evaluationPendingBody: {
+    color: colors.text,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 4
   },
   labeledInputBlock: {
     marginTop: 10
   },
   inputLabel: {
-    color: "#F0D27A",
+    color: colors.text,
     fontSize: 12,
     fontWeight: "900",
     marginBottom: 6,
     textTransform: "uppercase"
   },
   formInput: {
-    backgroundColor: "rgba(8, 7, 4, 0.86)",
-    borderColor: "rgba(247, 200, 75, 0.24)",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderStrong,
     borderRadius: 8,
     borderWidth: 1,
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 15,
     fontWeight: "700",
     minHeight: 48,
@@ -4472,8 +4641,8 @@ const styles = StyleSheet.create({
   },
   videoPickerButton: {
     alignItems: "center",
-    backgroundColor: "rgba(20, 17, 10, 0.9)",
-    borderColor: "rgba(247, 200, 75, 0.38)",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
@@ -4484,17 +4653,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14
   },
   videoPickerIcon: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 22,
     fontWeight: "700"
   },
   videoPickerButtonText: {
-    color: "#FFF4CC",
+    color: colors.primary,
     fontSize: 14,
     fontWeight: "900"
   },
   videoPickerHint: {
-    color: "#A98A4A",
+    color: colors.muted,
     fontSize: 11,
     fontWeight: "700",
     lineHeight: 16,
@@ -4502,8 +4671,8 @@ const styles = StyleSheet.create({
   },
   selectedVideoPanel: {
     alignItems: "center",
-    backgroundColor: "rgba(247, 200, 75, 0.06)",
-    borderColor: "rgba(247, 200, 75, 0.2)",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
@@ -4516,20 +4685,20 @@ const styles = StyleSheet.create({
     minWidth: 0
   },
   selectedVideoName: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 13,
     fontWeight: "900"
   },
   selectedVideoMeta: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 11,
     fontWeight: "700",
     marginTop: 3
   },
   removeVideoButton: {
     alignItems: "center",
-    backgroundColor: "rgba(248, 113, 113, 0.12)",
-    borderColor: "rgba(248, 113, 113, 0.4)",
+    backgroundColor: colors.dangerSoft,
+    borderColor: "#E9A8B0",
     borderRadius: 999,
     borderWidth: 1,
     height: 34,
@@ -4537,7 +4706,7 @@ const styles = StyleSheet.create({
     width: 34
   },
   removeVideoButtonText: {
-    color: "#FCA5A5",
+    color: colors.danger,
     fontSize: 23,
     lineHeight: 25
   },
@@ -4548,12 +4717,12 @@ const styles = StyleSheet.create({
     marginTop: 12
   },
   videoSourceDividerLine: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: colors.border,
     flex: 1,
     height: 1
   },
   videoSourceDividerText: {
-    color: "#806B3D",
+    color: colors.muted,
     fontSize: 11,
     fontWeight: "900",
     textTransform: "uppercase"
@@ -4562,7 +4731,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     aspectRatio: 9 / 16,
     backgroundColor: "#000000",
-    borderColor: "rgba(247, 200, 75, 0.28)",
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 14,
@@ -4582,8 +4751,8 @@ const styles = StyleSheet.create({
   },
   inputRow: {
     alignItems: "center",
-    backgroundColor: "#080704",
-    borderColor: "#5E4215",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderStrong,
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
@@ -4591,13 +4760,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12
   },
   currencyPrefix: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 17,
     fontWeight: "900",
     marginRight: 8
   },
   amountInput: {
-    color: "#FFF4CC",
+    color: colors.text,
     flex: 1,
     fontSize: 22,
     fontWeight: "900",
@@ -4616,27 +4785,27 @@ const styles = StyleSheet.create({
     marginTop: 12
   },
   simulationBox: {
-    backgroundColor: "#21190B",
-    borderColor: "#5E4215",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     flex: 1,
     padding: 12
   },
   simulationValue: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 18,
     fontWeight: "900"
   },
   simulationLabel: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "800",
     marginTop: 4
   },
   timelinePanel: {
-    backgroundColor: "#080704",
-    borderColor: "#4D3511",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     marginTop: 14,
@@ -4650,32 +4819,32 @@ const styles = StyleSheet.create({
   },
   timelineDot: {
     alignItems: "center",
-    backgroundColor: "#D6A326",
+    backgroundColor: colors.primary,
     borderRadius: 999,
     height: 24,
     justifyContent: "center",
     width: 24
   },
   timelineDotText: {
-    color: "#090805",
+    color: colors.onPrimary,
     fontSize: 11,
     fontWeight: "900"
   },
   timelineText: {
-    color: "#D8C48A",
+    color: colors.text,
     flex: 1,
     fontSize: 13,
     fontWeight: "800"
   },
   validationText: {
-    color: "#FF9B6A",
+    color: colors.danger,
     fontSize: 13,
     fontWeight: "800",
     marginTop: 10
   },
   submissionValidationPanel: {
-    backgroundColor: "rgba(255, 155, 106, 0.08)",
-    borderColor: "rgba(255, 155, 106, 0.32)",
+    backgroundColor: colors.dangerSoft,
+    borderColor: "#E9A8B0",
     borderRadius: 8,
     borderWidth: 1,
     gap: 5,
@@ -4683,7 +4852,7 @@ const styles = StyleSheet.create({
     padding: 11
   },
   submissionValidationTitle: {
-    color: "#FFB18A",
+    color: colors.danger,
     fontSize: 13,
     fontWeight: "900",
     marginBottom: 2
@@ -4694,12 +4863,12 @@ const styles = StyleSheet.create({
     gap: 7
   },
   submissionValidationMarker: {
-    color: "#FF9B6A",
+    color: colors.danger,
     fontSize: 13,
     fontWeight: "900"
   },
   submissionValidationText: {
-    color: "#FFD1B8",
+    color: colors.text,
     flex: 1,
     fontSize: 12,
     fontWeight: "700",
@@ -4707,35 +4876,40 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: "#D6A326",
+    backgroundColor: colors.primary,
     borderRadius: 8,
+    flexDirection: "row",
+    gap: 8,
     marginTop: 14,
     minHeight: 48,
     justifyContent: "center",
     paddingVertical: 13
   },
   primaryButtonDisabled: {
-    backgroundColor: "#5A4A25"
+    backgroundColor: colors.borderStrong
   },
   primaryButtonText: {
-    color: "#090805",
+    color: colors.onPrimary,
     fontSize: 15,
     fontWeight: "900"
   },
   secondaryButton: {
     alignItems: "center",
-    backgroundColor: "rgba(20, 17, 10, 0.86)",
-    borderColor: "rgba(247, 200, 75, 0.24)",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderStrong,
     borderRadius: 8,
     borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
     marginTop: 12,
     paddingVertical: 13
   },
   secondaryButtonDisabled: {
-    backgroundColor: "#17140D"
+    backgroundColor: colors.surfaceMuted
   },
   secondaryButtonText: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 14,
     fontWeight: "900"
   },
@@ -4747,7 +4921,7 @@ const styles = StyleSheet.create({
   },
   checkBox: {
     alignItems: "center",
-    borderColor: "#B8892D",
+    borderColor: colors.borderStrong,
     borderRadius: 6,
     borderWidth: 2,
     height: 28,
@@ -4755,16 +4929,16 @@ const styles = StyleSheet.create({
     width: 28
   },
   checkBoxActive: {
-    backgroundColor: "#D6A326",
-    borderColor: "#D6A326"
+    backgroundColor: colors.primary,
+    borderColor: colors.primary
   },
   checkMark: {
-    color: "#090805",
+    color: colors.onPrimary,
     fontSize: 10,
     fontWeight: "900"
   },
   checkText: {
-    color: "#D8C48A",
+    color: colors.text,
     flex: 1,
     fontSize: 13,
     fontWeight: "700",
@@ -4780,8 +4954,8 @@ const styles = StyleSheet.create({
   },
   submissionToast: {
     alignItems: "center",
-    backgroundColor: "#171F12",
-    borderColor: "#6FA34A",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
     borderRadius: 8,
     borderWidth: 1,
     elevation: 16,
@@ -4797,14 +4971,14 @@ const styles = StyleSheet.create({
   },
   submissionToastIcon: {
     alignItems: "center",
-    backgroundColor: "#B9F27A",
+    backgroundColor: colors.surface,
     borderRadius: 999,
     height: 32,
     justifyContent: "center",
     width: 32
   },
   submissionToastIconText: {
-    color: "#10170C",
+    color: colors.primary,
     fontSize: 10,
     fontWeight: "900"
   },
@@ -4813,25 +4987,25 @@ const styles = StyleSheet.create({
     minWidth: 0
   },
   submissionToastTitle: {
-    color: "#D8F3B2",
+    color: colors.onPrimary,
     fontSize: 14,
     fontWeight: "900"
   },
   submissionToastBody: {
-    color: "#B7D69A",
+    color: "#DCEFE4",
     fontSize: 12,
     fontWeight: "700",
     lineHeight: 17,
     marginTop: 2
   },
   submissionItem: {
-    borderColor: "#46300F",
+    borderColor: colors.border,
     borderTopWidth: 1,
     paddingTop: 12,
     marginTop: 12
   },
   adminItem: {
-    borderColor: "#46300F",
+    borderColor: colors.border,
     borderTopWidth: 1,
     marginTop: 12,
     paddingTop: 12
@@ -4846,33 +5020,33 @@ const styles = StyleSheet.create({
     flex: 1
   },
   submissionTitle: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 16,
     fontWeight: "900"
   },
   submissionMeta: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "700",
     marginTop: 3
   },
   submissionBody: {
-    color: "#D8C48A",
+    color: colors.text,
     fontSize: 13,
     lineHeight: 19,
     marginTop: 8
   },
   adminFinePrint: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "700",
     lineHeight: 18,
     marginTop: 8
   },
   reviewNote: {
-    backgroundColor: "#080704",
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 8,
-    color: "#D8C48A",
+    color: colors.text,
     fontSize: 12,
     fontWeight: "700",
     lineHeight: 18,
@@ -4885,19 +5059,19 @@ const styles = StyleSheet.create({
     paddingVertical: 6
   },
   statusReview: {
-    backgroundColor: "#3A2A10"
+    backgroundColor: colors.warningSoft
   },
   statusApproved: {
-    backgroundColor: "#17301D"
+    backgroundColor: colors.primarySoft
   },
   statusAdjust: {
-    backgroundColor: "#1E2B3F"
+    backgroundColor: colors.infoSoft
   },
   statusRejected: {
-    backgroundColor: "#3D1710"
+    backgroundColor: colors.dangerSoft
   },
   statusPillText: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 11,
     fontWeight: "900"
   },
@@ -4910,18 +5084,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
     flex: 1,
+    flexDirection: "row",
+    gap: 5,
     minHeight: 40,
     justifyContent: "center",
     paddingHorizontal: 8
   },
   approveButton: {
-    backgroundColor: "#2F7D45"
+    backgroundColor: colors.primary
   },
   adjustButton: {
-    backgroundColor: "#D6A326"
+    backgroundColor: colors.warning
   },
   rejectButton: {
-    backgroundColor: "#A63E28"
+    backgroundColor: colors.danger
   },
   smallButtonText: {
     color: "#FFFFFF",
@@ -4929,13 +5105,13 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   smallButtonTextDark: {
-    color: "#090805",
+    color: colors.onPrimary,
     fontSize: 12,
     fontWeight: "900"
   },
   summaryBand: {
-    backgroundColor: "rgba(5, 5, 3, 0.68)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     padding: 18
@@ -4946,35 +5122,35 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   summaryBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderColor: "rgba(247, 200, 75, 0.22)",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
     borderRadius: 999,
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 5
   },
   summaryBadgeText: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 10,
     fontWeight: "900",
     textTransform: "uppercase"
   },
   summaryLabel: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 12,
     fontWeight: "900",
     textTransform: "uppercase"
   },
   summaryValue: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 34,
     fontWeight: "900",
     letterSpacing: 0,
     marginTop: 6
   },
   summaryInsightStrip: {
-    backgroundColor: "rgba(255, 255, 255, 0.045)",
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
@@ -4988,45 +5164,45 @@ const styles = StyleSheet.create({
     minWidth: 0
   },
   summaryInsightValue: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 14,
     fontWeight: "900"
   },
   summaryInsightLabel: {
-    color: "#A98A4A",
+    color: colors.muted,
     fontSize: 9,
     fontWeight: "900",
     marginTop: 3,
     textTransform: "uppercase"
   },
   summaryBody: {
-    color: "#D8C48A",
+    color: colors.muted,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 8
   },
   emptyState: {
-    backgroundColor: "rgba(5, 5, 3, 0.66)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 16,
     padding: 18
   },
   emptyTitle: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 19,
     fontWeight: "900"
   },
   emptyBody: {
-    color: "#D8C48A",
+    color: colors.muted,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 6
   },
   portfolioItemBlock: {
-    backgroundColor: "rgba(5, 5, 3, 0.66)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 12,
@@ -5047,12 +5223,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   portfolioName: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 17,
     fontWeight: "900"
   },
   portfolioMeta: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 13,
     fontWeight: "700",
     marginTop: 4
@@ -5062,12 +5238,12 @@ const styles = StyleSheet.create({
     marginLeft: 12
   },
   portfolioAmount: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 16,
     fontWeight: "900"
   },
   portfolioShare: {
-    color: "#D8C48A",
+    color: colors.muted,
     fontSize: 12,
     fontWeight: "900",
     marginTop: 4
@@ -5078,17 +5254,17 @@ const styles = StyleSheet.create({
     marginTop: 14
   },
   stepMarker: {
-    backgroundColor: "#2B2110",
+    backgroundColor: colors.border,
     borderRadius: 999,
     flex: 1,
     height: 8
   },
   stepMarkerActive: {
-    backgroundColor: "#D6A326"
+    backgroundColor: colors.primary
   },
   profileHero: {
-    backgroundColor: "rgba(5, 5, 3, 0.68)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 14,
@@ -5101,8 +5277,8 @@ const styles = StyleSheet.create({
   },
   profileAvatar: {
     alignItems: "center",
-    backgroundColor: "rgba(5, 5, 3, 0.72)",
-    borderColor: "#F7C84B",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
     borderRadius: 999,
     borderWidth: 2,
     height: 50,
@@ -5110,7 +5286,7 @@ const styles = StyleSheet.create({
     width: 50
   },
   profileAvatarText: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 15,
     fontWeight: "900"
   },
@@ -5119,34 +5295,34 @@ const styles = StyleSheet.create({
     minWidth: 0
   },
   profileStatusPill: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderColor: "rgba(247, 200, 75, 0.22)",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 8
   },
   profileStatusText: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 10,
     fontWeight: "900",
     textTransform: "uppercase"
   },
   profileName: {
-    color: "#FFF4CC",
+    color: colors.text,
     fontSize: 26,
     fontWeight: "900",
     letterSpacing: 0
   },
   profileMeta: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 13,
     fontWeight: "700",
     marginTop: 5
   },
   profileQuickStats: {
-    backgroundColor: "rgba(255, 255, 255, 0.045)",
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
@@ -5159,12 +5335,12 @@ const styles = StyleSheet.create({
     minWidth: 0
   },
   profileQuickValue: {
-    color: "#F7C84B",
+    color: colors.primary,
     fontSize: 14,
     fontWeight: "900"
   },
   profileQuickLabel: {
-    color: "#A98A4A",
+    color: colors.muted,
     fontSize: 9,
     fontWeight: "900",
     marginTop: 3,
@@ -5179,8 +5355,8 @@ const styles = StyleSheet.create({
     minWidth: 0
   },
   profilePanel: {
-    backgroundColor: "rgba(5, 5, 3, 0.66)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 12,
@@ -5188,7 +5364,7 @@ const styles = StyleSheet.create({
   },
   profileRow: {
     alignItems: "center",
-    borderColor: "#2B2110",
+    borderColor: colors.border,
     borderTopWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -5201,12 +5377,12 @@ const styles = StyleSheet.create({
     paddingVertical: 11
   },
   profileLabel: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 13,
     fontWeight: "800"
   },
   profileValue: {
-    color: "#FFF4CC",
+    color: colors.text,
     flexShrink: 1,
     fontSize: 13,
     fontWeight: "900",
@@ -5214,17 +5390,22 @@ const styles = StyleSheet.create({
     textAlign: "right"
   },
   tabBar: {
-    backgroundColor: "#050503",
-    borderColor: "rgba(247, 200, 75, 0.28)",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
     bottom: SYSTEM_NAV_CLEARANCE,
     flexDirection: "row",
-    gap: 8,
+    elevation: 8,
+    gap: 4,
     left: 20,
     padding: 6,
     position: "absolute",
-    right: 20
+    right: 20,
+    shadowColor: "#10261A",
+    shadowOffset: { height: 4, width: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12
   },
   tabBarDesktop: {
     alignSelf: "center",
@@ -5242,7 +5423,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12
   },
   tabButtonActive: {
-    backgroundColor: "#D6A326"
+    backgroundColor: colors.primarySoft
   },
   tabMarker: {
     backgroundColor: "rgba(245, 222, 178, 0.26)",
@@ -5251,15 +5432,15 @@ const styles = StyleSheet.create({
     width: 22
   },
   tabMarkerActive: {
-    backgroundColor: "#090805",
+    backgroundColor: colors.primary,
     width: 34
   },
   tabText: {
-    color: "#C6A96A",
+    color: colors.muted,
     fontSize: 13,
     fontWeight: "900"
   },
   tabTextActive: {
-    color: "#090805"
+    color: colors.primary
   }
 });

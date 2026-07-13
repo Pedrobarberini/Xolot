@@ -1,58 +1,63 @@
 # NextStar
 
-Aplicativo mobile para descobrir jogadores de futebol por video e simular aportes em contratos de participacao futura.
+Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas de futebol.
 
-## Primeira parte entregue
+## Estado atual
 
-- Base React Native com Expo e TypeScript.
-- Feed de jogadores com cards de video mockados.
-- Tela de detalhe com metricas, tese e simulacao de aporte.
-- Carteira com resumo dos aportes simulados.
-- Plano de produto inicial em `docs/product-plan.md`.
+- Interface React Native com Expo e TypeScript para Android, iOS e web.
+- Identidade visual clara em verde, branco e tons neutros.
+- Icone do app com o simbolo NextStar e splash animada com a marca completa.
+- Feed vertical com video 9:16, reproducao automatica, som, tela cheia e ficha expansivel.
+- Video demonstrativo real de 5 segundos enquanto nao houver publicacao aprovada.
+- Envio por galeria ou link direto, com validacao e confirmacao animada.
+- Moderacao local por perfil Admin: aprovar, pedir ajustes ou reprovar.
+- Solicitacoes revisadas saem imediatamente da fila administrativa.
+- Videos reais aprovados substituem o perfil demonstrativo.
+- Score, risco, metricas e valores financeiros so aparecem quando existe uma avaliacao explicita.
+- Carteira e reservas permanecem simuladas, sem pagamento ou contrato real.
 
-## Segunda parte entregue
+## Teste online
 
-- Entrada/cadastro mockado com escolha entre investidor e atleta.
-- Perfil de usuario com status de verificacao e termos.
-- Area do atleta para enviar video, dados esportivos e objetivo do aporte.
-- Consentimento obrigatorio para atleta menor de idade.
-- Fila local de videos com status `Em revisao`.
+A versao web e publicada em:
 
-## Terceira parte entregue
+https://pedrobarberini.github.io/NextStar/
 
-- Maquete completa sem dinheiro real.
-- Perfil `Admin` para moderar videos enviados por atletas.
-- Aprovacao, reprova e pedido de ajustes em oportunidades.
-- Videos aprovados aparecem no feed como oportunidades simuladas.
-- Investidor cria uma reserva simulada, sem pagamento.
-- Carteira acompanha a esteira futura: reserva, KYC, contrato, pagamento e distribuicao, tudo apenas simulado.
-- Identidade visual atualizada com a logo NextStar, paleta preto/dourado e layout mais responsivo.
-
-## Como testar a maquete
-
-1. Entre como `Atleta` e envie um video.
-2. Saia e entre como `Admin` para aprovar ou pedir ajustes.
-3. Saia e entre como `Investidor`.
-4. Abra uma oportunidade no feed e crie uma reserva simulada.
-5. Va em `Carteira` e avance as etapas da simulacao.
+O estado ainda fica apenas na memoria do navegador. Recarregar a pagina apaga contas, envios, moderacoes e reservas criadas durante o teste.
 
 ## Como rodar
 
-1. Instale Node.js 20.19 ou superior.
-2. Instale as dependencias:
+Requisitos: Node.js 20.19 ou superior e pnpm.
 
 ```bash
 pnpm install
+pnpm start --tunnel
 ```
 
-3. Inicie o app:
+O modo `--tunnel` permite abrir o projeto no Expo Go mesmo quando computador e celular nao estao na mesma rede local.
+
+Para gerar a versao web usada pelo GitHub Pages:
 
 ```bash
-pnpm start
+pnpm run build:web
 ```
 
-Depois escaneie o QR Code com o Expo Go, ou rode em um emulador Android/iOS.
+## Fluxo principal de teste
 
-## Observacao importante
+1. Crie uma conta como `Atleta` e envie um video.
+2. Saia e crie uma conta como `Admin`.
+3. Aprove, reprove ou solicite ajustes no envio.
+4. Confirme que a solicitacao revisada saiu da fila.
+5. Abra o `Feed` e confira o video aprovado.
+6. Verifique que publicacoes sem avaliacao nao exibem score, risco ou valores inventados.
 
-O modelo de investimento em atleta pode envolver regras de valores mobiliarios, contratos de imagem, direito desportivo, KYC, AML e protecao de menores. Antes de aceitar dinheiro real, essa parte precisa ser validada com advogado e contador especializados.
+## Antes da abertura ao publico
+
+- Implementar autenticacao e sessoes reais.
+- Persistir usuarios, videos, consentimentos e moderacoes em backend.
+- Armazenar midia em bucket privado com processamento e verificacao de formato.
+- Adicionar trilha de auditoria, denuncia, bloqueio e politica de moderacao.
+- Aplicar LGPD, protecao de menores, termos e controles de acesso.
+- Validar juridicamente qualquer oferta, reserva ou distribuicao financeira.
+- Adicionar monitoramento, testes automatizados e recuperacao de falhas.
+
+O plano de evolucao esta em `docs/product-plan.md`. A origem do video demonstrativo esta documentada em `docs/third-party-assets.md`.

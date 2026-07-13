@@ -4,31 +4,54 @@
     "slug": "nextstar",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/nextstar-icon.png",
-    "userInterfaceStyle": "dark",
+    "icon": "./assets/brand/nextstar-app-icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F5F8F5",
     "splash": {
-      "image": "./assets/nextstar-logo-cropped.png",
+      "image": "./assets/brand/nextstar-wordmark.png",
       "resizeMode": "contain",
-      "backgroundColor": "#050503"
+      "backgroundColor": "#F7FAF7"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "icon": "./assets/brand/nextstar-app-icon.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/nextstar-icon.png",
-        "backgroundColor": "#050503"
+        "foregroundImage": "./assets/brand/nextstar-symbol.png",
+        "monochromeImage": "./assets/brand/nextstar-symbol.png",
+        "backgroundColor": "#F7FAF7"
       },
       "edgeToEdgeEnabled": true
     },
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#F7FAF7"
+    },
+    "androidNavigationBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#F7FAF7"
+    },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "favicon": "./assets/brand/nextstar-app-icon.png",
+      "name": "NextStar"
     },
     "plugins": [
       "expo-video",
+      "expo-system-ui",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F7FAF7",
+          "image": "./assets/brand/nextstar-wordmark.png",
+          "imageWidth": 300,
+          "resizeMode": "contain"
+        }
+      ],
       [
         "expo-image-picker",
         {
