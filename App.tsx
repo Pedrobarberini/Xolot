@@ -7,6 +7,7 @@ import {
   Animated,
   Easing,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -2059,6 +2060,7 @@ function SubmitVideoScreen({
     null
   );
   const [lastSubmittedId, setLastSubmittedId] = useState<string | null>(null);
+  const submissionToastProgress = useRef(new Animated.Value(0)).current;
   const age = Number(draft.age.replace(/\D/g, ""));
   const needsGuardianConsent = age > 0 && age < 18;
   const hasRemoteVideoLink = /^https?:\/\/\S+$/i.test(draft.videoLink.trim());
@@ -2082,6 +2084,39 @@ function SubmitVideoScreen({
       : "Confirme a autorizacao do responsavel legal."
   ].filter((issue): issue is string => Boolean(issue));
   const canSubmit = submissionIssues.length === 0;
+
+  useEffect(() => {
+    if (!lastSubmittedId) {
+      return;
+    }
+
+    submissionToastProgress.setValue(0);
+    const toastAnimation = Animated.sequence([
+      Animated.timing(submissionToastProgress, {
+        duration: 220,
+        easing: Easing.out(Easing.cubic),
+        toValue: 1,
+        useNativeDriver: true
+      }),
+      Animated.delay(2460),
+      Animated.timing(submissionToastProgress, {
+        duration: 320,
+        easing: Easing.in(Easing.cubic),
+        toValue: 0,
+        useNativeDriver: true
+      })
+    ]);
+
+    toastAnimation.start(({ finished }) => {
+      if (finished) {
+        setLastSubmittedId((current) =>
+          current === lastSubmittedId ? null : current
+        );
+      }
+    });
+
+    return () => toastAnimation.stop();
+  }, [lastSubmittedId, submissionToastProgress]);
 
   function updateDraft(field: keyof SubmissionDraft, value: string | boolean) {
     setDraft((current) => ({ ...current, [field]: value }));
@@ -2164,6 +2199,7 @@ function SubmitVideoScreen({
       status: "Em revisao",
       submittedAt: new Date().toISOString()
     });
+    Keyboard.dismiss();
     setLastSubmittedId(id);
     setSelectedVideo(null);
     setDraft({
@@ -2173,12 +2209,13 @@ function SubmitVideoScreen({
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={[
-        styles.screenContent,
-        isCompact ? styles.screenContentCompact : null
-      ]}
-    >
+    <View style={styles.submitScreen}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.screenContent,
+          isCompact ? styles.screenContentCompact : null
+        ]}
+      >
       <View style={styles.submitHero}>
         <Text style={styles.heroKicker}>Area do atleta</Text>
         <Text style={styles.heroTitle}>Envie seu video para analise.</Text>
@@ -2187,15 +2224,6 @@ function SubmitVideoScreen({
           entram no feed dos investidores.
         </Text>
       </View>
-
-      {lastSubmittedId ? (
-        <View style={styles.successPanel}>
-          <Text style={styles.successTitle}>Video enviado</Text>
-          <Text style={styles.successBody}>
-            O material entrou na fila de moderacao com status Em revisao.
-          </Text>
-        </View>
-      ) : null}
 
       <View
         style={[
@@ -2385,8 +2413,43 @@ function SubmitVideoScreen({
         </Pressable>
       </View>
 
-      <SubmissionList submissions={submissions} />
-    </ScrollView>
+        <SubmissionList submissions={submissions} />
+      </ScrollView>
+
+      {lastSubmittedId ? (
+        <View pointerEvents="none" style={styles.submissionToastLayer}>
+          <Animated.View
+            accessibilityLiveRegion="polite"
+            accessibilityRole="alert"
+            style={[
+              styles.submissionToast,
+              { width: Math.min(width - 28, 440) },
+              {
+                opacity: submissionToastProgress,
+                transform: [
+                  {
+                    translateY: submissionToastProgress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [18, 0]
+                    })
+                  }
+                ]
+              }
+            ]}
+          >
+            <View style={styles.submissionToastIcon}>
+              <Text style={styles.submissionToastIconText}>OK</Text>
+            </View>
+            <View style={styles.submissionToastTextBlock}>
+              <Text style={styles.submissionToastTitle}>Video enviado</Text>
+              <Text style={styles.submissionToastBody}>
+                Recebido. Agora ele esta em revisao.
+              </Text>
+            </View>
+          </Animated.View>
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -2957,6 +3020,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#050503",
     flex: 1,
     overflow: "hidden"
+  },
+  submitScreen: {
+    flex: 1
   },
   screenBackdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -4701,24 +4767,59 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 18
   },
-  successPanel: {
+  submissionToastLayer: {
+    alignItems: "center",
+    bottom: TAB_BAR_CONTENT_PADDING + 8,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    zIndex: 20
+  },
+  submissionToast: {
+    alignItems: "center",
     backgroundColor: "#171F12",
     borderColor: "#6FA34A",
     borderRadius: 8,
     borderWidth: 1,
-    padding: 14
+    elevation: 16,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 64,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    shadowColor: "#000000",
+    shadowOffset: { height: 5, width: 0 },
+    shadowOpacity: 0.38,
+    shadowRadius: 10
   },
-  successTitle: {
-    color: "#B9F27A",
-    fontSize: 16,
+  submissionToastIcon: {
+    alignItems: "center",
+    backgroundColor: "#B9F27A",
+    borderRadius: 999,
+    height: 32,
+    justifyContent: "center",
+    width: 32
+  },
+  submissionToastIconText: {
+    color: "#10170C",
+    fontSize: 10,
     fontWeight: "900"
   },
-  successBody: {
+  submissionToastTextBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  submissionToastTitle: {
     color: "#D8F3B2",
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  submissionToastBody: {
+    color: "#B7D69A",
+    fontSize: 12,
     fontWeight: "700",
-    lineHeight: 19,
-    marginTop: 4
+    lineHeight: 17,
+    marginTop: 2
   },
   submissionItem: {
     borderColor: "#46300F",
