@@ -52,7 +52,7 @@ export type Investment = {
   createdAt: string;
 };
 
-export type UserRole = "Investidor" | "Atleta" | "Admin";
+export type UserRole = "Usuario" | "Admin";
 
 export type KycStatus = "Nao iniciado" | "Pendente" | "Aprovado";
 

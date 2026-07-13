@@ -9,6 +9,7 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Icone do app com o simbolo NextStar e splash animada com a marca completa.
 - Feed vertical com video 9:16, reproducao automatica, som, tela cheia e ficha expansivel.
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao aprovada.
+- Conta comum `Usuario` com Feed, Envio, Carteira e Perfil no mesmo acesso.
 - Envio por galeria ou link direto, com validacao e confirmacao animada.
 - Moderacao local por perfil Admin: aprovar, pedir ajustes ou reprovar.
 - Solicitacoes revisadas saem imediatamente da fila administrativa.
@@ -43,12 +44,12 @@ pnpm run build:web
 
 ## Fluxo principal de teste
 
-1. Crie uma conta como `Atleta` e envie um video.
+1. Crie uma conta como `Usuario` e envie um video.
 2. Saia e crie uma conta como `Admin`.
 3. Aprove, reprove ou solicite ajustes no envio.
 4. Confirme que a solicitacao revisada saiu da fila.
 5. Abra o `Feed` e confira o video aprovado.
-6. Verifique que publicacoes sem avaliacao nao exibem score, risco ou valores inventados.
+6. Verifique que publicacoes sem avaliacao nao exibem score, risco, box de aviso ou valores inventados.
 
 ## Antes da abertura ao publico
 

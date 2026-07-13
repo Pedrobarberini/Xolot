@@ -190,10 +190,6 @@ export default function App() {
 
   function handleAuth(nextUser: AppUser) {
     setUser(nextUser);
-    if (nextUser.role === "Atleta") {
-      setTab("submit");
-      return;
-    }
     if (nextUser.role === "Admin") {
       setTab("admin");
       return;
@@ -312,7 +308,7 @@ export default function App() {
           {selectedPlayer ? (
             <ScreenFrame>
               <PlayerDetail
-                canInvest={user.role === "Investidor"}
+                canInvest={user.role === "Usuario"}
                 onBack={() => setSelectedPlayer(null)}
                 onInvest={handleInvest}
                 player={selectedPlayer}
@@ -613,18 +609,13 @@ function AuthScreen({
 }) {
   const { width } = useWindowDimensions();
   const [mode, setMode] = useState<"create" | "login">("create");
-  const [role, setRole] = useState<UserRole>("Investidor");
+  const [role, setRole] = useState<UserRole>("Usuario");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const isCompact = width < 380;
   const authModeLabel = mode === "create" ? "Cadastro" : "Login";
-  const roleSummary =
-    role === "Investidor"
-      ? "Carteira"
-      : role === "Atleta"
-        ? "Envio"
-        : "Moderacao";
+  const roleSummary = role === "Admin" ? "Moderacao" : "Feed, envio e carteira";
 
   const cleanName = name.trim();
   const cleanEmail = email.trim().toLowerCase();
@@ -683,7 +674,7 @@ function AuthScreen({
         </View>
 
         <View style={styles.segmentedControl}>
-          {(["Investidor", "Atleta", "Admin"] as UserRole[]).map((item) => {
+          {(["Usuario", "Admin"] as UserRole[]).map((item) => {
             const isActive = role === item;
 
             return (
@@ -791,17 +782,9 @@ function Header({
   const { width } = useWindowDimensions();
   const isCompact = width < 520;
   const badgeLabel =
-    user.role === "Investidor"
-      ? "Carteira"
-      : user.role === "Admin"
-        ? "Revisao"
-        : "Status";
+    user.role === "Admin" ? "Revisao" : "Carteira";
   const badgeValue =
-    user.role === "Investidor"
-      ? formatBRL(portfolioTotal)
-      : user.role === "Admin"
-        ? `${pendingReviews} pend.`
-        : user.kycStatus;
+    user.role === "Admin" ? `${pendingReviews} pend.` : formatBRL(portfolioTotal);
 
   return (
     <View style={[styles.header, isCompact ? styles.headerCompact : null]}>
@@ -1146,10 +1129,6 @@ function FeedReel({
                     score
                   </Text>
                 </View>
-              ) : !player.isDemo ? (
-                <View style={styles.feedPendingBadge}>
-                  <Text style={styles.feedPendingBadgeText}>Sem avaliacoes</Text>
-                </View>
               ) : null}
             </View>
           ) : null}
@@ -1385,15 +1364,6 @@ function FeedReel({
                     ticket
                   </Text>
                 </View>
-              </View>
-            ) : isWide && !player.isDemo ? (
-              <View style={styles.feedEvaluationPending}>
-                <Text style={styles.feedEvaluationPendingTitle}>
-                  Sem avaliacoes
-                </Text>
-                <Text style={styles.feedEvaluationPendingBody}>
-                  As notas aparecerao depois de avaliacoes reais da comunidade.
-                </Text>
               </View>
             ) : null}
 
@@ -2050,7 +2020,7 @@ function PlayerDetail({
             ? "Demonstracao"
             : evaluation
               ? `Risco ${evaluation.riskLevel}`
-              : "Sem avaliacoes"}
+              : "Video aprovado"}
         </Text>
       </View>
 
@@ -2184,7 +2154,7 @@ function PlayerDetail({
         ) : null}
         {!canInvest ? (
           <Text style={styles.validationText}>
-            Reservas estao disponiveis apenas para contas de investidor.
+            Reservas estao disponiveis apenas para contas de usuario.
           </Text>
         ) : null}
 
@@ -2199,16 +2169,6 @@ function PlayerDetail({
           <Text style={styles.primaryButtonText}>Criar reserva simulada</Text>
         </Pressable>
       </View>
-      ) : !player.isDemo ? (
-        <View style={styles.evaluationPendingPanel}>
-          <ShieldCheck color={colors.primary} size={24} />
-          <View style={styles.evaluationPendingTextBlock}>
-            <Text style={styles.evaluationPendingTitle}>Sem avaliacoes</Text>
-            <Text style={styles.evaluationPendingBody}>
-              As notas aparecerao depois de avaliacoes reais da comunidade.
-            </Text>
-          </View>
-        </View>
       ) : null}
     </ScrollView>
   );
@@ -3011,17 +2971,8 @@ function ProfileScreen({
     .join("")
     .toUpperCase();
   const profilePrimaryMetric =
-    user.role === "Investidor"
-      ? formatBRL(totalInvested)
-      : user.role === "Atleta"
-        ? String(mySubmissions.length)
-        : String(pending);
-  const profilePrimaryLabel =
-    user.role === "Investidor"
-      ? "total"
-      : user.role === "Atleta"
-        ? "envios"
-        : "pendentes";
+    user.role === "Admin" ? String(pending) : String(mySubmissions.length);
+  const profilePrimaryLabel = user.role === "Admin" ? "pendentes" : "envios";
 
   return (
     <ScrollView contentContainerStyle={styles.screenContent}>
@@ -3073,9 +3024,9 @@ function ProfileScreen({
           </View>
         </View>
 
-        {user.role === "Investidor" ? (
+        {user.role === "Usuario" ? (
           <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
-            <Text style={styles.sectionTitle}>Investidor</Text>
+            <Text style={styles.sectionTitle}>Conta NextStar</Text>
             <View style={styles.profileRow}>
               <Text style={styles.profileLabel}>Reservas simuladas</Text>
               <Text style={styles.profileValue}>{investments.length}</Text>
@@ -3084,12 +3035,6 @@ function ProfileScreen({
               <Text style={styles.profileLabel}>Total</Text>
               <Text style={styles.profileValue}>{formatBRL(totalInvested)}</Text>
             </View>
-          </View>
-        ) : null}
-
-        {user.role === "Atleta" ? (
-          <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
-            <Text style={styles.sectionTitle}>Atleta</Text>
             <View style={styles.profileRow}>
               <Text style={styles.profileLabel}>Videos enviados</Text>
               <Text style={styles.profileValue}>{mySubmissions.length}</Text>
@@ -3166,18 +3111,13 @@ function BottomTabs({
   role: UserRole;
 }) {
   const { width } = useWindowDimensions();
-  const isDesktop = width >= 860;
+  const maxTabWidth = role === "Usuario" ? 560 : 480;
+  const horizontalInset = Math.max(20, Math.floor((width - maxTabWidth) / 2));
   const tabs: Array<{
     id: Tab;
     label: string;
   }> =
-    role === "Atleta"
-      ? [
-          { id: "submit", label: "Envio" },
-          { id: "feed", label: "Feed" },
-          { id: "profile", label: "Perfil" }
-        ]
-      : role === "Admin"
+    role === "Admin"
         ? [
             { id: "admin", label: "Admin" },
             { id: "feed", label: "Feed" },
@@ -3185,12 +3125,13 @@ function BottomTabs({
           ]
         : [
             { id: "feed", label: "Feed" },
+            { id: "submit", label: "Envio" },
             { id: "portfolio", label: "Carteira" },
             { id: "profile", label: "Perfil" }
           ];
 
   return (
-    <View style={[styles.tabBar, isDesktop ? styles.tabBarDesktop : null]}>
+    <View style={[styles.tabBar, { left: horizontalInset, right: horizontalInset }]}>
       {tabs.map((item) => {
         const isActive = item.id === activeTab;
         const TabIcon =
@@ -3976,23 +3917,6 @@ const styles = StyleSheet.create({
   feedScoreBadge: {
     backgroundColor: colors.surface
   },
-  feedPendingBadge: {
-    alignItems: "center",
-    backgroundColor: colors.warningSoft,
-    borderColor: "#E9C985",
-    borderRadius: 8,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 46,
-    paddingHorizontal: 10
-  },
-  feedPendingBadgeText: {
-    color: colors.warning,
-    fontSize: 10,
-    fontWeight: "900",
-    textAlign: "center",
-    textTransform: "uppercase"
-  },
   feedTextOverlay: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
@@ -4216,26 +4140,6 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     marginTop: 2,
     textTransform: "uppercase"
-  },
-  feedEvaluationPending: {
-    backgroundColor: colors.warningSoft,
-    borderColor: "#E9C985",
-    borderRadius: 8,
-    borderWidth: 1,
-    marginTop: 10,
-    paddingHorizontal: 11,
-    paddingVertical: 9
-  },
-  feedEvaluationPendingTitle: {
-    color: colors.warning,
-    fontSize: 12,
-    fontWeight: "900"
-  },
-  feedEvaluationPendingBody: {
-    color: colors.text,
-    fontSize: 11,
-    lineHeight: 16,
-    marginTop: 3
   },
   feedReelMetricRow: {
     flexDirection: "row",
@@ -4758,32 +4662,6 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 14,
     lineHeight: 21
-  },
-  evaluationPendingPanel: {
-    alignItems: "flex-start",
-    backgroundColor: colors.warningSoft,
-    borderColor: "#E9C985",
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 11,
-    marginTop: 14,
-    padding: 14
-  },
-  evaluationPendingTextBlock: {
-    flex: 1,
-    minWidth: 0
-  },
-  evaluationPendingTitle: {
-    color: colors.warning,
-    fontSize: 15,
-    fontWeight: "900"
-  },
-  evaluationPendingBody: {
-    color: colors.text,
-    fontSize: 13,
-    lineHeight: 19,
-    marginTop: 4
   },
   labeledInputBlock: {
     marginTop: 10

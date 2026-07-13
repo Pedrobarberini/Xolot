@@ -8,7 +8,7 @@ NextStar aproxima atletas em desenvolvimento de pessoas e organizacoes que avali
 
 Entregue no aplicativo:
 
-- Cadastro local com perfis Atleta, Admin e Investidor.
+- Cadastro local com conta comum Usuario e perfil Admin separado para moderacao.
 - Feed vertical de videos com layout responsivo.
 - Envio por galeria ou link direto.
 - Consentimento obrigatorio para atletas menores de idade.
@@ -42,7 +42,7 @@ Limite atual: todo o estado e local e temporario. Nao ha autenticacao, API, banc
 
 Score, risco, metricas e qualquer valor financeiro nao devem nascer da aprovacao do video. Esses dados exigem uma avaliacao separada, com responsavel, metodologia, data e evidencia registradas.
 
-Enquanto a avaliacao nao existir, a interface deve mostrar `Em avaliacao` e manter indisponiveis as reservas.
+Enquanto a avaliacao nao existir, a interface nao deve exibir score, metricas, box de aviso ou valores financeiros como se fossem reais.
 
 ## Camada financeira futura
 
