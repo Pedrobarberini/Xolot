@@ -3411,7 +3411,9 @@ const styles = StyleSheet.create({
   },
   feedVideoMedia: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#000000"
+    backgroundColor: "#000000",
+    height: "100%",
+    width: "100%"
   },
   feedVideoTapTarget: {
     ...StyleSheet.absoluteFillObject,
@@ -4269,7 +4271,9 @@ const styles = StyleSheet.create({
   },
   detailVideoMedia: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#000000"
+    backgroundColor: "#000000",
+    height: "100%",
+    width: "100%"
   },
   detailPlayButton: {
     alignItems: "center",
@@ -4504,7 +4508,8 @@ const styles = StyleSheet.create({
     width: "62%"
   },
   submissionVideoPreviewMedia: {
-    flex: 1
+    height: "100%",
+    width: "100%"
   },
   inputRow: {
     alignItems: "center",
