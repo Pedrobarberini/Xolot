@@ -995,11 +995,11 @@ function FeedReel({
     ? Math.max(540, Math.min(reelHeight - TAB_BAR_CONTENT_PADDING - 44, 700))
     : reelHeight;
   const canvasWidth = isWide ? Math.min(width - 80, 1080) : width;
-  const mobileVideoWidth = Math.max(
-    195,
-    Math.min(
-      width * 0.68,
-      (reelHeight - 376) * (9 / 16)
+  const mobileVideoWidth = Math.min(
+    width * 0.76,
+    Math.max(
+      Math.min(width * 0.64, 230),
+      (reelHeight - SYSTEM_NAV_CLEARANCE - 224) * (9 / 16)
     )
   );
 
@@ -1570,7 +1570,12 @@ function FeedVideoBox({
         </View>
       </View>
 
-      <View style={styles.feedVideoCaptionStrip}>
+      <View
+        style={[
+          styles.feedVideoCaptionStrip,
+          !isWide ? styles.feedVideoCaptionStripCompact : null
+        ]}
+      >
         <Text
           numberOfLines={1}
           style={[styles.feedVideoCaption, { color: palette.text }]}
@@ -1584,6 +1589,7 @@ function FeedVideoBox({
       <View
         style={[
           styles.feedVideoScrubberTrack,
+          !isWide ? styles.feedVideoScrubberTrackCompact : null,
           { backgroundColor: palette.progressTrack }
         ]}
       >
@@ -1649,7 +1655,7 @@ function FeedVideoPlayback({
     <View style={styles.feedVideoPlayback}>
       <VideoView
         allowsFullscreen
-        contentFit="cover"
+        contentFit="contain"
         nativeControls={false}
         player={videoPlayer}
         playsInline
@@ -3387,10 +3393,10 @@ const styles = StyleSheet.create({
     aspectRatio: 9 / 16,
     borderRadius: 8,
     borderWidth: 1,
-    maxWidth: 280,
+    maxWidth: 320,
     overflow: "hidden",
     position: "absolute",
-    top: 72,
+    top: 62,
     width: "68%",
     zIndex: 2
   },
@@ -3404,7 +3410,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000"
   },
   feedVideoMedia: {
-    ...StyleSheet.absoluteFillObject
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#000000"
   },
   feedVideoTapTarget: {
     ...StyleSheet.absoluteFillObject,
@@ -3596,6 +3603,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 12
   },
+  feedVideoCaptionStripCompact: {
+    bottom: 44
+  },
   feedVideoCaption: {
     flex: 1,
     fontSize: 12,
@@ -3613,6 +3623,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "absolute",
     right: 12
+  },
+  feedVideoScrubberTrackCompact: {
+    bottom: 36
   },
   feedVideoScrubberFill: {
     borderRadius: 999,
@@ -3663,6 +3676,7 @@ const styles = StyleSheet.create({
   },
   feedTextOverlayCompact: {
     backgroundColor: "rgba(5, 5, 3, 0.96)",
+    bottom: TAB_BAR_CONTENT_PADDING - 16,
     padding: 12
   },
   feedTextOverlayCompactExpanded: {
