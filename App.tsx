@@ -31,6 +31,7 @@ import {
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  PanResponder,
   Platform,
   Pressable,
   SafeAreaView,
@@ -410,6 +411,16 @@ function formatVideoDuration(milliseconds?: number | null) {
   const seconds = totalSeconds % 60;
 
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function formatPlaybackTime(seconds: number) {
+  const totalSeconds = Number.isFinite(seconds)
+    ? Math.max(0, Math.floor(seconds))
+    : 0;
+  const minutes = Math.floor(totalSeconds / 60);
+  const remainingSeconds = totalSeconds % 60;
+
+  return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
 function formatVideoFileSize(bytes?: number) {
@@ -1114,11 +1125,11 @@ function FeedReel({
                     score
                   </Text>
                 </View>
-              ) : (
+              ) : !player.isDemo ? (
                 <View style={styles.feedPendingBadge}>
-                  <Text style={styles.feedPendingBadgeText}>Em avaliacao</Text>
+                  <Text style={styles.feedPendingBadgeText}>Sem avaliacoes</Text>
                 </View>
-              )}
+              ) : null}
             </View>
           ) : null}
 
@@ -1354,14 +1365,13 @@ function FeedReel({
                   </Text>
                 </View>
               </View>
-            ) : isWide ? (
+            ) : isWide && !player.isDemo ? (
               <View style={styles.feedEvaluationPending}>
                 <Text style={styles.feedEvaluationPendingTitle}>
-                  Avaliacao pendente
+                  Sem avaliacoes
                 </Text>
                 <Text style={styles.feedEvaluationPendingBody}>
-                  Score, risco e condicoes financeiras serao publicados apenas
-                  depois da analise.
+                  As notas aparecerao depois de avaliacoes reais da comunidade.
                 </Text>
               </View>
             ) : null}
@@ -1508,21 +1518,15 @@ function FeedVideoBox({
     >
       <FeedVideoPlayback
         accent={palette.accent}
+        caption={player.videoTitle}
+        durationLabel={player.videoLength}
         hasAudio={player.hasAudio !== false}
         isActive={isActive}
+        isWide={isWide}
         onAccent={palette.onAccent}
+        trackColor={palette.progressTrack}
         uri={player.videoUri}
       />
-
-      <View style={styles.feedVideoTopHud}>
-        <Image
-          accessibilityIgnoresInvertColors
-          resizeMode="contain"
-          source={NEXTSTAR_SYMBOL}
-          style={styles.feedVideoHudLogo}
-        />
-        <Text numberOfLines={1} style={styles.feedVideoHudText}>NextStar</Text>
-      </View>
 
       {evaluation && fundingProgressLabel ? (
         <View style={styles.feedVideoActionRail}>
@@ -1538,58 +1542,38 @@ function FeedVideoBox({
           </View>
         </View>
       ) : null}
-
-      <View
-        style={[
-          styles.feedVideoCaptionStrip,
-          !isWide ? styles.feedVideoCaptionStripCompact : null
-        ]}
-      >
-        <Text
-          numberOfLines={1}
-          style={[styles.feedVideoCaption, { color: colors.onPrimary }]}
-        >
-          {player.videoTitle}
-        </Text>
-        <Text style={[styles.feedVideoDuration, { color: colors.onPrimary }]}>
-          {player.videoLength}
-        </Text>
-      </View>
-      <View
-        style={[
-          styles.feedVideoScrubberTrack,
-          !isWide ? styles.feedVideoScrubberTrackCompact : null,
-          { backgroundColor: palette.progressTrack }
-        ]}
-      >
-        <View
-          style={[
-            styles.feedVideoScrubberFill,
-            { backgroundColor: palette.accent }
-          ]}
-        />
-      </View>
     </View>
   );
 }
 
 function FeedVideoPlayback({
   accent,
+  caption,
+  durationLabel,
   hasAudio,
   isActive,
+  isWide,
   onAccent,
+  trackColor,
   uri
 }: {
   accent: string;
+  caption: string;
+  durationLabel: string;
   hasAudio: boolean;
   isActive: boolean;
+  isWide: boolean;
   onAccent: string;
+  trackColor: string;
   uri: string | number;
 }) {
   const videoViewRef = useRef<VideoView | null>(null);
+  const [playbackTime, setPlaybackTime] = useState(0);
+  const [seekTrackWidth, setSeekTrackWidth] = useState(0);
   const videoPlayer = useVideoPlayer(uri, (player) => {
     player.loop = true;
     player.muted = true;
+    player.timeUpdateEventInterval = 0.1;
   });
   const { isPlaying } = useEvent(videoPlayer, "playingChange", {
     isPlaying: videoPlayer.playing
@@ -1597,6 +1581,93 @@ function FeedVideoPlayback({
   const { muted } = useEvent(videoPlayer, "mutedChange", {
     muted: videoPlayer.muted
   });
+  const { status: playerStatus } = useEvent(videoPlayer, "statusChange", {
+    status: videoPlayer.status
+  });
+  const { currentTime } = useEvent(videoPlayer, "timeUpdate", {
+    bufferedPosition: videoPlayer.bufferedPosition,
+    currentLiveTimestamp: null,
+    currentOffsetFromLive: null,
+    currentTime: videoPlayer.currentTime
+  });
+  const playbackDuration =
+    playerStatus === "readyToPlay" &&
+    Number.isFinite(videoPlayer.duration) &&
+    videoPlayer.duration > 0
+      ? videoPlayer.duration
+      : 0;
+  const safeCurrentTime = Number.isFinite(playbackTime)
+    ? Math.min(Math.max(playbackTime, 0), playbackDuration || playbackTime)
+    : 0;
+  const playbackProgress =
+    playbackDuration > 0 ? safeCurrentTime / playbackDuration : 0;
+  const totalTimeLabel =
+    durationLabel || formatPlaybackTime(Math.ceil(playbackDuration));
+  const thumbOffset =
+    seekTrackWidth > 12
+      ? Math.min(
+          Math.max(playbackProgress * seekTrackWidth, 6),
+          seekTrackWidth - 6
+        )
+      : 0;
+  const videoPlayerRef = useRef(videoPlayer);
+  const playbackDurationRef = useRef(playbackDuration);
+  const seekTrackWidthRef = useRef(seekTrackWidth);
+  const seekToTimeRef = useRef<(targetTime: number) => number>(() => 0);
+  const seekToOffsetRef = useRef<(offsetX: number) => number>(() => 0);
+
+  videoPlayerRef.current = videoPlayer;
+  playbackDurationRef.current = playbackDuration;
+  seekTrackWidthRef.current = seekTrackWidth;
+  seekToTimeRef.current = (targetTime: number) => {
+    const duration = playbackDurationRef.current;
+
+    if (duration <= 0) {
+      return 0;
+    }
+
+    const nextTime = Math.min(Math.max(targetTime, 0), duration);
+    setPlaybackTime(nextTime);
+    videoPlayerRef.current.currentTime = nextTime;
+    return nextTime;
+  };
+  seekToOffsetRef.current = (offsetX: number) => {
+    const width = seekTrackWidthRef.current;
+    const duration = playbackDurationRef.current;
+
+    if (width <= 0 || duration <= 0) {
+      return 0;
+    }
+
+    const progress = Math.min(Math.max(offsetX / width, 0), 1);
+    return seekToTimeRef.current(progress * duration);
+  };
+
+  const seekPanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: (event) => {
+        if (Number.isFinite(event.nativeEvent.locationX)) {
+          seekToOffsetRef.current(event.nativeEvent.locationX);
+        }
+      },
+      onPanResponderMove: (event) => {
+        if (Number.isFinite(event.nativeEvent.locationX)) {
+          seekToOffsetRef.current(event.nativeEvent.locationX);
+        }
+      },
+      onPanResponderTerminationRequest: () => false,
+      onShouldBlockNativeResponder: () => true,
+      onStartShouldSetPanResponder: () => false
+    })
+  ).current;
+
+  useEffect(() => {
+    if (Number.isFinite(currentTime)) {
+      setPlaybackTime(currentTime);
+    }
+  }, [currentTime]);
 
   useEffect(() => {
     if (isActive) {
@@ -1676,6 +1747,85 @@ function FeedVideoPlayback({
           style={styles.feedVideoControlButton}
         >
           <Expand color="#FFFFFF" size={20} />
+        </Pressable>
+      </View>
+      <View
+        pointerEvents="none"
+        style={[
+          styles.feedVideoCaptionStrip,
+          !isWide ? styles.feedVideoCaptionStripCompact : null
+        ]}
+      >
+        <Text
+          numberOfLines={1}
+          style={[styles.feedVideoCaption, { color: colors.onPrimary }]}
+        >
+          {caption}
+        </Text>
+        <Text style={[styles.feedVideoDuration, { color: colors.onPrimary }]}>
+          {formatPlaybackTime(safeCurrentTime)} / {totalTimeLabel}
+        </Text>
+      </View>
+      <View
+        onLayout={(event) => {
+          const nextWidth = event.nativeEvent.layout.width;
+          seekTrackWidthRef.current = nextWidth;
+          setSeekTrackWidth(nextWidth);
+        }}
+        style={[
+          styles.feedVideoSeekControl,
+          !isWide ? styles.feedVideoSeekControlCompact : null
+        ]}
+        {...seekPanResponder.panHandlers}
+      >
+        <Pressable
+          accessibilityActions={[
+            { label: "Avancar 5 segundos", name: "increment" },
+            { label: "Voltar 5 segundos", name: "decrement" }
+          ]}
+          accessibilityLabel="Posicao do video"
+          accessibilityRole="adjustable"
+          accessibilityValue={{
+            max: Math.max(0, Math.round(playbackDuration)),
+            min: 0,
+            now: Math.max(0, Math.round(safeCurrentTime)),
+            text: `${formatPlaybackTime(safeCurrentTime)} de ${totalTimeLabel}`
+          }}
+          onAccessibilityAction={(event) => {
+            if (event.nativeEvent.actionName === "increment") {
+              seekToTimeRef.current(safeCurrentTime + 5);
+            }
+
+            if (event.nativeEvent.actionName === "decrement") {
+              seekToTimeRef.current(safeCurrentTime - 5);
+            }
+          }}
+          onPress={(event) => {
+            seekToOffsetRef.current(event.nativeEvent.locationX);
+          }}
+          style={styles.feedVideoSeekPressable}
+        >
+          <View
+            pointerEvents="none"
+            style={[
+              styles.feedVideoScrubberTrack,
+              { backgroundColor: trackColor }
+            ]}
+          >
+            <View
+              style={[
+                styles.feedVideoScrubberFill,
+                {
+                  backgroundColor: accent,
+                  width: `${playbackProgress * 100}%`
+                }
+              ]}
+            />
+          </View>
+          <View
+            pointerEvents="none"
+            style={[styles.feedVideoScrubberThumb, { left: thumbOffset }]}
+          />
         </Pressable>
       </View>
     </View>
@@ -1871,7 +2021,7 @@ function PlayerDetail({
             ? "Demonstracao"
             : evaluation
               ? `Risco ${evaluation.riskLevel}`
-              : "Avaliacao pendente"}
+              : "Sem avaliacoes"}
         </Text>
       </View>
 
@@ -1879,8 +2029,7 @@ function PlayerDetail({
         <View style={styles.demoNotice}>
           <Text style={styles.demoNoticeTitle}>Perfil demonstrativo</Text>
           <Text style={styles.demoNoticeBody}>
-            Video, identidade, metricas e valores abaixo sao exclusivamente
-            ilustrativos.
+            O video e os dados deste perfil sao exclusivamente demonstrativos.
           </Text>
         </View>
       ) : null}
@@ -1942,7 +2091,9 @@ function PlayerDetail({
       </View>
 
       <View style={styles.infoPanel}>
-        <Text style={styles.sectionTitle}>Objetivo do aporte</Text>
+        <Text style={styles.sectionTitle}>
+          {player.isDemo ? "Objetivo do video" : "Objetivo do aporte"}
+        </Text>
         <Text style={styles.bodyText}>{player.objective}</Text>
       </View>
 
@@ -2019,18 +2170,17 @@ function PlayerDetail({
           <Text style={styles.primaryButtonText}>Criar reserva simulada</Text>
         </Pressable>
       </View>
-      ) : (
+      ) : !player.isDemo ? (
         <View style={styles.evaluationPendingPanel}>
           <ShieldCheck color={colors.primary} size={24} />
           <View style={styles.evaluationPendingTextBlock}>
-            <Text style={styles.evaluationPendingTitle}>Avaliacao pendente</Text>
+            <Text style={styles.evaluationPendingTitle}>Sem avaliacoes</Text>
             <Text style={styles.evaluationPendingBody}>
-              Score, risco, metricas e condicoes financeiras ainda nao foram
-              publicados. Reservas permanecem indisponiveis ate a analise.
+              As notas aparecerao depois de avaliacoes reais da comunidade.
             </Text>
           </View>
         </View>
-      )}
+      ) : null}
     </ScrollView>
   );
 }
@@ -3634,34 +3784,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(255, 255, 255, 0.025)"
   },
-  feedVideoTopHud: {
-    alignItems: "center",
-    backgroundColor: "rgba(5, 5, 3, 0.54)",
-    borderColor: "rgba(255, 255, 255, 0.12)",
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 7,
-    left: 12,
-    paddingHorizontal: 9,
-    paddingVertical: 6,
-    position: "absolute",
-    top: 12
-  },
-  feedVideoLiveDot: {
-    borderRadius: 999,
-    height: 7,
-    width: 7
-  },
-  feedVideoHudText: {
-    color: colors.onPrimary,
-    fontSize: 10,
-    fontWeight: "900"
-  },
-  feedVideoHudLogo: {
-    height: 18,
-    width: 18
-  },
   feedVideoSubject: {
     alignItems: "center",
     alignSelf: "center",
@@ -3740,7 +3862,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 9,
     position: "absolute",
-    right: 12
+    right: 12,
+    zIndex: 2
   },
   feedVideoCaptionStripCompact: {
     bottom: 44
@@ -3754,22 +3877,42 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "900"
   },
+  feedVideoSeekControl: {
+    bottom: 0,
+    height: 20,
+    justifyContent: "center",
+    left: 12,
+    position: "absolute",
+    right: 12,
+    zIndex: 4
+  },
+  feedVideoSeekControlCompact: {
+    bottom: 26
+  },
+  feedVideoSeekPressable: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center"
+  },
   feedVideoScrubberTrack: {
     borderRadius: 999,
-    bottom: 10,
-    height: 3,
-    left: 12,
+    height: 4,
     overflow: "hidden",
-    position: "absolute",
-    right: 12
-  },
-  feedVideoScrubberTrackCompact: {
-    bottom: 36
+    width: "100%"
   },
   feedVideoScrubberFill: {
     borderRadius: 999,
-    height: 3,
-    width: "42%"
+    height: "100%"
+  },
+  feedVideoScrubberThumb: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "rgba(5, 5, 3, 0.28)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 12,
+    position: "absolute",
+    top: 4,
+    transform: [{ translateX: -6 }],
+    width: 12
   },
   feedReelHeaderOverlay: {
     alignItems: "flex-start",
