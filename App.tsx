@@ -1,5 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEvent } from "expo";
+import * as ImagePicker from "expo-image-picker";
+import { VideoView, useVideoPlayer } from "expo-video";
 import {
+  Alert,
   Animated,
   Easing,
   Image,
@@ -72,6 +76,12 @@ type SubmissionDraft = {
   highlight: string;
   goals: string;
   hasGuardianConsent: boolean;
+};
+
+type SelectedVideoMeta = {
+  durationMs?: number;
+  fileName: string;
+  fileSize?: number;
 };
 
 const emptySubmissionDraft: SubmissionDraft = {
@@ -186,7 +196,7 @@ const initialSubmissions: VideoSubmission[] = [
     position: "Volante",
     club: "Projeto social Zona Sul",
     videoTitle: "Desarmes e inversoes de jogo",
-    videoLink: "https://video.exemplo/rafael",
+    videoLink: "",
     highlight:
       "Boa leitura defensiva, passe longo consistente e intensidade sem bola.",
     goals:
@@ -411,7 +421,8 @@ function buildPlayerFromSubmission(
     position: submission.position,
     club: submission.club,
     videoTitle: submission.videoTitle,
-    videoLength: "1:30",
+    videoLength: formatVideoDuration(submission.videoDurationMs) ?? "1:30",
+    videoUri: submission.videoLink || undefined,
     highlight: submission.highlight,
     thesis:
       "Oportunidade aprovada na maquete. Antes de investimento real, o caso exige verificacao juridica, KYC, contrato e revisao documental.",
@@ -431,6 +442,35 @@ function buildPlayerFromSubmission(
     thumbnailColor: colors.media,
     accentColor: colors.accent
   };
+}
+
+function formatVideoDuration(milliseconds?: number | null) {
+  if (!milliseconds || milliseconds <= 0) {
+    return null;
+  }
+
+  const totalSeconds = Math.max(1, Math.round(milliseconds / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function formatVideoFileSize(bytes?: number) {
+  if (!bytes || bytes <= 0) {
+    return null;
+  }
+
+  const megabytes = bytes / (1024 * 1024);
+  return `${megabytes < 10 ? megabytes.toFixed(1) : Math.round(megabytes)} MB`;
+}
+
+function getVideoTitleFromFileName(fileName?: string | null) {
+  if (!fileName) {
+    return "Meus melhores lances";
+  }
+
+  return fileName.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim();
 }
 
 function getCardPalette(index: number) {
@@ -700,7 +740,7 @@ function Header({
   user: AppUser;
 }) {
   const { width } = useWindowDimensions();
-  const isCompact = width < 390;
+  const isCompact = width < 520;
   const badgeLabel =
     user.role === "Investidor"
       ? "Carteira"
@@ -715,8 +755,13 @@ function Header({
         : user.kycStatus;
 
   return (
-    <View style={styles.header}>
-      <View style={styles.headerIdentity}>
+    <View style={[styles.header, isCompact ? styles.headerCompact : null]}>
+      <View
+        style={[
+          styles.headerIdentity,
+          isCompact ? styles.headerIdentityCompact : null
+        ]}
+      >
         <Image
           accessibilityLabel="Logo NextStar"
           resizeMode="contain"
@@ -728,17 +773,33 @@ function Header({
         />
         <View style={styles.headerTitleBlock}>
           <Text style={styles.brand}>NextStar</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text numberOfLines={1} style={styles.headerSubtitle}>
             {user.role} | {user.name}
           </Text>
         </View>
       </View>
-      <View style={styles.headerActions}>
-        <View style={styles.walletBadge}>
+      <View
+        style={[
+          styles.headerActions,
+          isCompact ? styles.headerActionsCompact : null
+        ]}
+      >
+        <View
+          style={[
+            styles.walletBadge,
+            isCompact ? styles.walletBadgeCompact : null
+          ]}
+        >
           <Text style={styles.walletLabel}>{badgeLabel}</Text>
           <Text style={styles.walletValue}>{badgeValue}</Text>
         </View>
-        <Pressable onPress={onSignOut} style={styles.signOutButton}>
+        <Pressable
+          onPress={onSignOut}
+          style={[
+            styles.signOutButton,
+            isCompact ? styles.signOutButtonCompact : null
+          ]}
+        >
           <Text style={styles.signOutText}>Sair</Text>
         </Pressable>
       </View>
@@ -757,6 +818,7 @@ function FeedScreen({
 }) {
   const { height } = useWindowDimensions();
   const [feedHeight, setFeedHeight] = useState(0);
+  const [activeFeedIndex, setActiveFeedIndex] = useState(0);
   const feedScrollRef = useRef<ScrollView | null>(null);
   const activeFeedIndexRef = useRef(0);
   const gestureStartIndexRef = useRef(0);
@@ -765,6 +827,13 @@ function FeedScreen({
   const sectionOffsetsRef = useRef<Record<number, number>>({});
   const pageHeight = feedHeight || height;
   const lastFeedIndex = Math.max(feedPlayers.length - 1, 0);
+
+  useEffect(() => {
+    if (activeFeedIndex > lastFeedIndex) {
+      activeFeedIndexRef.current = lastFeedIndex;
+      setActiveFeedIndex(lastFeedIndex);
+    }
+  }, [activeFeedIndex, lastFeedIndex]);
 
   function scrollToFeed(index: number) {
     const safeIndex = Math.min(Math.max(index, 0), lastFeedIndex);
@@ -812,6 +881,7 @@ function FeedScreen({
     );
 
     activeFeedIndexRef.current = nextIndex;
+    setActiveFeedIndex(nextIndex);
     gestureSettledRef.current = true;
     scrollToFeed(nextIndex);
   }
@@ -843,6 +913,7 @@ function FeedScreen({
             lastFeedIndex
           );
           activeFeedIndexRef.current = gestureStartIndexRef.current;
+          setActiveFeedIndex(gestureStartIndexRef.current);
           gestureStartOffsetRef.current = offsetY;
           gestureSettledRef.current = false;
         }}
@@ -865,6 +936,7 @@ function FeedScreen({
             <FeedReel
               approvedCount={approvedCount}
               index={index}
+              isActive={index === activeFeedIndex}
               onOpen={() => onOpenPlayer(player)}
               palette={getCardPalette(index)}
               player={player}
@@ -881,6 +953,7 @@ function FeedScreen({
 function FeedReel({
   approvedCount,
   index,
+  isActive,
   onOpen,
   palette,
   player,
@@ -889,6 +962,7 @@ function FeedReel({
 }: {
   approvedCount: number;
   index: number;
+  isActive: boolean;
   onOpen: () => void;
   palette: CardPalette;
   player: Player;
@@ -921,6 +995,13 @@ function FeedReel({
     ? Math.max(540, Math.min(reelHeight - TAB_BAR_CONTENT_PADDING - 44, 700))
     : reelHeight;
   const canvasWidth = isWide ? Math.min(width - 80, 1080) : width;
+  const mobileVideoWidth = Math.max(
+    195,
+    Math.min(
+      width * 0.68,
+      (reelHeight - 376) * (9 / 16)
+    )
+  );
 
   useEffect(() => {
     revealProgress.setValue(0);
@@ -932,6 +1013,12 @@ function FeedReel({
       useNativeDriver: true
     }).start();
   }, [player.id, revealProgress]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setIsExpanded(false);
+    }
+  }, [isActive]);
 
   return (
     <View style={[styles.feedReel, { height: reelHeight }]}>
@@ -990,39 +1077,84 @@ function FeedReel({
             <View style={styles.feedVideoShadeBottom} />
           </View>
 
-          <View style={styles.feedReelHeaderOverlay}>
-            <View>
-              <Text style={[styles.feedReelKicker, { color: palette.accent }]}>
-                Radar NextStar
-              </Text>
-              <Text style={[styles.feedReelCount, { color: palette.text }]}>
-                Ficha {index + 1}/{total} | {approvedCount} aprovadas
-              </Text>
+          <FeedVideoBox
+            fundingProgressLabel={fundingProgressLabel}
+            initials={initials}
+            isActive={isActive}
+            isWide={isWide}
+            mobileWidth={mobileVideoWidth}
+            palette={palette}
+            player={player}
+            scoreColor={scoreColor}
+          />
+
+          {!isWide ? (
+            <View style={styles.feedReelHeaderOverlay}>
+              <View>
+                <Text style={[styles.feedReelKicker, { color: palette.accent }]}>
+                  Radar NextStar
+                </Text>
+                <Text style={[styles.feedReelCount, { color: palette.text }]}>
+                  Ficha {index + 1}/{total} | {approvedCount} aprovadas
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.scoreBadge,
+                  styles.feedScoreBadge,
+                  { borderColor: scoreColor }
+                ]}
+              >
+                <Text style={[styles.scoreValue, { color: scoreColor }]}>
+                  {player.score}
+                </Text>
+                <Text style={[styles.scoreLabel, { color: palette.muted }]}>
+                  score
+                </Text>
+              </View>
             </View>
-            <View style={[styles.scoreBadge, styles.feedScoreBadge, { borderColor: scoreColor }]}>
-              <Text style={[styles.scoreValue, { color: scoreColor }]}>
-                {player.score}
-              </Text>
-              <Text style={[styles.scoreLabel, { color: palette.muted }]}>
-                score
-              </Text>
-            </View>
-          </View>
+          ) : null}
 
           <View
             style={[
               styles.feedTextOverlay,
-              isWide ? styles.feedTextOverlayWide : null
+              isWide
+                ? [
+                    styles.feedTextOverlayWide,
+                    { right: Math.max(300, canvasWidth - 360) }
+                  ]
+                : [
+                    styles.feedTextOverlayCompact,
+                    isExpanded ? styles.feedTextOverlayCompactExpanded : null,
+                    isExpanded ? { borderColor: palette.border } : null
+                  ]
             ]}
           >
-            <Text style={[styles.feedOverlayEyebrow, { color: palette.accent }]}>
-              Ficha de observacao
-            </Text>
-            <View style={styles.feedProfileRow}>
+            {isWide ? (
+              <Text style={[styles.feedOverlayEyebrow, { color: palette.accent }]}>
+                Ficha de observacao
+              </Text>
+            ) : null}
+            <View
+              style={[
+                styles.feedProfileRow,
+                !isWide ? styles.feedProfileRowCompact : null
+              ]}
+            >
               <View
-                style={[styles.feedAvatar, { borderColor: palette.accent }]}
+                style={[
+                  styles.feedAvatar,
+                  !isWide ? styles.feedAvatarCompact : null,
+                  { borderColor: palette.accent }
+                ]}
               >
-                <Text style={[styles.feedAvatarText, { color: palette.accent }]}>
+                <Text
+                  style={[
+                    styles.feedAvatarText,
+                    !isWide ? styles.feedAvatarTextCompact : null,
+                    { color: palette.accent }
+                  ]}
+                >
                   {initials}
                 </Text>
               </View>
@@ -1040,150 +1172,258 @@ function FeedReel({
                   {player.position} | {player.city}
                 </Text>
               </View>
-              <View style={[styles.feedStatusPill, { borderColor: palette.border }]}>
+              <View
+                style={[
+                  styles.feedStatusPill,
+                  !isWide ? styles.feedStatusPillCompact : null,
+                  { borderColor: palette.border }
+                ]}
+              >
                 <Text style={[styles.feedStatusText, { color: palette.accent }]}>
                   Verificado
                 </Text>
               </View>
             </View>
 
-            <Text
-              numberOfLines={2}
-              style={[
-                styles.feedReelVideoTitle,
-                isWide ? styles.feedReelVideoTitleWide : null,
-                { color: palette.text }
-              ]}
-            >
-              {player.videoTitle}
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={[styles.feedReelMeta, { color: palette.muted }]}
-            >
-              {player.age} anos | {player.club} | risco {player.riskLevel}
-            </Text>
-            <View style={styles.feedTagRow}>
-              {player.tags.slice(0, 3).map((tag) => (
+            {isWide ? (
+              <>
                 <Text
-                  key={tag}
+                  numberOfLines={2}
+                  style={[
+                    styles.feedReelVideoTitle,
+                    styles.feedReelVideoTitleWide,
+                    { color: palette.text }
+                  ]}
+                >
+                  {player.videoTitle}
+                </Text>
+                <Text
                   numberOfLines={1}
-                  style={[
-                    styles.feedTag,
-                    { borderColor: palette.border, color: palette.text }
-                  ]}
+                  style={[styles.feedReelMeta, { color: palette.muted }]}
                 >
-                  {tag}
+                  {player.age} anos | {player.club} | risco {player.riskLevel}
                 </Text>
-              ))}
-            </View>
-            <Text style={[styles.feedReelHighlight, { color: palette.text }]}>
-              {visibleText}
-            </Text>
-            {hasMoreText ? (
-              <Pressable
-                onPress={() => setIsExpanded((current) => !current)}
-                style={styles.feedReadMoreButton}
-              >
-                <Text style={[styles.feedReadMoreText, { color: palette.accent }]}>
-                  {isExpanded ? "Ver menos" : "Ver mais"}
+                <View style={styles.feedTagRow}>
+                  {player.tags.slice(0, 3).map((tag) => (
+                    <Text
+                      key={tag}
+                      numberOfLines={1}
+                      style={[
+                        styles.feedTag,
+                        { borderColor: palette.border, color: palette.text }
+                      ]}
+                    >
+                      {tag}
+                    </Text>
+                  ))}
+                </View>
+                <Text style={[styles.feedReelHighlight, { color: palette.text }]}>
+                  {visibleText}
                 </Text>
-              </Pressable>
-            ) : null}
-
-            <View style={styles.feedInsightStrip}>
-              <View style={styles.feedInsightItem}>
-                <Text style={[styles.feedInsightValue, { color: scoreColor }]}>
-                  {player.score}
-                </Text>
-                <Text style={[styles.feedInsightLabel, { color: palette.muted }]}>
-                  score
-                </Text>
-              </View>
-              <View style={styles.feedInsightItem}>
-                <Text style={[styles.feedInsightValue, { color: palette.accent }]}>
-                  {fundingProgressLabel}
-                </Text>
-                <Text style={[styles.feedInsightLabel, { color: palette.muted }]}>
-                  captado
-                </Text>
-              </View>
-              <View style={styles.feedInsightItem}>
-                <Text style={[styles.feedInsightValue, { color: palette.accent }]}>
-                  {minimumTicketLabel}
-                </Text>
-                <Text style={[styles.feedInsightLabel, { color: palette.muted }]}>
-                  ticket
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.feedReelMetricRow}>
-              {player.metrics.slice(0, 3).map((metric) => (
-                <View
-                  key={metric.label}
-                  style={[
-                    styles.feedReelMetric,
-                    {
-                      backgroundColor: palette.accentSoft,
-                      borderColor: palette.border
-                    }
-                  ]}
-                >
-                  <Text
-                    numberOfLines={1}
-                    style={[styles.feedReelMetricValue, { color: palette.accent }]}
+                {hasMoreText ? (
+                  <Pressable
+                    onPress={() => setIsExpanded((current) => !current)}
+                    style={styles.feedReadMoreButton}
                   >
-                    {metric.value}
+                    <Text
+                      style={[styles.feedReadMoreText, { color: palette.accent }]}
+                    >
+                      {isExpanded ? "Ver menos" : "Ver mais"}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <View style={styles.feedCompactSummaryRow}>
+                  <View style={styles.feedCompactSummaryText}>
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        styles.feedReelVideoTitle,
+                        styles.feedReelVideoTitleCompact,
+                        { color: palette.text }
+                      ]}
+                    >
+                      {player.videoTitle}
+                    </Text>
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.feedReelMeta, { color: palette.muted }]}
+                    >
+                      {player.age} anos | {player.club} | risco {player.riskLevel}
+                    </Text>
+                  </View>
+                  <Pressable
+                    accessibilityLabel={
+                      isExpanded ? "Recolher detalhes" : "Mostrar mais detalhes"
+                    }
+                    accessibilityRole="button"
+                    hitSlop={8}
+                    onPress={() => setIsExpanded((current) => !current)}
+                    style={({ pressed }) => [
+                      styles.feedCompactToggle,
+                      { borderColor: palette.border },
+                      pressed ? styles.feedCompactTogglePressed : null
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.feedCompactToggleText,
+                        { color: palette.accent }
+                      ]}
+                    >
+                      {isExpanded ? "Ver menos" : "Ver mais"}
+                    </Text>
+                  </Pressable>
+                </View>
+
+                {isExpanded ? (
+                  <View
+                    style={[
+                      styles.feedCompactExpandedContent,
+                      { borderTopColor: palette.border }
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.feedCompactSectionLabel,
+                        { color: palette.accent }
+                      ]}
+                    >
+                      Principal destaque
+                    </Text>
+                    <Text
+                      numberOfLines={5}
+                      style={[
+                        styles.feedReelHighlight,
+                        styles.feedReelHighlightCompact,
+                        { color: palette.text }
+                      ]}
+                    >
+                      {presentationText}
+                    </Text>
+                  </View>
+                ) : null}
+              </>
+            )}
+
+            {isWide ? (
+              <View style={styles.feedInsightStrip}>
+                <View style={styles.feedInsightItem}>
+                  <Text style={[styles.feedInsightValue, { color: scoreColor }]}>
+                    {player.score}
                   </Text>
                   <Text
-                    numberOfLines={1}
-                    style={[styles.feedReelMetricLabel, { color: palette.muted }]}
+                    style={[styles.feedInsightLabel, { color: palette.muted }]}
                   >
-                    {metric.label}
+                    score
                   </Text>
                 </View>
-              ))}
-            </View>
+                <View style={styles.feedInsightItem}>
+                  <Text
+                    style={[styles.feedInsightValue, { color: palette.accent }]}
+                  >
+                    {fundingProgressLabel}
+                  </Text>
+                  <Text
+                    style={[styles.feedInsightLabel, { color: palette.muted }]}
+                  >
+                    captado
+                  </Text>
+                </View>
+                <View style={styles.feedInsightItem}>
+                  <Text
+                    style={[styles.feedInsightValue, { color: palette.accent }]}
+                  >
+                    {minimumTicketLabel}
+                  </Text>
+                  <Text
+                    style={[styles.feedInsightLabel, { color: palette.muted }]}
+                  >
+                    ticket
+                  </Text>
+                </View>
+              </View>
+            ) : null}
 
-            <View style={styles.progressLabelRow}>
-              <Text
-                style={[styles.progressText, { color: palette.muted }]}
-              >
-                {formatBRL(player.funded)}
-              </Text>
-              <Text
-                style={[styles.progressText, { color: palette.muted }]}
-              >
-                {formatBRL(player.fundingGoal)}
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.progressTrack,
-                { backgroundColor: palette.progressTrack }
-              ]}
-            >
+            {isWide ? (
+              <View style={styles.feedReelMetricRow}>
+                {player.metrics.slice(0, 3).map((metric) => (
+                  <View
+                    key={metric.label}
+                    style={[
+                      styles.feedReelMetric,
+                      {
+                        backgroundColor: palette.accentSoft,
+                        borderColor: palette.border
+                      }
+                    ]}
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        styles.feedReelMetricValue,
+                        { color: palette.accent }
+                      ]}
+                    >
+                      {metric.value}
+                    </Text>
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        styles.feedReelMetricLabel,
+                        { color: palette.muted }
+                      ]}
+                    >
+                      {metric.label}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+
+            {isWide ? (
+              <View style={styles.progressLabelRow}>
+                <Text style={[styles.progressText, { color: palette.muted }]}>
+                  {formatBRL(player.funded)}
+                </Text>
+                <Text style={[styles.progressText, { color: palette.muted }]}>
+                  {formatBRL(player.fundingGoal)}
+                </Text>
+              </View>
+            ) : null}
+            {isWide ? (
               <View
                 style={[
-                  styles.progressFill,
-                  {
-                    backgroundColor: palette.accent,
-                    width: `${progress * 100}%`
-                  }
+                  styles.progressTrack,
+                  { backgroundColor: palette.progressTrack }
                 ]}
-              />
-            </View>
+              >
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      backgroundColor: palette.accent,
+                      width: `${progress * 100}%`
+                    }
+                  ]}
+                />
+              </View>
+            ) : null}
 
-            <Pressable
-              onPress={onOpen}
-              style={({ pressed }) => [
-                styles.feedLearnMoreButton,
-                pressed ? styles.feedReelButtonPressed : null
-              ]}
-            >
-              <Text style={styles.feedLearnMoreText}>Abrir ficha completa</Text>
-            </Pressable>
+            {isWide || isExpanded ? (
+              <Pressable
+                onPress={onOpen}
+                style={({ pressed }) => [
+                  styles.feedLearnMoreButton,
+                  !isWide ? styles.feedLearnMoreButtonCompact : null,
+                  pressed ? styles.feedReelButtonPressed : null
+                ]}
+              >
+                <Text style={styles.feedLearnMoreText}>Abrir ficha completa</Text>
+              </Pressable>
+            ) : null}
           </View>
 
           {isWide ? (
@@ -1209,6 +1449,257 @@ function FeedReel({
           ) : null}
         </View>
       </Animated.View>
+    </View>
+  );
+}
+
+function FeedVideoBox({
+  fundingProgressLabel,
+  initials,
+  isActive,
+  isWide,
+  mobileWidth,
+  palette,
+  player,
+  scoreColor
+}: {
+  fundingProgressLabel: string;
+  initials: string;
+  isActive: boolean;
+  isWide: boolean;
+  mobileWidth: number;
+  palette: CardPalette;
+  player: Player;
+  scoreColor: string;
+}) {
+  return (
+    <View
+      style={[
+        styles.feedVideoBox,
+        isWide ? styles.feedVideoBoxWide : null,
+        !isWide ? { width: mobileWidth } : null,
+        { backgroundColor: palette.media, borderColor: palette.border }
+      ]}
+    >
+      {player.videoUri ? (
+        <FeedVideoPlayback
+          accent={palette.accent}
+          isActive={isActive}
+          onAccent={palette.onAccent}
+          uri={player.videoUri}
+        />
+      ) : (
+        <>
+          <View
+            style={[
+              styles.feedVideoBoxGlow,
+              { backgroundColor: palette.accentSoft }
+            ]}
+          />
+          <View style={styles.feedVideoPitchMarkings}>
+            <View style={styles.feedVideoPitchCenterLine} />
+            <View style={styles.feedVideoPitchCenterCircle} />
+            <View style={styles.feedVideoPitchBoxTop} />
+            <View style={styles.feedVideoPitchBoxBottom} />
+          </View>
+          <View style={styles.feedVideoNoiseWash} />
+
+          <View
+            style={[
+              styles.feedVideoSubject,
+              !isWide ? styles.feedVideoSubjectCompact : null,
+              { borderColor: palette.accent }
+            ]}
+          >
+            <Text
+              style={[styles.feedVideoSubjectText, { color: palette.accent }]}
+            >
+              {initials}
+            </Text>
+          </View>
+
+          <View
+            style={[
+              styles.feedVideoPlayCircle,
+              !isWide ? styles.feedVideoPlayCircleCompact : null,
+              { backgroundColor: palette.accent }
+            ]}
+          >
+            <View
+              style={[
+                styles.feedVideoPlayTriangle,
+                { borderLeftColor: palette.onAccent }
+              ]}
+            />
+          </View>
+        </>
+      )}
+
+      <View style={styles.feedVideoTopHud}>
+        <View
+          style={[styles.feedVideoLiveDot, { backgroundColor: palette.accent }]}
+        />
+        <Text
+          numberOfLines={1}
+          style={[styles.feedVideoHudText, { color: palette.text }]}
+        >
+          NEXTSTAR
+        </Text>
+      </View>
+
+      <View style={styles.feedVideoActionRail}>
+        <View
+          style={[styles.feedVideoActionButton, { borderColor: palette.border }]}
+        >
+          <Text style={[styles.feedVideoActionValue, { color: scoreColor }]}>
+            {player.score}
+          </Text>
+          <Text style={[styles.feedVideoActionLabel, { color: palette.muted }]}>
+            SC
+          </Text>
+        </View>
+        <View
+          style={[styles.feedVideoActionButton, { borderColor: palette.border }]}
+        >
+          <Text style={[styles.feedVideoActionValue, { color: palette.accent }]}>
+            {fundingProgressLabel}
+          </Text>
+          <Text style={[styles.feedVideoActionLabel, { color: palette.muted }]}>
+            CAP
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.feedVideoCaptionStrip}>
+        <Text
+          numberOfLines={1}
+          style={[styles.feedVideoCaption, { color: palette.text }]}
+        >
+          {player.videoTitle}
+        </Text>
+        <Text style={[styles.feedVideoDuration, { color: palette.text }]}>
+          {player.videoLength}
+        </Text>
+      </View>
+      <View
+        style={[
+          styles.feedVideoScrubberTrack,
+          { backgroundColor: palette.progressTrack }
+        ]}
+      >
+        <View
+          style={[
+            styles.feedVideoScrubberFill,
+            { backgroundColor: palette.accent }
+          ]}
+        />
+      </View>
+    </View>
+  );
+}
+
+function FeedVideoPlayback({
+  accent,
+  isActive,
+  onAccent,
+  uri
+}: {
+  accent: string;
+  isActive: boolean;
+  onAccent: string;
+  uri: string;
+}) {
+  const videoViewRef = useRef<VideoView | null>(null);
+  const videoPlayer = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+    player.muted = true;
+  });
+  const { isPlaying } = useEvent(videoPlayer, "playingChange", {
+    isPlaying: videoPlayer.playing
+  });
+  const { muted } = useEvent(videoPlayer, "mutedChange", {
+    muted: videoPlayer.muted
+  });
+
+  useEffect(() => {
+    if (isActive) {
+      videoPlayer.play();
+      return;
+    }
+
+    videoPlayer.pause();
+  }, [isActive, videoPlayer]);
+
+  function togglePlayback() {
+    if (isPlaying) {
+      videoPlayer.pause();
+      return;
+    }
+
+    videoPlayer.play();
+  }
+
+  function openFullscreen() {
+    videoViewRef.current?.enterFullscreen().catch(() => {
+      Alert.alert("Tela cheia indisponivel", "Tente abrir o video novamente.");
+    });
+  }
+
+  return (
+    <View style={styles.feedVideoPlayback}>
+      <VideoView
+        allowsFullscreen
+        contentFit="cover"
+        nativeControls={false}
+        player={videoPlayer}
+        playsInline
+        ref={videoViewRef}
+        style={styles.feedVideoMedia}
+        surfaceType="textureView"
+      />
+      <Pressable
+        accessibilityLabel={isPlaying ? "Pausar video" : "Reproduzir video"}
+        accessibilityRole="button"
+        onPress={togglePlayback}
+        style={styles.feedVideoTapTarget}
+      >
+        {!isPlaying ? (
+          <View
+            style={[
+              styles.feedVideoPlayCircle,
+              styles.feedVideoPlaybackPlay,
+              { backgroundColor: accent }
+            ]}
+          >
+            <View
+              style={[
+                styles.feedVideoPlayTriangle,
+                { borderLeftColor: onAccent }
+              ]}
+            />
+          </View>
+        ) : null}
+      </Pressable>
+      <View style={styles.feedVideoFloatingControls}>
+        <Pressable
+          accessibilityLabel={muted ? "Ativar som" : "Silenciar video"}
+          accessibilityRole="button"
+          onPress={() => {
+            videoPlayer.muted = !muted;
+          }}
+          style={styles.feedVideoControlButton}
+        >
+          <Text style={styles.feedVideoControlIcon}>{muted ? "🔇" : "🔊"}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityLabel="Abrir video em tela cheia"
+          accessibilityRole="button"
+          onPress={openFullscreen}
+          style={styles.feedVideoControlButton}
+        >
+          <Text style={styles.feedVideoControlIcon}>⛶</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -1391,21 +1882,30 @@ function PlayerDetail({
           }
         ]}
       >
-        <View
-          style={[styles.detailPlayButton, { backgroundColor: palette.accent }]}
-        >
-          <Text style={[styles.detailPlayText, { color: palette.onAccent }]}>
-            PLAY
-          </Text>
-        </View>
-        <View style={[styles.paletteBadge, { borderColor: palette.border }]}>
-          <Text style={[styles.paletteBadgeText, { color: palette.accent }]}>
-            NEXTSTAR
-          </Text>
-        </View>
-        <Text style={[styles.detailVideoTitle, { color: palette.text }]}>
-          {player.videoTitle}
-        </Text>
+        {player.videoUri ? (
+          <DetailVideoPlayback uri={player.videoUri} />
+        ) : (
+          <>
+            <View
+              style={[
+                styles.detailPlayButton,
+                { backgroundColor: palette.accent }
+              ]}
+            >
+              <Text style={[styles.detailPlayText, { color: palette.onAccent }]}>
+                PLAY
+              </Text>
+            </View>
+            <View style={[styles.paletteBadge, { borderColor: palette.border }]}>
+              <Text style={[styles.paletteBadgeText, { color: palette.accent }]}>
+                NEXTSTAR
+              </Text>
+            </View>
+            <Text style={[styles.detailVideoTitle, { color: palette.text }]}>
+              {player.videoTitle}
+            </Text>
+          </>
+        )}
       </View>
 
       <View style={styles.detailTitleRow}>
@@ -1516,6 +2016,24 @@ function PlayerDetail({
   );
 }
 
+function DetailVideoPlayback({ uri }: { uri: string }) {
+  const detailPlayer = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+  });
+
+  return (
+    <VideoView
+      allowsFullscreen
+      contentFit="contain"
+      nativeControls
+      player={detailPlayer}
+      playsInline
+      style={styles.detailVideoMedia}
+      surfaceType="textureView"
+    />
+  );
+}
+
 function SubmitVideoScreen({
   onSubmit,
   submissions,
@@ -1525,25 +2043,97 @@ function SubmitVideoScreen({
   submissions: VideoSubmission[];
   user: AppUser;
 }) {
+  const { width } = useWindowDimensions();
+  const isCompact = width < 520;
   const [draft, setDraft] = useState<SubmissionDraft>({
     ...emptySubmissionDraft,
     athleteName: user.name
   });
+  const [selectedVideo, setSelectedVideo] = useState<SelectedVideoMeta | null>(
+    null
+  );
   const [lastSubmittedId, setLastSubmittedId] = useState<string | null>(null);
   const age = Number(draft.age.replace(/\D/g, ""));
   const needsGuardianConsent = age > 0 && age < 18;
-  const canSubmit =
-    draft.athleteName.trim().length >= 3 &&
-    age >= 12 &&
-    draft.city.trim().length >= 2 &&
-    draft.position.trim().length >= 2 &&
-    draft.videoTitle.trim().length >= 4 &&
-    draft.videoLink.trim().length >= 6 &&
-    draft.highlight.trim().length >= 12 &&
-    (!needsGuardianConsent || draft.hasGuardianConsent);
+  const hasRemoteVideoLink = /^https?:\/\/\S+$/i.test(draft.videoLink.trim());
+  const hasVideoSource = selectedVideo !== null || hasRemoteVideoLink;
+  const submissionIssues = [
+    draft.athleteName.trim().length >= 3
+      ? null
+      : "Informe o nome completo do atleta.",
+    age >= 12 ? null : "Informe uma idade valida a partir de 12 anos.",
+    draft.position.trim().length >= 2 ? null : "Informe a posicao do atleta.",
+    draft.city.trim().length >= 2 ? null : "Informe a cidade do atleta.",
+    draft.videoTitle.trim().length >= 4
+      ? null
+      : "O titulo do video precisa ter pelo menos 4 caracteres.",
+    hasVideoSource ? null : "Selecione um video ou informe um link direto.",
+    draft.highlight.trim().length >= 4
+      ? null
+      : "Descreva o principal destaque com pelo menos 4 caracteres.",
+    !needsGuardianConsent || draft.hasGuardianConsent
+      ? null
+      : "Confirme a autorizacao do responsavel legal."
+  ].filter((issue): issue is string => Boolean(issue));
+  const canSubmit = submissionIssues.length === 0;
 
   function updateDraft(field: keyof SubmissionDraft, value: string | boolean) {
     setDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  async function pickVideoFromLibrary() {
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permission.granted) {
+        Alert.alert(
+          "Permissao necessaria",
+          "Autorize o acesso aos videos para escolher um lance da galeria."
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: false,
+        mediaTypes: ["videos"],
+        quality: 1
+      });
+
+      if (result.canceled || !result.assets[0]) {
+        return;
+      }
+
+      const asset = result.assets[0];
+      const fileName = asset.fileName || "video-selecionado.mp4";
+
+      if (asset.type && asset.type !== "video") {
+        Alert.alert("Arquivo invalido", "Escolha um arquivo de video.");
+        return;
+      }
+
+      setSelectedVideo({
+        durationMs: asset.duration ?? undefined,
+        fileName,
+        fileSize: asset.fileSize
+      });
+      setDraft((current) => ({
+        ...current,
+        videoLink: asset.uri,
+        videoTitle:
+          current.videoTitle.trim() || getVideoTitleFromFileName(fileName)
+      }));
+      setLastSubmittedId(null);
+    } catch {
+      Alert.alert(
+        "Nao foi possivel abrir a galeria",
+        "Tente novamente ou use um link direto para o arquivo de video."
+      );
+    }
+  }
+
+  function removeSelectedVideo() {
+    setSelectedVideo(null);
+    updateDraft("videoLink", "");
   }
 
   function submitDraft() {
@@ -1559,6 +2149,9 @@ function SubmitVideoScreen({
       club: draft.club.trim() || "Sem clube informado",
       videoTitle: draft.videoTitle.trim(),
       videoLink: draft.videoLink.trim(),
+      videoDurationMs: selectedVideo?.durationMs,
+      videoFileName: selectedVideo?.fileName,
+      videoFileSize: selectedVideo?.fileSize,
       highlight: draft.highlight.trim(),
       goals: draft.goals.trim() || "Objetivos ainda nao informados",
       hasGuardianConsent: draft.hasGuardianConsent,
@@ -1566,6 +2159,7 @@ function SubmitVideoScreen({
       submittedAt: new Date().toISOString()
     });
     setLastSubmittedId(id);
+    setSelectedVideo(null);
     setDraft({
       ...emptySubmissionDraft,
       athleteName: user.name
@@ -1573,7 +2167,12 @@ function SubmitVideoScreen({
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.screenContent}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.screenContent,
+        isCompact ? styles.screenContentCompact : null
+      ]}
+    >
       <View style={styles.submitHero}>
         <Text style={styles.heroKicker}>Area do atleta</Text>
         <Text style={styles.heroTitle}>Envie seu video para analise.</Text>
@@ -1592,7 +2191,12 @@ function SubmitVideoScreen({
         </View>
       ) : null}
 
-      <View style={styles.infoPanel}>
+      <View
+        style={[
+          styles.infoPanel,
+          isCompact ? styles.submitInfoPanelCompact : null
+        ]}
+      >
         <Text style={styles.sectionTitle}>Dados do atleta</Text>
         <LabeledInput
           label="Nome do atleta"
@@ -1633,7 +2237,12 @@ function SubmitVideoScreen({
         />
       </View>
 
-      <View style={styles.infoPanel}>
+      <View
+        style={[
+          styles.infoPanel,
+          isCompact ? styles.submitInfoPanelCompact : null
+        ]}
+      >
         <Text style={styles.sectionTitle}>Video</Text>
         <LabeledInput
           label="Titulo do video"
@@ -1641,13 +2250,71 @@ function SubmitVideoScreen({
           placeholder="Melhores lances"
           value={draft.videoTitle}
         />
-        <LabeledInput
-          autoCapitalize="none"
-          label="Link do video"
-          onChangeText={(value) => updateDraft("videoLink", value)}
-          placeholder="https://..."
-          value={draft.videoLink}
-        />
+        <Pressable
+          accessibilityLabel="Escolher video da galeria"
+          accessibilityRole="button"
+          onPress={pickVideoFromLibrary}
+          style={({ pressed }) => [
+            styles.videoPickerButton,
+            pressed ? styles.feedReelButtonPressed : null
+          ]}
+        >
+          <Text style={styles.videoPickerIcon}>+</Text>
+          <Text style={styles.videoPickerButtonText}>
+            Escolher video da galeria
+          </Text>
+        </Pressable>
+        <Text style={styles.videoPickerHint}>
+          Para o primeiro teste, prefira um MP4 vertical de ate 60 segundos.
+        </Text>
+
+        {selectedVideo ? (
+          <View style={styles.selectedVideoPanel}>
+            <View style={styles.selectedVideoTextBlock}>
+              <Text numberOfLines={1} style={styles.selectedVideoName}>
+                {selectedVideo.fileName}
+              </Text>
+              <Text style={styles.selectedVideoMeta}>
+                {[
+                  formatVideoDuration(selectedVideo.durationMs),
+                  formatVideoFileSize(selectedVideo.fileSize)
+                ]
+                  .filter(Boolean)
+                  .join(" | ") || "Video pronto para visualizar"}
+              </Text>
+            </View>
+            <Pressable
+              accessibilityLabel="Remover video selecionado"
+              accessibilityRole="button"
+              onPress={removeSelectedVideo}
+              style={styles.removeVideoButton}
+            >
+              <Text style={styles.removeVideoButtonText}>×</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <>
+            <View style={styles.videoSourceDivider}>
+              <View style={styles.videoSourceDividerLine} />
+              <Text style={styles.videoSourceDividerText}>ou</Text>
+              <View style={styles.videoSourceDividerLine} />
+            </View>
+            <LabeledInput
+              autoCapitalize="none"
+              label="Link direto do video"
+              onChangeText={(value) => {
+                setSelectedVideo(null);
+                updateDraft("videoLink", value);
+              }}
+              placeholder="https://.../video.mp4"
+              value={draft.videoLink}
+            />
+          </>
+        )}
+
+        {hasVideoSource ? (
+          <SubmissionVideoPreview uri={draft.videoLink.trim()} />
+        ) : null}
         <LabeledInput
           label="Principal destaque"
           multiline
@@ -1686,10 +2353,18 @@ function SubmitVideoScreen({
           </Pressable>
         ) : null}
 
-        {!canSubmit ? (
-          <Text style={styles.validationText}>
-            Preencha os campos principais para enviar para moderacao.
-          </Text>
+        {submissionIssues.length > 0 ? (
+          <View style={styles.submissionValidationPanel}>
+            <Text style={styles.submissionValidationTitle}>
+              Revise antes de enviar:
+            </Text>
+            {submissionIssues.map((issue) => (
+              <View key={issue} style={styles.submissionValidationRow}>
+                <Text style={styles.submissionValidationMarker}>-</Text>
+                <Text style={styles.submissionValidationText}>{issue}</Text>
+              </View>
+            ))}
+          </View>
         ) : null}
 
         <Pressable
@@ -1706,6 +2381,37 @@ function SubmitVideoScreen({
 
       <SubmissionList submissions={submissions} />
     </ScrollView>
+  );
+}
+
+function SubmissionVideoPreview({
+  compact = false,
+  uri
+}: {
+  compact?: boolean;
+  uri: string;
+}) {
+  const previewPlayer = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+  });
+
+  return (
+    <View
+      style={[
+        styles.submissionVideoPreview,
+        compact ? styles.submissionVideoPreviewCompact : null
+      ]}
+    >
+      <VideoView
+        allowsFullscreen
+        contentFit="contain"
+        nativeControls
+        player={previewPlayer}
+        playsInline
+        style={styles.submissionVideoPreviewMedia}
+        surfaceType="textureView"
+      />
+    </View>
   );
 }
 
@@ -1763,6 +2469,9 @@ function AdminScreen({
                 <StatusPill status={submission.status} />
               </View>
 
+              {submission.videoLink ? (
+                <SubmissionVideoPreview compact uri={submission.videoLink} />
+              ) : null}
               <Text style={styles.submissionBody}>{submission.highlight}</Text>
               <Text style={styles.adminFinePrint}>
                 Video: {submission.videoTitle} | Consentimento:{" "}
@@ -2445,12 +3154,30 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     width: "100%"
   },
+  headerCompact: {
+    alignItems: "stretch",
+    flexDirection: "column",
+    flexWrap: "nowrap",
+    gap: 10,
+    paddingBottom: 12,
+    paddingHorizontal: 14,
+    paddingTop: 10
+  },
   headerIdentity: {
     alignItems: "center",
     flexDirection: "row",
     flex: 1,
     minWidth: 168,
     paddingRight: 8
+  },
+  headerIdentityCompact: {
+    flexBasis: 48,
+    flexGrow: 0,
+    flexShrink: 0,
+    minHeight: 48,
+    minWidth: 0,
+    paddingRight: 0,
+    width: "100%"
   },
   headerLogo: {
     height: 42,
@@ -2481,6 +3208,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8
   },
+  headerActionsCompact: {
+    alignSelf: "stretch",
+    justifyContent: "space-between",
+    width: "100%"
+  },
   walletBadge: {
     alignItems: "flex-end",
     backgroundColor: "#14110A",
@@ -2489,6 +3221,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 7
+  },
+  walletBadgeCompact: {
+    alignItems: "flex-start",
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 12
   },
   walletLabel: {
     color: "#B8892D",
@@ -2513,6 +3251,10 @@ const styles = StyleSheet.create({
     minHeight: 38,
     paddingHorizontal: 10
   },
+  signOutButtonCompact: {
+    minHeight: 46,
+    paddingHorizontal: 18
+  },
   signOutText: {
     color: "#F7C84B",
     fontSize: 12,
@@ -2525,6 +3267,9 @@ const styles = StyleSheet.create({
     paddingTop: 18,
     paddingBottom: TAB_BAR_CONTENT_PADDING,
     width: "100%"
+  },
+  screenContentCompact: {
+    paddingHorizontal: 14
   },
   feedPagerShell: {
     backgroundColor: "#050503",
@@ -2637,6 +3382,243 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0
   },
+  feedVideoBox: {
+    alignSelf: "center",
+    aspectRatio: 9 / 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    maxWidth: 280,
+    overflow: "hidden",
+    position: "absolute",
+    top: 72,
+    width: "68%",
+    zIndex: 2
+  },
+  feedVideoBoxWide: {
+    maxWidth: 292,
+    top: 30,
+    width: 292
+  },
+  feedVideoPlayback: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#000000"
+  },
+  feedVideoMedia: {
+    ...StyleSheet.absoluteFillObject
+  },
+  feedVideoTapTarget: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1
+  },
+  feedVideoPlaybackPlay: {
+    position: "relative",
+    top: 0
+  },
+  feedVideoFloatingControls: {
+    flexDirection: "row",
+    gap: 7,
+    position: "absolute",
+    right: 10,
+    top: 10,
+    zIndex: 3
+  },
+  feedVideoControlButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(5, 5, 3, 0.72)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 34,
+    justifyContent: "center",
+    width: 34
+  },
+  feedVideoControlIcon: {
+    color: "#FFF4CC",
+    fontSize: 15,
+    fontWeight: "900"
+  },
+  feedVideoBoxGlow: {
+    borderRadius: 8,
+    height: "48%",
+    opacity: 0.9,
+    position: "absolute",
+    right: "-28%",
+    top: "7%",
+    transform: [{ rotate: "-18deg" }],
+    width: "80%"
+  },
+  feedVideoPitchMarkings: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.42
+  },
+  feedVideoPitchCenterLine: {
+    backgroundColor: "rgba(255, 244, 204, 0.22)",
+    height: 1,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: "50%"
+  },
+  feedVideoPitchCenterCircle: {
+    alignSelf: "center",
+    borderColor: "rgba(255, 244, 204, 0.16)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 88,
+    position: "absolute",
+    top: "39%",
+    width: 88
+  },
+  feedVideoPitchBoxTop: {
+    alignSelf: "center",
+    borderColor: "rgba(255, 244, 204, 0.14)",
+    borderTopWidth: 0,
+    borderWidth: 1,
+    height: 72,
+    position: "absolute",
+    top: 0,
+    width: "58%"
+  },
+  feedVideoPitchBoxBottom: {
+    alignSelf: "center",
+    borderBottomWidth: 0,
+    borderColor: "rgba(255, 244, 204, 0.14)",
+    borderWidth: 1,
+    bottom: 0,
+    height: 72,
+    position: "absolute",
+    width: "58%"
+  },
+  feedVideoNoiseWash: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.025)"
+  },
+  feedVideoTopHud: {
+    alignItems: "center",
+    backgroundColor: "rgba(5, 5, 3, 0.54)",
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 7,
+    left: 12,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    position: "absolute",
+    top: 12
+  },
+  feedVideoLiveDot: {
+    borderRadius: 999,
+    height: 7,
+    width: 7
+  },
+  feedVideoHudText: {
+    fontSize: 10,
+    fontWeight: "900"
+  },
+  feedVideoSubject: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: "rgba(5, 5, 3, 0.62)",
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 74,
+    justifyContent: "center",
+    position: "absolute",
+    top: "29%",
+    width: 74
+  },
+  feedVideoSubjectCompact: {
+    top: "26%"
+  },
+  feedVideoSubjectText: {
+    fontSize: 21,
+    fontWeight: "900"
+  },
+  feedVideoPlayCircle: {
+    alignItems: "center",
+    alignSelf: "center",
+    borderRadius: 999,
+    height: 54,
+    justifyContent: "center",
+    position: "absolute",
+    top: "47%",
+    width: 54
+  },
+  feedVideoPlayCircleCompact: {
+    top: "48%"
+  },
+  feedVideoPlayTriangle: {
+    borderBottomColor: "transparent",
+    borderBottomWidth: 9,
+    borderLeftWidth: 14,
+    borderTopColor: "transparent",
+    borderTopWidth: 9,
+    height: 0,
+    marginLeft: 4,
+    width: 0
+  },
+  feedVideoActionRail: {
+    gap: 9,
+    position: "absolute",
+    right: 10,
+    top: "34%"
+  },
+  feedVideoActionButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(5, 5, 3, 0.58)",
+    borderRadius: 8,
+    borderWidth: 1,
+    height: 46,
+    justifyContent: "center",
+    width: 46
+  },
+  feedVideoActionValue: {
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  feedVideoActionLabel: {
+    fontSize: 8,
+    fontWeight: "900",
+    marginTop: 1
+  },
+  feedVideoCaptionStrip: {
+    alignItems: "flex-end",
+    backgroundColor: "rgba(5, 5, 3, 0.68)",
+    bottom: 18,
+    flexDirection: "row",
+    gap: 10,
+    left: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    position: "absolute",
+    right: 12
+  },
+  feedVideoCaption: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  feedVideoDuration: {
+    fontSize: 11,
+    fontWeight: "900"
+  },
+  feedVideoScrubberTrack: {
+    borderRadius: 999,
+    bottom: 10,
+    height: 3,
+    left: 12,
+    overflow: "hidden",
+    position: "absolute",
+    right: 12
+  },
+  feedVideoScrubberFill: {
+    borderRadius: 999,
+    height: 3,
+    width: "42%"
+  },
   feedReelHeaderOverlay: {
     alignItems: "flex-start",
     flexDirection: "row",
@@ -2679,6 +3661,18 @@ const styles = StyleSheet.create({
     padding: 18,
     right: 340
   },
+  feedTextOverlayCompact: {
+    backgroundColor: "rgba(5, 5, 3, 0.96)",
+    padding: 12
+  },
+  feedTextOverlayCompactExpanded: {
+    backgroundColor: "rgba(5, 5, 3, 0.99)",
+    elevation: 12,
+    shadowColor: "#000000",
+    shadowOffset: { height: -5, width: 0 },
+    shadowOpacity: 0.34,
+    shadowRadius: 12
+  },
   feedOverlayEyebrow: {
     fontSize: 10,
     fontWeight: "900",
@@ -2692,6 +3686,9 @@ const styles = StyleSheet.create({
     gap: 9,
     marginBottom: 10
   },
+  feedProfileRowCompact: {
+    marginBottom: 8
+  },
   feedAvatar: {
     alignItems: "center",
     backgroundColor: "rgba(5, 5, 3, 0.72)",
@@ -2704,6 +3701,13 @@ const styles = StyleSheet.create({
   feedAvatarText: {
     fontSize: 14,
     fontWeight: "900"
+  },
+  feedAvatarCompact: {
+    height: 36,
+    width: 36
+  },
+  feedAvatarTextCompact: {
+    fontSize: 12
   },
   feedProfileTextBlock: {
     flex: 1,
@@ -2732,6 +3736,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "900"
   },
+  feedStatusPillCompact: {
+    minHeight: 28,
+    paddingHorizontal: 8
+  },
   feedReelVideoTitle: {
     fontSize: 20,
     fontWeight: "900",
@@ -2741,6 +3749,46 @@ const styles = StyleSheet.create({
   feedReelVideoTitleWide: {
     fontSize: 24,
     lineHeight: 29
+  },
+  feedReelVideoTitleCompact: {
+    fontSize: 17,
+    lineHeight: 21
+  },
+  feedCompactSummaryRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 10
+  },
+  feedCompactSummaryText: {
+    flex: 1,
+    minWidth: 0
+  },
+  feedCompactToggle: {
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    borderRadius: 8,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 32,
+    paddingHorizontal: 10
+  },
+  feedCompactTogglePressed: {
+    opacity: 0.72,
+    transform: [{ scale: 0.97 }]
+  },
+  feedCompactToggleText: {
+    fontSize: 11,
+    fontWeight: "900"
+  },
+  feedCompactExpandedContent: {
+    borderTopWidth: 1,
+    marginTop: 10,
+    paddingTop: 10
+  },
+  feedCompactSectionLabel: {
+    fontSize: 10,
+    fontWeight: "900",
+    textTransform: "uppercase"
   },
   feedReelMeta: {
     fontSize: 13,
@@ -2769,6 +3817,11 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     marginTop: 8
   },
+  feedReelHighlightCompact: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 5
+  },
   feedReadMoreButton: {
     alignSelf: "flex-start",
     marginTop: 6,
@@ -2788,6 +3841,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingHorizontal: 9,
     paddingVertical: 8
+  },
+  feedInsightStripCompact: {
+    marginTop: 8,
+    paddingVertical: 6
   },
   feedInsightItem: {
     flex: 1,
@@ -2836,6 +3893,17 @@ const styles = StyleSheet.create({
     marginTop: 12,
     minHeight: 48,
     paddingHorizontal: 15
+  },
+  feedLearnMoreButtonCompact: {
+    marginTop: 10,
+    minHeight: 44
+  },
+  feedProgressTrackCompact: {
+    height: 5,
+    marginTop: 10
+  },
+  feedProgressFillCompact: {
+    height: 5
   },
   feedReelButtonPressed: {
     opacity: 0.84,
@@ -3182,7 +4250,12 @@ const styles = StyleSheet.create({
     height: 230,
     justifyContent: "space-between",
     marginTop: 4,
+    overflow: "hidden",
     padding: 16
+  },
+  detailVideoMedia: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#000000"
   },
   detailPlayButton: {
     alignItems: "center",
@@ -3260,6 +4333,9 @@ const styles = StyleSheet.create({
     marginTop: 14,
     padding: 16
   },
+  submitInfoPanelCompact: {
+    paddingHorizontal: 12
+  },
   infoPanelCompact: {
     backgroundColor: "rgba(5, 5, 3, 0.66)",
     borderColor: "rgba(255, 255, 255, 0.12)",
@@ -3306,6 +4382,115 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     minHeight: 94,
     paddingTop: 12
+  },
+  videoPickerButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(20, 17, 10, 0.9)",
+    borderColor: "rgba(247, 200, 75, 0.38)",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 9,
+    justifyContent: "center",
+    marginTop: 12,
+    minHeight: 48,
+    paddingHorizontal: 14
+  },
+  videoPickerIcon: {
+    color: "#F7C84B",
+    fontSize: 22,
+    fontWeight: "700"
+  },
+  videoPickerButtonText: {
+    color: "#FFF4CC",
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  videoPickerHint: {
+    color: "#A98A4A",
+    fontSize: 11,
+    fontWeight: "700",
+    lineHeight: 16,
+    marginTop: 7
+  },
+  selectedVideoPanel: {
+    alignItems: "center",
+    backgroundColor: "rgba(247, 200, 75, 0.06)",
+    borderColor: "rgba(247, 200, 75, 0.2)",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 12,
+    padding: 10
+  },
+  selectedVideoTextBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  selectedVideoName: {
+    color: "#FFF4CC",
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  selectedVideoMeta: {
+    color: "#C6A96A",
+    fontSize: 11,
+    fontWeight: "700",
+    marginTop: 3
+  },
+  removeVideoButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(248, 113, 113, 0.12)",
+    borderColor: "rgba(248, 113, 113, 0.4)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 34,
+    justifyContent: "center",
+    width: 34
+  },
+  removeVideoButtonText: {
+    color: "#FCA5A5",
+    fontSize: 23,
+    lineHeight: 25
+  },
+  videoSourceDivider: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 9,
+    marginTop: 12
+  },
+  videoSourceDividerLine: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    flex: 1,
+    height: 1
+  },
+  videoSourceDividerText: {
+    color: "#806B3D",
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase"
+  },
+  submissionVideoPreview: {
+    alignSelf: "center",
+    aspectRatio: 9 / 16,
+    backgroundColor: "#000000",
+    borderColor: "rgba(247, 200, 75, 0.28)",
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 14,
+    maxHeight: 640,
+    maxWidth: 360,
+    overflow: "hidden",
+    width: "100%"
+  },
+  submissionVideoPreviewCompact: {
+    maxHeight: 360,
+    maxWidth: 210,
+    width: "62%"
+  },
+  submissionVideoPreviewMedia: {
+    flex: 1
   },
   inputRow: {
     alignItems: "center",
@@ -3399,6 +4584,38 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
     marginTop: 10
+  },
+  submissionValidationPanel: {
+    backgroundColor: "rgba(255, 155, 106, 0.08)",
+    borderColor: "rgba(255, 155, 106, 0.32)",
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 5,
+    marginTop: 14,
+    padding: 11
+  },
+  submissionValidationTitle: {
+    color: "#FFB18A",
+    fontSize: 13,
+    fontWeight: "900",
+    marginBottom: 2
+  },
+  submissionValidationRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 7
+  },
+  submissionValidationMarker: {
+    color: "#FF9B6A",
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  submissionValidationText: {
+    color: "#FFD1B8",
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 17
   },
   primaryButton: {
     alignItems: "center",

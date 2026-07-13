@@ -14,6 +14,7 @@ export type Player = {
   club: string;
   videoTitle: string;
   videoLength: string;
+  videoUri?: string;
   highlight: string;
   thesis: string;
   fundingGoal: number;
@@ -75,6 +76,9 @@ export type VideoSubmission = {
   club: string;
   videoTitle: string;
   videoLink: string;
+  videoDurationMs?: number;
+  videoFileName?: string;
+  videoFileSize?: number;
   highlight: string;
   goals: string;
   hasGuardianConsent: boolean;
