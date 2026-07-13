@@ -59,10 +59,13 @@ function walk(dir) {
     const source = readFileSync(path, "utf8");
     let updated = source
       .replace(/(["'=])\/_expo\//g, "$1./_expo/")
-      .replace(/(["'=])\/assets\//g, "$1./assets/");
+      .replace(/(["'=])\/assets\//g, "$1./assets/")
+      .replace(/(["'=])\/favicon\.ico/g, "$1./favicon.ico");
 
     if (getExtension(path) === ".html" && !updated.includes("nextstar-page-shell")) {
-      updated = updated.replace("  </head>", `${pageShellStyle}\n  </head>`);
+      updated = updated
+        .replace('<html lang="en">', '<html lang="pt-BR">')
+        .replace(/<\/head>/i, `${pageShellStyle}\n  </head>`);
     }
 
     if (updated !== source) {
