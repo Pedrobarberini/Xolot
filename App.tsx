@@ -2495,7 +2495,10 @@ function AdminScreen({
   ) => void;
   submissions: VideoSubmission[];
 }) {
-  const pending = submissions.filter((item) => item.status === "Em revisao").length;
+  const reviewQueue = submissions.filter(
+    (item) => item.status === "Em revisao"
+  );
+  const pending = reviewQueue.length;
   const approved = submissions.filter((item) => item.status === "Aprovado").length;
   const changes = submissions.filter(
     (item) => item.status === "Ajustes solicitados"
@@ -2519,11 +2522,11 @@ function AdminScreen({
       </View>
 
       <View style={styles.infoPanel}>
-        <Text style={styles.sectionTitle}>Fila de videos</Text>
-        {submissions.length === 0 ? (
-          <Text style={styles.bodyText}>Nenhum video na fila.</Text>
+        <Text style={styles.sectionTitle}>Fila de revisao</Text>
+        {reviewQueue.length === 0 ? (
+          <Text style={styles.bodyText}>Nenhuma solicitacao pendente.</Text>
         ) : (
-          submissions.map((submission) => (
+          reviewQueue.map((submission) => (
             <View key={submission.id} style={styles.adminItem}>
               <View style={styles.submissionTopRow}>
                 <View style={styles.submissionTextBlock}>
