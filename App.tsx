@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useEvent } from "expo";
+import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { VideoView, useVideoPlayer } from "expo-video";
 import {
   ArrowLeft,
   Check,
-  ChevronDown,
-  ChevronUp,
   Expand,
   LogOut,
   Play,
@@ -80,7 +80,7 @@ const TAB_BAR_SAFE_PADDING =
   }) ?? 10;
 const TAB_BAR_CONTENT_PADDING = 24;
 const DETAIL_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 36;
-const FEED_TEXT_LIMIT_COMPACT = 108;
+const FEED_TEXT_LIMIT_COMPACT = 76;
 const FEED_TEXT_LIMIT_WIDE = 230;
 
 type Tab = "feed" | "portfolio" | "submit" | "admin" | "profile";
@@ -1015,6 +1015,10 @@ function FeedReel({
     !isExpanded && hasMoreText
       ? `${presentationText.slice(0, textLimit).trim()}...`
       : presentationText;
+  const compactPreview =
+    presentationText.length > FEED_TEXT_LIMIT_COMPACT
+      ? `${presentationText.slice(0, FEED_TEXT_LIMIT_COMPACT).trim()}...`
+      : presentationText;
   const fundingProgressLabel = evaluation
     ? `${Math.round(progress * 100)}%`
     : null;
@@ -1140,11 +1144,31 @@ function FeedReel({
                   ]
                 : [
                     styles.feedTextOverlayCompact,
-                    isExpanded ? styles.feedTextOverlayCompactExpanded : null,
-                    isExpanded ? { borderColor: palette.border } : null
+                    isExpanded ? styles.feedTextOverlayCompactExpanded : null
                   ]
             ]}
           >
+            {!isWide && isExpanded ? (
+              <>
+                <BlurView
+                  experimentalBlurMethod={
+                    Platform.OS === "android" ? "dimezisBlurView" : "none"
+                  }
+                  intensity={24}
+                  pointerEvents="none"
+                  style={styles.feedCompactBlur}
+                  tint="dark"
+                />
+                <LinearGradient
+                  colors={["rgba(5, 18, 12, 0)", "rgba(5, 18, 12, 1)"]}
+                  end={{ x: 0.5, y: 1 }}
+                  locations={[0, 1]}
+                  pointerEvents="none"
+                  start={{ x: 0.5, y: 0 }}
+                  style={styles.feedCompactGradient}
+                />
+              </>
+            ) : null}
             {isWide ? (
               <Text style={[styles.feedOverlayEyebrow, { color: palette.accent }]}>
                 Ficha de observacao
@@ -1156,48 +1180,52 @@ function FeedReel({
                 !isWide ? styles.feedProfileRowCompact : null
               ]}
             >
-              <View
-                style={[
-                  styles.feedAvatar,
-                  !isWide ? styles.feedAvatarCompact : null,
-                  { borderColor: palette.accent }
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.feedAvatarText,
-                    !isWide ? styles.feedAvatarTextCompact : null,
-                    { color: palette.accent }
-                  ]}
+              {isWide ? (
+                <View
+                  style={[styles.feedAvatar, { borderColor: palette.accent }]}
                 >
-                  {initials}
-                </Text>
-              </View>
+                  <Text
+                    style={[styles.feedAvatarText, { color: palette.accent }]}
+                  >
+                    {initials}
+                  </Text>
+                </View>
+              ) : null}
               <View style={styles.feedProfileTextBlock}>
                 <Text
                   numberOfLines={1}
-                  style={[styles.feedProfileName, { color: palette.text }]}
+                  style={[
+                    styles.feedProfileName,
+                    !isWide ? styles.feedProfileNameCompact : null,
+                    { color: isWide ? palette.text : colors.onPrimary }
+                  ]}
                 >
                   {player.name}
                 </Text>
                 <Text
                   numberOfLines={1}
-                  style={[styles.feedSponsorLabel, { color: palette.muted }]}
+                  style={[
+                    styles.feedSponsorLabel,
+                    !isWide ? styles.feedSponsorLabelCompact : null,
+                    {
+                      color: isWide
+                        ? palette.muted
+                        : "rgba(255, 255, 255, 0.82)"
+                    }
+                  ]}
                 >
                   {player.position} | {player.city}
                 </Text>
               </View>
-              <View
-                style={[
-                  styles.feedStatusPill,
-                  !isWide ? styles.feedStatusPillCompact : null,
-                  { borderColor: palette.border }
-                ]}
-              >
-                <Text style={[styles.feedStatusText, { color: palette.accent }]}>
-                  {player.isDemo ? "Demonstracao" : "Aprovado"}
-                </Text>
-              </View>
+              {isWide ? (
+                <View
+                  style={[styles.feedStatusPill, { borderColor: palette.border }]}
+                >
+                  <Text style={[styles.feedStatusText, { color: palette.accent }]}>
+                    {player.isDemo ? "Demonstracao" : "Aprovado"}
+                  </Text>
+                </View>
+              ) : null}
             </View>
 
             {isWide ? (
@@ -1251,76 +1279,62 @@ function FeedReel({
               </>
             ) : (
               <>
-                <View style={styles.feedCompactSummaryRow}>
-                  <View style={styles.feedCompactSummaryText}>
+                <Text style={styles.feedCompactDescription}>
+                  <Text style={styles.feedCompactDescriptionTitle}>
+                    {player.videoTitle}
+                  </Text>
+                  {presentationText
+                    ? ` - ${isExpanded ? presentationText : compactPreview}`
+                    : ""}
+                  {!isExpanded ? (
                     <Text
-                      numberOfLines={1}
-                      style={[
-                        styles.feedReelVideoTitle,
-                        styles.feedReelVideoTitleCompact,
-                        { color: palette.text }
-                      ]}
+                      accessibilityRole="button"
+                      onPress={() => setIsExpanded(true)}
+                      style={styles.feedCompactInlineAction}
                     >
-                      {player.videoTitle}
+                      {"  "}mais
                     </Text>
-                    <Text
-                      numberOfLines={1}
-                      style={[styles.feedReelMeta, { color: palette.muted }]}
-                    >
-                      {player.age} anos | {player.club}
-                      {evaluation ? ` | risco ${evaluation.riskLevel}` : ""}
-                    </Text>
-                  </View>
-                  <Pressable
-                    accessibilityLabel={
-                      isExpanded ? "Recolher detalhes" : "Mostrar mais detalhes"
-                    }
-                    accessibilityRole="button"
-                    hitSlop={8}
-                    onPress={() => setIsExpanded((current) => !current)}
-                    style={({ pressed }) => [
-                      styles.feedCompactToggle,
-                      { borderColor: palette.border },
-                      pressed ? styles.feedCompactTogglePressed : null
-                    ]}
-                  >
-                    <Text style={styles.feedCompactToggleText}>
-                      {isExpanded ? "Ver menos" : "Ver mais"}
-                    </Text>
-                    {isExpanded ? (
-                      <ChevronUp color={colors.primary} size={16} />
-                    ) : (
-                      <ChevronDown color={colors.primary} size={16} />
-                    )}
-                  </Pressable>
-                </View>
+                  ) : null}
+                </Text>
 
                 {isExpanded ? (
-                  <View
-                    style={[
-                      styles.feedCompactExpandedContent,
-                      { borderTopColor: palette.border }
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.feedCompactSectionLabel,
-                        { color: palette.accent }
-                      ]}
-                    >
-                      Principal destaque
+                  <>
+                    <Text style={styles.feedCompactExpandedMeta}>
+                      {player.age} anos | {player.club}
                     </Text>
-                    <Text
-                      numberOfLines={5}
-                      style={[
-                        styles.feedReelHighlight,
-                        styles.feedReelHighlightCompact,
-                        { color: palette.text }
-                      ]}
-                    >
-                      {presentationText}
-                    </Text>
-                  </View>
+                    {player.tags.length > 0 ? (
+                      <View style={styles.feedCompactHashtagRow}>
+                        {player.tags.slice(0, 4).map((tag) => (
+                          <Text key={tag} style={styles.feedCompactHashtag}>
+                            #{tag}
+                          </Text>
+                        ))}
+                      </View>
+                    ) : null}
+                    <View style={styles.feedCompactExpandedActions}>
+                      <Pressable
+                        accessibilityRole="button"
+                        hitSlop={8}
+                        onPress={onOpen}
+                        style={styles.feedCompactTextButton}
+                      >
+                        <Text style={styles.feedCompactTextButtonLabel}>
+                          Ver perfil
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        accessibilityLabel="Recolher descricao"
+                        accessibilityRole="button"
+                        hitSlop={8}
+                        onPress={() => setIsExpanded(false)}
+                        style={styles.feedCompactTextButton}
+                      >
+                        <Text style={styles.feedCompactTextButtonLabel}>
+                          menos
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </>
                 ) : null}
               </>
             )}
@@ -1429,12 +1443,11 @@ function FeedReel({
               </View>
             ) : null}
 
-            {isWide || isExpanded ? (
+            {isWide ? (
               <Pressable
                 onPress={onOpen}
                 style={({ pressed }) => [
                   styles.feedLearnMoreButton,
-                  !isWide ? styles.feedLearnMoreButtonCompact : null,
                   pressed ? styles.feedReelButtonPressed : null
                 ]}
               >
@@ -3934,18 +3947,31 @@ const styles = StyleSheet.create({
     right: 340
   },
   feedTextOverlayCompact: {
-    backgroundColor: "rgba(247, 250, 247, 0.82)",
+    backgroundColor: "transparent",
+    borderRadius: 0,
+    borderWidth: 0,
     bottom: 0,
-    padding: 12,
-    shadowOpacity: 0.08
+    left: 0,
+    overflow: "hidden",
+    padding: 0,
+    paddingBottom: 16,
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    right: 0,
+    shadowOpacity: 0
   },
   feedTextOverlayCompactExpanded: {
-    backgroundColor: colors.surface,
-    elevation: 12,
-    shadowColor: "#000000",
-    shadowOffset: { height: -5, width: 0 },
-    shadowOpacity: 0.14,
-    shadowRadius: 12
+    backgroundColor: "transparent",
+    elevation: 0,
+    minHeight: 270,
+    paddingTop: 78,
+    shadowOpacity: 0
+  },
+  feedCompactBlur: {
+    ...StyleSheet.absoluteFillObject
+  },
+  feedCompactGradient: {
+    ...StyleSheet.absoluteFillObject
   },
   feedOverlayEyebrow: {
     fontSize: 10,
@@ -3961,7 +3987,9 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   feedProfileRowCompact: {
-    marginBottom: 8
+    alignItems: "flex-start",
+    marginBottom: 7,
+    zIndex: 2
   },
   feedAvatar: {
     alignItems: "center",
@@ -3976,13 +4004,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "900"
   },
-  feedAvatarCompact: {
-    height: 36,
-    width: 36
-  },
-  feedAvatarTextCompact: {
-    fontSize: 12
-  },
   feedProfileTextBlock: {
     flex: 1,
     minWidth: 0
@@ -3992,10 +4013,24 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "900"
   },
+  feedProfileNameCompact: {
+    fontSize: 16,
+    lineHeight: 20,
+    textShadowColor: "rgba(0, 0, 0, 0.78)",
+    textShadowOffset: { height: 1, width: 0 },
+    textShadowRadius: 3
+  },
   feedSponsorLabel: {
     fontSize: 11,
     fontWeight: "800",
     marginTop: 2
+  },
+  feedSponsorLabelCompact: {
+    fontSize: 12,
+    lineHeight: 16,
+    textShadowColor: "rgba(0, 0, 0, 0.78)",
+    textShadowOffset: { height: 1, width: 0 },
+    textShadowRadius: 3
   },
   feedStatusPill: {
     alignItems: "center",
@@ -4010,10 +4045,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "900"
   },
-  feedStatusPillCompact: {
-    minHeight: 28,
-    paddingHorizontal: 8
-  },
   feedReelVideoTitle: {
     fontSize: 20,
     fontWeight: "900",
@@ -4024,47 +4055,66 @@ const styles = StyleSheet.create({
     fontSize: 24,
     lineHeight: 29
   },
-  feedReelVideoTitleCompact: {
-    fontSize: 17,
-    lineHeight: 21
+  feedCompactDescription: {
+    color: colors.onPrimary,
+    fontSize: 15,
+    fontWeight: "600",
+    lineHeight: 20,
+    textShadowColor: "rgba(0, 0, 0, 0.84)",
+    textShadowOffset: { height: 1, width: 0 },
+    textShadowRadius: 3,
+    zIndex: 2
   },
-  feedCompactSummaryRow: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 10
-  },
-  feedCompactSummaryText: {
-    flex: 1,
-    minWidth: 0
-  },
-  feedCompactToggle: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 32,
-    paddingHorizontal: 10
-  },
-  feedCompactTogglePressed: {
-    opacity: 0.72,
-    transform: [{ scale: 0.97 }]
-  },
-  feedCompactToggleText: {
-    fontSize: 11,
+  feedCompactDescriptionTitle: {
     fontWeight: "900"
   },
-  feedCompactExpandedContent: {
-    borderColor: colors.border,
-    borderTopWidth: 1,
-    marginTop: 10,
-    paddingTop: 10
+  feedCompactInlineAction: {
+    color: colors.onPrimary,
+    fontWeight: "900"
   },
-  feedCompactSectionLabel: {
-    fontSize: 10,
+  feedCompactExpandedMeta: {
+    color: "rgba(255, 255, 255, 0.82)",
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 17,
+    marginTop: 8,
+    zIndex: 2
+  },
+  feedCompactHashtagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 7,
+    marginTop: 13,
+    zIndex: 2
+  },
+  feedCompactHashtag: {
+    color: colors.onPrimary,
+    fontSize: 14,
     fontWeight: "900",
-    textTransform: "uppercase"
+    lineHeight: 19,
+    textShadowColor: "rgba(0, 0, 0, 0.72)",
+    textShadowOffset: { height: 1, width: 0 },
+    textShadowRadius: 2
+  },
+  feedCompactExpandedActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16,
+    zIndex: 2
+  },
+  feedCompactTextButton: {
+    minHeight: 34,
+    justifyContent: "center",
+    paddingHorizontal: 4
+  },
+  feedCompactTextButtonLabel: {
+    color: colors.onPrimary,
+    fontSize: 14,
+    fontWeight: "900",
+    textShadowColor: "rgba(0, 0, 0, 0.72)",
+    textShadowOffset: { height: 1, width: 0 },
+    textShadowRadius: 2
   },
   feedReelMeta: {
     fontSize: 13,
@@ -4092,11 +4142,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 19,
     marginTop: 8
-  },
-  feedReelHighlightCompact: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 5
   },
   feedReadMoreButton: {
     alignSelf: "flex-start",
@@ -4170,10 +4215,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     minHeight: 48,
     paddingHorizontal: 15
-  },
-  feedLearnMoreButtonCompact: {
-    marginTop: 10,
-    minHeight: 44
   },
   feedProgressTrackCompact: {
     height: 5,

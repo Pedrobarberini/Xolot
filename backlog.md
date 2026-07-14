@@ -139,6 +139,31 @@ Criterios de aceite:
 - Textos e controles continuam legiveis.
 - O estado expandido mantem contraste suficiente.
 
+### Task HOTFIX-007 - Converter ficha mobile em legenda expansivel
+
+Tipo: Frontend/UI
+
+Objetivo: aproximar a descricao do padrao visual de feeds de video, exibindo texto diretamente sobre a midia e detalhes em uma camada expandida.
+
+Tasks:
+
+- [x] Remover card, avatar, selo e botao retangular da descricao compacta.
+- [x] Exibir nome, localizacao e descricao com tipografia branca sobre o video.
+- [x] Posicionar a acao `mais` em linha com a descricao.
+- [x] Criar estado expandido com blur e degrade vertical de 0% a 100%.
+- [x] Exibir tags e metadados reais do perfil no estado expandido.
+- [x] Adicionar acoes textuais `Ver perfil` e `menos`.
+- [x] Instalar `expo-blur` e `expo-linear-gradient` em versoes compativeis com Expo SDK 54.
+- [x] Preservar a ficha estruturada no layout desktop.
+
+Criterios de aceite:
+
+- A descricao compacta nao possui fundo, borda ou sombra de card.
+- A acao `mais` expande os detalhes sem trocar de tela.
+- O degrade expandido e transparente no topo e opaco no rodape.
+- O blur funciona em Expo Go, Android e web.
+- A acao `menos` retorna para a legenda compacta.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens
