@@ -15,7 +15,7 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Solicitacoes revisadas saem imediatamente da fila administrativa.
 - Videos reais aprovados substituem o perfil demonstrativo.
 - Score, risco, metricas e valores financeiros so aparecem quando existe uma avaliacao explicita.
-- Carteira e reservas permanecem simuladas, sem pagamento ou contrato real.
+- Saldo, depositos e reservas permanecem simulados, sem pagamento ou contrato real.
 
 ## Teste online
 
@@ -23,7 +23,7 @@ A versao web e publicada em:
 
 https://pedrobarberini.github.io/NextStar/
 
-O estado ainda fica apenas na memoria do navegador. Recarregar a pagina apaga contas, envios, moderacoes e reservas criadas durante o teste.
+O estado ainda fica apenas na memoria do navegador. Recarregar a pagina apaga contas, saldos, depositos, envios, moderacoes e reservas criadas durante o teste.
 
 ## Como rodar
 
@@ -50,6 +50,8 @@ pnpm run build:web
 4. Confirme que a solicitacao revisada saiu da fila.
 5. Abra o `Feed` e confira o video aprovado.
 6. Verifique que publicacoes sem avaliacao nao exibem score, risco, box de aviso ou valores inventados.
+7. Na `Carteira`, use `Depositar` para adicionar saldo simulado.
+8. Confirme que o saldo aparece em Feed, Carteira e Perfil e diminui ao criar uma reserva simulada.
 
 ## Antes da abertura ao publico
 

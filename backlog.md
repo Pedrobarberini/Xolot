@@ -185,6 +185,34 @@ Criterios de aceite:
 - `Ponta | Sao Paulo, SP` aparece acima de `Perfil demonstrativo`.
 - O titulo do video nao aparece duplicado no mobile.
 
+### Task HOTFIX-009 - Adicionar saldo e deposito simulado
+
+Tipo: Produto/Frontend
+
+Objetivo: permitir testes do fluxo de carteira com saldo disponivel, mantendo a operacao explicitamente simulada ate existir infraestrutura financeira real.
+
+Tasks:
+
+- [x] Criar estado compartilhado de saldo disponivel.
+- [x] Exibir somente o valor do saldo, sem box, no topo de Feed, Carteira e Perfil.
+- [x] Posicionar o saldo do Feed antes dos controles do canto superior direito.
+- [x] Adicionar botao `Depositar` na Carteira.
+- [x] Criar modal de deposito com campo numerico e valores predefinidos.
+- [x] Validar depositos simulados entre R$ 10 e R$ 100.000.
+- [x] Atualizar o saldo imediatamente apos a confirmacao.
+- [x] Descontar reservas simuladas do saldo disponivel.
+- [x] Bloquear reserva quando o saldo for insuficiente.
+- [x] Informar claramente que nao existe cobranca ou transferencia real.
+- [x] Atualizar README e plano de produto com o novo fluxo.
+
+Criterios de aceite:
+
+- O mesmo saldo aparece em Feed, Carteira e Perfil.
+- O indicador global possui apenas o valor em uma linha, sem fundo ou borda.
+- Depositar atualiza todas as telas sem recarregar.
+- Reserva reduz o saldo e nao permite valor superior ao disponivel.
+- Recarregar a pagina limpa o saldo enquanto nao houver backend.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens

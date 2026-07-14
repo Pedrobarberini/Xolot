@@ -9,6 +9,7 @@ import { VideoView, useVideoPlayer } from "expo-video";
 import {
   ArrowLeft,
   Check,
+  CircleDollarSign,
   Expand,
   LogOut,
   Play,
@@ -31,6 +32,7 @@ import {
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Modal,
   PanResponder,
   Platform,
   Pressable,
@@ -159,6 +161,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("feed");
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [investments, setInvestments] = useState<Investment[]>([]);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [submissions, setSubmissions] = useState<VideoSubmission[]>([]);
 
   useEffect(() => {
@@ -183,11 +186,6 @@ export default function App() {
         ? approvedSubmissionPlayers
         : [demoPlayer],
     [approvedSubmissionPlayers]
-  );
-
-  const portfolioTotal = useMemo(
-    () => investments.reduce((total, item) => total + item.amount, 0),
-    [investments]
   );
 
   const pendingReviews = submissions.filter(
@@ -218,6 +216,14 @@ export default function App() {
       return;
     }
 
+    if (amount > walletBalance) {
+      Alert.alert(
+        "Saldo insuficiente",
+        `Seu saldo disponivel e ${formatBRL(walletBalance)}. Deposite um valor simulado na Carteira antes de criar a reserva.`
+      );
+      return;
+    }
+
     const simulatedMonthlyReturn = calculateProjectedDistribution(
       amount,
       player.evaluation.funded,
@@ -237,8 +243,13 @@ export default function App() {
       },
       ...current
     ]);
+    setWalletBalance((current) => Math.max(0, current - amount));
     setSelectedPlayer(null);
     setTab("portfolio");
+  }
+
+  function handleDeposit(amount: number) {
+    setWalletBalance((current) => current + amount);
   }
 
   function handleAdvanceInvestment(investmentId: string) {
@@ -318,6 +329,7 @@ export default function App() {
                 onBack={() => setSelectedPlayer(null)}
                 onInvest={handleInvest}
                 player={selectedPlayer}
+                walletBalance={walletBalance}
               />
             </ScreenFrame>
           ) : (
@@ -326,12 +338,17 @@ export default function App() {
                 <Header
                   onSignOut={handleSignOut}
                   pendingReviews={pendingReviews}
-                  portfolioTotal={portfolioTotal}
+                  showBalance={
+                    user.role === "Usuario" &&
+                    (tab === "portfolio" || tab === "profile")
+                  }
                   user={user}
+                  walletBalance={walletBalance}
                 />
               ) : null}
               {tab === "feed" ? (
                 <FeedScreen
+                  balance={user.role === "Usuario" ? walletBalance : null}
                   onOpenPlayer={setSelectedPlayer}
                   players={availablePlayers}
                 />
@@ -339,8 +356,10 @@ export default function App() {
               {tab === "portfolio" ? (
                 <ScreenFrame>
                   <PortfolioScreen
+                    balance={walletBalance}
                     investments={investments}
                     onAdvance={handleAdvanceInvestment}
+                    onDeposit={handleDeposit}
                   />
                 </ScreenFrame>
               ) : null}
@@ -777,20 +796,18 @@ function AuthScreen({
 function Header({
   onSignOut,
   pendingReviews,
-  portfolioTotal,
-  user
+  showBalance,
+  user,
+  walletBalance
 }: {
   onSignOut: () => void;
   pendingReviews: number;
-  portfolioTotal: number;
+  showBalance: boolean;
   user: AppUser;
+  walletBalance: number;
 }) {
   const { width } = useWindowDimensions();
   const isCompact = width < 520;
-  const badgeLabel =
-    user.role === "Admin" ? "Revisao" : "Carteira";
-  const badgeValue =
-    user.role === "Admin" ? `${pendingReviews} pend.` : formatBRL(portfolioTotal);
 
   return (
     <View style={[styles.header, isCompact ? styles.headerCompact : null]}>
@@ -822,15 +839,10 @@ function Header({
           isCompact ? styles.headerActionsCompact : null
         ]}
       >
-        <View
-          style={[
-            styles.walletBadge,
-            isCompact ? styles.walletBadgeCompact : null
-          ]}
-        >
-          <Text style={styles.walletLabel}>{badgeLabel}</Text>
-          <Text style={styles.walletValue}>{badgeValue}</Text>
-        </View>
+        {showBalance ? <BalanceLine balance={walletBalance} /> : null}
+        {user.role === "Admin" ? (
+          <Text style={styles.headerReviewLine}>{pendingReviews} pend.</Text>
+        ) : null}
         <Pressable
           accessibilityLabel="Sair da conta"
           onPress={onSignOut}
@@ -846,10 +858,37 @@ function Header({
   );
 }
 
+function BalanceLine({
+  balance,
+  overlay = false
+}: {
+  balance: number;
+  overlay?: boolean;
+}) {
+  return (
+    <View
+      accessibilityLabel={`Saldo disponivel ${formatBRL(balance)}`}
+      style={[styles.balanceLine, overlay ? styles.balanceLineOverlay : null]}
+    >
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.balanceLineValue,
+          overlay ? styles.balanceLineValueOverlay : null
+        ]}
+      >
+        {formatBRL(balance)}
+      </Text>
+    </View>
+  );
+}
+
 function FeedScreen({
+  balance,
   onOpenPlayer,
   players: feedPlayers
 }: {
+  balance: number | null;
   onOpenPlayer: (player: Player) => void;
   players: Player[];
 }) {
@@ -980,6 +1019,7 @@ function FeedScreen({
           </View>
         ))}
       </ScrollView>
+      {balance !== null ? <BalanceLine balance={balance} overlay /> : null}
     </View>
   );
 }
@@ -1983,12 +2023,14 @@ function PlayerDetail({
   canInvest,
   onBack,
   onInvest,
-  player
+  player,
+  walletBalance
 }: {
   canInvest: boolean;
   onBack: () => void;
   onInvest: (player: Player, amount: number) => void;
   player: Player;
+  walletBalance: number;
 }) {
   const palette = getCardPaletteFromId(player.id);
   const evaluation = player.evaluation;
@@ -2013,8 +2055,9 @@ function PlayerDetail({
   const hasMinimumTicket = evaluation
     ? amount >= evaluation.minimumTicket
     : false;
+  const hasAvailableBalance = amount <= walletBalance;
   const canSubmitInvestment = Boolean(
-    evaluation && canInvest && hasMinimumTicket
+    evaluation && canInvest && hasMinimumTicket && hasAvailableBalance
   );
 
   return (
@@ -2122,6 +2165,9 @@ function PlayerDetail({
           {formatPercent(evaluation.athleteSharePercent)} dos ganhos do atleta seriam
           destinados ao pool de investidores. Esta tela apenas simula o modelo.
         </Text>
+        <Text style={styles.availableBalanceText}>
+          Saldo disponivel: {formatBRL(walletBalance)}
+        </Text>
 
         <View style={styles.inputRow}>
           <Text style={styles.currencyPrefix}>R$</Text>
@@ -2167,6 +2213,11 @@ function PlayerDetail({
         {!canInvest ? (
           <Text style={styles.validationText}>
             Reservas estao disponiveis apenas para contas de usuario.
+          </Text>
+        ) : null}
+        {!hasAvailableBalance ? (
+          <Text style={styles.validationText}>
+            Saldo insuficiente. Use o botao Depositar na Carteira.
           </Text>
         ) : null}
 
@@ -2830,132 +2881,288 @@ function StatusPill({ status }: { status: VideoSubmissionStatus }) {
 }
 
 function PortfolioScreen({
+  balance,
   investments,
-  onAdvance
+  onAdvance,
+  onDeposit
 }: {
+  balance: number;
   investments: Investment[];
   onAdvance: (investmentId: string) => void;
+  onDeposit: (amount: number) => void;
 }) {
   const { width } = useWindowDimensions();
+  const [isDepositVisible, setIsDepositVisible] = useState(false);
   const isWide = width >= 840;
-  const total = investments.reduce((sum, item) => sum + item.amount, 0);
+  const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const monthlyProjection = investments.reduce(
     (sum, item) => sum + item.simulatedMonthlyReturn,
     0
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.screenContent}>
-      <View style={styles.summaryBand}>
-        <View style={styles.summaryTopRow}>
-          <Text style={styles.summaryLabel}>Carteira</Text>
-          <View style={styles.summaryBadge}>
-            <Text style={styles.summaryBadgeText}>Simulada</Text>
+    <>
+      <ScrollView contentContainerStyle={styles.screenContent}>
+        <View style={styles.summaryBand}>
+          <View style={styles.summaryTopRow}>
+            <Text style={styles.summaryLabel}>Saldo disponivel</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setIsDepositVisible(true)}
+              style={({ pressed }) => [
+                styles.depositButton,
+                pressed ? styles.buttonPressed : null
+              ]}
+            >
+              <CircleDollarSign color={colors.onPrimary} size={18} />
+              <Text style={styles.depositButtonText}>Depositar</Text>
+            </Pressable>
           </View>
+          <Text style={styles.summaryValue}>{formatBRL(balance)}</Text>
+          <View style={styles.summaryInsightStrip}>
+            <View style={styles.summaryInsightItem}>
+              <Text style={styles.summaryInsightValue}>
+                {formatBRL(totalInvested)}
+              </Text>
+              <Text style={styles.summaryInsightLabel}>reservado</Text>
+            </View>
+            <View style={styles.summaryInsightItem}>
+              <Text style={styles.summaryInsightValue}>{investments.length}</Text>
+              <Text style={styles.summaryInsightLabel}>reservas</Text>
+            </View>
+            <View style={styles.summaryInsightItem}>
+              <Text style={styles.summaryInsightValue}>
+                {formatBRL(monthlyProjection)}
+              </Text>
+              <Text style={styles.summaryInsightLabel}>projecao</Text>
+            </View>
+          </View>
+          <Text style={styles.summaryBody}>
+            Saldo, depositos e reservas sao simulacoes locais. Nenhuma cobranca
+            ou transferencia bancaria sera realizada.
+          </Text>
         </View>
-        <Text style={styles.summaryValue}>{formatBRL(total)}</Text>
-        <View style={styles.summaryInsightStrip}>
-          <View style={styles.summaryInsightItem}>
-            <Text style={styles.summaryInsightValue}>{investments.length}</Text>
-            <Text style={styles.summaryInsightLabel}>reservas</Text>
-          </View>
-          <View style={styles.summaryInsightItem}>
-            <Text style={styles.summaryInsightValue}>
-              {formatBRL(monthlyProjection)}
-            </Text>
-            <Text style={styles.summaryInsightLabel}>projecao</Text>
-          </View>
-          <View style={styles.summaryInsightItem}>
-            <Text style={styles.summaryInsightValue}>
-              {investmentStages.length}
-            </Text>
-            <Text style={styles.summaryInsightLabel}>etapas</Text>
-          </View>
-        </View>
-        <Text style={styles.summaryBody}>
-          Projecao mensal hipotetica: {formatBRL(monthlyProjection)}. Esta
-          carteira nao faz cobranca, assinatura ou transferencia.
-        </Text>
-      </View>
 
-      <View style={isWide ? styles.portfolioDesktopGrid : null}>
-        <View style={isWide ? styles.portfolioDesktopColumn : null}>
-          <View style={styles.infoPanel}>
-            <Text style={styles.sectionTitle}>Fluxo futuro</Text>
-            {investmentStages.map((stage, index) => (
-              <View key={stage} style={styles.timelineRow}>
-                <View style={styles.timelineDot}>
-                  <Text style={styles.timelineDotText}>{index + 1}</Text>
+        <View style={isWide ? styles.portfolioDesktopGrid : null}>
+          <View style={isWide ? styles.portfolioDesktopColumn : null}>
+            <View style={styles.infoPanel}>
+              <Text style={styles.sectionTitle}>Fluxo futuro</Text>
+              {investmentStages.map((stage, index) => (
+                <View key={stage} style={styles.timelineRow}>
+                  <View style={styles.timelineDot}>
+                    <Text style={styles.timelineDotText}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.timelineText}>{stage}</Text>
                 </View>
-                <Text style={styles.timelineText}>{stage}</Text>
+              ))}
+            </View>
+          </View>
+
+          <View style={isWide ? styles.portfolioDesktopColumn : null}>
+            {investments.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
+                <Text style={styles.emptyBody}>
+                  Deposite saldo simulado e abra um perfil no feed para criar
+                  uma reserva.
+                </Text>
               </View>
-            ))}
+            ) : (
+              investments.map((investment) => {
+                const currentIndex = investmentStages.indexOf(investment.status);
+                const isComplete = currentIndex === investmentStages.length - 1;
+
+                return (
+                  <View key={investment.id} style={styles.portfolioItemBlock}>
+                    <View style={styles.portfolioItemHeader}>
+                      <View style={styles.submissionTextBlock}>
+                        <Text style={styles.portfolioName}>
+                          {investment.playerName}
+                        </Text>
+                        <Text style={styles.portfolioMeta}>
+                          {investment.status}
+                        </Text>
+                      </View>
+                      <View style={styles.portfolioNumbers}>
+                        <Text style={styles.portfolioAmount}>
+                          {formatBRL(investment.amount)}
+                        </Text>
+                        <Text style={styles.portfolioShare}>
+                          {formatBRL(investment.simulatedMonthlyReturn)} proj.
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.stepRail}>
+                      {investmentStages.map((stage, index) => (
+                        <View
+                          key={stage}
+                          style={[
+                            styles.stepMarker,
+                            index <= currentIndex
+                              ? styles.stepMarkerActive
+                              : null
+                          ]}
+                        />
+                      ))}
+                    </View>
+
+                    <Pressable
+                      disabled={isComplete}
+                      onPress={() => onAdvance(investment.id)}
+                      style={[
+                        styles.secondaryButton,
+                        isComplete ? styles.secondaryButtonDisabled : null
+                      ]}
+                    >
+                      <Text style={styles.secondaryButtonText}>
+                        {isComplete
+                          ? "Simulacao concluida"
+                          : "Avancar simulacao"}
+                      </Text>
+                    </Pressable>
+                  </View>
+                );
+              })
+            )}
           </View>
         </View>
+      </ScrollView>
+      <DepositModal
+        balance={balance}
+        onClose={() => setIsDepositVisible(false)}
+        onConfirm={onDeposit}
+        visible={isDepositVisible}
+      />
+    </>
+  );
+}
 
-        <View style={isWide ? styles.portfolioDesktopColumn : null}>
-          {investments.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
-              <Text style={styles.emptyBody}>
-                Abra um perfil no feed e crie uma reserva simulada.
+function DepositModal({
+  balance,
+  onClose,
+  onConfirm,
+  visible
+}: {
+  balance: number;
+  onClose: () => void;
+  onConfirm: (amount: number) => void;
+  visible: boolean;
+}) {
+  const [amountText, setAmountText] = useState("");
+  const amount = Number(amountText.replace(/\D/g, "")) || 0;
+  const canDeposit = amount >= 10 && amount <= 100000;
+
+  function closeModal() {
+    setAmountText("");
+    onClose();
+  }
+
+  function confirmDeposit() {
+    if (!canDeposit) {
+      return;
+    }
+
+    onConfirm(amount);
+    closeModal();
+  }
+
+  return (
+    <Modal
+      animationType="fade"
+      onRequestClose={closeModal}
+      statusBarTranslucent
+      transparent
+      visible={visible}
+    >
+      <View style={styles.depositModalRoot}>
+        <Pressable
+          accessibilityLabel="Fechar deposito"
+          onPress={closeModal}
+          style={styles.depositModalBackdrop}
+        />
+        <View accessibilityViewIsModal style={styles.depositDialog}>
+          <View style={styles.depositDialogHeader}>
+            <View style={styles.depositDialogTitleBlock}>
+              <Text style={styles.depositDialogTitle}>Depositar saldo</Text>
+              <Text style={styles.depositDialogSubtitle}>
+                Operacao demonstrativa, sem cobranca real.
               </Text>
             </View>
-          ) : (
-            investments.map((investment) => {
-              const currentIndex = investmentStages.indexOf(investment.status);
-              const isComplete = currentIndex === investmentStages.length - 1;
+            <Pressable
+              accessibilityLabel="Fechar"
+              hitSlop={8}
+              onPress={closeModal}
+              style={styles.depositCloseButton}
+            >
+              <X color={colors.muted} size={20} />
+            </Pressable>
+          </View>
 
-              return (
-                <View key={investment.id} style={styles.portfolioItemBlock}>
-                  <View style={styles.portfolioItemHeader}>
-                    <View style={styles.submissionTextBlock}>
-                      <Text style={styles.portfolioName}>
-                        {investment.playerName}
-                      </Text>
-                      <Text style={styles.portfolioMeta}>{investment.status}</Text>
-                    </View>
-                    <View style={styles.portfolioNumbers}>
-                      <Text style={styles.portfolioAmount}>
-                        {formatBRL(investment.amount)}
-                      </Text>
-                      <Text style={styles.portfolioShare}>
-                        {formatBRL(investment.simulatedMonthlyReturn)} proj.
-                      </Text>
-                    </View>
-                  </View>
+          <Text style={styles.depositBalanceLabel}>Saldo atual</Text>
+          <Text style={styles.depositBalanceValue}>{formatBRL(balance)}</Text>
 
-                  <View style={styles.stepRail}>
-                    {investmentStages.map((stage, index) => (
-                      <View
-                        key={stage}
-                        style={[
-                          styles.stepMarker,
-                          index <= currentIndex ? styles.stepMarkerActive : null
-                        ]}
-                      />
-                    ))}
-                  </View>
+          <Text style={styles.inputLabel}>Valor do deposito</Text>
+          <View style={styles.depositInputRow}>
+            <Text style={styles.depositCurrencyPrefix}>R$</Text>
+            <TextInput
+              autoFocus
+              keyboardType="number-pad"
+              onChangeText={setAmountText}
+              placeholder="0"
+              placeholderTextColor={colors.muted}
+              selectTextOnFocus
+              style={styles.depositInput}
+              value={amountText}
+            />
+          </View>
 
-                  <Pressable
-                    disabled={isComplete}
-                    onPress={() => onAdvance(investment.id)}
-                    style={[
-                      styles.secondaryButton,
-                      isComplete ? styles.secondaryButtonDisabled : null
-                    ]}
-                  >
-                    <Text style={styles.secondaryButtonText}>
-                      {isComplete ? "Simulacao concluida" : "Avancar simulacao"}
-                    </Text>
-                  </Pressable>
-                </View>
-              );
-            })
-          )}
+          <View style={styles.depositPresetRow}>
+            {[50, 100, 250, 500].map((preset) => (
+              <Pressable
+                key={preset}
+                onPress={() => setAmountText(String(preset))}
+                style={[
+                  styles.depositPresetButton,
+                  amount === preset ? styles.depositPresetButtonActive : null
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.depositPresetText,
+                    amount === preset ? styles.depositPresetTextActive : null
+                  ]}
+                >
+                  {formatBRL(preset)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {amount > 0 && !canDeposit ? (
+            <Text style={styles.validationText}>
+              Informe um valor entre R$ 10 e R$ 100.000.
+            </Text>
+          ) : null}
+
+          <View style={styles.depositDialogActions}>
+            <Pressable onPress={closeModal} style={styles.depositCancelButton}>
+              <Text style={styles.depositCancelText}>Cancelar</Text>
+            </Pressable>
+            <Pressable
+              disabled={!canDeposit}
+              onPress={confirmDeposit}
+              style={[
+                styles.depositConfirmButton,
+                !canDeposit ? styles.primaryButtonDisabled : null
+              ]}
+            >
+              <Text style={styles.depositConfirmText}>Confirmar deposito</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
-    </ScrollView>
+    </Modal>
   );
 }
 
@@ -3417,14 +3624,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 16,
+    position: "relative",
     width: "100%"
   },
   headerCompact: {
-    alignItems: "stretch",
-    flexDirection: "column",
+    alignItems: "center",
+    flexDirection: "row",
     flexWrap: "nowrap",
-    gap: 10,
-    paddingBottom: 12,
+    gap: 0,
+    paddingBottom: 10,
     paddingHorizontal: 14,
     paddingTop: 10
   },
@@ -3436,13 +3644,10 @@ const styles = StyleSheet.create({
     paddingRight: 8
   },
   headerIdentityCompact: {
-    flexBasis: 48,
-    flexGrow: 0,
-    flexShrink: 0,
+    flex: 1,
     minHeight: 48,
     minWidth: 0,
-    paddingRight: 0,
-    width: "100%"
+    paddingRight: 156
   },
   headerLogo: {
     height: 42,
@@ -3474,35 +3679,42 @@ const styles = StyleSheet.create({
     gap: 8
   },
   headerActionsCompact: {
-    alignSelf: "stretch",
-    justifyContent: "space-between",
-    width: "100%"
+    gap: 6,
+    position: "absolute",
+    right: 14,
+    top: 11
   },
-  walletBadge: {
+  balanceLine: {
     alignItems: "flex-end",
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 7
+    justifyContent: "center",
+    minHeight: 38,
+    minWidth: 86
   },
-  walletBadgeCompact: {
-    alignItems: "flex-start",
-    flex: 1,
+  balanceLineOverlay: {
+    minHeight: 30,
     minWidth: 0,
-    paddingHorizontal: 12
+    position: "absolute",
+    right: 72,
+    top: 18,
+    zIndex: 6
   },
-  walletLabel: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: "700"
-  },
-  walletValue: {
+  balanceLineValue: {
     color: colors.text,
     fontSize: 14,
+    fontWeight: "900"
+  },
+  balanceLineValueOverlay: {
+    color: colors.onPrimary,
+    fontSize: 14,
     fontWeight: "900",
-    marginTop: 2
+    textShadowColor: "rgba(0, 0, 0, 0.82)",
+    textShadowOffset: { height: 1, width: 0 },
+    textShadowRadius: 3
+  },
+  headerReviewLine: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800"
   },
   signOutButton: {
     alignItems: "center",
@@ -4864,6 +5076,12 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     minHeight: 54
   },
+  availableBalanceText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "900",
+    marginTop: 10
+  },
   twoColumnRow: {
     flexDirection: "row",
     gap: 10
@@ -5211,21 +5429,27 @@ const styles = StyleSheet.create({
   summaryTopRow: {
     alignItems: "center",
     flexDirection: "row",
+    gap: 12,
     justifyContent: "space-between"
   },
-  summaryBadge: {
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.border,
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 5
+  depositButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 40,
+    paddingHorizontal: 13
   },
-  summaryBadgeText: {
-    color: colors.primary,
-    fontSize: 10,
-    fontWeight: "900",
-    textTransform: "uppercase"
+  depositButtonText: {
+    color: colors.onPrimary,
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  buttonPressed: {
+    opacity: 0.76,
+    transform: [{ scale: 0.98 }]
   },
   summaryLabel: {
     color: colors.primary,
@@ -5272,6 +5496,159 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginTop: 8
+  },
+  depositModalRoot: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    padding: 20
+  },
+  depositModalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(5, 18, 12, 0.52)"
+  },
+  depositDialog: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    elevation: 18,
+    maxWidth: 420,
+    padding: 18,
+    shadowColor: "#000000",
+    shadowOffset: { height: 8, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    width: "100%"
+  },
+  depositDialogHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between"
+  },
+  depositDialogTitleBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  depositDialogTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: "900"
+  },
+  depositDialogSubtitle: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4
+  },
+  depositCloseButton: {
+    alignItems: "center",
+    height: 36,
+    justifyContent: "center",
+    width: 36
+  },
+  depositBalanceLabel: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+    marginTop: 18,
+    textTransform: "uppercase"
+  },
+  depositBalanceValue: {
+    color: colors.primary,
+    fontSize: 24,
+    fontWeight: "900",
+    marginBottom: 18,
+    marginTop: 2
+  },
+  depositInputRow: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderStrong,
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: "row",
+    marginTop: 7,
+    paddingHorizontal: 12
+  },
+  depositCurrencyPrefix: {
+    color: colors.primary,
+    fontSize: 18,
+    fontWeight: "900",
+    marginRight: 8
+  },
+  depositInput: {
+    color: colors.text,
+    flex: 1,
+    fontSize: 24,
+    fontWeight: "900",
+    minHeight: 54
+  },
+  depositPresetRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 7,
+    marginTop: 10
+  },
+  depositPresetButton: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    flexGrow: 1,
+    minHeight: 36,
+    minWidth: 76,
+    justifyContent: "center",
+    paddingHorizontal: 8
+  },
+  depositPresetButtonActive: {
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary
+  },
+  depositPresetText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800"
+  },
+  depositPresetTextActive: {
+    color: colors.primary
+  },
+  depositDialogActions: {
+    flexDirection: "row",
+    gap: 9,
+    marginTop: 18
+  },
+  depositCancelButton: {
+    alignItems: "center",
+    borderColor: colors.borderStrong,
+    borderRadius: 6,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 46,
+    paddingHorizontal: 12
+  },
+  depositCancelText: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  depositConfirmButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    flex: 1.6,
+    justifyContent: "center",
+    minHeight: 46,
+    paddingHorizontal: 12
+  },
+  depositConfirmText: {
+    color: colors.onPrimary,
+    fontSize: 13,
+    fontWeight: "900",
+    textAlign: "center"
   },
   emptyState: {
     backgroundColor: colors.surface,

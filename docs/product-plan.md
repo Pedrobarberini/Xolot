@@ -16,7 +16,7 @@ Entregue no aplicativo:
 - Publicacao no feed somente depois da aprovacao.
 - Perfil demonstrativo com video real, removido quando existe video aprovado.
 - Avaliacao esportiva e condicoes financeiras opcionais e separadas do envio.
-- Reservas e carteira exclusivamente simuladas.
+- Saldo, depositos, reservas e carteira exclusivamente simulados em memoria local.
 
 Limite atual: todo o estado e local e temporario. Nao ha autenticacao, API, banco, armazenamento permanente, pagamento ou contrato real.
 
