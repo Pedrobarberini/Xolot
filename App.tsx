@@ -151,7 +151,7 @@ export default function App() {
   const [athleteFunds, setAthleteFunds] = useState<AthleteFund[]>(() => [
     {
       id: "demo-athlete-fund",
-      playerId: demoPlayer.id,
+      profileId: demoPlayer.profileId,
       ownerUserId: "demo-athlete",
       athleteName: demoPlayer.name,
       goalAmount: 5000,
@@ -214,7 +214,9 @@ export default function App() {
   }
 
   function handleInvest(player: Player, amount: number) {
-    const fund = athleteFunds.find((item) => item.playerId === player.id);
+    const fund = athleteFunds.find(
+      (item) => item.profileId === player.profileId
+    );
 
     if (!fund) {
       Alert.alert(
@@ -261,7 +263,7 @@ export default function App() {
         id: `simulation-${Date.now()}`,
         fundId: fund.id,
         investorUserId: user?.id ?? "",
-        playerId: player.id,
+        profileId: player.profileId,
         playerName: player.name,
         amount,
         status: "Confirmada",
@@ -315,7 +317,7 @@ export default function App() {
     goalAmount: number,
     minimumContribution: number
   ) {
-    if (athleteFunds.some((item) => item.playerId === player.id)) {
+    if (athleteFunds.some((item) => item.profileId === player.profileId)) {
       Alert.alert("Bolsa ja existente", "Este perfil ja possui uma bolsa aberta.");
       return;
     }
@@ -323,7 +325,7 @@ export default function App() {
     setAthleteFunds((current) => [
       {
         id: `athlete-fund-${Date.now()}`,
-        playerId: player.id,
+        profileId: player.profileId,
         ownerUserId: player.ownerUserId ?? user?.id ?? "",
         athleteName: player.name,
         goalAmount,
@@ -395,11 +397,14 @@ export default function App() {
               <PlayerDetail
                 canInvest={user.role === "Usuario"}
                 fund={athleteFunds.find(
-                  (item) => item.playerId === selectedPlayer.id
+                  (item) => item.profileId === selectedPlayer.profileId
                 )}
                 onBack={() => setSelectedPlayer(null)}
                 onInvest={handleInvest}
                 player={selectedPlayer}
+                profileVideos={availablePlayers.filter(
+                  (item) => item.profileId === selectedPlayer.profileId
+                )}
                 walletBalance={walletBalance}
               />
             </ScreenFrame>
@@ -484,6 +489,7 @@ export default function App() {
 function buildPlayerFromSubmission(submission: VideoSubmission): Player {
   return {
     id: `approved-${submission.id}`,
+    profileId: `profile-${submission.userId}`,
     ownerUserId: submission.userId,
     name: submission.athleteName,
     age: submission.age,
@@ -1298,17 +1304,29 @@ function FeedReel({
                 !isWide ? styles.feedProfileRowCompact : null
               ]}
             >
-              {isWide ? (
-                <View
-                  style={[styles.feedAvatar, { borderColor: palette.accent }]}
-                >
+              <Pressable
+                accessibilityLabel={`Abrir perfil de ${player.name}`}
+                accessibilityRole="button"
+                hitSlop={6}
+                onPress={onOpen}
+                style={({ pressed }) => [
+                  styles.feedProfileButton,
+                  isWide
+                    ? [styles.feedAvatar, { borderColor: palette.accent }]
+                    : styles.feedProfileButtonCompact,
+                  pressed ? styles.buttonPressed : null
+                ]}
+              >
+                {isWide ? (
                   <Text
                     style={[styles.feedAvatarText, { color: palette.accent }]}
                   >
                     {initials}
                   </Text>
-                </View>
-              ) : null}
+                ) : (
+                  <UserRound color={colors.onPrimary} size={20} strokeWidth={2.2} />
+                )}
+              </Pressable>
               <View style={styles.feedProfileTextBlock}>
                 {!isWide ? (
                   <Text
@@ -2103,6 +2121,7 @@ function PlayerDetail({
   onBack,
   onInvest,
   player,
+  profileVideos,
   walletBalance
 }: {
   canInvest: boolean;
@@ -2110,10 +2129,12 @@ function PlayerDetail({
   onBack: () => void;
   onInvest: (player: Player, amount: number) => void;
   player: Player;
+  profileVideos: Player[];
   walletBalance: number;
 }) {
-  const palette = getCardPaletteFromId(player.id);
-  const evaluation = player.evaluation;
+  const [activeVideo, setActiveVideo] = useState(player);
+  const palette = getCardPaletteFromId(activeVideo.id);
+  const evaluation = activeVideo.evaluation;
   const scoreColor = evaluation
     ? getScoreColor(evaluation.score)
     : colors.muted;
@@ -2139,6 +2160,10 @@ function PlayerDetail({
       hasAvailableBalance
   );
 
+  useEffect(() => {
+    setActiveVideo(player);
+  }, [player]);
+
   return (
     <ScrollView contentContainerStyle={styles.detailContent}>
       <View style={styles.detailTopBar}>
@@ -2150,7 +2175,7 @@ function PlayerDetail({
           <ArrowLeft color={colors.primary} size={22} />
         </Pressable>
         <Text style={styles.detailRisk}>
-          {player.isDemo
+          {activeVideo.isDemo
             ? "Demonstracao"
             : evaluation
               ? `Risco ${evaluation.riskLevel}`
@@ -2158,7 +2183,7 @@ function PlayerDetail({
         </Text>
       </View>
 
-      {player.isDemo ? (
+      {activeVideo.isDemo ? (
         <View style={styles.demoNotice}>
           <Text style={styles.demoNoticeTitle}>Perfil demonstrativo</Text>
           <Text style={styles.demoNoticeBody}>
@@ -2177,7 +2202,10 @@ function PlayerDetail({
           }
         ]}
       >
-        <DetailVideoPlayback uri={player.videoUri} />
+        <DetailVideoPlayback
+          key={activeVideo.id}
+          uri={activeVideo.videoUri}
+        />
       </View>
 
       <View style={styles.detailTitleRow}>
@@ -2195,6 +2223,29 @@ function PlayerDetail({
             <Text style={[styles.scoreLabel, { color: palette.muted }]}>score</Text>
           </View>
         ) : null}
+      </View>
+
+      <View style={styles.profileVideosSection}>
+        <View style={styles.profileVideosHeader}>
+          <Text style={styles.sectionTitle}>Videos publicados</Text>
+          <Text style={styles.profileVideosCount}>
+            {profileVideos.length} {profileVideos.length === 1 ? "video" : "videos"}
+          </Text>
+        </View>
+        <ScrollView
+          contentContainerStyle={styles.profileVideosRail}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        >
+          {profileVideos.map((video) => (
+            <ProfileVideoCard
+              isSelected={video.id === activeVideo.id}
+              key={video.id}
+              onPress={() => setActiveVideo(video)}
+              video={video}
+            />
+          ))}
+        </ScrollView>
       </View>
 
       {evaluation ? (
@@ -2220,14 +2271,14 @@ function PlayerDetail({
 
       <View style={styles.infoPanel}>
         <Text style={styles.sectionTitle}>Principal destaque</Text>
-        <Text style={styles.bodyText}>{player.highlight}</Text>
+        <Text style={styles.bodyText}>{activeVideo.highlight}</Text>
       </View>
 
       <View style={styles.infoPanel}>
         <Text style={styles.sectionTitle}>
-          {player.isDemo ? "Objetivo do video" : "Objetivo do aporte"}
+          {activeVideo.isDemo ? "Objetivo do video" : "Objetivo do aporte"}
         </Text>
-        <Text style={styles.bodyText}>{player.objective}</Text>
+        <Text style={styles.bodyText}>{activeVideo.objective}</Text>
       </View>
 
       {evaluation ? (
@@ -2371,6 +2422,54 @@ function DetailVideoPlayback({ uri }: { uri: string | number }) {
       style={styles.detailVideoMedia}
       surfaceType="textureView"
     />
+  );
+}
+
+function ProfileVideoCard({
+  isSelected,
+  onPress,
+  video
+}: {
+  isSelected: boolean;
+  onPress: () => void;
+  video: Player;
+}) {
+  const previewPlayer = useVideoPlayer(video.videoUri, (player) => {
+    player.loop = false;
+    player.muted = true;
+  });
+
+  return (
+    <Pressable
+      accessibilityLabel={`Reproduzir ${video.videoTitle}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.profileVideoCard,
+        isSelected ? styles.profileVideoCardSelected : null,
+        pressed ? styles.buttonPressed : null
+      ]}
+    >
+      <View style={styles.profileVideoThumbnail}>
+        <VideoView
+          contentFit="cover"
+          nativeControls={false}
+          player={previewPlayer}
+          pointerEvents="none"
+          style={styles.profileVideoThumbnailMedia}
+          surfaceType="textureView"
+        />
+        <View style={styles.profileVideoPlayIcon}>
+          <Play color={colors.onPrimary} fill={colors.onPrimary} size={16} />
+        </View>
+      </View>
+      <Text numberOfLines={2} style={styles.profileVideoTitle}>
+        {video.videoTitle}
+      </Text>
+      <Text style={styles.profileVideoDuration}>
+        {video.videoLength || "Video aprovado"}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -3013,7 +3112,7 @@ function PortfolioScreen({
   const isWide = width >= 840;
   const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const supportedAthletes = new Set(
-    investments.map((investment) => investment.playerId)
+    investments.map((investment) => investment.profileId)
   ).size;
 
   return (
@@ -4515,6 +4614,19 @@ const styles = StyleSheet.create({
     marginBottom: 7,
     zIndex: 2
   },
+  feedProfileButton: {
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  feedProfileButtonCompact: {
+    backgroundColor: "rgba(5, 18, 12, 0.62)",
+    borderColor: "rgba(255, 255, 255, 0.72)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 40,
+    marginTop: 1,
+    width: 40
+  },
   feedAvatar: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
@@ -5147,6 +5259,76 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     marginTop: 5
+  },
+  profileVideosSection: {
+    marginTop: 22
+  },
+  profileVideosHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 11
+  },
+  profileVideosCount: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800"
+  },
+  profileVideosRail: {
+    gap: 10,
+    paddingRight: 22
+  },
+  profileVideoCard: {
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    overflow: "hidden",
+    paddingBottom: 10,
+    width: 138
+  },
+  profileVideoCardSelected: {
+    borderColor: colors.primary,
+    borderWidth: 2
+  },
+  profileVideoThumbnail: {
+    aspectRatio: 9 / 13,
+    backgroundColor: colors.media,
+    overflow: "hidden",
+    position: "relative",
+    width: "100%"
+  },
+  profileVideoThumbnailMedia: {
+    ...StyleSheet.absoluteFillObject,
+    height: "100%",
+    width: "100%"
+  },
+  profileVideoPlayIcon: {
+    alignItems: "center",
+    backgroundColor: "rgba(5, 18, 12, 0.72)",
+    borderRadius: 999,
+    height: 36,
+    justifyContent: "center",
+    left: "50%",
+    marginLeft: -18,
+    marginTop: -18,
+    position: "absolute",
+    top: "50%",
+    width: 36
+  },
+  profileVideoTitle: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "900",
+    lineHeight: 17,
+    marginTop: 9,
+    paddingHorizontal: 9
+  },
+  profileVideoDuration: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    marginTop: 3,
+    paddingHorizontal: 9
   },
   demoNotice: {
     backgroundColor: colors.infoSoft,

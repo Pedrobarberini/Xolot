@@ -248,6 +248,32 @@ Criterios de aceite:
 - O perfil do atleta concluido mostra que esta em busca de contratantes.
 - Toda operacao permanece local, temporaria e explicitamente simulada.
 
+### Task HOTFIX-011 - Abrir perfil do atleta pelo feed
+
+Tipo: Produto/Frontend/Arquitetura
+
+Objetivo: transformar o nome exibido no feed em uma entrada clara para o perfil publico, reunindo os videos e a bolsa do atleta em uma unica identidade.
+
+Tasks:
+
+- [x] Criar `profileId` independente do identificador de cada video.
+- [x] Migrar `AthleteFund` e `Investment` para vinculo por `profileId`.
+- [x] Adicionar icone de perfil clicavel a esquerda do nome no feed mobile.
+- [x] Manter o avatar do feed desktop clicavel e acessivel.
+- [x] Agrupar todos os videos aprovados publicados pela mesma conta.
+- [x] Exibir galeria horizontal de videos no perfil publico.
+- [x] Permitir selecionar um video da galeria para reproduzir no player principal.
+- [x] Exibir a mesma bolsa em qualquer video usado para acessar o perfil.
+- [x] Atualizar README com o fluxo de navegacao pelo perfil.
+
+Criterios de aceite:
+
+- Tocar no icone ao lado do nome abre o perfil correto.
+- O perfil lista todos os videos aprovados da mesma conta.
+- Selecionar um item da galeria troca o video principal.
+- A bolsa pertence ao perfil e nao e duplicada por video.
+- O status `Captando` ou `Concluida` permanece igual ao alternar videos.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens

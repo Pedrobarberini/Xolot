@@ -11,6 +11,7 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao aprovada.
 - Conta comum `Usuario` com Feed, Envio, Carteira e Perfil no mesmo acesso.
 - Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.
+- Perfil publico acessivel pelo feed, com todos os videos aprovados do atleta e o estado da bolsa.
 - Envio por galeria ou link direto, com validacao e confirmacao animada.
 - Moderacao local por perfil Admin: aprovar, pedir ajustes ou reprovar.
 - Solicitacoes revisadas saem imediatamente da fila administrativa.
@@ -53,9 +54,10 @@ pnpm run build:web
 6. Verifique que publicacoes sem avaliacao nao exibem score, risco, box de aviso ou valores inventados.
 7. Na `Carteira`, use `Depositar` para adicionar saldo simulado.
 8. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
-9. Confirme que o saldo diminui e o valor captado da bolsa aumenta.
-10. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
-11. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
+9. Use o icone ao lado do nome para abrir o perfil e alternar entre os videos publicados.
+10. Confirme que o saldo diminui e o valor captado da bolsa aumenta.
+11. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
+12. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
 
 ## Antes da abertura ao publico
 

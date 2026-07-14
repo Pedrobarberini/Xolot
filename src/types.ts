@@ -19,6 +19,7 @@ export type PlayerEvaluation = {
 
 export type Player = {
   id: string;
+  profileId: string;
   ownerUserId?: string;
   name: string;
   age: number;
@@ -40,7 +41,7 @@ export type AthleteFundStatus = "Captando" | "Concluida";
 
 export type AthleteFund = {
   id: string;
-  playerId: string;
+  profileId: string;
   ownerUserId: string;
   athleteName: string;
   goalAmount: number;
@@ -55,7 +56,7 @@ export type Investment = {
   id: string;
   fundId: string;
   investorUserId: string;
-  playerId: string;
+  profileId: string;
   playerName: string;
   amount: number;
   status: "Confirmada";
