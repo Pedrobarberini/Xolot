@@ -274,6 +274,25 @@ Criterios de aceite:
 - A bolsa pertence ao perfil e nao e duplicada por video.
 - O status `Captando` ou `Concluida` permanece igual ao alternar videos.
 
+### Task HOTFIX-012 - Centralizar layout mobile na web
+
+Tipo: Frontend/UI
+
+Objetivo: preservar a experiencia mobile do aplicativo quando a versao web for aberta em telas largas.
+
+Tasks:
+
+- [x] Limitar o container principal da web a `480px`.
+- [x] Centralizar o aplicativo e diferenciar o fundo externo.
+- [x] Forcar os componentes responsivos da web a usar o layout compacto.
+- [x] Manter o comportamento responsivo nativo inalterado no Android e iOS.
+
+Criterios de aceite:
+
+- A versao web nao estica o feed em monitores largos.
+- Header, feed, envio, carteira e perfil usam a composicao mobile na web.
+- Android e iOS continuam usando os breakpoints por largura da tela.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens

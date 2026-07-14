@@ -79,6 +79,7 @@ const TAB_BAR_CONTENT_PADDING = 24;
 const DETAIL_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 36;
 const FEED_TEXT_LIMIT_COMPACT = 76;
 const FEED_TEXT_LIMIT_WIDE = 230;
+const USE_CENTERED_WEB_LAYOUT = Platform.OS === "web";
 
 type Tab = "feed" | "portfolio" | "submit" | "admin" | "profile";
 
@@ -891,7 +892,7 @@ function Header({
   walletBalance: number;
 }) {
   const { width } = useWindowDimensions();
-  const isCompact = width < 520;
+  const isCompact = USE_CENTERED_WEB_LAYOUT || width < 520;
 
   return (
     <View style={[styles.header, isCompact ? styles.headerCompact : null]}>
@@ -1124,7 +1125,7 @@ function FeedReel({
   const { width } = useWindowDimensions();
   const [isExpanded, setIsExpanded] = useState(false);
   const revealProgress = useRef(new Animated.Value(0)).current;
-  const isWide = width >= 900;
+  const isWide = !USE_CENTERED_WEB_LAYOUT && width >= 900;
   const evaluation = player.evaluation;
   const progress = evaluation
     ? Math.min(evaluation.funded / evaluation.fundingGoal, 1)
@@ -2483,7 +2484,7 @@ function SubmitVideoScreen({
   user: AppUser;
 }) {
   const { width } = useWindowDimensions();
-  const isCompact = width < 520;
+  const isCompact = USE_CENTERED_WEB_LAYOUT || width < 520;
   const [draft, setDraft] = useState<SubmissionDraft>({
     ...emptySubmissionDraft,
     athleteName: user.name
@@ -3109,7 +3110,7 @@ function PortfolioScreen({
 }) {
   const { width } = useWindowDimensions();
   const [isDepositVisible, setIsDepositVisible] = useState(false);
-  const isWide = width >= 840;
+  const isWide = !USE_CENTERED_WEB_LAYOUT && width >= 840;
   const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const supportedAthletes = new Set(
     investments.map((investment) => investment.profileId)
@@ -3367,7 +3368,7 @@ function ProfileScreen({
 }) {
   const { width } = useWindowDimensions();
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
-  const isWide = width >= 840;
+  const isWide = !USE_CENTERED_WEB_LAYOUT && width >= 840;
   const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const mySubmissions = submissions.filter((item) => item.userId === user.id);
   const approved = submissions.filter((item) => item.status === "Aprovado").length;
@@ -3794,12 +3795,29 @@ function BottomTabs({
 
 const styles = StyleSheet.create({
   appRoot: {
-    backgroundColor: colors.background,
+    alignItems: "center",
+    backgroundColor: USE_CENTERED_WEB_LAYOUT
+      ? colors.surfaceMuted
+      : colors.background,
     flex: 1
   },
   safeArea: {
     backgroundColor: colors.background,
-    flex: 1
+    flex: 1,
+    width: "100%",
+    ...(USE_CENTERED_WEB_LAYOUT
+      ? {
+          borderLeftColor: colors.border,
+          borderLeftWidth: 1,
+          borderRightColor: colors.border,
+          borderRightWidth: 1,
+          maxWidth: 480,
+          shadowColor: "#10261A",
+          shadowOffset: { height: 0, width: 0 },
+          shadowOpacity: 0.12,
+          shadowRadius: 22
+        }
+      : {})
   },
   brandLaunch: {
     ...StyleSheet.absoluteFillObject,
