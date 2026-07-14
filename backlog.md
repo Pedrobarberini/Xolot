@@ -80,6 +80,25 @@ Criterios de aceite:
 - Publicacoes sem avaliacao nao exibem score, metricas nem box de aviso.
 - A interface permanece limpa e sem espacos vazios.
 
+### Task HOTFIX-004 - Transformar bottom navigation em full footer
+
+Tipo: Frontend/UI
+
+Objetivo: substituir a barra flutuante por um footer full-width estilo app social, mantendo o video acima da navegacao.
+
+Tasks:
+
+- [x] Remover comportamento flutuante da bottom navigation.
+- [x] Fazer footer ocupar largura total com borda superior.
+- [x] Ajustar altura disponivel do feed para o video nao ficar atras do footer.
+- [x] Remover compensacoes antigas do feed ligadas ao footer flutuante.
+
+Criterios de aceite:
+
+- Footer fica fixo no fluxo inferior da tela.
+- Video e ficha ficam acima do footer.
+- Abas continuam acessiveis em conta Usuario e Admin.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens

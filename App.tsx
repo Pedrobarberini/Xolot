@@ -72,7 +72,13 @@ const SYSTEM_NAV_CLEARANCE =
     ios: 34,
     default: 24
   }) ?? 24;
-const TAB_BAR_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 92;
+const TAB_BAR_SAFE_PADDING =
+  Platform.select({
+    android: 18,
+    ios: 18,
+    default: 10
+  }) ?? 10;
+const TAB_BAR_CONTENT_PADDING = 24;
 const DETAIL_CONTENT_PADDING = SYSTEM_NAV_CLEARANCE + 36;
 const FEED_TEXT_LIMIT_COMPACT = 108;
 const FEED_TEXT_LIMIT_WIDE = 230;
@@ -1025,14 +1031,14 @@ function FeedReel({
     .join("")
     .toUpperCase();
   const canvasHeight = isWide
-    ? Math.max(540, Math.min(reelHeight - TAB_BAR_CONTENT_PADDING - 44, 700))
+    ? Math.max(540, Math.min(reelHeight - 44, 700))
     : reelHeight;
   const canvasWidth = isWide ? Math.min(width - 80, 1080) : width;
   const mobileVideoWidth = Math.min(
     width * 0.76,
     Math.max(
       Math.min(width * 0.64, 230),
-      (reelHeight - SYSTEM_NAV_CLEARANCE - 224) * (9 / 16)
+      (reelHeight - 190) * (9 / 16)
     )
   );
 
@@ -3110,9 +3116,6 @@ function BottomTabs({
   onChange: (tab: Tab) => void;
   role: UserRole;
 }) {
-  const { width } = useWindowDimensions();
-  const maxTabWidth = role === "Usuario" ? 560 : 480;
-  const horizontalInset = Math.max(20, Math.floor((width - maxTabWidth) / 2));
   const tabs: Array<{
     id: Tab;
     label: string;
@@ -3131,7 +3134,7 @@ function BottomTabs({
           ];
 
   return (
-    <View style={[styles.tabBar, { left: horizontalInset, right: horizontalInset }]}>
+    <View style={styles.tabBar}>
       {tabs.map((item) => {
         const isActive = item.id === activeTab;
         const TabIcon =
@@ -5441,36 +5444,27 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    bottom: SYSTEM_NAV_CLEARANCE,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
     flexDirection: "row",
-    elevation: 8,
-    gap: 4,
-    left: 20,
-    padding: 6,
-    position: "absolute",
-    right: 20,
+    elevation: 10,
+    gap: 2,
+    paddingBottom: TAB_BAR_SAFE_PADDING,
+    paddingHorizontal: 8,
+    paddingTop: 8,
     shadowColor: "#10261A",
-    shadowOffset: { height: 4, width: 0 },
+    shadowOffset: { height: -4, width: 0 },
     shadowOpacity: 0.12,
-    shadowRadius: 12
-  },
-  tabBarDesktop: {
-    alignSelf: "center",
-    left: "50%",
-    maxWidth: 620,
-    right: undefined,
-    transform: [{ translateX: -310 }],
-    width: 620
+    shadowRadius: 12,
+    width: "100%"
   },
   tabButton: {
     alignItems: "center",
-    borderRadius: 8,
+    borderRadius: 6,
     flex: 1,
-    gap: 6,
-    paddingVertical: 12
+    gap: 5,
+    minHeight: 56,
+    paddingVertical: 8
   },
   tabButtonActive: {
     backgroundColor: colors.primarySoft
