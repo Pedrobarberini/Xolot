@@ -1,6 +1,6 @@
 # Backlog tecnico - NextStar
 
-Atualizado em 2026-07-13.
+Atualizado em 2026-07-14.
 
 Este backlog e escrito para desenvolvimento. Cada item deve virar issue/task no GitHub, Trello, Jira ou similar.
 
@@ -98,6 +98,26 @@ Criterios de aceite:
 - Footer fica fixo no fluxo inferior da tela.
 - Video e ficha ficam acima do footer.
 - Abas continuam acessiveis em conta Usuario e Admin.
+
+### Task HOTFIX-005 - Fazer video preencher o feed mobile
+
+Tipo: Frontend/UI
+
+Objetivo: eliminar o espaco morto ao redor do player no celular e usar o video como plano principal do feed, mantendo a marca sobreposta.
+
+Tasks:
+
+- [x] Remover limite de largura e margem superior da box de video no mobile.
+- [x] Fazer o player preencher toda a largura e altura util do feed.
+- [x] Manter a marca no topo como overlay sobre o video.
+- [x] Preservar o player contido no layout desktop.
+
+Criterios de aceite:
+
+- O feed mobile nao exibe faixas vazias ao redor do video.
+- O video termina acima do full footer.
+- A marca e os controles permanecem legiveis e clicaveis sobre o video.
+- O layout desktop nao e ampliado para tela cheia.
 
 ## Sprint 1 - Base real de produto
 

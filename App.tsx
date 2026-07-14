@@ -1034,14 +1034,6 @@ function FeedReel({
     ? Math.max(540, Math.min(reelHeight - 44, 700))
     : reelHeight;
   const canvasWidth = isWide ? Math.min(width - 80, 1080) : width;
-  const mobileVideoWidth = Math.min(
-    width * 0.76,
-    Math.max(
-      Math.min(width * 0.64, 230),
-      (reelHeight - 190) * (9 / 16)
-    )
-  );
-
   useEffect(() => {
     revealProgress.setValue(0);
 
@@ -1101,7 +1093,6 @@ function FeedReel({
             fundingProgressLabel={fundingProgressLabel}
             isActive={isActive}
             isWide={isWide}
-            mobileWidth={mobileVideoWidth}
             palette={palette}
             player={player}
             scoreColor={scoreColor}
@@ -1489,7 +1480,6 @@ function FeedVideoBox({
   fundingProgressLabel,
   isActive,
   isWide,
-  mobileWidth,
   palette,
   player,
   scoreColor
@@ -1497,7 +1487,6 @@ function FeedVideoBox({
   fundingProgressLabel: string | null;
   isActive: boolean;
   isWide: boolean;
-  mobileWidth: number;
   palette: CardPalette;
   player: Player;
   scoreColor: string;
@@ -1508,8 +1497,7 @@ function FeedVideoBox({
     <View
       style={[
         styles.feedVideoBox,
-        isWide ? styles.feedVideoBoxWide : null,
-        !isWide ? { width: mobileWidth } : null,
+        isWide ? styles.feedVideoBoxWide : styles.feedVideoBoxCompact,
         { backgroundColor: palette.media, borderColor: palette.border }
       ]}
     >
@@ -3642,18 +3630,21 @@ const styles = StyleSheet.create({
     right: 0
   },
   feedVideoBox: {
+    overflow: "hidden",
+    position: "absolute",
+    zIndex: 2
+  },
+  feedVideoBoxCompact: {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0
+  },
+  feedVideoBoxWide: {
     alignSelf: "center",
     aspectRatio: 9 / 16,
     borderRadius: 8,
     borderWidth: 1,
-    maxWidth: 320,
-    overflow: "hidden",
-    position: "absolute",
-    top: 62,
-    width: "68%",
-    zIndex: 2
-  },
-  feedVideoBoxWide: {
     maxWidth: 292,
     top: 30,
     width: 292
