@@ -119,6 +119,26 @@ Criterios de aceite:
 - A marca e os controles permanecem legiveis e clicaveis sobre o video.
 - O layout desktop nao e ampliado para tela cheia.
 
+### Task HOTFIX-006 - Refinar ficha sobre o video
+
+Tipo: Frontend/UI
+
+Objetivo: integrar melhor a ficha compacta ao video, reduzindo seu peso visual e aproveitando o limite inferior do feed.
+
+Tasks:
+
+- [x] Aplicar fundo translucido na ficha compacta.
+- [x] Posicionar a ficha compacta no limite inferior do video.
+- [x] Manter fundo opaco no estado expandido para preservar a leitura.
+- [x] Reduzir a sombra da ficha compacta.
+
+Criterios de aceite:
+
+- O video permanece visivel por baixo da ficha compacta.
+- A ficha nao deixa espaco morto antes do footer.
+- Textos e controles continuam legiveis.
+- O estado expandido mantem contraste suficiente.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens

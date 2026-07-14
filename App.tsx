@@ -3934,9 +3934,10 @@ const styles = StyleSheet.create({
     right: 340
   },
   feedTextOverlayCompact: {
-    backgroundColor: colors.surface,
-    bottom: TAB_BAR_CONTENT_PADDING - 16,
-    padding: 12
+    backgroundColor: "rgba(247, 250, 247, 0.82)",
+    bottom: 0,
+    padding: 12,
+    shadowOpacity: 0.08
   },
   feedTextOverlayCompactExpanded: {
     backgroundColor: colors.surface,
