@@ -293,6 +293,28 @@ Criterios de aceite:
 - Header, feed, envio, carteira e perfil usam a composicao mobile na web.
 - Android e iOS continuam usando os breakpoints por largura da tela.
 
+### Task HOTFIX-013 - Mostrar valor e porcentagem da cota
+
+Tipo: Produto/Frontend
+
+Objetivo: deixar claro no historico da Carteira quanto foi aportado e qual porcentagem da meta da bolsa foi adquirida.
+
+Tasks:
+
+- [x] Calcular a porcentagem da cota no momento do aporte.
+- [x] Salvar `sharePercent` no registro de `Investment`.
+- [x] Manter o valor do aporte formatado em reais.
+- [x] Exibir `Cota X,XX%` abaixo do valor em reais.
+- [x] Remover a repeticao do status `Confirmada` no lado direito.
+- [x] Atualizar README com a informacao exibida na Carteira.
+
+Criterios de aceite:
+
+- Cada aporte mostra seu valor em reais.
+- A porcentagem exibida corresponde a `valor do aporte / meta total da bolsa`.
+- O status `Confirmada` aparece apenas uma vez por aporte.
+- Percentuais usam duas casas decimais e formato brasileiro.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens

@@ -59,6 +59,7 @@ export type Investment = {
   profileId: string;
   playerName: string;
   amount: number;
+  sharePercent: number;
   status: "Confirmada";
   createdAt: string;
 };

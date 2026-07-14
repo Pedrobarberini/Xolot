@@ -267,6 +267,7 @@ export default function App() {
         profileId: player.profileId,
         playerName: player.name,
         amount,
+        sharePercent: (amount / fund.goalAmount) * 100,
         status: "Confirmada",
         createdAt: new Date().toISOString()
       },
@@ -3196,7 +3197,7 @@ function PortfolioScreen({
                           {formatBRL(investment.amount)}
                         </Text>
                         <Text style={styles.portfolioShare}>
-                          {investment.status}
+                          Cota {formatPercent(investment.sharePercent)}
                         </Text>
                       </View>
                     </View>

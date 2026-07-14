@@ -18,6 +18,7 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Videos reais aprovados substituem o perfil demonstrativo.
 - Score, risco, metricas e valores financeiros so aparecem quando existe uma avaliacao explicita.
 - Saldo, depositos, aportes e bolsas permanecem simulados, sem pagamento, saque ou contrato real.
+- Carteira mostra o valor em reais e a porcentagem da cota adquirida em cada aporte.
 
 ## Teste online
 
@@ -55,7 +56,7 @@ pnpm run build:web
 7. Na `Carteira`, use `Depositar` para adicionar saldo simulado.
 8. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
 9. Use o icone ao lado do nome para abrir o perfil e alternar entre os videos publicados.
-10. Confirme que o saldo diminui e o valor captado da bolsa aumenta.
+10. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
 11. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
 12. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
 
