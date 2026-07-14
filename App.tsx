@@ -1192,6 +1192,18 @@ function FeedReel({
                 </View>
               ) : null}
               <View style={styles.feedProfileTextBlock}>
+                {!isWide ? (
+                  <Text
+                    numberOfLines={1}
+                    style={[
+                      styles.feedSponsorLabel,
+                      styles.feedSponsorLabelCompact,
+                      { color: "rgba(255, 255, 255, 0.82)" }
+                    ]}
+                  >
+                    {player.position} | {player.city}
+                  </Text>
+                ) : null}
                 <Text
                   numberOfLines={1}
                   style={[
@@ -1202,20 +1214,17 @@ function FeedReel({
                 >
                   {player.name}
                 </Text>
-                <Text
-                  numberOfLines={1}
-                  style={[
-                    styles.feedSponsorLabel,
-                    !isWide ? styles.feedSponsorLabelCompact : null,
-                    {
-                      color: isWide
-                        ? palette.muted
-                        : "rgba(255, 255, 255, 0.82)"
-                    }
-                  ]}
-                >
-                  {player.position} | {player.city}
-                </Text>
+                {isWide ? (
+                  <Text
+                    numberOfLines={1}
+                    style={[
+                      styles.feedSponsorLabel,
+                      { color: palette.muted }
+                    ]}
+                  >
+                    {player.position} | {player.city}
+                  </Text>
+                ) : null}
               </View>
               {isWide ? (
                 <View
@@ -1751,23 +1760,19 @@ function FeedVideoPlayback({
           <Expand color="#FFFFFF" size={20} />
         </Pressable>
       </View>
-      <View
-        pointerEvents="none"
-        style={[
-          styles.feedVideoCaptionStrip,
-          !isWide ? styles.feedVideoCaptionStripCompact : null
-        ]}
-      >
-        <Text
-          numberOfLines={1}
-          style={[styles.feedVideoCaption, { color: colors.onPrimary }]}
-        >
-          {caption}
-        </Text>
-        <Text style={[styles.feedVideoDuration, { color: colors.onPrimary }]}>
-          {formatPlaybackTime(safeCurrentTime)} / {totalTimeLabel}
-        </Text>
-      </View>
+      {isWide ? (
+        <View pointerEvents="none" style={styles.feedVideoCaptionStrip}>
+          <Text
+            numberOfLines={1}
+            style={[styles.feedVideoCaption, { color: colors.onPrimary }]}
+          >
+            {caption}
+          </Text>
+          <Text style={[styles.feedVideoDuration, { color: colors.onPrimary }]}>
+            {formatPlaybackTime(safeCurrentTime)} / {totalTimeLabel}
+          </Text>
+        </View>
+      ) : null}
       <View
         onLayout={(event) => {
           const nextWidth = event.nativeEvent.layout.width;
@@ -3842,9 +3847,6 @@ const styles = StyleSheet.create({
     right: 12,
     zIndex: 2
   },
-  feedVideoCaptionStripCompact: {
-    bottom: 44
-  },
   feedVideoCaption: {
     flex: 1,
     fontSize: 12,
@@ -3864,7 +3866,9 @@ const styles = StyleSheet.create({
     zIndex: 4
   },
   feedVideoSeekControlCompact: {
-    bottom: 26
+    bottom: 0,
+    left: 0,
+    right: 0
   },
   feedVideoSeekPressable: {
     ...StyleSheet.absoluteFillObject,
@@ -3950,11 +3954,11 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderRadius: 0,
     borderWidth: 0,
-    bottom: 0,
+    bottom: 20,
     left: 0,
     overflow: "hidden",
     padding: 0,
-    paddingBottom: 16,
+    paddingBottom: 10,
     paddingHorizontal: 18,
     paddingTop: 14,
     right: 0,
@@ -4028,6 +4032,8 @@ const styles = StyleSheet.create({
   feedSponsorLabelCompact: {
     fontSize: 12,
     lineHeight: 16,
+    marginBottom: 2,
+    marginTop: 0,
     textShadowColor: "rgba(0, 0, 0, 0.78)",
     textShadowOffset: { height: 1, width: 0 },
     textShadowRadius: 3

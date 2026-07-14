@@ -164,6 +164,27 @@ Criterios de aceite:
 - O blur funciona em Expo Go, Android e web.
 - A acao `menos` retorna para a legenda compacta.
 
+### Task HOTFIX-008 - Reorganizar legenda e barra do player
+
+Tipo: Frontend/UI
+
+Objetivo: remover sobreposicoes entre legenda e controles do video e melhorar a hierarquia dos dados do perfil no mobile.
+
+Tasks:
+
+- [x] Mover a barra de progresso para a borda inferior do video.
+- [x] Reservar espaco acima da barra para a legenda expansivel.
+- [x] Remover a faixa duplicada de titulo e duracao no player mobile.
+- [x] Exibir posicao e cidade acima do nome do perfil no mobile.
+- [x] Preservar titulo, duracao e layout estruturado no desktop.
+
+Criterios de aceite:
+
+- A barra de progresso nao atravessa os textos da legenda.
+- A barra continua permitindo avancar e retroceder o video.
+- `Ponta | Sao Paulo, SP` aparece acima de `Perfil demonstrativo`.
+- O titulo do video nao aparece duplicado no mobile.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens
