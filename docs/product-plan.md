@@ -17,6 +17,7 @@ Entregue no aplicativo:
 - Perfil demonstrativo com video real, removido quando existe video aprovado.
 - Avaliacao esportiva e condicoes financeiras opcionais e separadas do envio.
 - Saldo, depositos, reservas e carteira exclusivamente simulados em memoria local.
+- Bolsa simulada vinculada ao perfil do atleta, com meta, aporte minimo, custodia sem saque e conclusao automatica.
 
 Limite atual: todo o estado e local e temporario. Nao ha autenticacao, API, banco, armazenamento permanente, pagamento ou contrato real.
 
@@ -53,6 +54,9 @@ Somente depois da validacao tecnica, operacional e juridica:
 - Definir custodia, cancelamento, extrato e comprovantes.
 - Publicar metodologia de risco e limites de comunicacao de retorno.
 - Implementar conciliacao e distribuicao com auditoria.
+- Validar o modelo com assessoria juridica especializada e com a CVM antes de qualquer oferta publica.
+- Contratar plataforma de investimento participativo autorizada, quando aplicavel, ou definir outro enquadramento permitido.
+- Contratar instituicao financeira ou de pagamento autorizada para manter e transferir recursos de usuarios.
 
 ## Pontos juridicos prioritarios
 

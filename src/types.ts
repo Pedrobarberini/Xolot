@@ -19,6 +19,7 @@ export type PlayerEvaluation = {
 
 export type Player = {
   id: string;
+  ownerUserId?: string;
   name: string;
   age: number;
   city: string;
@@ -35,20 +36,29 @@ export type Player = {
   evaluation?: PlayerEvaluation;
 };
 
-export type SimulatedInvestmentStatus =
-  | "Reserva simulada"
-  | "KYC simulado"
-  | "Contrato simulado"
-  | "Pagamento simulado"
-  | "Distribuicao simulada";
+export type AthleteFundStatus = "Captando" | "Concluida";
+
+export type AthleteFund = {
+  id: string;
+  playerId: string;
+  ownerUserId: string;
+  athleteName: string;
+  goalAmount: number;
+  fundedAmount: number;
+  minimumContribution: number;
+  status: AthleteFundStatus;
+  createdAt: string;
+  completedAt?: string;
+};
 
 export type Investment = {
   id: string;
+  fundId: string;
+  investorUserId: string;
   playerId: string;
   playerName: string;
   amount: number;
-  simulatedMonthlyReturn: number;
-  status: SimulatedInvestmentStatus;
+  status: "Confirmada";
   createdAt: string;
 };
 

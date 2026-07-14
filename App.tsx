@@ -49,19 +49,14 @@ import { demoPlayer } from "./src/data/demoPlayer";
 import { colors } from "./src/theme";
 import {
   AppUser,
+  AthleteFund,
   Investment,
   Player,
-  SimulatedInvestmentStatus,
   UserRole,
   VideoSubmission,
   VideoSubmissionStatus
 } from "./src/types";
-import {
-  calculatePoolShare,
-  calculateProjectedDistribution,
-  formatBRL,
-  formatPercent
-} from "./src/utils/investment";
+import { formatBRL, formatPercent } from "./src/utils/investment";
 
 const NEXTSTAR_SYMBOL = require("./assets/brand/nextstar-symbol.png");
 const NEXTSTAR_WORDMARK = require("./assets/brand/nextstar-wordmark.png");
@@ -133,14 +128,6 @@ const emptySubmissionDraft: SubmissionDraft = {
   hasGuardianConsent: false
 };
 
-const investmentStages: SimulatedInvestmentStatus[] = [
-  "Reserva simulada",
-  "KYC simulado",
-  "Contrato simulado",
-  "Pagamento simulado",
-  "Distribuicao simulada"
-];
-
 const CARD_PALETTE: CardPalette = {
   name: "NextStar",
   card: colors.surface,
@@ -161,8 +148,24 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("feed");
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [walletBalance, setWalletBalance] = useState(0);
+  const [athleteFunds, setAthleteFunds] = useState<AthleteFund[]>(() => [
+    {
+      id: "demo-athlete-fund",
+      playerId: demoPlayer.id,
+      ownerUserId: "demo-athlete",
+      athleteName: demoPlayer.name,
+      goalAmount: 5000,
+      fundedAmount: 0,
+      minimumContribution: 50,
+      status: "Captando",
+      createdAt: new Date().toISOString()
+    }
+  ]);
+  const [walletBalances, setWalletBalances] = useState<Record<string, number>>(
+    {}
+  );
   const [submissions, setSubmissions] = useState<VideoSubmission[]>([]);
+  const walletBalance = user ? (walletBalances[user.id] ?? 0) : 0;
 
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(colors.background).catch(() => undefined);
@@ -191,6 +194,9 @@ export default function App() {
   const pendingReviews = submissions.filter(
     (submission) => submission.status === "Em revisao"
   ).length;
+  const currentUserInvestments = user
+    ? investments.filter((investment) => investment.investorUserId === user.id)
+    : [];
 
   function handleAuth(nextUser: AppUser) {
     setUser(nextUser);
@@ -208,10 +214,30 @@ export default function App() {
   }
 
   function handleInvest(player: Player, amount: number) {
-    if (!player.evaluation) {
+    const fund = athleteFunds.find((item) => item.playerId === player.id);
+
+    if (!fund) {
       Alert.alert(
-        "Avaliacao pendente",
-        "Esta oportunidade ainda nao possui dados validados para reserva."
+        "Bolsa indisponivel",
+        "Este perfil ainda nao abriu uma bolsa de investimento."
+      );
+      return;
+    }
+
+    if (fund.status === "Concluida") {
+      Alert.alert(
+        "Bolsa concluida",
+        "A meta deste perfil ja foi atingida e novos aportes estao bloqueados."
+      );
+      return;
+    }
+
+    const remainingAmount = Math.max(0, fund.goalAmount - fund.fundedAmount);
+
+    if (amount < fund.minimumContribution || amount > remainingAmount) {
+      Alert.alert(
+        "Valor invalido",
+        `O aporte deve ficar entre ${formatBRL(fund.minimumContribution)} e ${formatBRL(remainingAmount)}.`
       );
       return;
     }
@@ -224,48 +250,90 @@ export default function App() {
       return;
     }
 
-    const simulatedMonthlyReturn = calculateProjectedDistribution(
-      amount,
-      player.evaluation.funded,
-      player.evaluation.athleteSharePercent,
-      player.evaluation.projectedMonthlyEarnings
+    const nextFundedAmount = Math.min(
+      fund.goalAmount,
+      fund.fundedAmount + amount
     );
+    const isFundComplete = nextFundedAmount >= fund.goalAmount;
 
     setInvestments((current) => [
       {
         id: `simulation-${Date.now()}`,
+        fundId: fund.id,
+        investorUserId: user?.id ?? "",
         playerId: player.id,
         playerName: player.name,
         amount,
-        simulatedMonthlyReturn,
-        status: "Reserva simulada",
+        status: "Confirmada",
         createdAt: new Date().toISOString()
       },
       ...current
     ]);
-    setWalletBalance((current) => Math.max(0, current - amount));
+    setAthleteFunds((current) =>
+      current.map((item) =>
+        item.id === fund.id
+          ? {
+              ...item,
+              fundedAmount: nextFundedAmount,
+              status: isFundComplete ? "Concluida" : "Captando",
+              completedAt: isFundComplete
+                ? new Date().toISOString()
+                : item.completedAt
+            }
+          : item
+      )
+    );
+    if (user) {
+      setWalletBalances((current) => ({
+        ...current,
+        [user.id]: Math.max(0, (current[user.id] ?? 0) - amount)
+      }));
+    }
     setSelectedPlayer(null);
     setTab("portfolio");
+    Alert.alert(
+      isFundComplete ? "Bolsa concluida" : "Transferencia confirmada",
+      isFundComplete
+        ? "A meta do atleta foi atingida. O perfil agora aparece como em busca de contratantes."
+        : `${formatBRL(amount)} foram transferidos para a bolsa de ${player.name}.`
+    );
   }
 
   function handleDeposit(amount: number) {
-    setWalletBalance((current) => current + amount);
+    if (!user) {
+      return;
+    }
+
+    setWalletBalances((current) => ({
+      ...current,
+      [user.id]: (current[user.id] ?? 0) + amount
+    }));
   }
 
-  function handleAdvanceInvestment(investmentId: string) {
-    setInvestments((current) =>
-      current.map((investment) => {
-        if (investment.id !== investmentId) {
-          return investment;
-        }
+  function handleOpenFund(
+    player: Player,
+    goalAmount: number,
+    minimumContribution: number
+  ) {
+    if (athleteFunds.some((item) => item.playerId === player.id)) {
+      Alert.alert("Bolsa ja existente", "Este perfil ja possui uma bolsa aberta.");
+      return;
+    }
 
-        const currentIndex = investmentStages.indexOf(investment.status);
-        const nextStatus =
-          investmentStages[Math.min(currentIndex + 1, investmentStages.length - 1)];
-
-        return { ...investment, status: nextStatus };
-      })
-    );
+    setAthleteFunds((current) => [
+      {
+        id: `athlete-fund-${Date.now()}`,
+        playerId: player.id,
+        ownerUserId: player.ownerUserId ?? user?.id ?? "",
+        athleteName: player.name,
+        goalAmount,
+        fundedAmount: 0,
+        minimumContribution,
+        status: "Captando",
+        createdAt: new Date().toISOString()
+      },
+      ...current
+    ]);
   }
 
   function handleSubmitVideo(submission: VideoSubmission) {
@@ -326,6 +394,9 @@ export default function App() {
             <ScreenFrame>
               <PlayerDetail
                 canInvest={user.role === "Usuario"}
+                fund={athleteFunds.find(
+                  (item) => item.playerId === selectedPlayer.id
+                )}
                 onBack={() => setSelectedPlayer(null)}
                 onInvest={handleInvest}
                 player={selectedPlayer}
@@ -357,8 +428,7 @@ export default function App() {
                 <ScreenFrame>
                   <PortfolioScreen
                     balance={walletBalance}
-                    investments={investments}
-                    onAdvance={handleAdvanceInvestment}
+                    investments={currentUserInvestments}
                     onDeposit={handleDeposit}
                   />
                 </ScreenFrame>
@@ -385,8 +455,15 @@ export default function App() {
               {tab === "profile" ? (
                 <ScreenFrame>
                   <ProfileScreen
-                    investments={investments}
+                    fund={athleteFunds.find(
+                      (item) => item.ownerUserId === user.id
+                    )}
+                    investments={currentUserInvestments}
+                    onOpenFund={handleOpenFund}
                     onSignOut={handleSignOut}
+                    player={availablePlayers.find(
+                      (item) => item.ownerUserId === user.id
+                    )}
                     submissions={submissions}
                     user={user}
                   />
@@ -407,6 +484,7 @@ export default function App() {
 function buildPlayerFromSubmission(submission: VideoSubmission): Player {
   return {
     id: `approved-${submission.id}`,
+    ownerUserId: submission.userId,
     name: submission.athleteName,
     age: submission.age,
     city: submission.city,
@@ -654,7 +732,7 @@ function AuthScreen({
       role === "Admin" ? "Admin NextStar" : cleanEmail.split("@")[0] || "Usuario";
 
     onComplete({
-      id: `${role.toLowerCase()}-${Date.now()}`,
+      id: `${role.toLowerCase()}-${cleanEmail}`,
       name: mode === "login" ? fallbackName : cleanName,
       email: cleanEmail,
       role,
@@ -2021,12 +2099,14 @@ function PlayerCard({
 
 function PlayerDetail({
   canInvest,
+  fund,
   onBack,
   onInvest,
   player,
   walletBalance
 }: {
   canInvest: boolean;
+  fund?: AthleteFund;
   onBack: () => void;
   onInvest: (player: Player, amount: number) => void;
   player: Player;
@@ -2038,26 +2118,25 @@ function PlayerDetail({
     ? getScoreColor(evaluation.score)
     : colors.muted;
   const [amountText, setAmountText] = useState(
-    evaluation ? String(evaluation.minimumTicket) : ""
+    fund ? String(fund.minimumContribution) : ""
   );
   const amount = Number(amountText.replace(/\D/g, "")) || 0;
-  const share = calculatePoolShare(
-    amount,
-    evaluation?.funded ?? 0,
-    evaluation?.athleteSharePercent ?? 0
-  );
-  const projectedDistribution = calculateProjectedDistribution(
-    amount,
-    evaluation?.funded ?? 0,
-    evaluation?.athleteSharePercent ?? 0,
-    evaluation?.projectedMonthlyEarnings ?? 0
-  );
-  const hasMinimumTicket = evaluation
-    ? amount >= evaluation.minimumTicket
+  const remainingAmount = fund
+    ? Math.max(0, fund.goalAmount - fund.fundedAmount)
+    : 0;
+  const fundingProgress = fund
+    ? Math.min(fund.fundedAmount / fund.goalAmount, 1)
+    : 0;
+  const hasMinimumTicket = fund
+    ? amount >= fund.minimumContribution && amount <= remainingAmount
     : false;
   const hasAvailableBalance = amount <= walletBalance;
   const canSubmitInvestment = Boolean(
-    evaluation && canInvest && hasMinimumTicket && hasAvailableBalance
+    fund &&
+      fund.status === "Captando" &&
+      canInvest &&
+      hasMinimumTicket &&
+      hasAvailableBalance
   );
 
   return (
@@ -2158,81 +2237,121 @@ function PlayerDetail({
       </View>
       ) : null}
 
-      {evaluation ? (
-      <View style={styles.infoPanel}>
-        <Text style={styles.sectionTitle}>Simular reserva</Text>
-        <Text style={styles.bodyText}>
-          {formatPercent(evaluation.athleteSharePercent)} dos ganhos do atleta seriam
-          destinados ao pool de investidores. Esta tela apenas simula o modelo.
-        </Text>
-        <Text style={styles.availableBalanceText}>
-          Saldo disponivel: {formatBRL(walletBalance)}
-        </Text>
-
-        <View style={styles.inputRow}>
-          <Text style={styles.currencyPrefix}>R$</Text>
-          <TextInput
-            keyboardType="number-pad"
-            onChangeText={setAmountText}
-            placeholder="Valor"
-            placeholderTextColor={colors.muted}
-            style={styles.amountInput}
-            value={amountText}
-          />
-        </View>
-
-        <View style={styles.simulationGrid}>
-          <View style={styles.simulationBox}>
-            <Text style={styles.simulationValue}>{formatPercent(share)}</Text>
-            <Text style={styles.simulationLabel}>da receita futura</Text>
-          </View>
-          <View style={styles.simulationBox}>
-            <Text style={styles.simulationValue}>
-              {formatBRL(projectedDistribution)}
+      {fund ? (
+        <View style={styles.infoPanel}>
+          <View style={styles.fundTitleRow}>
+            <Text style={styles.sectionTitle}>Bolsa do atleta</Text>
+            <Text
+              style={[
+                styles.fundStatus,
+                fund.status === "Concluida" ? styles.fundStatusComplete : null
+              ]}
+            >
+              {fund.status}
             </Text>
-            <Text style={styles.simulationLabel}>projecao mensal</Text>
           </View>
-        </View>
+          <Text style={styles.bodyText}>
+            A bolsa pertence ao perfil de {player.name}. O video acima apenas
+            demonstra o talento do atleta.
+          </Text>
 
-        <View style={styles.timelinePanel}>
-          {investmentStages.map((stage, index) => (
-            <View key={stage} style={styles.timelineRow}>
-              <View style={styles.timelineDot}>
-                <Text style={styles.timelineDotText}>{index + 1}</Text>
-              </View>
-              <Text style={styles.timelineText}>{stage}</Text>
+          <View style={styles.fundProgressHeader}>
+            <Text style={styles.fundProgressValue}>
+              {formatBRL(fund.fundedAmount)} captados
+            </Text>
+            <Text style={styles.fundProgressGoal}>
+              Meta {formatBRL(fund.goalAmount)}
+            </Text>
+          </View>
+          <View style={styles.fundProgressTrack}>
+            <View
+              style={[
+                styles.fundProgressFill,
+                { width: `${fundingProgress * 100}%` }
+              ]}
+            />
+          </View>
+          <View style={styles.fundStatsRow}>
+            <View style={styles.fundStatItem}>
+              <Text style={styles.fundStatValue}>{formatBRL(remainingAmount)}</Text>
+              <Text style={styles.fundStatLabel}>restante</Text>
             </View>
-          ))}
+            <View style={styles.fundStatItem}>
+              <Text style={styles.fundStatValue}>
+                {formatBRL(fund.minimumContribution)}
+              </Text>
+              <Text style={styles.fundStatLabel}>aporte minimo</Text>
+            </View>
+          </View>
+
+          {fund.status === "Concluida" ? (
+            <View style={styles.fundCompleteNotice}>
+              <Text style={styles.fundCompleteNoticeTitle}>
+                Investimento concluido
+              </Text>
+              <Text style={styles.fundCompleteNoticeBody}>
+                Meta atingida. Este atleta esta em busca de contratantes.
+              </Text>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.availableBalanceText}>
+                Saldo disponivel: {formatBRL(walletBalance)}
+              </Text>
+              <View style={styles.inputRow}>
+                <Text style={styles.currencyPrefix}>R$</Text>
+                <TextInput
+                  keyboardType="number-pad"
+                  onChangeText={setAmountText}
+                  placeholder="Valor"
+                  placeholderTextColor={colors.muted}
+                  style={styles.amountInput}
+                  value={amountText}
+                />
+              </View>
+              <Text style={styles.fundCustodyNote}>
+                Transferencia simulada para custodia da bolsa. O atleta pode
+                acompanhar a captacao, mas nao pode sacar os recursos.
+              </Text>
+              {!hasMinimumTicket ? (
+                <Text style={styles.validationText}>
+                  Informe entre {formatBRL(fund.minimumContribution)} e{" "}
+                  {formatBRL(remainingAmount)}.
+                </Text>
+              ) : null}
+              {!canInvest ? (
+                <Text style={styles.validationText}>
+                  Aportes estao disponiveis apenas para contas de usuario.
+                </Text>
+              ) : null}
+              {!hasAvailableBalance ? (
+                <Text style={styles.validationText}>
+                  Saldo insuficiente. Use o botao Depositar na Carteira.
+                </Text>
+              ) : null}
+              <Pressable
+                disabled={!canSubmitInvestment}
+                onPress={() => onInvest(player, amount)}
+                style={[
+                  styles.primaryButton,
+                  !canSubmitInvestment ? styles.primaryButtonDisabled : null
+                ]}
+              >
+                <Text style={styles.primaryButtonText}>
+                  Transferir para a bolsa
+                </Text>
+              </Pressable>
+            </>
+          )}
         </View>
-
-        {!hasMinimumTicket ? (
-          <Text style={styles.validationText}>
-            Ticket minimo: {formatBRL(evaluation.minimumTicket)}
+      ) : (
+        <View style={styles.infoPanel}>
+          <Text style={styles.sectionTitle}>Bolsa do atleta</Text>
+          <Text style={styles.bodyText}>
+            Este perfil ainda nao abriu uma bolsa de investimento.
           </Text>
-        ) : null}
-        {!canInvest ? (
-          <Text style={styles.validationText}>
-            Reservas estao disponiveis apenas para contas de usuario.
-          </Text>
-        ) : null}
-        {!hasAvailableBalance ? (
-          <Text style={styles.validationText}>
-            Saldo insuficiente. Use o botao Depositar na Carteira.
-          </Text>
-        ) : null}
-
-        <Pressable
-          disabled={!canSubmitInvestment}
-          onPress={() => onInvest(player, amount)}
-          style={[
-            styles.primaryButton,
-            !canSubmitInvestment ? styles.primaryButtonDisabled : null
-          ]}
-        >
-          <Text style={styles.primaryButtonText}>Criar reserva simulada</Text>
-        </Pressable>
-      </View>
-      ) : null}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -2883,22 +3002,19 @@ function StatusPill({ status }: { status: VideoSubmissionStatus }) {
 function PortfolioScreen({
   balance,
   investments,
-  onAdvance,
   onDeposit
 }: {
   balance: number;
   investments: Investment[];
-  onAdvance: (investmentId: string) => void;
   onDeposit: (amount: number) => void;
 }) {
   const { width } = useWindowDimensions();
   const [isDepositVisible, setIsDepositVisible] = useState(false);
   const isWide = width >= 840;
   const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
-  const monthlyProjection = investments.reduce(
-    (sum, item) => sum + item.simulatedMonthlyReturn,
-    0
-  );
+  const supportedAthletes = new Set(
+    investments.map((investment) => investment.playerId)
+  ).size;
 
   return (
     <>
@@ -2931,10 +3047,8 @@ function PortfolioScreen({
               <Text style={styles.summaryInsightLabel}>reservas</Text>
             </View>
             <View style={styles.summaryInsightItem}>
-              <Text style={styles.summaryInsightValue}>
-                {formatBRL(monthlyProjection)}
-              </Text>
-              <Text style={styles.summaryInsightLabel}>projecao</Text>
+              <Text style={styles.summaryInsightValue}>{supportedAthletes}</Text>
+              <Text style={styles.summaryInsightLabel}>atletas</Text>
             </View>
           </View>
           <Text style={styles.summaryBody}>
@@ -2946,15 +3060,12 @@ function PortfolioScreen({
         <View style={isWide ? styles.portfolioDesktopGrid : null}>
           <View style={isWide ? styles.portfolioDesktopColumn : null}>
             <View style={styles.infoPanel}>
-              <Text style={styles.sectionTitle}>Fluxo futuro</Text>
-              {investmentStages.map((stage, index) => (
-                <View key={stage} style={styles.timelineRow}>
-                  <View style={styles.timelineDot}>
-                    <Text style={styles.timelineDotText}>{index + 1}</Text>
-                  </View>
-                  <Text style={styles.timelineText}>{stage}</Text>
-                </View>
-              ))}
+              <Text style={styles.sectionTitle}>Custodia da bolsa</Text>
+              <Text style={styles.bodyText}>
+                Cada aporte fica vinculado ao perfil do atleta. Nesta
+                simulacao, o atleta acompanha a captacao, mas nao possui opcao
+                de saque.
+              </Text>
             </View>
           </View>
 
@@ -2969,9 +3080,6 @@ function PortfolioScreen({
               </View>
             ) : (
               investments.map((investment) => {
-                const currentIndex = investmentStages.indexOf(investment.status);
-                const isComplete = currentIndex === investmentStages.length - 1;
-
                 return (
                   <View key={investment.id} style={styles.portfolioItemBlock}>
                     <View style={styles.portfolioItemHeader}>
@@ -2988,39 +3096,10 @@ function PortfolioScreen({
                           {formatBRL(investment.amount)}
                         </Text>
                         <Text style={styles.portfolioShare}>
-                          {formatBRL(investment.simulatedMonthlyReturn)} proj.
+                          {investment.status}
                         </Text>
                       </View>
                     </View>
-
-                    <View style={styles.stepRail}>
-                      {investmentStages.map((stage, index) => (
-                        <View
-                          key={stage}
-                          style={[
-                            styles.stepMarker,
-                            index <= currentIndex
-                              ? styles.stepMarkerActive
-                              : null
-                          ]}
-                        />
-                      ))}
-                    </View>
-
-                    <Pressable
-                      disabled={isComplete}
-                      onPress={() => onAdvance(investment.id)}
-                      style={[
-                        styles.secondaryButton,
-                        isComplete ? styles.secondaryButtonDisabled : null
-                      ]}
-                    >
-                      <Text style={styles.secondaryButtonText}>
-                        {isComplete
-                          ? "Simulacao concluida"
-                          : "Avancar simulacao"}
-                      </Text>
-                    </Pressable>
                   </View>
                 );
               })
@@ -3167,17 +3246,28 @@ function DepositModal({
 }
 
 function ProfileScreen({
+  fund,
   investments,
+  onOpenFund,
   onSignOut,
+  player,
   submissions,
   user
 }: {
+  fund?: AthleteFund;
   investments: Investment[];
+  onOpenFund: (
+    player: Player,
+    goalAmount: number,
+    minimumContribution: number
+  ) => void;
   onSignOut: () => void;
+  player?: Player;
   submissions: VideoSubmission[];
   user: AppUser;
 }) {
   const { width } = useWindowDimensions();
+  const [isFundModalVisible, setIsFundModalVisible] = useState(false);
   const isWide = width >= 840;
   const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const mySubmissions = submissions.filter((item) => item.userId === user.id);
@@ -3192,9 +3282,13 @@ function ProfileScreen({
   const profilePrimaryMetric =
     user.role === "Admin" ? String(pending) : String(mySubmissions.length);
   const profilePrimaryLabel = user.role === "Admin" ? "pendentes" : "envios";
+  const fundProgress = fund
+    ? Math.min(fund.fundedAmount / fund.goalAmount, 1)
+    : 0;
 
   return (
-    <ScrollView contentContainerStyle={styles.screenContent}>
+    <>
+      <ScrollView contentContainerStyle={styles.screenContent}>
       <View style={styles.profileHero}>
         <View style={styles.profileHeroTopRow}>
           <View style={styles.profileAvatar}>
@@ -3227,6 +3321,15 @@ function ProfileScreen({
           </View>
         </View>
       </View>
+
+      {fund?.status === "Concluida" ? (
+        <View style={styles.profileFundAlert}>
+          <Text style={styles.profileFundAlertTitle}>Investimento concluido</Text>
+          <Text style={styles.profileFundAlertBody}>
+            Sua meta foi atingida. Seu perfil esta em busca de contratantes.
+          </Text>
+        </View>
+      ) : null}
 
       <View style={isWide ? styles.profileDesktopGrid : null}>
         <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
@@ -3280,6 +3383,77 @@ function ProfileScreen({
         ) : null}
       </View>
 
+      {user.role === "Usuario" ? (
+        <View style={styles.profilePanel}>
+          <View style={styles.fundTitleRow}>
+            <Text style={styles.sectionTitle}>Bolsa do atleta</Text>
+            {fund ? (
+              <Text
+                style={[
+                  styles.fundStatus,
+                  fund.status === "Concluida"
+                    ? styles.fundStatusComplete
+                    : null
+                ]}
+              >
+                {fund.status}
+              </Text>
+            ) : null}
+          </View>
+
+          {fund ? (
+            <>
+              <View style={styles.fundProgressHeader}>
+                <Text style={styles.fundProgressValue}>
+                  {formatBRL(fund.fundedAmount)} captados
+                </Text>
+                <Text style={styles.fundProgressGoal}>
+                  Meta {formatBRL(fund.goalAmount)}
+                </Text>
+              </View>
+              <View style={styles.fundProgressTrack}>
+                <View
+                  style={[
+                    styles.fundProgressFill,
+                    { width: `${fundProgress * 100}%` }
+                  ]}
+                />
+              </View>
+              <Text style={styles.fundCustodyNote}>
+                A bolsa fica sob custodia simulada do app. Voce pode acompanhar
+                a captacao, mas nao pode sacar os recursos.
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.bodyText}>
+                Abra uma bolsa vinculada ao seu perfil publico para receber
+                aportes simulados de outros usuarios.
+              </Text>
+              {!player ? (
+                <Text style={styles.validationText}>
+                  Envie um video e aguarde a aprovacao para criar seu perfil
+                  publico antes de abrir a bolsa.
+                </Text>
+              ) : null}
+              <Pressable
+                disabled={!player}
+                onPress={() => setIsFundModalVisible(true)}
+                style={[
+                  styles.primaryButton,
+                  !player ? styles.primaryButtonDisabled : null
+                ]}
+              >
+                <CircleDollarSign color={colors.onPrimary} size={18} />
+                <Text style={styles.primaryButtonText}>
+                  Abrir bolsa de investimento
+                </Text>
+              </Pressable>
+            </>
+          )}
+        </View>
+      ) : null}
+
       <View style={styles.profilePanel}>
         <Text style={styles.sectionTitle}>Maquete ativa</Text>
         <Text style={styles.bodyText}>
@@ -3297,7 +3471,141 @@ function ProfileScreen({
         <LogOut color={colors.primary} size={18} />
         <Text style={styles.secondaryButtonText}>Sair da conta</Text>
       </Pressable>
-    </ScrollView>
+      </ScrollView>
+      {player ? (
+        <OpenFundModal
+          onClose={() => setIsFundModalVisible(false)}
+          onConfirm={(goalAmount, minimumContribution) => {
+            onOpenFund(player, goalAmount, minimumContribution);
+            setIsFundModalVisible(false);
+          }}
+          player={player}
+          visible={isFundModalVisible}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function OpenFundModal({
+  onClose,
+  onConfirm,
+  player,
+  visible
+}: {
+  onClose: () => void;
+  onConfirm: (goalAmount: number, minimumContribution: number) => void;
+  player: Player;
+  visible: boolean;
+}) {
+  const [goalText, setGoalText] = useState("5000");
+  const [minimumText, setMinimumText] = useState("50");
+  const goalAmount = Number(goalText.replace(/\D/g, "")) || 0;
+  const minimumContribution = Number(minimumText.replace(/\D/g, "")) || 0;
+  const canOpenFund =
+    goalAmount >= 1000 &&
+    goalAmount <= 1000000 &&
+    minimumContribution >= 10 &&
+    minimumContribution <= goalAmount;
+
+  function confirmFund() {
+    if (!canOpenFund) {
+      return;
+    }
+
+    onConfirm(goalAmount, minimumContribution);
+  }
+
+  return (
+    <Modal
+      animationType="fade"
+      onRequestClose={onClose}
+      statusBarTranslucent
+      transparent
+      visible={visible}
+    >
+      <View style={styles.depositModalRoot}>
+        <Pressable
+          accessibilityLabel="Fechar abertura da bolsa"
+          onPress={onClose}
+          style={styles.depositModalBackdrop}
+        />
+        <View accessibilityViewIsModal style={styles.depositDialog}>
+          <View style={styles.depositDialogHeader}>
+            <View style={styles.depositDialogTitleBlock}>
+              <Text style={styles.depositDialogTitle}>Abrir bolsa</Text>
+              <Text style={styles.depositDialogSubtitle}>
+                Vinculada ao perfil de {player.name}.
+              </Text>
+            </View>
+            <Pressable
+              accessibilityLabel="Fechar"
+              hitSlop={8}
+              onPress={onClose}
+              style={styles.depositCloseButton}
+            >
+              <X color={colors.muted} size={20} />
+            </Pressable>
+          </View>
+
+          <Text style={styles.inputLabel}>Meta de captacao</Text>
+          <View style={styles.depositInputRow}>
+            <Text style={styles.depositCurrencyPrefix}>R$</Text>
+            <TextInput
+              keyboardType="number-pad"
+              onChangeText={setGoalText}
+              placeholder="5000"
+              placeholderTextColor={colors.muted}
+              style={styles.depositInput}
+              value={goalText}
+            />
+          </View>
+
+          <Text style={styles.openFundSecondLabel}>Aporte minimo</Text>
+          <View style={styles.depositInputRow}>
+            <Text style={styles.depositCurrencyPrefix}>R$</Text>
+            <TextInput
+              keyboardType="number-pad"
+              onChangeText={setMinimumText}
+              placeholder="50"
+              placeholderTextColor={colors.muted}
+              style={styles.depositInput}
+              value={minimumText}
+            />
+          </View>
+
+          <View style={styles.openFundNotice}>
+            <Text style={styles.openFundNoticeText}>
+              Simulacao sem dinheiro real. O atleta acompanha a meta, mas nao
+              pode sacar os recursos da bolsa.
+            </Text>
+          </View>
+
+          {!canOpenFund ? (
+            <Text style={styles.validationText}>
+              Meta entre R$ 1.000 e R$ 1.000.000; aporte minimo a partir de R$
+              10 e menor que a meta.
+            </Text>
+          ) : null}
+
+          <View style={styles.depositDialogActions}>
+            <Pressable onPress={onClose} style={styles.depositCancelButton}>
+              <Text style={styles.depositCancelText}>Cancelar</Text>
+            </Pressable>
+            <Pressable
+              disabled={!canOpenFund}
+              onPress={confirmFund}
+              style={[
+                styles.depositConfirmButton,
+                !canOpenFund ? styles.primaryButtonDisabled : null
+              ]}
+            >
+              <Text style={styles.depositConfirmText}>Abrir bolsa</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -5082,6 +5390,97 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     marginTop: 10
   },
+  fundTitleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between"
+  },
+  fundStatus: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase"
+  },
+  fundStatusComplete: {
+    color: colors.accent
+  },
+  fundProgressHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    marginTop: 16
+  },
+  fundProgressValue: {
+    color: colors.primary,
+    flexShrink: 1,
+    fontSize: 15,
+    fontWeight: "900"
+  },
+  fundProgressGoal: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+    textAlign: "right"
+  },
+  fundProgressTrack: {
+    backgroundColor: colors.border,
+    borderRadius: 999,
+    height: 8,
+    marginTop: 9,
+    overflow: "hidden"
+  },
+  fundProgressFill: {
+    backgroundColor: colors.accent,
+    borderRadius: 999,
+    height: "100%"
+  },
+  fundStatsRow: {
+    flexDirection: "row",
+    gap: 16,
+    marginTop: 13
+  },
+  fundStatItem: {
+    flex: 1,
+    minWidth: 0
+  },
+  fundStatValue: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  fundStatLabel: {
+    color: colors.muted,
+    fontSize: 10,
+    fontWeight: "800",
+    marginTop: 2,
+    textTransform: "uppercase"
+  },
+  fundCompleteNotice: {
+    borderLeftColor: colors.accent,
+    borderLeftWidth: 3,
+    marginTop: 18,
+    paddingLeft: 12,
+    paddingVertical: 3
+  },
+  fundCompleteNoticeTitle: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: "900"
+  },
+  fundCompleteNoticeBody: {
+    color: colors.text,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 3
+  },
+  fundCustodyNote: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 12
+  },
   twoColumnRow: {
     flexDirection: "row",
     gap: 10
@@ -5585,6 +5984,24 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     minHeight: 54
   },
+  openFundSecondLabel: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "800",
+    marginTop: 15
+  },
+  openFundNotice: {
+    borderLeftColor: colors.warning,
+    borderLeftWidth: 3,
+    marginTop: 16,
+    paddingLeft: 11,
+    paddingVertical: 2
+  },
+  openFundNoticeText: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17
+  },
   depositPresetRow: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -5738,6 +6155,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 14,
     padding: 18
+  },
+  profileFundAlert: {
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    marginBottom: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 13
+  },
+  profileFundAlertTitle: {
+    color: colors.onPrimary,
+    fontSize: 16,
+    fontWeight: "900"
+  },
+  profileFundAlertBody: {
+    color: "rgba(255, 255, 255, 0.86)",
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 3
   },
   profileHeroTopRow: {
     alignItems: "center",

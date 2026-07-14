@@ -10,12 +10,13 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Feed vertical com video 9:16, reproducao automatica, som, tela cheia e ficha expansivel.
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao aprovada.
 - Conta comum `Usuario` com Feed, Envio, Carteira e Perfil no mesmo acesso.
+- Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.
 - Envio por galeria ou link direto, com validacao e confirmacao animada.
 - Moderacao local por perfil Admin: aprovar, pedir ajustes ou reprovar.
 - Solicitacoes revisadas saem imediatamente da fila administrativa.
 - Videos reais aprovados substituem o perfil demonstrativo.
 - Score, risco, metricas e valores financeiros so aparecem quando existe uma avaliacao explicita.
-- Saldo, depositos e reservas permanecem simulados, sem pagamento ou contrato real.
+- Saldo, depositos, aportes e bolsas permanecem simulados, sem pagamento, saque ou contrato real.
 
 ## Teste online
 
@@ -51,7 +52,10 @@ pnpm run build:web
 5. Abra o `Feed` e confira o video aprovado.
 6. Verifique que publicacoes sem avaliacao nao exibem score, risco, box de aviso ou valores inventados.
 7. Na `Carteira`, use `Depositar` para adicionar saldo simulado.
-8. Confirme que o saldo aparece em Feed, Carteira e Perfil e diminui ao criar uma reserva simulada.
+8. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
+9. Confirme que o saldo diminui e o valor captado da bolsa aumenta.
+10. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
+11. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
 
 ## Antes da abertura ao publico
 
@@ -61,6 +65,8 @@ pnpm run build:web
 - Adicionar trilha de auditoria, denuncia, bloqueio e politica de moderacao.
 - Aplicar LGPD, protecao de menores, termos e controles de acesso.
 - Validar juridicamente qualquer oferta, reserva ou distribuicao financeira.
+- Definir enquadramento CVM da oferta e contratar plataforma autorizada ou outro parceiro regulado antes de captar dinheiro real.
+- Integrar instituicao financeira ou de pagamento autorizada para custodia e transferencia de recursos.
 - Adicionar monitoramento, testes automatizados e recuperacao de falhas.
 
 O plano de evolucao esta em `docs/product-plan.md`. A origem do video demonstrativo esta documentada em `docs/third-party-assets.md`.

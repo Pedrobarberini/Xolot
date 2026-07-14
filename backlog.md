@@ -213,6 +213,41 @@ Criterios de aceite:
 - Reserva reduz o saldo e nao permite valor superior ao disponivel.
 - Recarregar a pagina limpa o saldo enquanto nao houver backend.
 
+### Task HOTFIX-010 - Vincular bolsa de investimento ao perfil do atleta
+
+Tipo: Produto/Frontend/Arquitetura
+
+Objetivo: separar video, perfil e bolsa, permitindo que o atleta abra uma captacao vinculada ao proprio perfil e que outros usuarios transfiram saldo simulado para ela.
+
+Tasks:
+
+- [x] Criar entidade `AthleteFund` separada de video e avaliacao esportiva.
+- [x] Vincular videos aprovados ao usuario proprietario do perfil.
+- [x] Criar bolsa demonstrativa para teste imediato no perfil de demonstracao.
+- [x] Exibir bolsa, meta, captado, restante e aporte minimo no perfil publico do atleta.
+- [x] Transferir saldo simulado da carteira do investidor para a bolsa do perfil.
+- [x] Bloquear aporte abaixo do minimo, acima do restante ou sem saldo.
+- [x] Fechar automaticamente a bolsa quando a meta for atingida.
+- [x] Bloquear novos aportes depois da conclusao.
+- [x] Nao disponibilizar saque para o atleta.
+- [x] Permitir que o atleta abra uma bolsa depois da aprovacao do perfil publico.
+- [x] Criar formulario de abertura com meta e aporte minimo.
+- [x] Exibir progresso da bolsa no perfil privado do atleta.
+- [x] Exibir aviso de investimento concluido e busca por contratantes.
+- [x] Separar saldos e aportes por conta de usuario.
+- [x] Tornar o identificador local da conta estavel por papel e e-mail.
+- [x] Remover projecoes de retorno e avancos manuais da carteira.
+- [x] Atualizar README e plano de produto.
+
+Criterios de aceite:
+
+- O video apresenta o talento, mas nao armazena nem recebe o investimento.
+- A transferencia acontece somente dentro do perfil que possui bolsa aberta.
+- O atleta visualiza a captacao e nao possui acao de saque.
+- Atingir 100% muda a bolsa para `Concluida` automaticamente.
+- O perfil do atleta concluido mostra que esta em busca de contratantes.
+- Toda operacao permanece local, temporaria e explicitamente simulada.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens
