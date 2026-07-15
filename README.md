@@ -49,6 +49,18 @@ Para gerar a versao web usada pelo GitHub Pages:
 pnpm run build:web
 ```
 
+## Arquitetura do frontend
+
+O `App.tsx` mantem somente estado compartilhado, composicao e roteamento local. O restante esta organizado em:
+
+- `src/screens/`: telas de autenticacao, feed, envio, moderacao, carteira e perfil.
+- `src/components/`: shell visual, navegacao e componentes compartilhados.
+- `src/actions/`: handlers de produto, formatadores e builders de dados.
+- `src/styles/`: estilos React Native extraidos do componente raiz.
+- `src/constants/` e `src/ui/`: constantes de layout, assets e tipos de interface.
+
+As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` e estilos por dominio, estao marcadas em `backlog.md`.
+
 ## Fluxo principal de teste
 
 1. Crie uma conta como `Usuario` e envie um video.

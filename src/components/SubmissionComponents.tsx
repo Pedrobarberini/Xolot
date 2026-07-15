@@ -1,0 +1,90 @@
+import React from "react";
+import { VideoView, useVideoPlayer } from "expo-video";
+import { Text, View } from "react-native";
+import { styles } from "../styles/appStyles";
+import { VideoSubmission, VideoSubmissionStatus } from "../types";
+
+export function SubmissionVideoPreview({
+  compact = false,
+  uri
+}: {
+  compact?: boolean;
+  uri: string;
+}) {
+  const previewPlayer = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+  });
+
+  return (
+    <View
+      style={[
+        styles.submissionVideoPreview,
+        compact ? styles.submissionVideoPreviewCompact : null
+      ]}
+    >
+      <VideoView
+        allowsFullscreen
+        contentFit="contain"
+        nativeControls
+        player={previewPlayer}
+        playsInline
+        style={styles.submissionVideoPreviewMedia}
+        surfaceType="textureView"
+      />
+    </View>
+  );
+}
+
+export function SubmissionList({
+  submissions
+}: {
+  submissions: VideoSubmission[];
+}) {
+  return (
+    <View style={styles.infoPanel}>
+      <Text style={styles.sectionTitle}>Meus envios</Text>
+      {submissions.length === 0 ? (
+        <Text style={styles.bodyText}>
+          Nenhum video enviado por esta conta ainda.
+        </Text>
+      ) : (
+        submissions.map((submission) => (
+          <View key={submission.id} style={styles.submissionItem}>
+            <View style={styles.submissionTopRow}>
+              <View style={styles.submissionTextBlock}>
+                <Text style={styles.submissionTitle}>
+                  {submission.videoTitle}
+                </Text>
+                <Text style={styles.submissionMeta}>
+                  {submission.position} | {submission.city}
+                </Text>
+              </View>
+              <StatusPill status={submission.status} />
+            </View>
+            <Text style={styles.submissionBody}>{submission.highlight}</Text>
+            {submission.reviewNote ? (
+              <Text style={styles.reviewNote}>{submission.reviewNote}</Text>
+            ) : null}
+          </View>
+        ))
+      )}
+    </View>
+  );
+}
+
+export function StatusPill({ status }: { status: VideoSubmissionStatus }) {
+  const styleByStatus =
+    status === "Aprovado"
+      ? styles.statusApproved
+      : status === "Reprovado"
+        ? styles.statusRejected
+        : status === "Ajustes solicitados"
+          ? styles.statusAdjust
+          : styles.statusReview;
+
+  return (
+    <View style={[styles.statusPill, styleByStatus]}>
+      <Text style={styles.statusPillText}>{status}</Text>
+    </View>
+  );
+}

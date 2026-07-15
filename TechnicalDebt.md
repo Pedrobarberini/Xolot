@@ -4,21 +4,21 @@ Documento de dívida técnica do estado atual do repositório (jul/2026). Cada i
 
 ---
 
-## 1. Monolito `App.tsx`
+## 1. Monolito `App.tsx` — resolvido
 
-**Problema:** ~6.800 linhas concentram roteamento, estado global, 15+ componentes de tela, utilitários de formatação e ~2.800 linhas de `StyleSheet` em um único arquivo.
+**Status:** Resolvido em 2026-07-15.
 
-**Impacto:** Dificulta revisão, testes, reutilização e onboarding. Qualquer alteração aumenta risco de regressão.
+**Solução aplicada:** O `App.tsx` foi reduzido de ~6.800 para 231 linhas e agora concentra estado, composição e roteamento local. Telas, ações, navegação, shell, constantes e estilos foram movidos para módulos em `src/`.
 
-**Ação:** Extrair para `src/screens/`, `src/components/`, `src/utils/` e `src/styles/`. Manter `App.tsx` apenas com composição, estado global e roteamento por aba. Referência de escopo em `backlog.md` (P0-001).
+**Risco residual:** `FeedScreen.tsx` e `src/styles/appStyles.ts` ainda são grandes. A extração de `VideoPlayer`, `VideoCard`, `AppToast` e estilos por domínio permanece em `backlog.md` (P0-001 e P1-002).
 
-**Prioridade:** P0
+**Prioridade:** Concluída
 
 ---
 
 ## 2. Ausência de camada de serviços/repositório
 
-**Problema:** Telas e handlers (`handleInvest`, `handleSubmitVideo`, `handleReviewSubmission`) manipulam arrays locais (`useState`) diretamente no componente raiz.
+**Problema:** Os handlers foram extraídos para `src/actions/createAppActions.ts`, mas ainda manipulam estado local (`useState`) sem uma interface de persistência.
 
 **Impacto:** Impossível trocar persistência local por API sem reescrever a UI. Lógica de negócio acoplada à apresentação.
 
@@ -90,7 +90,7 @@ Documento de dívida técnica do estado atual do repositório (jul/2026). Cada i
 
 ## 8. `VideoPlayer` não reutilizável
 
-**Problema:** Lógica de reprodução (play/pause, seek, volume vertical, fullscreen, loop) está duplicada entre `FeedVideoPlayback`, `DetailVideoPlayback` e `SubmissionVideoPreview` dentro de `App.tsx`.
+**Problema:** A lógica de reprodução (play/pause, seek, volume vertical, fullscreen, loop) continua distribuída entre `FeedScreen.tsx` e `SubmissionComponents.tsx`, sem um player compartilhado.
 
 **Impacto:** Correções e melhorias precisam ser replicadas manualmente em três lugares.
 
@@ -127,11 +127,11 @@ Documento de dívida técnica do estado atual do repositório (jul/2026). Cada i
 
 ---
 
-## 11. Utilitários presos ao componente
+## 11. Utilitários presos ao componente — parcialmente resolvido
 
-**Problema:** Funções como `formatVideoDuration`, `formatPlaybackTime`, `formatVideoFileSize`, `getVideoTitleFromFileName` e `buildPlayerFromSubmission` vivem em `App.tsx`.
+**Status:** Helpers foram removidos do `App.tsx` e agrupados em `src/actions/appActions.ts`.
 
-**Impacto:** Não testáveis isoladamente; duplicação provável ao extrair telas.
+**Risco residual:** O nome `appActions.ts` mistura formatadores e builders; esses helpers ainda devem migrar para `src/utils/` e receber testes unitários.
 
 **Ação:** Mover para `src/utils/` (ex.: `format.ts`, `video.ts`, `player.ts`).
 
@@ -139,11 +139,11 @@ Documento de dívida técnica do estado atual do repositório (jul/2026). Cada i
 
 ---
 
-## 12. Estilos centralizados em bloco único
+## 12. Estilos centralizados em bloco único — parcialmente resolvido
 
-**Problema:** Um `StyleSheet.create` com centenas de chaves no final de `App.tsx`. Estilos de telas distintas compartilham o mesmo objeto.
+**Status:** O `StyleSheet.create` foi removido do `App.tsx` e movido para `src/styles/appStyles.ts`.
 
-**Impacto:** Conflitos de nomenclatura, difícil localizar estilos por tela, bundle de estilos desnecessário ao extrair componentes.
+**Risco residual:** Telas distintas ainda compartilham um único arquivo de estilos com muitas chaves.
 
 **Ação:** Co-localizar estilos com cada screen/component ou criar `src/styles/` por domínio (`auth.ts`, `feed.ts`, `profile.ts`). Manter tokens em `src/theme.ts`.
 

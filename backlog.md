@@ -30,21 +30,27 @@ Tarefas concluidas estao documentadas em `releases/release-1.md`.
 
 Tipo: Frontend
 
+Status: Em andamento. A modularizacao principal foi entregue em 2026-07-15; componentes menores continuam pendentes.
+
 Objetivo: quebrar o `App.tsx` em telas/componentes para o app ficar mais facil de manter.
 
 Tasks:
 
-- [ ] Criar `src/screens/AuthScreen.tsx`.
-- [ ] Criar `src/screens/FeedScreen.tsx`.
-- [ ] Criar `src/screens/SubmissionScreen.tsx`.
-- [ ] Criar `src/screens/AdminScreen.tsx`.
-- [ ] Criar `src/screens/ProfileScreen.tsx`.
-- [ ] Criar `src/screens/WalletScreen.tsx` ou remover/ocultar enquanto for simulado.
+- [x] Criar `src/screens/AuthScreen.tsx`.
+- [x] Criar `src/screens/FeedScreen.tsx`.
+- [x] Criar `src/screens/SubmissionScreen.tsx`.
+- [x] Criar `src/screens/AdminScreen.tsx`.
+- [x] Criar `src/screens/ProfileScreen.tsx`.
+- [x] Criar `src/screens/WalletScreen.tsx`.
 - [ ] Criar `src/components/VideoCard.tsx`.
 - [ ] Criar `src/components/VideoPlayer.tsx`.
-- [ ] Criar `src/components/BottomNavigation.tsx`.
+- [x] Extrair a navegacao inferior para `src/components/Navigation.tsx`.
 - [ ] Criar `src/components/AppToast.tsx`.
-- [ ] Mover estilos compartilhados para `src/theme.ts` e componentes base.
+- [x] Extrair estilos do `App.tsx` para `src/styles/appStyles.ts`.
+- [x] Extrair handlers de produto para `src/actions/createAppActions.ts`.
+- [x] Extrair helpers de dados para `src/actions/appActions.ts`.
+- [x] Extrair shell, splash e transicoes para `src/components/AppShell.tsx`.
+- [ ] Dividir `src/styles/appStyles.ts` por tela ou dominio.
 
 Criterios de aceite:
 

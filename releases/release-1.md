@@ -419,3 +419,30 @@ Criterios de aceite:
 - O saldo continua legivel em uma unica linha.
 - A seta permanece confortavel para toque no celular.
 - O conteudo nao fica escondido sob a barra.
+
+### Task HOTFIX-019 - Modularizar arquitetura do frontend
+
+Tipo: Frontend/Arquitetura
+
+Objetivo: reduzir o acoplamento do arquivo raiz e organizar o codigo por responsabilidade para facilitar manutencao, revisao e evolucao do produto.
+
+Tasks:
+
+- [x] Reduzir o `App.tsx` de 6.834 para 231 linhas.
+- [x] Separar as seis telas em `src/screens/`.
+- [x] Extrair handlers de autenticacao, carteira, bolsa, envio e moderacao para `src/actions/createAppActions.ts`.
+- [x] Extrair formatadores e builders compartilhados para `src/actions/appActions.ts`.
+- [x] Extrair navegacao, shell, splash e componentes compartilhados para `src/components/`.
+- [x] Mover o `StyleSheet` para `src/styles/appStyles.ts`.
+- [x] Extrair constantes de assets e layout para `src/constants/`.
+- [x] Remover o componente morto `PlayerCard`.
+- [x] Atualizar `backlog.md`, `TechnicalDebt.md` e `README.md`.
+- [x] Validar a nova estrutura com TypeScript.
+
+Criterios de aceite:
+
+- `App.tsx` fica responsavel principalmente por estado global simples e roteamento local.
+- Cada tela principal possui um modulo proprio.
+- Acoes de produto nao ficam declaradas no componente raiz.
+- O layout e os fluxos existentes continuam com as mesmas props e regras.
+- As subdivisoes restantes ficam identificadas no backlog, sem serem marcadas como concluidas.
