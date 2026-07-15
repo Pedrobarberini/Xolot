@@ -18,7 +18,15 @@ import { SearchScreen } from "./src/screens/SearchScreen";
 import { SubmitVideoScreen } from "./src/screens/SubmissionScreen";
 import { styles } from "./src/styles/appStyles";
 import { colors } from "./src/theme";
-import { AppUser, AthleteFund, Investment, Player, VideoSubmission } from "./src/types";
+import {
+  AppUser,
+  AthleteFund,
+  DirectMessage,
+  Investment,
+  MessageContact,
+  Player,
+  VideoSubmission
+} from "./src/types";
 import { Tab } from "./src/ui/types";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -38,6 +46,11 @@ export default function App() {
   const [reelReturnTarget, setReelReturnTarget] =
     useState<ReelReturnTarget | null>(null);
   const [registeredUsers, setRegisteredUsers] = useState<AppUser[]>([]);
+  const [messageContacts, setMessageContacts] = useState<MessageContact[]>([]);
+  const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
+  const [activeMessageContactId, setActiveMessageContactId] = useState<
+    string | null
+  >(null);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [athleteFunds, setAthleteFunds] = useState<AthleteFund[]>(() => [
     {
@@ -147,6 +160,60 @@ export default function App() {
     setSelectedPlayer(returnTarget.player);
   }
 
+  function openMessagesForSelectedProfile() {
+    const contactId =
+      selectedProfileAccount?.id ??
+      selectedProfilePlayer?.ownerUserId ??
+      selectedProfilePlayer?.profileId;
+
+    if (!contactId) {
+      return;
+    }
+
+    const contact: MessageContact = {
+      id: contactId,
+      name:
+        selectedProfilePlayer?.name ??
+        selectedProfileAccount?.name ??
+        "Perfil NextStar",
+      subtitle: selectedProfilePlayer
+        ? `${selectedProfilePlayer.position} | ${selectedProfilePlayer.city}`
+        : "Usuario NextStar"
+    };
+
+    setMessageContacts((current) => {
+      const alreadyExists = current.some((item) => item.id === contact.id);
+
+      return alreadyExists
+        ? current.map((item) => (item.id === contact.id ? contact : item))
+        : [contact, ...current];
+    });
+    setActiveMessageContactId(contact.id);
+    setInvestmentPlayer(null);
+    setSelectedAccount(null);
+    setSelectedPlayer(null);
+    setTab("messages");
+  }
+
+  function sendDirectMessage(contactId: string, body: string) {
+    const trimmedBody = body.trim();
+
+    if (!user || !trimmedBody) {
+      return;
+    }
+
+    setDirectMessages((current) => [
+      ...current,
+      {
+        body: trimmedBody,
+        contactId,
+        createdAt: new Date().toISOString(),
+        id: `message-${Date.now()}-${current.length}`,
+        senderUserId: user.id
+      }
+    ]);
+  }
+
   const {
     handleAuth,
     handleDeposit,
@@ -169,6 +236,13 @@ export default function App() {
     user,
     walletBalance
   });
+
+  function signOutAndClearMessages() {
+    setActiveMessageContactId(null);
+    setDirectMessages([]);
+    setMessageContacts([]);
+    handleSignOut();
+  }
 
   if (!user) {
     return (
@@ -241,6 +315,7 @@ export default function App() {
                       setInvestmentPlayer(selectedProfilePlayer);
                     }
                   }}
+                  onMessage={openMessagesForSelectedProfile}
                   onOpenVideo={(player) =>
                     openReel(player, {
                       account: selectedProfileAccount,
@@ -263,7 +338,7 @@ export default function App() {
             <>
               {tab !== "feed" ? (
                 <Header
-                  onSignOut={handleSignOut}
+                  onSignOut={signOutAndClearMessages}
                   pendingReviews={pendingReviews}
                   showBalance={
                     user.role === "Usuario" && tab === "profile"
@@ -307,7 +382,15 @@ export default function App() {
               ) : null}
               {tab === "messages" ? (
                 <ScreenFrame>
-                  <MessagesScreen onFindProfiles={() => setTab("search")} />
+                  <MessagesScreen
+                    activeContactId={activeMessageContactId}
+                    contacts={messageContacts}
+                    currentUserId={user.id}
+                    messages={directMessages}
+                    onFindProfiles={() => openTab("search")}
+                    onSelectContact={setActiveMessageContactId}
+                    onSendMessage={sendDirectMessage}
+                  />
                 </ScreenFrame>
               ) : null}
               {tab === "submit" ? (
@@ -348,7 +431,7 @@ export default function App() {
                       }
                     }}
                     onDeposit={handleDeposit}
-                    onSignOut={handleSignOut}
+                    onSignOut={signOutAndClearMessages}
                     player={availablePlayers.find(
                       (item) => item.ownerUserId === user.id
                     )}

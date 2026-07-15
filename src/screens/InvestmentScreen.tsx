@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ArrowLeft, CircleDollarSign } from "lucide-react-native";
+import { CircleDollarSign } from "lucide-react-native";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { DetailHud } from "../components/Navigation";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AthleteFund, Player } from "../types";
@@ -152,24 +153,11 @@ export function InvestmentScreen({
         </View>
       </ScrollView>
 
-      <View style={styles.detailFixedHud}>
-        <Pressable
-          accessibilityLabel="Voltar ao perfil"
-          accessibilityRole="button"
-          hitSlop={6}
-          onPress={onBack}
-          style={styles.detailHudBackButton}
-        >
-          <ArrowLeft color={colors.text} size={21} strokeWidth={2.1} />
-        </Pressable>
-        <Text
-          accessibilityLabel={`Saldo disponivel ${formatBRL(walletBalance)}`}
-          numberOfLines={1}
-          style={styles.detailHudBalance}
-        >
-          {formatBRL(walletBalance)}
-        </Text>
-      </View>
+      <DetailHud
+        backLabel="Voltar ao perfil"
+        onBack={onBack}
+        walletBalance={walletBalance}
+      />
     </View>
   );
 }

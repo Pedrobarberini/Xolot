@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  ArrowLeft,
   Home,
   LogOut,
   MessageCircle,
@@ -113,6 +114,45 @@ export function BalanceLine({
         ]}
       >
         {formatBRL(balance)}
+      </Text>
+    </View>
+  );
+}
+
+export function DetailHud({
+  backLabel,
+  onBack,
+  walletBalance
+}: {
+  backLabel: string;
+  onBack: () => void;
+  walletBalance: number;
+}) {
+  return (
+    <View style={styles.detailFixedHud}>
+      <View style={styles.detailHudLeading}>
+        <Pressable
+          accessibilityLabel={backLabel}
+          accessibilityRole="button"
+          hitSlop={6}
+          onPress={onBack}
+          style={styles.detailHudBackButton}
+        >
+          <ArrowLeft color={colors.text} size={21} strokeWidth={2.1} />
+        </Pressable>
+        <Image
+          accessibilityLabel="Logo NextStar"
+          resizeMode="contain"
+          source={NEXTSTAR_SYMBOL}
+          style={styles.detailHudLogo}
+        />
+      </View>
+      <Text
+        accessibilityLabel={`Saldo disponivel ${formatBRL(walletBalance)}`}
+        numberOfLines={1}
+        style={styles.detailHudBalance}
+      >
+        {formatBRL(walletBalance)}
       </Text>
     </View>
   );

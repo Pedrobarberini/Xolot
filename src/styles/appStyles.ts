@@ -1547,11 +1547,20 @@ export const styles = StyleSheet.create({
     width: "100%",
     zIndex: 8
   },
+  detailHudLeading: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4
+  },
   detailHudBackButton: {
     alignItems: "center",
     height: 40,
     justifyContent: "center",
     width: 40
+  },
+  detailHudLogo: {
+    height: 38,
+    width: 48
   },
   detailHudBalance: {
     color: colors.text,
@@ -3334,6 +3343,10 @@ export const styles = StyleSheet.create({
     paddingTop: 20,
     width: "100%"
   },
+  messagesScreen: {
+    flex: 1,
+    position: "relative"
+  },
   messagesEmptyState: {
     alignItems: "center",
     flex: 1,
@@ -3364,6 +3377,162 @@ export const styles = StyleSheet.create({
     color: colors.onPrimary,
     fontSize: 13,
     fontWeight: "900"
+  },
+  messagesConversationHeader: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: 9,
+    minHeight: 62,
+    paddingHorizontal: 10,
+    paddingVertical: 8
+  },
+  messagesBackButton: {
+    alignItems: "center",
+    height: 40,
+    justifyContent: "center",
+    width: 36
+  },
+  messagesContactAvatar: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    height: 42,
+    justifyContent: "center",
+    width: 42
+  },
+  messagesContactAvatarText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  messagesContactIdentity: {
+    flex: 1,
+    minWidth: 0
+  },
+  messagesContactName: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  messagesContactSubtitle: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    marginTop: 2
+  },
+  messagesThreadContent: {
+    flexGrow: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 16
+  },
+  messagesThreadEmpty: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 260,
+    paddingHorizontal: 24
+  },
+  messagesThreadEmptyTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "900",
+    marginTop: 12
+  },
+  messagesThreadEmptyBody: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 4,
+    textAlign: "center"
+  },
+  messageBubbleRow: {
+    alignItems: "flex-start",
+    marginBottom: 8,
+    width: "100%"
+  },
+  messageBubbleRowMine: {
+    alignItems: "flex-end"
+  },
+  messageBubble: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    maxWidth: "82%",
+    paddingHorizontal: 12,
+    paddingVertical: 9
+  },
+  messageBubbleMine: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary
+  },
+  messageBubbleText: {
+    color: colors.text,
+    fontSize: 13,
+    lineHeight: 18
+  },
+  messageBubbleTextMine: {
+    color: colors.onPrimary
+  },
+  messageComposer: {
+    alignItems: "flex-end",
+    backgroundColor: colors.surface,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    padding: 10
+  },
+  messageComposerInput: {
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    color: colors.text,
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    maxHeight: 92,
+    minHeight: 42,
+    paddingHorizontal: 12,
+    paddingVertical: 10
+  },
+  messageSendButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    height: 42,
+    justifyContent: "center",
+    width: 42
+  },
+  messageSendButtonDisabled: {
+    opacity: 0.42
+  },
+  messagesContactList: {
+    gap: 8,
+    marginTop: 16
+  },
+  messagesContactCard: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 11,
+    minHeight: 66,
+    paddingHorizontal: 12,
+    paddingVertical: 10
+  },
+  messagesContactPreview: {
+    color: colors.muted,
+    fontSize: 12,
+    marginTop: 3
   },
   tabBar: {
     backgroundColor: colors.surface,

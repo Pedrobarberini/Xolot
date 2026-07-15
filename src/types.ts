@@ -64,6 +64,20 @@ export type Investment = {
   createdAt: string;
 };
 
+export type MessageContact = {
+  id: string;
+  name: string;
+  subtitle: string;
+};
+
+export type DirectMessage = {
+  id: string;
+  contactId: string;
+  senderUserId: string;
+  body: string;
+  createdAt: string;
+};
+
 export type UserRole = "Usuario" | "Admin";
 
 export type KycStatus = "Nao iniciado" | "Pendente" | "Aprovado";

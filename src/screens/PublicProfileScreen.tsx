@@ -1,6 +1,7 @@
 import React from "react";
-import { ArrowLeft, CircleDollarSign } from "lucide-react-native";
+import { CircleDollarSign, MessageCircle } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { DetailHud } from "../components/Navigation";
 import {
   ProfileGalleryVideo,
   ProfileVideoGallery
@@ -8,7 +9,6 @@ import {
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, AthleteFund, Player } from "../types";
-import { formatBRL } from "../utils/investment";
 
 export function PublicProfileScreen({
   account,
@@ -16,6 +16,7 @@ export function PublicProfileScreen({
   fund,
   onBack,
   onInvest,
+  onMessage,
   onOpenVideo,
   player,
   videos,
@@ -26,6 +27,7 @@ export function PublicProfileScreen({
   fund?: AthleteFund;
   onBack: () => void;
   onInvest: () => void;
+  onMessage: () => void;
   onOpenVideo: (player: Player) => void;
   player?: Player;
   videos: Player[];
@@ -85,19 +87,12 @@ export function PublicProfileScreen({
               </Text>
             </View>
             <Pressable
-              accessibilityLabel="Abrir investimento"
+              accessibilityLabel={`Enviar mensagem para ${profileName}`}
               accessibilityRole="button"
-              disabled={!hasOpenFund}
-              onPress={onInvest}
-              style={[
-                styles.profileMenuButton,
-                !hasOpenFund ? styles.profileActionButtonDisabled : null
-              ]}
+              onPress={onMessage}
+              style={styles.profileMenuButton}
             >
-              <CircleDollarSign
-                color={hasOpenFund ? colors.primary : colors.muted}
-                size={22}
-              />
+              <MessageCircle color={colors.primary} size={22} />
             </Pressable>
           </View>
 
@@ -170,24 +165,11 @@ export function PublicProfileScreen({
         />
       </ScrollView>
 
-      <View style={styles.detailFixedHud}>
-        <Pressable
-          accessibilityLabel="Voltar"
-          accessibilityRole="button"
-          hitSlop={6}
-          onPress={onBack}
-          style={styles.detailHudBackButton}
-        >
-          <ArrowLeft color={colors.text} size={21} strokeWidth={2.1} />
-        </Pressable>
-        <Text
-          accessibilityLabel={`Saldo disponivel ${formatBRL(walletBalance)}`}
-          numberOfLines={1}
-          style={styles.detailHudBalance}
-        >
-          {formatBRL(walletBalance)}
-        </Text>
-      </View>
+      <DetailHud
+        backLabel="Voltar"
+        onBack={onBack}
+        walletBalance={walletBalance}
+      />
     </View>
   );
 }

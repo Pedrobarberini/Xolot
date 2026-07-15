@@ -589,3 +589,29 @@ Criterios de aceite:
 - A seta restaura exatamente o perfil que originou a navegacao.
 - Logo e seta permanecem integralmente visiveis e nao se sobrepoem.
 - A marca do Inicio possui o mesmo tamanho usado no header compacto.
+
+### Task HOTFIX-025 - Mensagens pelo perfil e HUD com marca
+
+Tipo: Frontend/UI/Navegacao
+
+Objetivo: transformar a acao secundaria do perfil publico em contato direto e padronizar a marca nas paginas contextuais.
+
+Tasks:
+
+- [x] Substituir o icone financeiro superior do perfil publico por mensagem.
+- [x] Manter o botao principal de investimento como unica entrada da bolsa.
+- [x] Abrir a conversa com o perfil visitado ja selecionado.
+- [x] Criar lista de conversas, thread, composer e envio local.
+- [x] Manter o historico de mensagens durante a sessao atual.
+- [x] Limpar mensagens locais ao sair da conta.
+- [x] Criar HUD compartilhado com seta, logo compacta e saldo.
+- [x] Reutilizar o HUD no perfil publico e na pagina de investimento.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- O icone pequeno do perfil abre Mensagens e nao duplica o investimento.
+- A conversa aberta corresponde ao perfil visitado.
+- Uma mensagem enviada aparece imediatamente no historico local.
+- A marca ocupa a mesma posicao e dimensao nas paginas contextuais.
+- Seta, logo e saldo permanecem fixos e sem sobreposicao.

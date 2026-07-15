@@ -8,11 +8,11 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Identidade visual clara em verde, branco e tons neutros.
 - Icone do app com o simbolo NextStar e splash animada com a marca completa.
 - Inicio com videos verticais 9:16, reproducao automatica, controle vertical de volume, tela cheia e ficha expansivel.
-- Logo fixa no feed e navegacao persistente no perfil publico, com HUD horizontal compacto de voltar/saldo e footer sempre acessiveis.
+- Logo fixa no feed e HUD contextual padronizado com voltar, marca e saldo nas paginas publicas.
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao aprovada.
 - Conta comum `Usuario` com Inicio, Envio, Pesquisar, Mensagens e Perfil no mesmo acesso.
 - Pesquisa por nome, posicao, cidade ou clube abre diretamente o perfil publico do atleta.
-- Mensagens possui uma area propria e estado vazio sem conversas demonstrativas.
+- Mensagens pode ser iniciada pelo perfil visitado, com composer e historico local durante a sessao.
 - Perfil possui menu de tres barras com Configuracoes, Carteira e Sair da conta.
 - Perfil principal funciona como vitrine, com galeria de videos aprovados e estado vazio para novas contas.
 - Configuracoes concentra preferencias, verificacao/KYC, dados da Conta NextStar e gestao da bolsa.
@@ -79,14 +79,15 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 9. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
 10. Use o icone ao lado do nome para abrir o perfil e alternar entre os videos publicados.
 11. Pesquise uma conta pela aba `Pesquisar`; usuarios sem video tambem aparecem e abrem um perfil publico vazio.
-12. No perfil visitado, toque em um video para voltar ao reel correspondente ou use `Investir` para abrir a pagina da bolsa.
-13. Perfis sem bolsa em captacao exibem a acao de investimento desabilitada.
-14. Ao abrir um video pela galeria, use a seta no Inicio para retornar ao mesmo perfil.
-12. Confira o estado vazio honesto da aba `Mensagens`.
-13. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
-14. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
-15. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
-16. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
+12. No perfil visitado, toque no icone de mensagem, escreva uma mensagem e confirme que ela aparece na conversa.
+13. Volte para a lista de conversas e reabra o historico criado durante a sessao.
+14. No perfil visitado, toque em um video para voltar ao reel correspondente ou use `Investir` para abrir a pagina da bolsa.
+15. Perfis sem bolsa em captacao exibem a acao de investimento desabilitada.
+16. Ao abrir um video pela galeria, use a seta no Inicio para retornar ao mesmo perfil.
+17. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
+18. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
+19. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
+20. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
 
 ## Antes da abertura ao publico
 

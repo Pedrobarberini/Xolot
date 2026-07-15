@@ -46,6 +46,8 @@ Tasks:
 - [x] Incluir contas cadastradas na sessao nos resultados, mesmo sem video aprovado.
 - [x] Criar estado publico navegavel para usuario cadastrado sem publicacoes.
 - [x] Criar `src/screens/MessagesScreen.tsx` com estado vazio sem conversas fake.
+- [x] Iniciar uma conversa pelo perfil visitado.
+- [x] Enviar mensagens e manter o historico durante a sessao atual.
 - [ ] Criar `src/components/VideoCard.tsx`.
 - [ ] Criar `src/components/VideoPlayer.tsx`.
 - [x] Extrair a navegacao inferior para `src/components/Navigation.tsx`.
@@ -78,6 +80,7 @@ Tasks:
 - [ ] Criar `src/services/videoService.ts`.
 - [ ] Criar `src/services/moderationService.ts`.
 - [ ] Criar `src/services/profileService.ts`.
+- [ ] Criar `src/services/messageService.ts`.
 - [ ] Criar `src/repositories/localRepository.ts` para estado temporario.
 - [ ] Criar tipos de request/response em `src/types.ts` ou `src/api/types.ts`.
 
@@ -107,6 +110,9 @@ Endpoints sugeridos:
 - [ ] `PATCH /admin/videos/:id/reject`
 - [ ] `PATCH /admin/videos/:id/request-changes`
 - [ ] `GET /admin/videos/pending`
+- [ ] `GET /conversations`
+- [ ] `GET /conversations/:id/messages`
+- [ ] `POST /conversations/:id/messages`
 
 Modelo inicial:
 
@@ -365,6 +371,37 @@ Criterios de aceite:
 - Investimento e preenchido em uma pagina propria, separada da vitrine publica.
 - Usuario retorna ao perfil correto depois de assistir um video da galeria.
 - Alteracoes salvas persistem apos refresh.
+
+### Task P1-009 - Sistema de mensagens diretas
+
+Tipo: Frontend/Backend
+
+Status: Em andamento. O fluxo local de conversa foi entregue em 2026-07-15; persistencia e entrega entre contas dependem do backend.
+
+Objetivo: permitir contato direto entre usuarios a partir de um perfil publico, com historico confiavel e controles de seguranca.
+
+Tasks:
+
+- [x] Substituir o atalho financeiro duplicado do perfil publico por mensagem.
+- [x] Abrir a aba Mensagens com o perfil correto selecionado.
+- [x] Criar lista de conversas iniciadas pelo usuario.
+- [x] Criar thread com composer, envio e historico local da sessao.
+- [x] Limpar conversas locais ao sair da conta.
+- [x] Padronizar seta, logo e saldo no HUD das paginas de perfil e investimento.
+- [ ] Persistir conversas e mensagens no backend.
+- [ ] Entregar mensagens em tempo real entre contas autenticadas.
+- [ ] Adicionar estados de envio, entregue, lida e falha.
+- [ ] Adicionar paginacao e carregamento incremental do historico.
+- [ ] Adicionar bloqueio, denuncia e protecao contra spam.
+- [ ] Adicionar notificacoes push com preferencias por conta.
+
+Criterios de aceite:
+
+- O icone de mensagem do perfil abre uma conversa com o destinatario correto.
+- Mensagens enviadas aparecem imediatamente na thread e na lista da sessao.
+- Sair da conta nao deixa o historico local visivel para o proximo login.
+- A versao publica nao trata estado local como entrega real ao destinatario.
+- Backend, moderacao e privacidade devem estar prontos antes de liberar mensagens para o publico.
 
 ## Sprint 6 - Mobile e deploy
 
