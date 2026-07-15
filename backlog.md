@@ -345,6 +345,11 @@ Tasks:
 - [x] Adicionar acao com icone para investimento no perfil.
 - [x] Criar pagina dedicada com dados da bolsa e formulario de aporte.
 - [x] Desabilitar a acao de investir quando a bolsa nao estiver aberta.
+- [x] Remover o atalho financeiro duplicado ao lado do menu do Perfil proprio.
+- [x] Preservar a origem ao abrir um video do perfil no Inicio.
+- [x] Exibir seta contextual para retornar do reel ao perfil de origem.
+- [x] Posicionar seta e marca lado a lado sem sobreposicao.
+- [x] Padronizar a marca do Inicio com o tamanho compacto do header.
 - [ ] Exibir avaliacoes agregadas reais quando existirem.
 - [ ] Permitir editar dados do proprio perfil.
 - [x] Criar estado de perfil sem videos com orientacao para publicar.
@@ -358,6 +363,7 @@ Criterios de aceite:
 - Perfil funciona para atleta logado e visitante.
 - Videos do perfil sao reproduzidos no Inicio, sem player duplicado na pagina.
 - Investimento e preenchido em uma pagina propria, separada da vitrine publica.
+- Usuario retorna ao perfil correto depois de assistir um video da galeria.
 - Alteracoes salvas persistem apos refresh.
 
 ## Sprint 6 - Mobile e deploy

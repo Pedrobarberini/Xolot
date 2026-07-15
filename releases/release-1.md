@@ -561,3 +561,31 @@ Criterios de aceite:
 - Perfil com bolsa aberta permite acessar a pagina de investimento.
 - Perfil sem bolsa aberta mostra `Bolsa indisponivel` em estado desabilitado.
 - Confirmacao do aporte continua usando saldo, bolsa e historico compartilhados.
+
+### Task HOTFIX-024 - Retorno contextual do reel e marca padronizada
+
+Tipo: Frontend/UI/Navegacao
+
+Objetivo: simplificar as acoes do Perfil proprio e permitir que o usuario retorne ao perfil de origem depois de abrir um video no Inicio.
+
+Tasks:
+
+- [x] Remover o icone financeiro ao lado do menu de tres barras no Perfil proprio.
+- [x] Manter investimento acessivel por Configuracoes no Perfil proprio.
+- [x] Registrar se o reel foi aberto pelo Perfil proprio ou por um perfil visitado.
+- [x] Criar seta contextual de retorno no canto superior esquerdo do Inicio.
+- [x] Retornar ao Perfil proprio quando o video sair da galeria da conta.
+- [x] Retornar ao perfil visitado correto quando o video sair da galeria publica.
+- [x] Limpar o retorno contextual ao selecionar uma aba do footer.
+- [x] Posicionar seta e logo em uma linha sem sobreposicao.
+- [x] Aumentar a logo do Inicio de `25x25` para o padrao compacto `48x38`.
+- [x] Atualizar README e backlog.
+
+Criterios de aceite:
+
+- Perfil proprio possui somente o menu de tres barras como acao no topo.
+- Reel aberto normalmente nao exibe seta de retorno ao perfil.
+- Reel aberto por uma galeria exibe a seta no canto superior esquerdo.
+- A seta restaura exatamente o perfil que originou a navegacao.
+- Logo e seta permanecem integralmente visiveis e nao se sobrepoem.
+- A marca do Inicio possui o mesmo tamanho usado no header compacto.

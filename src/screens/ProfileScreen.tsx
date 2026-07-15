@@ -145,31 +145,15 @@ export function ProfileScreen({
               {user.role} | {user.email}
             </Text>
           </View>
-          <View style={styles.profileHeroActions}>
-            {user.role === "Usuario" ? (
-              <Pressable
-                accessibilityLabel="Abrir investimento do perfil"
-                accessibilityRole="button"
-                hitSlop={6}
-                onPress={() => setProfileView("settings")}
-                style={styles.profileMenuButton}
-              >
-                <CircleDollarSign
-                  color={fund ? colors.primary : colors.muted}
-                  size={22}
-                />
-              </Pressable>
-            ) : null}
-            <Pressable
-              accessibilityLabel="Abrir opcoes do perfil"
-              accessibilityRole="button"
-              hitSlop={8}
-              onPress={() => setIsOptionsVisible(true)}
-              style={styles.profileMenuButton}
-            >
-              <Menu color={colors.text} size={22} />
-            </Pressable>
-          </View>
+          <Pressable
+            accessibilityLabel="Abrir opcoes do perfil"
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={() => setIsOptionsVisible(true)}
+            style={styles.profileMenuButton}
+          >
+            <Menu color={colors.text} size={22} />
+          </Pressable>
         </View>
         <View style={styles.profileQuickStats}>
           <View style={styles.profileQuickItem}>

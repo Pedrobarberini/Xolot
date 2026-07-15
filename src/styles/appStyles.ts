@@ -395,15 +395,34 @@ export const styles = StyleSheet.create({
     flex: 1,
     position: "relative"
   },
-  feedFixedBrand: {
+  feedTopNavigation: {
     alignItems: "center",
-    height: 42,
-    justifyContent: "center",
+    flexDirection: "row",
+    gap: 4,
     left: 10,
     position: "absolute",
     top: 10,
-    width: 42,
     zIndex: 7
+  },
+  feedProfileBackButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 40,
+    justifyContent: "center",
+    shadowColor: "#10261A",
+    shadowOffset: { height: 2, width: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    width: 40
+  },
+  feedBrandSlot: {
+    alignItems: "center",
+    height: 40,
+    justifyContent: "center",
+    width: 48
   },
   feedPager: {
     backgroundColor: colors.background,
@@ -813,8 +832,8 @@ export const styles = StyleSheet.create({
     zIndex: 4
   },
   feedReelBrandMark: {
-    height: 25,
-    width: 25
+    height: 38,
+    width: 48
   },
   feedReelCount: {
     fontSize: 12,
@@ -2696,10 +2715,6 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 12
-  },
-  profileHeroActions: {
-    flexDirection: "row",
-    gap: 6
   },
   profileAvatar: {
     alignItems: "center",

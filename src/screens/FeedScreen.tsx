@@ -3,7 +3,7 @@ import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { Expand, Play, UserRound, Volume2, VolumeX } from "lucide-react-native";
+import { ArrowLeft, Expand, Play, UserRound, Volume2, VolumeX } from "lucide-react-native";
 import { Alert, Animated, Easing, Image, PanResponder, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import {
   formatPlaybackTime,
@@ -25,12 +25,14 @@ export function FeedScreen({
   balance,
   focusPlayerId,
   funds,
+  onBackToProfile,
   onOpenPlayer,
   players: feedPlayers
 }: {
   balance: number | null;
   focusPlayerId?: string | null;
   funds: AthleteFund[];
+  onBackToProfile?: () => void;
   onOpenPlayer: (player: Player) => void;
   players: Player[];
 }) {
@@ -189,13 +191,26 @@ export function FeedScreen({
           </View>
         ))}
       </ScrollView>
-      <View pointerEvents="none" style={styles.feedFixedBrand}>
-        <Image
-          accessibilityLabel="NextStar"
-          resizeMode="contain"
-          source={NEXTSTAR_SYMBOL}
-          style={styles.feedReelBrandMark}
-        />
+      <View style={styles.feedTopNavigation}>
+        {onBackToProfile ? (
+          <Pressable
+            accessibilityLabel="Voltar ao perfil"
+            accessibilityRole="button"
+            hitSlop={6}
+            onPress={onBackToProfile}
+            style={styles.feedProfileBackButton}
+          >
+            <ArrowLeft color={colors.text} size={21} strokeWidth={2.2} />
+          </Pressable>
+        ) : null}
+        <View pointerEvents="none" style={styles.feedBrandSlot}>
+          <Image
+            accessibilityLabel="NextStar"
+            resizeMode="contain"
+            source={NEXTSTAR_SYMBOL}
+            style={styles.feedReelBrandMark}
+          />
+        </View>
       </View>
       {balance !== null ? <BalanceLine balance={balance} overlay /> : null}
     </View>

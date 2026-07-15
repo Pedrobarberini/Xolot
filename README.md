@@ -81,6 +81,7 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 11. Pesquise uma conta pela aba `Pesquisar`; usuarios sem video tambem aparecem e abrem um perfil publico vazio.
 12. No perfil visitado, toque em um video para voltar ao reel correspondente ou use `Investir` para abrir a pagina da bolsa.
 13. Perfis sem bolsa em captacao exibem a acao de investimento desabilitada.
+14. Ao abrir um video pela galeria, use a seta no Inicio para retornar ao mesmo perfil.
 12. Confira o estado vazio honesto da aba `Mensagens`.
 13. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
 14. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.

@@ -23,6 +23,10 @@ import { Tab } from "./src/ui/types";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
+type ReelReturnTarget =
+  | { type: "own-profile" }
+  | { account?: AppUser; player: Player; type: "public-profile" };
+
 export default function App() {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isBrandLaunchVisible, setIsBrandLaunchVisible] = useState(true);
@@ -31,6 +35,8 @@ export default function App() {
   const [selectedAccount, setSelectedAccount] = useState<AppUser | null>(null);
   const [investmentPlayer, setInvestmentPlayer] = useState<Player | null>(null);
   const [feedFocusPlayerId, setFeedFocusPlayerId] = useState<string | null>(null);
+  const [reelReturnTarget, setReelReturnTarget] =
+    useState<ReelReturnTarget | null>(null);
   const [registeredUsers, setRegisteredUsers] = useState<AppUser[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [athleteFunds, setAthleteFunds] = useState<AthleteFund[]>(() => [
@@ -106,17 +112,39 @@ export default function App() {
 
   function openTab(nextTab: Tab) {
     setInvestmentPlayer(null);
+    setReelReturnTarget(null);
     setSelectedAccount(null);
     setSelectedPlayer(null);
     setTab(nextTab);
   }
 
-  function openReel(player: Player) {
+  function openReel(
+    player: Player,
+    returnTarget: ReelReturnTarget | null = null
+  ) {
     setInvestmentPlayer(null);
+    setReelReturnTarget(returnTarget);
     setSelectedAccount(null);
     setSelectedPlayer(null);
     setFeedFocusPlayerId(player.id);
     setTab("feed");
+  }
+
+  function returnToReelOrigin() {
+    if (!reelReturnTarget) {
+      return;
+    }
+
+    const returnTarget = reelReturnTarget;
+
+    setReelReturnTarget(null);
+    if (returnTarget.type === "own-profile") {
+      setTab("profile");
+      return;
+    }
+
+    setSelectedAccount(returnTarget.account ?? null);
+    setSelectedPlayer(returnTarget.player);
   }
 
   const {
@@ -213,7 +241,13 @@ export default function App() {
                       setInvestmentPlayer(selectedProfilePlayer);
                     }
                   }}
-                  onOpenVideo={openReel}
+                  onOpenVideo={(player) =>
+                    openReel(player, {
+                      account: selectedProfileAccount,
+                      player: selectedProfilePlayer ?? player,
+                      type: "public-profile"
+                    })
+                  }
                   player={selectedProfilePlayer}
                   videos={selectedProfileVideos}
                   walletBalance={walletBalance}
@@ -244,7 +278,13 @@ export default function App() {
                   balance={user.role === "Usuario" ? walletBalance : null}
                   focusPlayerId={feedFocusPlayerId}
                   funds={athleteFunds}
-                  onOpenPlayer={setSelectedPlayer}
+                  onBackToProfile={
+                    reelReturnTarget ? returnToReelOrigin : undefined
+                  }
+                  onOpenPlayer={(player) => {
+                    setReelReturnTarget(null);
+                    setSelectedPlayer(player);
+                  }}
                   players={availablePlayers}
                 />
               ) : null}
@@ -304,7 +344,7 @@ export default function App() {
                       );
 
                       if (reelPlayer) {
-                        openReel(reelPlayer);
+                        openReel(reelPlayer, { type: "own-profile" });
                       }
                     }}
                     onDeposit={handleDeposit}
