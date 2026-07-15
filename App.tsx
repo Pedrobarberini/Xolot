@@ -12,6 +12,7 @@ import { AuthScreen } from "./src/screens/AuthScreen";
 import { FeedScreen, PlayerDetail } from "./src/screens/FeedScreen";
 import { MessagesScreen } from "./src/screens/MessagesScreen";
 import { ProfileScreen } from "./src/screens/ProfileScreen";
+import { PublicAccountScreen } from "./src/screens/PublicAccountScreen";
 import { SearchScreen } from "./src/screens/SearchScreen";
 import { SubmitVideoScreen } from "./src/screens/SubmissionScreen";
 import { styles } from "./src/styles/appStyles";
@@ -26,6 +27,8 @@ export default function App() {
   const [isBrandLaunchVisible, setIsBrandLaunchVisible] = useState(true);
   const [tab, setTab] = useState<Tab>("feed");
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<AppUser | null>(null);
+  const [registeredUsers, setRegisteredUsers] = useState<AppUser[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [athleteFunds, setAthleteFunds] = useState<AthleteFund[]>(() => [
     {
@@ -89,6 +92,8 @@ export default function App() {
     athleteFunds,
     setAthleteFunds,
     setInvestments,
+    setRegisteredUsers,
+    setSelectedAccount,
     setSelectedPlayer,
     setSubmissions,
     setTab,
@@ -147,6 +152,26 @@ export default function App() {
                 activeTab={tab}
                 onChange={(nextTab) => {
                   setSelectedPlayer(null);
+                  setSelectedAccount(null);
+                  setTab(nextTab);
+                }}
+                role={user.role}
+              />
+            </>
+          ) : selectedAccount ? (
+            <>
+              <ScreenFrame>
+                <PublicAccountScreen
+                  account={selectedAccount}
+                  onBack={() => setSelectedAccount(null)}
+                  walletBalance={walletBalance}
+                />
+              </ScreenFrame>
+              <BottomTabs
+                activeTab={tab}
+                onChange={(nextTab) => {
+                  setSelectedAccount(null);
+                  setSelectedPlayer(null);
                   setTab(nextTab);
                 }}
                 role={user.role}
@@ -178,8 +203,16 @@ export default function App() {
                 <ScreenFrame>
                   <SearchScreen
                     funds={athleteFunds}
-                    onOpenPlayer={setSelectedPlayer}
+                    onOpenPlayer={(player) => {
+                      setSelectedAccount(null);
+                      setSelectedPlayer(player);
+                    }}
+                    onOpenUser={(account) => {
+                      setSelectedPlayer(null);
+                      setSelectedAccount(account);
+                    }}
                     players={availablePlayers}
+                    users={registeredUsers}
                   />
                 </ScreenFrame>
               ) : null}

@@ -15,6 +15,8 @@ type CreateAppActionsOptions = {
   athleteFunds: AthleteFund[];
   setAthleteFunds: Dispatch<SetStateAction<AthleteFund[]>>;
   setInvestments: Dispatch<SetStateAction<Investment[]>>;
+  setRegisteredUsers: Dispatch<SetStateAction<AppUser[]>>;
+  setSelectedAccount: Dispatch<SetStateAction<AppUser | null>>;
   setSelectedPlayer: Dispatch<SetStateAction<Player | null>>;
   setSubmissions: Dispatch<SetStateAction<VideoSubmission[]>>;
   setTab: Dispatch<SetStateAction<Tab>>;
@@ -28,6 +30,8 @@ export function createAppActions({
   athleteFunds,
   setAthleteFunds,
   setInvestments,
+  setRegisteredUsers,
+  setSelectedAccount,
   setSelectedPlayer,
   setSubmissions,
   setTab,
@@ -37,11 +41,28 @@ export function createAppActions({
   walletBalance
 }: CreateAppActionsOptions) {
   function handleAuth(nextUser: AppUser) {
+    if (nextUser.role === "Usuario") {
+      setRegisteredUsers((current) => {
+        const accountExists = current.some((item) => item.id === nextUser.id);
+
+        return accountExists
+          ? current.map((item) =>
+              item.id === nextUser.id
+                ? { ...nextUser, name: item.name || nextUser.name }
+                : item
+            )
+          : [nextUser, ...current];
+      });
+    }
+
+    setSelectedAccount(null);
+    setSelectedPlayer(null);
     setUser(nextUser);
     setTab(nextUser.role === "Admin" ? "admin" : "feed");
   }
 
   function handleSignOut() {
+    setSelectedAccount(null);
     setSelectedPlayer(null);
     setUser(null);
     setTab("feed");

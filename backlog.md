@@ -43,6 +43,8 @@ Tasks:
 - [x] Criar `src/screens/ProfileScreen.tsx`.
 - [x] Criar `src/screens/WalletScreen.tsx`.
 - [x] Criar `src/screens/SearchScreen.tsx` com pesquisa de perfis reais.
+- [x] Incluir contas cadastradas na sessao nos resultados, mesmo sem video aprovado.
+- [x] Criar estado publico navegavel para usuario cadastrado sem publicacoes.
 - [x] Criar `src/screens/MessagesScreen.tsx` com estado vazio sem conversas fake.
 - [ ] Criar `src/components/VideoCard.tsx`.
 - [ ] Criar `src/components/VideoPlayer.tsx`.
@@ -50,6 +52,7 @@ Tasks:
 - [x] Renomear a aba `Feed` para `Inicio`.
 - [x] Substituir `Carteira` no footer por `Pesquisar` e adicionar `Mensagens`.
 - [x] Mover o acesso da Carteira para o menu de tres barras do Perfil.
+- [x] Permitir fechar o menu do Perfil tocando em qualquer lado fora do HUD.
 - [ ] Criar `src/components/AppToast.tsx`.
 - [x] Extrair estilos do `App.tsx` para `src/styles/appStyles.ts`.
 - [x] Extrair handlers de produto para `src/actions/createAppActions.ts`.

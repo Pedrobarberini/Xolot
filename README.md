@@ -78,7 +78,7 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 8. Use `Depositar` para adicionar saldo simulado.
 9. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
 10. Use o icone ao lado do nome para abrir o perfil e alternar entre os videos publicados.
-11. Pesquise um atleta pela aba `Pesquisar` e abra o perfil encontrado.
+11. Pesquise uma conta pela aba `Pesquisar`; usuarios sem video tambem aparecem e abrem um perfil publico vazio.
 12. Confira o estado vazio honesto da aba `Mensagens`.
 13. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
 14. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.

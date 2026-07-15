@@ -505,3 +505,29 @@ Criterios de aceite:
 - Nova conta recebe uma orientacao clara para publicar o primeiro video.
 - Tocar em um item da galeria abre o video com controles.
 - A gestao da bolsa continua usando o mesmo estado e modal existentes.
+
+### Task HOTFIX-022 - Pesquisar contas cadastradas e fechar menu por toda a tela
+
+Tipo: Frontend/UI/Pesquisa
+
+Objetivo: tornar contas da sessao pesquisaveis antes da primeira publicacao e corrigir a area externa de fechamento do menu do Perfil.
+
+Tasks:
+
+- [x] Registrar contas de Usuario autenticadas no diretorio local da sessao.
+- [x] Unificar contas cadastradas e perfis com video nos resultados de pesquisa.
+- [x] Evitar duplicidade quando a conta cadastrada ja possui perfil com video aprovado.
+- [x] Manter email e dados privados fora do resultado publico.
+- [x] Criar perfil publico vazio para contas sem video aprovado.
+- [x] Manter HUD de voltar, saldo e footer ao abrir esse perfil.
+- [x] Fazer a camada do menu ignorar toques fora do painel.
+- [x] Fechar o menu ao tocar acima, abaixo, a esquerda ou a direita do HUD.
+- [x] Atualizar README e backlog.
+
+Criterios de aceite:
+
+- Uma conta criada aparece na pesquisa pelo nome mesmo sem ter enviado video.
+- Perfis com video continuam abrindo a ficha completa existente.
+- Perfis sem video mostram um estado vazio sem inventar dados esportivos.
+- O menu de tres barras fecha ao tocar em qualquer regiao externa ao painel.
+- Os botoes dentro do menu continuam funcionando normalmente.

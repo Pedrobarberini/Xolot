@@ -340,10 +340,11 @@ function ProfileOptionsMenu({
       <View style={styles.profileMenuModalRoot}>
         <Pressable
           accessibilityLabel="Fechar opcoes do perfil"
+          accessibilityRole="button"
           onPress={onClose}
           style={styles.profileMenuBackdrop}
         />
-        <View style={styles.profileMenuLayer}>
+        <View pointerEvents="box-none" style={styles.profileMenuLayer}>
           <View accessibilityViewIsModal style={styles.profileMenuPanel}>
             <Text style={styles.profileMenuTitle}>Opcoes do perfil</Text>
             <Pressable

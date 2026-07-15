@@ -3,27 +3,94 @@ import { ChevronRight, Search, X } from "lucide-react-native";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import { AthleteFund, Player } from "../types";
+import { AppUser, AthleteFund, Player } from "../types";
+
+type SearchProfile = {
+  fund?: AthleteFund;
+  id: string;
+  meta: string;
+  name: string;
+  player?: Player;
+  searchableText: string;
+  user?: AppUser;
+};
 
 export function SearchScreen({
   funds,
   onOpenPlayer,
-  players
+  onOpenUser,
+  players,
+  users
 }: {
   funds: AthleteFund[];
   onOpenPlayer: (player: Player) => void;
+  onOpenUser: (user: AppUser) => void;
   players: Player[];
+  users: AppUser[];
 }) {
   const [query, setQuery] = useState("");
   const profiles = useMemo(
-    () => Array.from(new Map(players.map((player) => [player.profileId, player])).values()),
-    [players]
+    () => {
+      const uniquePlayers = Array.from(
+        new Map(players.map((player) => [player.profileId, player])).values()
+      );
+      const userAccounts = users.filter((account) => account.role === "Usuario");
+      const userIds = new Set(userAccounts.map((account) => account.id));
+      const registeredProfiles: SearchProfile[] = userAccounts.map((account) => {
+        const player = uniquePlayers.find(
+          (item) => item.ownerUserId === account.id
+        );
+        const fund = player
+          ? funds.find((item) => item.profileId === player.profileId)
+          : undefined;
+        const meta = player
+          ? `${player.position} | ${player.city}`
+          : "Usuario NextStar | Sem videos publicados";
+
+        return {
+          fund,
+          id: `account-${account.id}`,
+          meta,
+          name: player?.name ?? account.name,
+          player,
+          searchableText: [
+            account.name,
+            player?.name,
+            player?.position,
+            player?.city,
+            player?.club
+          ]
+            .filter(Boolean)
+            .join(" "),
+          user: account
+        };
+      });
+      const standaloneProfiles: SearchProfile[] = uniquePlayers
+        .filter(
+          (player) => !player.ownerUserId || !userIds.has(player.ownerUserId)
+        )
+        .map((player) => ({
+          fund: funds.find((item) => item.profileId === player.profileId),
+          id: `player-${player.profileId}`,
+          meta: `${player.position} | ${player.city}`,
+          name: player.name,
+          player,
+          searchableText: [
+            player.name,
+            player.position,
+            player.city,
+            player.club
+          ].join(" ")
+        }));
+
+      return [...registeredProfiles, ...standaloneProfiles];
+    },
+    [funds, players, users]
   );
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
   const filteredProfiles = normalizedQuery
-    ? profiles.filter((player) =>
-        [player.name, player.position, player.city, player.club]
-          .join(" ")
+    ? profiles.filter((profile) =>
+        profile.searchableText
           .toLocaleLowerCase("pt-BR")
           .includes(normalizedQuery)
       )
@@ -81,20 +148,28 @@ export function SearchScreen({
           </Text>
         </View>
       ) : (
-        filteredProfiles.map((player) => {
-          const initials = player.name
+        filteredProfiles.map((profile) => {
+          const initials = profile.name
             .split(" ")
             .slice(0, 2)
             .map((part) => part[0])
             .join("")
             .toUpperCase();
-          const fund = funds.find((item) => item.profileId === player.profileId);
 
           return (
             <Pressable
-              accessibilityLabel={`Abrir perfil de ${player.name}`}
-              key={player.profileId}
-              onPress={() => onOpenPlayer(player)}
+              accessibilityLabel={`Abrir perfil de ${profile.name}`}
+              key={profile.id}
+              onPress={() => {
+                if (profile.player) {
+                  onOpenPlayer(profile.player);
+                  return;
+                }
+
+                if (profile.user) {
+                  onOpenUser(profile.user);
+                }
+              }}
               style={({ pressed }) => [
                 styles.searchProfileRow,
                 pressed ? styles.buttonPressed : null
@@ -105,23 +180,25 @@ export function SearchScreen({
               </View>
               <View style={styles.searchProfileBody}>
                 <Text numberOfLines={1} style={styles.searchProfileName}>
-                  {player.name}
+                  {profile.name}
                 </Text>
                 <Text numberOfLines={1} style={styles.searchProfileMeta}>
-                  {player.position} | {player.city}
+                  {profile.meta}
                 </Text>
                 <Text
                   numberOfLines={1}
                   style={[
                     styles.searchProfileFund,
-                    fund ? styles.searchProfileFundActive : null
+                    profile.fund ? styles.searchProfileFundActive : null
                   ]}
                 >
-                  {fund
-                    ? fund.status === "Captando"
+                  {profile.fund
+                    ? profile.fund.status === "Captando"
                       ? "Bolsa de investimento aberta"
                       : "Meta de investimento concluida"
-                    : "Este perfil nao possui investimento aberto"}
+                    : profile.player
+                      ? "Este perfil nao possui investimento aberto"
+                      : "Perfil cadastrado"}
                 </Text>
               </View>
               <ChevronRight color={colors.muted} size={20} />

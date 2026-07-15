@@ -3102,6 +3102,82 @@ export const styles = StyleSheet.create({
     lineHeight: 17,
     marginTop: 3
   },
+  publicAccountShell: {
+    flex: 1,
+    position: "relative"
+  },
+  publicAccountContent: {
+    alignSelf: "center",
+    flexGrow: 1,
+    maxWidth: 760,
+    paddingBottom: TAB_BAR_CONTENT_PADDING,
+    paddingHorizontal: 20,
+    paddingTop: 86,
+    width: "100%"
+  },
+  publicAccountIdentity: {
+    alignItems: "center",
+    paddingBottom: 30,
+    paddingTop: 18
+  },
+  publicAccountAvatar: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 78,
+    justifyContent: "center",
+    width: 78
+  },
+  publicAccountAvatarText: {
+    color: colors.primary,
+    fontSize: 22,
+    fontWeight: "900"
+  },
+  publicAccountName: {
+    color: colors.text,
+    fontSize: 24,
+    fontWeight: "900",
+    marginTop: 14,
+    textAlign: "center"
+  },
+  publicAccountMeta: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 4
+  },
+  publicAccountEmpty: {
+    alignItems: "center",
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    paddingHorizontal: 18,
+    paddingTop: 42
+  },
+  publicAccountEmptyIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 999,
+    height: 54,
+    justifyContent: "center",
+    width: 54
+  },
+  publicAccountEmptyTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 14,
+    textAlign: "center"
+  },
+  publicAccountEmptyBody: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 6,
+    maxWidth: 360,
+    textAlign: "center"
+  },
   discoveryContent: {
     alignSelf: "center",
     maxWidth: 760,
