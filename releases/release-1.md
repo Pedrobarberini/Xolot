@@ -395,3 +395,27 @@ Criterios de aceite:
 - Apenas seta e saldo ficam visiveis na barra.
 - O saldo usa uma linha, sem box ou badge.
 - O conteudo comeca abaixo da barra e nao sofre sobreposicao.
+
+### Task HOTFIX-018 - Compactar HUD do perfil publico
+
+Tipo: Frontend/UI
+
+Objetivo: reduzir o peso visual do HUD superior e padronizar seus controles em preto.
+
+Tasks:
+
+- [x] Reduzir a altura do HUD de `62px` para `52px`.
+- [x] Reduzir o icone de voltar de `25px` para `21px`.
+- [x] Reduzir a area do botao para `40px`, preservando `hitSlop`.
+- [x] Reduzir o saldo de `17px` para `15px`.
+- [x] Aplicar `colors.text` no icone e no valor do saldo.
+- [x] Ajustar o espaco superior do conteudo para a nova altura.
+- [x] Atualizar README com o HUD compacto.
+
+Criterios de aceite:
+
+- HUD e icone ocupam menos espaco no perfil publico.
+- Seta e saldo usam o preto padrao da interface.
+- O saldo continua legivel em uma unica linha.
+- A seta permanece confortavel para toque no celular.
+- O conteudo nao fica escondido sob a barra.

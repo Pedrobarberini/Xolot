@@ -2586,7 +2586,7 @@ function PlayerDetail({
           onPress={onBack}
           style={styles.detailHudBackButton}
         >
-          <ArrowLeft color={colors.primary} size={25} strokeWidth={2.2} />
+          <ArrowLeft color={colors.text} size={21} strokeWidth={2.1} />
         </Pressable>
         <Text
           accessibilityLabel={`Saldo disponivel ${formatBRL(walletBalance)}`}
@@ -5476,7 +5476,7 @@ const styles = StyleSheet.create({
     maxWidth: 1080,
     paddingHorizontal: 22,
     paddingBottom: DETAIL_CONTENT_PADDING,
-    paddingTop: 76,
+    paddingTop: 64,
     width: "100%"
   },
   playerDetailShell: {
@@ -5490,9 +5490,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    height: 62,
+    height: 52,
     left: 0,
-    paddingHorizontal: 14,
+    paddingHorizontal: 10,
     position: "absolute",
     right: 0,
     shadowColor: "#10261A",
@@ -5505,13 +5505,13 @@ const styles = StyleSheet.create({
   },
   detailHudBackButton: {
     alignItems: "center",
-    height: 44,
+    height: 40,
     justifyContent: "center",
-    width: 44
+    width: 40
   },
   detailHudBalance: {
-    color: colors.primary,
-    fontSize: 17,
+    color: colors.text,
+    fontSize: 15,
     fontWeight: "900"
   },
   detailVideo: {
