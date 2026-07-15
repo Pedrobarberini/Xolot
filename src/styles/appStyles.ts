@@ -879,12 +879,8 @@ export const styles = StyleSheet.create({
     right: 0,
     shadowOpacity: 0
   },
-  feedTextOverlayCompactExpanded: {
-    backgroundColor: "transparent",
-    elevation: 0,
-    minHeight: 270,
-    paddingTop: 78,
-    shadowOpacity: 0
+  feedCompactBackdropAnimation: {
+    ...StyleSheet.absoluteFillObject
   },
   feedCompactBlur: {
     ...StyleSheet.absoluteFillObject
@@ -1005,6 +1001,9 @@ export const styles = StyleSheet.create({
   feedCompactInlineAction: {
     color: colors.onPrimary,
     fontWeight: "900"
+  },
+  feedCompactExpandedContent: {
+    zIndex: 2
   },
   feedCompactExpandedMeta: {
     color: "rgba(255, 255, 255, 0.82)",

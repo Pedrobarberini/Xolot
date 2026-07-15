@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Bell,
@@ -62,6 +62,9 @@ export function ProfileScreen({
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
   const [profileView, setProfileView] = useState<ProfileView>("overview");
+  const profileNavigationTimer = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
   const mySubmissions = submissions.filter((item) => item.userId === user.id);
@@ -89,6 +92,28 @@ export function ProfileScreen({
   const profilePrimaryMetric =
     user.role === "Admin" ? String(pending) : String(mySubmissions.length);
   const profilePrimaryLabel = user.role === "Admin" ? "pendentes" : "envios";
+
+  useEffect(
+    () => () => {
+      if (profileNavigationTimer.current) {
+        clearTimeout(profileNavigationTimer.current);
+      }
+    },
+    []
+  );
+
+  function openProfileView(nextView: Exclude<ProfileView, "overview">) {
+    setIsOptionsVisible(false);
+
+    if (profileNavigationTimer.current) {
+      clearTimeout(profileNavigationTimer.current);
+    }
+
+    profileNavigationTimer.current = setTimeout(() => {
+      setProfileView(nextView);
+      profileNavigationTimer.current = null;
+    }, 220);
+  }
 
   if (profileView === "wallet") {
     return (
@@ -201,14 +226,8 @@ export function ProfileScreen({
       </ScreenTransition>
       <ProfileOptionsMenu
         onClose={() => setIsOptionsVisible(false)}
-        onOpenSettings={() => {
-          setIsOptionsVisible(false);
-          setProfileView("settings");
-        }}
-        onOpenWallet={() => {
-          setIsOptionsVisible(false);
-          setProfileView("wallet");
-        }}
+        onOpenSettings={() => openProfileView("settings")}
+        onOpenWallet={() => openProfileView("wallet")}
         onSignOut={() => {
           setIsOptionsVisible(false);
           onSignOut();

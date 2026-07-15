@@ -213,11 +213,11 @@ Objetivo: melhorar a box de texto sobre o feed.
 
 Tasks:
 
-- [ ] Criar versao compacta com nome, posicao, cidade e titulo do video.
-- [ ] Criar botao `Ver mais`.
-- [ ] Ao expandir, permitir cobrir parte do video de forma intencional.
-- [ ] Adicionar destaque, objetivo e tags somente quando existirem.
-- [ ] Evitar texto cortado em telas pequenas.
+- [x] Criar versao compacta com nome, posicao, cidade e titulo do video.
+- [x] Criar botao `Ver mais`.
+- [x] Ao expandir, permitir cobrir parte do video de forma intencional.
+- [x] Adicionar destaque, objetivo e tags somente quando existirem.
+- [x] Evitar texto cortado em telas pequenas.
 
 Criterios de aceite:
 
@@ -353,6 +353,8 @@ Tasks:
 - [x] Desabilitar a acao de investir quando a bolsa nao estiver aberta.
 - [x] Adicionar botao de fechar na pagina da bolsa para retornar ao perfil.
 - [x] Padronizar a animacao de entrada nas novas paginas e subpaginas.
+- [x] Sincronizar a transicao de Configuracoes e Carteira com o fechamento do menu.
+- [x] Animar a expansao e o recolhimento da descricao `Ver mais` no feed.
 - [x] Remover o atalho financeiro duplicado ao lado do menu do Perfil proprio.
 - [x] Preservar a origem ao abrir um video do perfil no Inicio.
 - [x] Exibir seta contextual para retornar do reel ao perfil de origem.

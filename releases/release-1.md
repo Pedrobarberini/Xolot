@@ -659,3 +659,28 @@ Criterios de aceite:
 - Trocas entre lista e conversa reiniciam a animacao.
 - Header e footer permanecem fixos durante a transicao.
 - Configuracoes e Carteira seguem o mesmo comportamento visual do restante do app.
+
+### Task HOTFIX-028 - Exibir transicoes do Perfil e animar Ver mais
+
+Tipo: Frontend/UI/Animacao
+
+Objetivo: tornar perceptiveis as transicoes de Configuracoes e Carteira e suavizar a expansao da descricao do feed.
+
+Tasks:
+
+- [x] Aguardar o fechamento do menu antes de abrir Configuracoes.
+- [x] Aguardar o fechamento do menu antes de abrir Carteira.
+- [x] Preservar a transicao padrao de entrada nas duas subpaginas.
+- [x] Animar altura e espacamento da descricao expandida.
+- [x] Aplicar fade e deslocamento vertical ao conteudo de `Ver mais`.
+- [x] Animar o recolhimento antes de restaurar a legenda compacta.
+- [x] Reiniciar a legenda ao trocar de video.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- A animacao de Configuracoes fica visivel depois que o menu fecha.
+- A animacao da Carteira fica visivel depois que o menu fecha.
+- `mais` expande a descricao sem aparecimento brusco.
+- `menos` recolhe a descricao antes de voltar ao estado compacto.
+- A animacao nao altera a posicao do footer nem dos controles do video.

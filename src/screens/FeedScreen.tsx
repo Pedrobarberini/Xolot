@@ -234,6 +234,7 @@ function FeedReel({
 }) {
   const { width } = useWindowDimensions();
   const [isExpanded, setIsExpanded] = useState(false);
+  const expansionProgress = useRef(new Animated.Value(0)).current;
   const revealProgress = useRef(new Animated.Value(0)).current;
   const isWide = !USE_CENTERED_WEB_LAYOUT && width >= 900;
   const evaluation = player.evaluation;
@@ -276,6 +277,28 @@ function FeedReel({
     ? Math.max(540, Math.min(reelHeight - 44, 700))
     : reelHeight;
   const canvasWidth = isWide ? Math.min(width - 80, 1080) : width;
+
+  function animateDescription(nextExpanded: boolean) {
+    expansionProgress.stopAnimation();
+
+    if (nextExpanded) {
+      setIsExpanded(true);
+    }
+
+    Animated.timing(expansionProgress, {
+      duration: nextExpanded ? 320 : 240,
+      easing: nextExpanded
+        ? Easing.out(Easing.cubic)
+        : Easing.inOut(Easing.cubic),
+      toValue: nextExpanded ? 1 : 0,
+      useNativeDriver: false
+    }).start(({ finished }) => {
+      if (finished && !nextExpanded) {
+        setIsExpanded(false);
+      }
+    });
+  }
+
   useEffect(() => {
     revealProgress.setValue(0);
 
@@ -289,9 +312,11 @@ function FeedReel({
 
   useEffect(() => {
     if (!isActive) {
+      expansionProgress.stopAnimation();
+      expansionProgress.setValue(0);
       setIsExpanded(false);
     }
-  }, [isActive]);
+  }, [expansionProgress, isActive]);
 
   return (
     <View style={[styles.feedReel, { height: reelHeight }]}>
@@ -359,7 +384,7 @@ function FeedReel({
             </View>
           ) : null}
 
-          <View
+          <Animated.View
             style={[
               styles.feedTextOverlay,
               isWide
@@ -369,12 +394,27 @@ function FeedReel({
                   ]
                 : [
                     styles.feedTextOverlayCompact,
-                    isExpanded ? styles.feedTextOverlayCompactExpanded : null
+                    {
+                      minHeight: expansionProgress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 270]
+                      }),
+                      paddingTop: expansionProgress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [14, 78]
+                      })
+                    }
                   ]
             ]}
           >
             {!isWide && isExpanded ? (
-              <>
+              <Animated.View
+                pointerEvents="none"
+                style={[
+                  styles.feedCompactBackdropAnimation,
+                  { opacity: expansionProgress }
+                ]}
+              >
                 <BlurView
                   experimentalBlurMethod={
                     Platform.OS === "android" ? "dimezisBlurView" : "none"
@@ -392,7 +432,7 @@ function FeedReel({
                   start={{ x: 0.5, y: 0 }}
                   style={styles.feedCompactGradient}
                 />
-              </>
+              </Animated.View>
             ) : null}
             {isWide ? (
               <Text style={[styles.feedOverlayEyebrow, { color: palette.accent }]}>
@@ -512,7 +552,7 @@ function FeedReel({
                 </Text>
                 {hasMoreText ? (
                   <Pressable
-                    onPress={() => setIsExpanded((current) => !current)}
+                    onPress={() => animateDescription(!isExpanded)}
                     style={styles.feedReadMoreButton}
                   >
                     <Text
@@ -525,26 +565,43 @@ function FeedReel({
               </>
             ) : (
               <>
-                <Text style={styles.feedCompactDescription}>
-                  <Text style={styles.feedCompactDescriptionTitle}>
-                    {player.videoTitle}
-                  </Text>
-                  {presentationText
-                    ? ` - ${isExpanded ? presentationText : compactPreview}`
-                    : ""}
-                  {!isExpanded ? (
+                {!isExpanded ? (
+                  <Text style={styles.feedCompactDescription}>
+                    <Text style={styles.feedCompactDescriptionTitle}>
+                      {player.videoTitle}
+                    </Text>
+                    {presentationText ? ` - ${compactPreview}` : ""}
                     <Text
                       accessibilityRole="button"
-                      onPress={() => setIsExpanded(true)}
+                      onPress={() => animateDescription(true)}
                       style={styles.feedCompactInlineAction}
                     >
                       {"  "}mais
                     </Text>
-                  ) : null}
-                </Text>
-
-                {isExpanded ? (
-                  <>
+                  </Text>
+                ) : (
+                  <Animated.View
+                    style={[
+                      styles.feedCompactExpandedContent,
+                      {
+                        opacity: expansionProgress,
+                        transform: [
+                          {
+                            translateY: expansionProgress.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [10, 0]
+                            })
+                          }
+                        ]
+                      }
+                    ]}
+                  >
+                    <Text style={styles.feedCompactDescription}>
+                      <Text style={styles.feedCompactDescriptionTitle}>
+                        {player.videoTitle}
+                      </Text>
+                      {presentationText ? ` - ${presentationText}` : ""}
+                    </Text>
                     <Text style={styles.feedCompactExpandedMeta}>
                       {player.age} anos | {player.club}
                     </Text>
@@ -601,7 +658,7 @@ function FeedReel({
                         accessibilityLabel="Recolher descricao"
                         accessibilityRole="button"
                         hitSlop={8}
-                        onPress={() => setIsExpanded(false)}
+                        onPress={() => animateDescription(false)}
                         style={styles.feedCompactTextButton}
                       >
                         <Text style={styles.feedCompactTextButtonLabel}>
@@ -609,8 +666,8 @@ function FeedReel({
                         </Text>
                       </Pressable>
                     </View>
-                  </>
-                ) : null}
+                  </Animated.View>
+                )}
               </>
             )}
 
@@ -733,7 +790,7 @@ function FeedReel({
                 </Text>
               </Pressable>
             ) : null}
-          </View>
+          </Animated.View>
 
           {isWide && evaluation ? (
             <View style={styles.feedDesktopPanel}>
