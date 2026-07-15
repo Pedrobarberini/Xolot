@@ -635,3 +635,27 @@ Criterios de aceite:
 - Tocar no `X` fecha a pagina da bolsa.
 - O usuario retorna ao mesmo perfil visitado.
 - O botao permanece visivel sem competir com os dados financeiros.
+
+### Task HOTFIX-027 - Padronizar transicoes das novas paginas
+
+Tipo: Frontend/UI/Navegacao
+
+Objetivo: aplicar a mesma animacao suave de entrada em todas as paginas adicionadas recentemente.
+
+Tasks:
+
+- [x] Reiniciar a transicao ao abrir um perfil publico.
+- [x] Reiniciar a transicao ao abrir ou fechar a pagina de investimento.
+- [x] Animar Pesquisa, Envio, Admin e a lista de Mensagens por rota.
+- [x] Animar a abertura e o retorno de uma conversa.
+- [x] Animar Perfil, Configuracoes e Carteira sem mover header e footer.
+- [x] Reutilizar `ScreenTransition` sem criar estilos de movimento paralelos.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- Todas as novas paginas entram com fade e deslocamento vertical suave.
+- Trocas entre perfil e investimento reiniciam a animacao.
+- Trocas entre lista e conversa reiniciam a animacao.
+- Header e footer permanecem fixos durante a transicao.
+- Configuracoes e Carteira seguem o mesmo comportamento visual do restante do app.

@@ -117,7 +117,22 @@ export function ScreenTransition({
   );
 }
 
-export function ScreenFrame({ children }: { children: React.ReactNode }) {
+export function ScreenFrame({
+  animated = true,
+  children
+}: {
+  animated?: boolean;
+  children: React.ReactNode;
+}) {
+  if (!animated) {
+    return (
+      <View style={styles.tabScene}>
+        <ScreenBackdrop />
+        {children}
+      </View>
+    );
+  }
+
   return (
     <ScreenTransition style={styles.tabScene}>
       <ScreenBackdrop />

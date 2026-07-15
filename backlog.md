@@ -352,6 +352,7 @@ Tasks:
 - [x] Criar pagina dedicada com dados da bolsa e formulario de aporte.
 - [x] Desabilitar a acao de investir quando a bolsa nao estiver aberta.
 - [x] Adicionar botao de fechar na pagina da bolsa para retornar ao perfil.
+- [x] Padronizar a animacao de entrada nas novas paginas e subpaginas.
 - [x] Remover o atalho financeiro duplicado ao lado do menu do Perfil proprio.
 - [x] Preservar a origem ao abrir um video do perfil no Inicio.
 - [x] Exibir seta contextual para retornar do reel ao perfil de origem.

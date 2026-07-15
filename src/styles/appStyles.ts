@@ -3047,6 +3047,9 @@ export const styles = StyleSheet.create({
     marginBottom: 14,
     minHeight: 42
   },
+  profileViewScene: {
+    flex: 1
+  },
   profileSubviewBackButton: {
     alignItems: "center",
     backgroundColor: colors.surface,

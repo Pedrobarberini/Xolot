@@ -274,7 +274,7 @@ export default function App() {
         >
           {investmentPlayer && investmentFund ? (
             <>
-              <ScreenFrame>
+              <ScreenFrame key={`investment-${investmentPlayer.id}`}>
                 <InvestmentScreen
                   fund={investmentFund}
                   onBack={() => setInvestmentPlayer(null)}
@@ -294,7 +294,11 @@ export default function App() {
             </>
           ) : selectedProfilePlayer || selectedProfileAccount ? (
             <>
-              <ScreenFrame>
+              <ScreenFrame
+                key={`public-profile-${
+                  selectedProfilePlayer?.profileId ?? selectedProfileAccount?.id
+                }`}
+              >
                 <PublicProfileScreen
                   account={selectedProfileAccount}
                   canInvest={Boolean(
@@ -364,7 +368,7 @@ export default function App() {
                 />
               ) : null}
               {tab === "search" ? (
-                <ScreenFrame>
+                <ScreenFrame key="search">
                   <SearchScreen
                     funds={athleteFunds}
                     onOpenPlayer={(player) => {
@@ -381,7 +385,9 @@ export default function App() {
                 </ScreenFrame>
               ) : null}
               {tab === "messages" ? (
-                <ScreenFrame>
+                <ScreenFrame
+                  key={`messages-${activeMessageContactId ?? "list"}`}
+                >
                   <MessagesScreen
                     activeContactId={activeMessageContactId}
                     contacts={messageContacts}
@@ -394,7 +400,7 @@ export default function App() {
                 </ScreenFrame>
               ) : null}
               {tab === "submit" ? (
-                <ScreenFrame>
+                <ScreenFrame key="submit">
                   <SubmitVideoScreen
                     onSubmit={handleSubmitVideo}
                     submissions={submissions.filter(
@@ -405,7 +411,7 @@ export default function App() {
                 </ScreenFrame>
               ) : null}
               {tab === "admin" ? (
-                <ScreenFrame>
+                <ScreenFrame key="admin">
                   <AdminScreen
                     onReview={handleReviewSubmission}
                     submissions={submissions}
@@ -413,7 +419,7 @@ export default function App() {
                 </ScreenFrame>
               ) : null}
               {tab === "profile" ? (
-                <ScreenFrame>
+                <ScreenFrame animated={false} key="profile">
                   <ProfileScreen
                     balance={walletBalance}
                     fund={athleteFunds.find(

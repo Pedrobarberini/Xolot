@@ -23,6 +23,7 @@ import {
   ProfileGalleryVideo,
   ProfileVideoGallery
 } from "../components/ProfileVideoGallery";
+import { ScreenTransition } from "../components/AppShell";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, AthleteFund, Investment, Player, VideoSubmission } from "../types";
@@ -91,31 +92,35 @@ export function ProfileScreen({
 
   if (profileView === "wallet") {
     return (
-      <PortfolioScreen
-        balance={balance}
-        investments={investments}
-        onBack={() => setProfileView("overview")}
-        onDeposit={onDeposit}
-      />
+      <ScreenTransition key="wallet" style={styles.profileViewScene}>
+        <PortfolioScreen
+          balance={balance}
+          investments={investments}
+          onBack={() => setProfileView("overview")}
+          onDeposit={onDeposit}
+        />
+      </ScreenTransition>
     );
   }
 
   if (profileView === "settings") {
     return (
       <>
-        <SettingsView
-          accountSubmissions={accountSubmissions}
-          autoplayEnabled={autoplayEnabled}
-          fund={fund}
-          investments={investments}
-          notificationsEnabled={notificationsEnabled}
-          onBack={() => setProfileView("overview")}
-          onChangeAutoplay={setAutoplayEnabled}
-          onChangeNotifications={setNotificationsEnabled}
-          onRequestOpenFund={() => setIsFundModalVisible(true)}
-          player={player}
-          user={user}
-        />
+        <ScreenTransition key="settings" style={styles.profileViewScene}>
+          <SettingsView
+            accountSubmissions={accountSubmissions}
+            autoplayEnabled={autoplayEnabled}
+            fund={fund}
+            investments={investments}
+            notificationsEnabled={notificationsEnabled}
+            onBack={() => setProfileView("overview")}
+            onChangeAutoplay={setAutoplayEnabled}
+            onChangeNotifications={setNotificationsEnabled}
+            onRequestOpenFund={() => setIsFundModalVisible(true)}
+            player={player}
+            user={user}
+          />
+        </ScreenTransition>
         {player ? (
           <OpenFundModal
             onClose={() => setIsFundModalVisible(false)}
@@ -133,60 +138,67 @@ export function ProfileScreen({
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.screenContent}>
-      <View style={styles.profileHero}>
-        <View style={styles.profileHeroTopRow}>
-          <View style={styles.profileAvatar}>
-            <Text style={styles.profileAvatarText}>{profileInitials}</Text>
+      <ScreenTransition key="overview" style={styles.profileViewScene}>
+        <ScrollView contentContainerStyle={styles.screenContent}>
+          <View style={styles.profileHero}>
+            <View style={styles.profileHeroTopRow}>
+              <View style={styles.profileAvatar}>
+                <Text style={styles.profileAvatarText}>{profileInitials}</Text>
+              </View>
+              <View style={styles.profileTitleBlock}>
+                <Text style={styles.profileName}>{user.name}</Text>
+                <Text style={styles.profileMeta}>
+                  {user.role} | {user.email}
+                </Text>
+              </View>
+              <Pressable
+                accessibilityLabel="Abrir opcoes do perfil"
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={() => setIsOptionsVisible(true)}
+                style={styles.profileMenuButton}
+              >
+                <Menu color={colors.text} size={22} />
+              </Pressable>
+            </View>
+            <View style={styles.profileQuickStats}>
+              <View style={styles.profileQuickItem}>
+                <Text style={styles.profileQuickValue}>
+                  {profilePrimaryMetric}
+                </Text>
+                <Text style={styles.profileQuickLabel}>
+                  {profilePrimaryLabel}
+                </Text>
+              </View>
+              <View style={styles.profileQuickItem}>
+                <Text style={styles.profileQuickValue}>{approved}</Text>
+                <Text style={styles.profileQuickLabel}>aprovados</Text>
+              </View>
+              <View style={styles.profileQuickItem}>
+                <Text style={styles.profileQuickValue}>
+                  {publishedVideos.length}
+                </Text>
+                <Text style={styles.profileQuickLabel}>publicados</Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.profileTitleBlock}>
-            <Text style={styles.profileName}>{user.name}</Text>
-            <Text style={styles.profileMeta}>
-              {user.role} | {user.email}
-            </Text>
-          </View>
-          <Pressable
-            accessibilityLabel="Abrir opcoes do perfil"
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={() => setIsOptionsVisible(true)}
-            style={styles.profileMenuButton}
-          >
-            <Menu color={colors.text} size={22} />
-          </Pressable>
-        </View>
-        <View style={styles.profileQuickStats}>
-          <View style={styles.profileQuickItem}>
-            <Text style={styles.profileQuickValue}>{profilePrimaryMetric}</Text>
-            <Text style={styles.profileQuickLabel}>{profilePrimaryLabel}</Text>
-          </View>
-          <View style={styles.profileQuickItem}>
-            <Text style={styles.profileQuickValue}>{approved}</Text>
-            <Text style={styles.profileQuickLabel}>aprovados</Text>
-          </View>
-          <View style={styles.profileQuickItem}>
-            <Text style={styles.profileQuickValue}>{publishedVideos.length}</Text>
-            <Text style={styles.profileQuickLabel}>publicados</Text>
-          </View>
-        </View>
-      </View>
 
-      <ProfileVideoGallery
-        emptyBody="Videos aprovados pela moderacao aparecerao nesta galeria."
-        emptyTitle="Poste um video para mostra-lo aqui"
-        onOpenVideo={(video) => {
-          const selectedVideo = publishedVideos.find(
-            (item) => item.id === video.id
-          );
+          <ProfileVideoGallery
+            emptyBody="Videos aprovados pela moderacao aparecerao nesta galeria."
+            emptyTitle="Poste um video para mostra-lo aqui"
+            onOpenVideo={(video) => {
+              const selectedVideo = publishedVideos.find(
+                (item) => item.id === video.id
+              );
 
-          if (selectedVideo) {
-            onOpenVideo(selectedVideo);
-          }
-        }}
-        videos={galleryVideos}
-      />
-
-      </ScrollView>
+              if (selectedVideo) {
+                onOpenVideo(selectedVideo);
+              }
+            }}
+            videos={galleryVideos}
+          />
+        </ScrollView>
+      </ScreenTransition>
       <ProfileOptionsMenu
         onClose={() => setIsOptionsVisible(false)}
         onOpenSettings={() => {
