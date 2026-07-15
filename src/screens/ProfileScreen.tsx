@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { VideoView, useVideoPlayer } from "expo-video";
 import {
   ArrowLeft,
   Bell,
@@ -17,10 +18,9 @@ import {
   Switch,
   Text,
   TextInput,
-  useWindowDimensions,
   View
 } from "react-native";
-import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
+import { SubmissionVideoPreview } from "../components/SubmissionComponents";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, AthleteFund, Investment, Player, VideoSubmission } from "../types";
@@ -54,17 +54,24 @@ export function ProfileScreen({
   submissions: VideoSubmission[];
   user: AppUser;
 }) {
-  const { width } = useWindowDimensions();
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
   const [profileView, setProfileView] = useState<ProfileView>("overview");
+  const [selectedGalleryVideo, setSelectedGalleryVideo] =
+    useState<VideoSubmission | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
-  const isWide = !USE_CENTERED_WEB_LAYOUT && width >= 840;
-  const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const mySubmissions = submissions.filter((item) => item.userId === user.id);
-  const approved = submissions.filter((item) => item.status === "Aprovado").length;
-  const pending = submissions.filter((item) => item.status === "Em revisao").length;
+  const accountSubmissions = user.role === "Admin" ? submissions : mySubmissions;
+  const approved = accountSubmissions.filter(
+    (item) => item.status === "Aprovado"
+  ).length;
+  const pending = accountSubmissions.filter(
+    (item) => item.status === "Em revisao"
+  ).length;
+  const publishedVideos = mySubmissions.filter(
+    (item) => item.status === "Aprovado" && item.videoLink.trim().length > 0
+  );
   const profileInitials = user.name
     .split(" ")
     .slice(0, 2)
@@ -74,9 +81,6 @@ export function ProfileScreen({
   const profilePrimaryMetric =
     user.role === "Admin" ? String(pending) : String(mySubmissions.length);
   const profilePrimaryLabel = user.role === "Admin" ? "pendentes" : "envios";
-  const fundProgress = fund
-    ? Math.min(fund.fundedAmount / fund.goalAmount, 1)
-    : 0;
 
   if (profileView === "wallet") {
     return (
@@ -91,14 +95,32 @@ export function ProfileScreen({
 
   if (profileView === "settings") {
     return (
-      <SettingsView
-        autoplayEnabled={autoplayEnabled}
-        notificationsEnabled={notificationsEnabled}
-        onBack={() => setProfileView("overview")}
-        onChangeAutoplay={setAutoplayEnabled}
-        onChangeNotifications={setNotificationsEnabled}
-        user={user}
-      />
+      <>
+        <SettingsView
+          accountSubmissions={accountSubmissions}
+          autoplayEnabled={autoplayEnabled}
+          fund={fund}
+          investments={investments}
+          notificationsEnabled={notificationsEnabled}
+          onBack={() => setProfileView("overview")}
+          onChangeAutoplay={setAutoplayEnabled}
+          onChangeNotifications={setNotificationsEnabled}
+          onRequestOpenFund={() => setIsFundModalVisible(true)}
+          player={player}
+          user={user}
+        />
+        {player ? (
+          <OpenFundModal
+            onClose={() => setIsFundModalVisible(false)}
+            onConfirm={(goalAmount, minimumContribution) => {
+              onOpenFund(player, goalAmount, minimumContribution);
+              setIsFundModalVisible(false);
+            }}
+            player={player}
+            visible={isFundModalVisible}
+          />
+        ) : null}
+      </>
     );
   }
 
@@ -132,158 +154,20 @@ export function ProfileScreen({
             <Text style={styles.profileQuickLabel}>{profilePrimaryLabel}</Text>
           </View>
           <View style={styles.profileQuickItem}>
-            <Text style={styles.profileQuickValue}>
-              {user.acceptedTerms ? "OK" : "Pendente"}
-            </Text>
-            <Text style={styles.profileQuickLabel}>termos</Text>
-          </View>
-          <View style={styles.profileQuickItem}>
             <Text style={styles.profileQuickValue}>{approved}</Text>
             <Text style={styles.profileQuickLabel}>aprovados</Text>
           </View>
+          <View style={styles.profileQuickItem}>
+            <Text style={styles.profileQuickValue}>{publishedVideos.length}</Text>
+            <Text style={styles.profileQuickLabel}>publicados</Text>
+          </View>
         </View>
       </View>
 
-      {fund?.status === "Concluida" ? (
-        <View style={styles.profileFundAlert}>
-          <Text style={styles.profileFundAlertTitle}>Investimento concluido</Text>
-          <Text style={styles.profileFundAlertBody}>
-            Sua meta foi atingida. Seu perfil esta em busca de contratantes.
-          </Text>
-        </View>
-      ) : null}
-
-      <View style={isWide ? styles.profileDesktopGrid : null}>
-        <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
-          <Text style={styles.sectionTitle}>Verificacao</Text>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Identidade</Text>
-            <Text style={styles.profileValue}>{user.kycStatus}</Text>
-          </View>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Termos</Text>
-            <Text style={styles.profileValue}>
-              {user.acceptedTerms ? "Aceitos" : "Pendente"}
-            </Text>
-          </View>
-        </View>
-
-        {user.role === "Usuario" ? (
-          <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
-            <Text style={styles.sectionTitle}>Conta NextStar</Text>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Reservas simuladas</Text>
-              <Text style={styles.profileValue}>{investments.length}</Text>
-            </View>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Total</Text>
-              <Text style={styles.profileValue}>{formatBRL(totalInvested)}</Text>
-            </View>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Videos enviados</Text>
-              <Text style={styles.profileValue}>{mySubmissions.length}</Text>
-            </View>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Status padrao</Text>
-              <Text style={styles.profileValue}>Moderacao manual</Text>
-            </View>
-          </View>
-        ) : null}
-
-        {user.role === "Admin" ? (
-          <View style={[styles.profilePanel, isWide ? styles.profilePanelGridItem : null]}>
-            <Text style={styles.sectionTitle}>Admin</Text>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Pendentes</Text>
-              <Text style={styles.profileValue}>{pending}</Text>
-            </View>
-            <View style={styles.profileRow}>
-              <Text style={styles.profileLabel}>Aprovados</Text>
-              <Text style={styles.profileValue}>{approved}</Text>
-            </View>
-          </View>
-        ) : null}
-      </View>
-
-      {user.role === "Usuario" ? (
-        <View style={styles.profilePanel}>
-          <View style={styles.fundTitleRow}>
-            <Text style={styles.sectionTitle}>Bolsa do atleta</Text>
-            {fund ? (
-              <Text
-                style={[
-                  styles.fundStatus,
-                  fund.status === "Concluida"
-                    ? styles.fundStatusComplete
-                    : null
-                ]}
-              >
-                {fund.status}
-              </Text>
-            ) : null}
-          </View>
-
-          {fund ? (
-            <>
-              <View style={styles.fundProgressHeader}>
-                <Text style={styles.fundProgressValue}>
-                  {formatBRL(fund.fundedAmount)} captados
-                </Text>
-                <Text style={styles.fundProgressGoal}>
-                  Meta {formatBRL(fund.goalAmount)}
-                </Text>
-              </View>
-              <View style={styles.fundProgressTrack}>
-                <View
-                  style={[
-                    styles.fundProgressFill,
-                    { width: `${fundProgress * 100}%` }
-                  ]}
-                />
-              </View>
-              <Text style={styles.fundCustodyNote}>
-                A bolsa fica sob custodia simulada do app. Voce pode acompanhar
-                a captacao, mas nao pode sacar os recursos.
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.bodyText}>
-                Abra uma bolsa vinculada ao seu perfil publico para receber
-                aportes simulados de outros usuarios.
-              </Text>
-              {!player ? (
-                <Text style={styles.validationText}>
-                  Envie um video e aguarde a aprovacao para criar seu perfil
-                  publico antes de abrir a bolsa.
-                </Text>
-              ) : null}
-              <Pressable
-                disabled={!player}
-                onPress={() => setIsFundModalVisible(true)}
-                style={[
-                  styles.primaryButton,
-                  !player ? styles.primaryButtonDisabled : null
-                ]}
-              >
-                <CircleDollarSign color={colors.onPrimary} size={18} />
-                <Text style={styles.primaryButtonText}>
-                  Abrir bolsa de investimento
-                </Text>
-              </Pressable>
-            </>
-          )}
-        </View>
-      ) : null}
-
-      <View style={styles.profilePanel}>
-        <Text style={styles.sectionTitle}>Maquete ativa</Text>
-        <Text style={styles.bodyText}>
-          Esta etapa simula cadastro, moderacao, feed aprovado, reserva de
-          aporte, KYC, contrato, pagamento e distribuicao. Nenhuma etapa tem
-          validade financeira ou juridica.
-        </Text>
-      </View>
+      <ProfileVideoGallery
+        onOpenVideo={setSelectedGalleryVideo}
+        videos={publishedVideos}
+      />
 
       </ScrollView>
       <ProfileOptionsMenu
@@ -303,18 +187,130 @@ export function ProfileScreen({
         showWallet={user.role === "Usuario"}
         visible={isOptionsVisible}
       />
-      {player ? (
-        <OpenFundModal
-          onClose={() => setIsFundModalVisible(false)}
-          onConfirm={(goalAmount, minimumContribution) => {
-            onOpenFund(player, goalAmount, minimumContribution);
-            setIsFundModalVisible(false);
-          }}
-          player={player}
-          visible={isFundModalVisible}
-        />
-      ) : null}
+      <ProfileVideoModal
+        onClose={() => setSelectedGalleryVideo(null)}
+        video={selectedGalleryVideo}
+      />
     </>
+  );
+}
+
+function ProfileVideoGallery({
+  onOpenVideo,
+  videos
+}: {
+  onOpenVideo: (video: VideoSubmission) => void;
+  videos: VideoSubmission[];
+}) {
+  return (
+    <View style={styles.profileGallerySection}>
+      <View style={styles.profileGalleryHeader}>
+        <Text style={styles.profileGalleryTitle}>Videos publicados</Text>
+        {videos.length > 0 ? (
+          <Text style={styles.profileGalleryCount}>{videos.length}</Text>
+        ) : null}
+      </View>
+
+      {videos.length === 0 ? (
+        <View style={styles.profileGalleryEmpty}>
+          <Play color={colors.muted} size={28} />
+          <Text style={styles.profileGalleryEmptyTitle}>
+            Poste um video para mostra-lo aqui
+          </Text>
+          <Text style={styles.profileGalleryEmptyBody}>
+            Videos aprovados pela moderacao aparecerao nesta galeria.
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.profileGalleryGrid}>
+          {videos.map((video) => (
+            <Pressable
+              accessibilityLabel={`Assistir ${video.videoTitle}`}
+              accessibilityRole="button"
+              key={video.id}
+              onPress={() => onOpenVideo(video)}
+              style={({ pressed }) => [
+                styles.profileGalleryCard,
+                pressed ? styles.buttonPressed : null
+              ]}
+            >
+              <ProfileGalleryThumbnail uri={video.videoLink} />
+              <View style={styles.profileGalleryCardShade} />
+              <View style={styles.profileGalleryPlayBadge}>
+                <Play color={colors.onPrimary} fill={colors.onPrimary} size={14} />
+              </View>
+              <Text numberOfLines={2} style={styles.profileGalleryCardTitle}>
+                {video.videoTitle}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function ProfileGalleryThumbnail({ uri }: { uri: string }) {
+  const thumbnailPlayer = useVideoPlayer(uri);
+
+  useEffect(() => {
+    thumbnailPlayer.pause();
+  }, [thumbnailPlayer]);
+
+  return (
+    <VideoView
+      contentFit="cover"
+      nativeControls={false}
+      player={thumbnailPlayer}
+      pointerEvents="none"
+      style={styles.profileGalleryMedia}
+      surfaceType="textureView"
+    />
+  );
+}
+
+function ProfileVideoModal({
+  onClose,
+  video
+}: {
+  onClose: () => void;
+  video: VideoSubmission | null;
+}) {
+  return (
+    <Modal
+      animationType="fade"
+      onRequestClose={onClose}
+      statusBarTranslucent
+      transparent
+      visible={Boolean(video)}
+    >
+      <View style={styles.profileVideoModalRoot}>
+        <Pressable
+          accessibilityLabel="Fechar video"
+          onPress={onClose}
+          style={styles.profileVideoModalBackdrop}
+        />
+        {video ? (
+          <View accessibilityViewIsModal style={styles.profileVideoDialog}>
+            <View style={styles.profileVideoDialogHeader}>
+              <Text numberOfLines={1} style={styles.profileVideoDialogTitle}>
+                {video.videoTitle}
+              </Text>
+              <Pressable
+                accessibilityLabel="Fechar video"
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={onClose}
+                style={styles.depositCloseButton}
+              >
+                <X color={colors.muted} size={20} />
+              </Pressable>
+            </View>
+            <SubmissionVideoPreview uri={video.videoLink} />
+          </View>
+        ) : null}
+      </View>
+    </Modal>
   );
 }
 
@@ -387,20 +383,41 @@ function ProfileOptionsMenu({
 }
 
 function SettingsView({
+  accountSubmissions,
   autoplayEnabled,
+  fund,
+  investments,
   notificationsEnabled,
   onBack,
   onChangeAutoplay,
   onChangeNotifications,
+  onRequestOpenFund,
+  player,
   user
 }: {
+  accountSubmissions: VideoSubmission[];
   autoplayEnabled: boolean;
+  fund?: AthleteFund;
+  investments: Investment[];
   notificationsEnabled: boolean;
   onBack: () => void;
   onChangeAutoplay: (value: boolean) => void;
   onChangeNotifications: (value: boolean) => void;
+  onRequestOpenFund: () => void;
+  player?: Player;
   user: AppUser;
 }) {
+  const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
+  const approved = accountSubmissions.filter(
+    (item) => item.status === "Aprovado"
+  ).length;
+  const pending = accountSubmissions.filter(
+    (item) => item.status === "Em revisao"
+  ).length;
+  const fundProgress = fund
+    ? Math.min(fund.fundedAmount / fund.goalAmount, 1)
+    : 0;
+
   return (
     <ScrollView contentContainerStyle={styles.screenContent}>
       <View style={styles.profileSubviewHeader}>
@@ -456,7 +473,7 @@ function SettingsView({
       </View>
 
       <View style={styles.settingsSection}>
-        <Text style={styles.settingsSectionTitle}>Conta</Text>
+        <Text style={styles.settingsSectionTitle}>Verificacao e KYC</Text>
         <View style={styles.profileRowNoBorder}>
           <Text style={styles.profileLabel}>Email</Text>
           <Text numberOfLines={1} style={styles.profileValue}>
@@ -464,9 +481,142 @@ function SettingsView({
           </Text>
         </View>
         <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Verificacao</Text>
+          <Text style={styles.profileLabel}>Identidade</Text>
           <Text style={styles.profileValue}>{user.kycStatus}</Text>
         </View>
+        <View style={styles.profileRow}>
+          <Text style={styles.profileLabel}>Termos</Text>
+          <Text style={styles.profileValue}>
+            {user.acceptedTerms ? "Aceitos" : "Pendente"}
+          </Text>
+        </View>
+      </View>
+
+      {user.role === "Usuario" ? (
+        <View style={styles.settingsSection}>
+          <Text style={styles.settingsSectionTitle}>Conta NextStar</Text>
+          <View style={styles.profileRowNoBorder}>
+            <Text style={styles.profileLabel}>Reservas simuladas</Text>
+            <Text style={styles.profileValue}>{investments.length}</Text>
+          </View>
+          <View style={styles.profileRow}>
+            <Text style={styles.profileLabel}>Total</Text>
+            <Text style={styles.profileValue}>{formatBRL(totalInvested)}</Text>
+          </View>
+          <View style={styles.profileRow}>
+            <Text style={styles.profileLabel}>Videos enviados</Text>
+            <Text style={styles.profileValue}>{accountSubmissions.length}</Text>
+          </View>
+          <View style={styles.profileRow}>
+            <Text style={styles.profileLabel}>Status padrao</Text>
+            <Text style={styles.profileValue}>Moderacao manual</Text>
+          </View>
+        </View>
+      ) : (
+        <View style={styles.settingsSection}>
+          <Text style={styles.settingsSectionTitle}>Conta administrativa</Text>
+          <View style={styles.profileRowNoBorder}>
+            <Text style={styles.profileLabel}>Pendentes</Text>
+            <Text style={styles.profileValue}>{pending}</Text>
+          </View>
+          <View style={styles.profileRow}>
+            <Text style={styles.profileLabel}>Aprovados</Text>
+            <Text style={styles.profileValue}>{approved}</Text>
+          </View>
+        </View>
+      )}
+
+      {user.role === "Usuario" ? (
+        <View style={styles.settingsSection}>
+          <View style={styles.fundTitleRow}>
+            <Text style={styles.settingsSectionTitle}>
+              Bolsa de investimento
+            </Text>
+            {fund ? (
+              <Text
+                style={[
+                  styles.fundStatus,
+                  fund.status === "Concluida"
+                    ? styles.fundStatusComplete
+                    : null
+                ]}
+              >
+                {fund.status}
+              </Text>
+            ) : null}
+          </View>
+
+          {fund?.status === "Concluida" ? (
+            <View style={styles.settingsFundComplete}>
+              <Text style={styles.settingsFundCompleteTitle}>
+                Investimento concluido
+              </Text>
+              <Text style={styles.settingsFundCompleteBody}>
+                Sua meta foi atingida. Seu perfil esta em busca de contratantes.
+              </Text>
+            </View>
+          ) : null}
+
+          {fund ? (
+            <>
+              <View style={styles.fundProgressHeader}>
+                <Text style={styles.fundProgressValue}>
+                  {formatBRL(fund.fundedAmount)} captados
+                </Text>
+                <Text style={styles.fundProgressGoal}>
+                  Meta {formatBRL(fund.goalAmount)}
+                </Text>
+              </View>
+              <View style={styles.fundProgressTrack}>
+                <View
+                  style={[
+                    styles.fundProgressFill,
+                    { width: `${fundProgress * 100}%` }
+                  ]}
+                />
+              </View>
+              <Text style={styles.fundCustodyNote}>
+                A bolsa fica sob custodia simulada do app. Voce acompanha a
+                captacao, mas nao pode sacar os recursos.
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.bodyText}>
+                Abra uma bolsa vinculada ao perfil publico para receber aportes
+                simulados de outros usuarios.
+              </Text>
+              {!player ? (
+                <Text style={styles.validationText}>
+                  Envie um video e aguarde a aprovacao para criar seu perfil
+                  publico antes de abrir a bolsa.
+                </Text>
+              ) : null}
+              <Pressable
+                accessibilityRole="button"
+                disabled={!player}
+                onPress={onRequestOpenFund}
+                style={[
+                  styles.primaryButton,
+                  !player ? styles.primaryButtonDisabled : null
+                ]}
+              >
+                <CircleDollarSign color={colors.onPrimary} size={18} />
+                <Text style={styles.primaryButtonText}>
+                  Abrir bolsa de investimento
+                </Text>
+              </Pressable>
+            </>
+          )}
+        </View>
+      ) : null}
+
+      <View style={styles.settingsSection}>
+        <Text style={styles.settingsSectionTitle}>Ambiente demonstrativo</Text>
+        <Text style={styles.bodyText}>
+          Cadastro, moderacao, aportes, KYC e distribuicao ainda sao simulados.
+          Nenhuma operacao possui validade financeira ou juridica.
+        </Text>
       </View>
     </ScrollView>
   );

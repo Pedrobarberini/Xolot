@@ -14,6 +14,8 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Pesquisa por nome, posicao, cidade ou clube abre diretamente o perfil publico do atleta.
 - Mensagens possui uma area propria e estado vazio sem conversas demonstrativas.
 - Perfil possui menu de tres barras com Configuracoes, Carteira e Sair da conta.
+- Perfil principal funciona como vitrine, com galeria de videos aprovados e estado vazio para novas contas.
+- Configuracoes concentra preferencias, verificacao/KYC, dados da Conta NextStar e gestao da bolsa.
 - Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.
 - Perfil publico acessivel pelo feed, com todos os videos aprovados do atleta e o estado da bolsa.
 - Legenda expandida do feed mostra bolsa aberta, valores captados, meta e progresso real.

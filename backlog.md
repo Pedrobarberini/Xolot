@@ -335,10 +335,12 @@ Tasks:
 
 - [ ] Exibir avatar, nome, idade, posicao, cidade e clube.
 - [ ] Exibir bio curta.
-- [ ] Exibir videos aprovados do atleta.
+- [x] Exibir videos aprovados do atleta em uma galeria no proprio perfil.
 - [ ] Exibir avaliacoes agregadas reais quando existirem.
 - [ ] Permitir editar dados do proprio perfil.
-- [ ] Criar estado de perfil sem videos.
+- [x] Criar estado de perfil sem videos com orientacao para publicar.
+- [x] Manter no Perfil apenas identidade resumida e conteudo publicado.
+- [x] Mover verificacao, KYC, Conta NextStar e bolsa para Configuracoes.
 - [ ] Criar link compartilhavel do perfil na web.
 
 Criterios de aceite:

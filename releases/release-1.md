@@ -477,3 +477,31 @@ Criterios de aceite:
 - Pesquisa usa somente perfis disponiveis no estado atual.
 - Mensagens nao exibe conversas fake.
 - Saldo, deposito e investimentos continuam usando o mesmo estado compartilhado.
+
+### Task HOTFIX-021 - Transformar Perfil em vitrine de videos
+
+Tipo: Frontend/UI/Perfil
+
+Objetivo: separar conteudo publico de configuracoes da conta e priorizar os videos publicados pelo usuario.
+
+Tasks:
+
+- [x] Remover Verificacao e Conta NextStar da tela principal do Perfil.
+- [x] Mover email, identidade, termos e status KYC para Configuracoes.
+- [x] Mover reservas, total investido, quantidade de envios e moderacao para Configuracoes.
+- [x] Mover abertura, progresso e conclusao da bolsa de investimento para Configuracoes.
+- [x] Mover o aviso de ambiente demonstrativo para Configuracoes.
+- [x] Criar galeria em tres colunas com videos aprovados da propria conta.
+- [x] Abrir o video selecionado em um modal com controles de reproducao.
+- [x] Exibir `Poste um video para mostra-lo aqui` quando nao houver publicacoes.
+- [x] Atualizar as estatisticas do Perfil para envios, aprovados e publicados.
+- [x] Atualizar backlog e README.
+
+Criterios de aceite:
+
+- Perfil principal nao exibe KYC, termos, reservas ou bolsa.
+- Configuracoes reune dados operacionais e financeiros da conta.
+- Somente videos aprovados e com arquivo valido aparecem na galeria.
+- Nova conta recebe uma orientacao clara para publicar o primeiro video.
+- Tocar em um item da galeria abre o video com controles.
+- A gestao da bolsa continua usando o mesmo estado e modal existentes.

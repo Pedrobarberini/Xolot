@@ -2811,6 +2811,133 @@ export const styles = StyleSheet.create({
     marginLeft: 12,
     textAlign: "right"
   },
+  profileGallerySection: {
+    marginBottom: 12
+  },
+  profileGalleryHeader: {
+    alignItems: "center",
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    paddingBottom: 10
+  },
+  profileGalleryTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "900"
+  },
+  profileGalleryCount: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  profileGalleryEmpty: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 220,
+    paddingHorizontal: 24,
+    paddingVertical: 30
+  },
+  profileGalleryEmptyTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: "900",
+    marginTop: 12,
+    textAlign: "center"
+  },
+  profileGalleryEmptyBody: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 5,
+    maxWidth: 320,
+    textAlign: "center"
+  },
+  profileGalleryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6
+  },
+  profileGalleryCard: {
+    aspectRatio: 0.78,
+    backgroundColor: colors.media,
+    borderRadius: 6,
+    overflow: "hidden",
+    position: "relative",
+    width: "31.9%"
+  },
+  profileGalleryMedia: {
+    height: "100%",
+    width: "100%"
+  },
+  profileGalleryCardShade: {
+    backgroundColor: "rgba(0, 0, 0, 0.44)",
+    bottom: 0,
+    height: "44%",
+    left: 0,
+    position: "absolute",
+    right: 0
+  },
+  profileGalleryPlayBadge: {
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.52)",
+    borderRadius: 999,
+    height: 30,
+    justifyContent: "center",
+    position: "absolute",
+    right: 8,
+    top: 8,
+    width: 30
+  },
+  profileGalleryCardTitle: {
+    bottom: 8,
+    color: colors.onPrimary,
+    fontSize: 11,
+    fontWeight: "900",
+    left: 8,
+    lineHeight: 14,
+    position: "absolute",
+    right: 8
+  },
+  profileVideoModalRoot: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    padding: 16
+  },
+  profileVideoModalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(5, 18, 12, 0.72)"
+  },
+  profileVideoDialog: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    maxWidth: 430,
+    padding: 14,
+    width: "100%"
+  },
+  profileVideoDialogHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between"
+  },
+  profileVideoDialogTitle: {
+    color: colors.text,
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "900",
+    minWidth: 0
+  },
   profileMenuButton: {
     alignItems: "center",
     backgroundColor: colors.surfaceMuted,
@@ -2954,6 +3081,26 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 16,
     marginTop: 2
+  },
+  settingsFundComplete: {
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    marginBottom: 12,
+    marginTop: 8,
+    padding: 12
+  },
+  settingsFundCompleteTitle: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  settingsFundCompleteBody: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 3
   },
   discoveryContent: {
     alignSelf: "center",
