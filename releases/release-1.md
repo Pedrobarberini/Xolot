@@ -371,3 +371,27 @@ Criterios de aceite:
 - O footer permanece visivel e fora da area rolavel do perfil.
 - Tocar em Feed, Envio, Carteira ou Perfil fecha o perfil publico e abre a aba.
 - Conteudo, botao fixo e footer nao se sobrepoem de forma incoerente.
+
+### Task HOTFIX-017 - Criar HUD horizontal no perfil publico
+
+Tipo: Frontend/UI
+
+Objetivo: simplificar o topo fixo do perfil publico e manter somente navegacao de retorno e saldo disponivel.
+
+Tasks:
+
+- [x] Substituir o botao flutuante isolado por uma barra horizontal.
+- [x] Fixar a barra em `top: 0` e `width: 100%`.
+- [x] Manter somente o icone de voltar no lado esquerdo.
+- [x] Exibir somente o valor do saldo disponivel no lado direito.
+- [x] Remover `Demonstracao`, risco e status do HUD.
+- [x] Reservar espaco superior no `ScrollView` para a barra fixa.
+- [x] Atualizar README com o novo HUD.
+
+Criterios de aceite:
+
+- A barra ocupa toda a largura superior do perfil publico.
+- O HUD permanece fixo durante a rolagem.
+- Apenas seta e saldo ficam visiveis na barra.
+- O saldo usa uma linha, sem box ou badge.
+- O conteudo comeca abaixo da barra e nao sofre sobreposicao.

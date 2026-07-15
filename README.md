@@ -8,7 +8,7 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Identidade visual clara em verde, branco e tons neutros.
 - Icone do app com o simbolo NextStar e splash animada com a marca completa.
 - Feed vertical com video 9:16, reproducao automatica, controle vertical de volume, tela cheia e ficha expansivel.
-- Logo fixa no feed e navegacao persistente no perfil publico, com voltar e footer sempre acessiveis.
+- Logo fixa no feed e navegacao persistente no perfil publico, com HUD horizontal de voltar/saldo e footer sempre acessiveis.
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao aprovada.
 - Conta comum `Usuario` com Feed, Envio, Carteira e Perfil no mesmo acesso.
 - Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.

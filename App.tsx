@@ -2357,17 +2357,6 @@ function PlayerDetail({
   return (
     <View style={styles.playerDetailShell}>
       <ScrollView contentContainerStyle={styles.detailContent}>
-        <View style={styles.detailTopBar}>
-          <View style={styles.detailBackButtonSpacer} />
-        <Text style={styles.detailRisk}>
-          {activeVideo.isDemo
-            ? "Demonstracao"
-            : evaluation
-              ? `Risco ${evaluation.riskLevel}`
-              : "Video aprovado"}
-        </Text>
-        </View>
-
       {activeVideo.isDemo ? (
         <View style={styles.demoNotice}>
           <Text style={styles.demoNoticeTitle}>Perfil demonstrativo</Text>
@@ -2589,14 +2578,24 @@ function PlayerDetail({
         </View>
       )}
       </ScrollView>
-      <Pressable
-        accessibilityLabel="Voltar ao feed"
-        accessibilityRole="button"
-        onPress={onBack}
-        style={[styles.backButton, styles.detailBackButtonFixed]}
-      >
-        <ArrowLeft color={colors.primary} size={22} />
-      </Pressable>
+      <View style={styles.detailFixedHud}>
+        <Pressable
+          accessibilityLabel="Voltar ao feed"
+          accessibilityRole="button"
+          hitSlop={6}
+          onPress={onBack}
+          style={styles.detailHudBackButton}
+        >
+          <ArrowLeft color={colors.primary} size={25} strokeWidth={2.2} />
+        </Pressable>
+        <Text
+          accessibilityLabel={`Saldo disponivel ${formatBRL(walletBalance)}`}
+          numberOfLines={1}
+          style={styles.detailHudBalance}
+        >
+          {formatBRL(walletBalance)}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -5477,46 +5476,42 @@ const styles = StyleSheet.create({
     maxWidth: 1080,
     paddingHorizontal: 22,
     paddingBottom: DETAIL_CONTENT_PADDING,
+    paddingTop: 76,
     width: "100%"
   },
   playerDetailShell: {
     flex: 1,
     position: "relative"
   },
-  detailTopBar: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 12
-  },
-  detailBackButtonSpacer: {
-    height: 42,
-    width: 42
-  },
-  backButton: {
+  detailFixedHud: {
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    height: 42,
-    justifyContent: "center",
-    width: 42
-  },
-  detailBackButtonFixed: {
-    left: 22,
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    height: 62,
+    left: 0,
+    paddingHorizontal: 14,
     position: "absolute",
-    top: 12,
+    right: 0,
+    shadowColor: "#10261A",
+    shadowOffset: { height: 3, width: 0 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    top: 0,
+    width: "100%",
     zIndex: 8
   },
-  backButtonText: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: "900"
+  detailHudBackButton: {
+    alignItems: "center",
+    height: 44,
+    justifyContent: "center",
+    width: 44
   },
-  detailRisk: {
+  detailHudBalance: {
     color: colors.primary,
-    fontSize: 13,
+    fontSize: 17,
     fontWeight: "900"
   },
   detailVideo: {
