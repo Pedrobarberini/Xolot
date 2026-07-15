@@ -7,7 +7,7 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Interface React Native com Expo e TypeScript para Android, iOS e web.
 - Identidade visual clara em verde, branco e tons neutros.
 - Icone do app com o simbolo NextStar e splash animada com a marca completa.
-- Feed vertical com video 9:16, reproducao automatica, som, tela cheia e ficha expansivel.
+- Feed vertical com video 9:16, reproducao automatica, controle vertical de volume, tela cheia e ficha expansivel.
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao aprovada.
 - Conta comum `Usuario` com Feed, Envio, Carteira e Perfil no mesmo acesso.
 - Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.

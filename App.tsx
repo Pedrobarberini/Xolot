@@ -552,6 +552,27 @@ function getPointerLocationX(nativeEvent: unknown) {
   return null;
 }
 
+function getPointerLocationY(nativeEvent: unknown) {
+  if (!nativeEvent || typeof nativeEvent !== "object") {
+    return null;
+  }
+
+  const { locationY, offsetY } = nativeEvent as {
+    locationY?: unknown;
+    offsetY?: unknown;
+  };
+
+  if (typeof locationY === "number" && Number.isFinite(locationY)) {
+    return locationY;
+  }
+
+  if (typeof offsetY === "number" && Number.isFinite(offsetY)) {
+    return offsetY;
+  }
+
+  return null;
+}
+
 function formatVideoFileSize(bytes?: number) {
   if (!bytes || bytes <= 0) {
     return null;
@@ -1246,9 +1267,6 @@ function FeedReel({
                   source={NEXTSTAR_SYMBOL}
                   style={styles.feedReelBrandMark}
                 />
-                <Text style={[styles.feedReelKicker, { color: palette.accent }]}>
-                  Radar
-                </Text>
               </View>
               {evaluation ? (
                 <View
@@ -1753,6 +1771,9 @@ function FeedVideoPlayback({
   const videoViewRef = useRef<VideoView | null>(null);
   const [playbackTime, setPlaybackTime] = useState(0);
   const [seekTrackWidth, setSeekTrackWidth] = useState(0);
+  const [isVolumeControlVisible, setIsVolumeControlVisible] = useState(false);
+  const [volume, setVolume] = useState(0);
+  const [volumeTrackHeight, setVolumeTrackHeight] = useState(0);
   const videoPlayer = useVideoPlayer(uri, (player) => {
     player.loop = true;
     player.muted = true;
@@ -1786,6 +1807,7 @@ function FeedVideoPlayback({
     playbackDuration > 0 ? safeCurrentTime / playbackDuration : 0;
   const totalTimeLabel =
     durationLabel || formatPlaybackTime(Math.ceil(playbackDuration));
+  const effectiveVolume = muted ? 0 : volume;
   const thumbOffset =
     seekTrackWidth > 12
       ? Math.min(
@@ -1796,12 +1818,18 @@ function FeedVideoPlayback({
   const videoPlayerRef = useRef(videoPlayer);
   const playbackDurationRef = useRef(playbackDuration);
   const seekTrackWidthRef = useRef(seekTrackWidth);
+  const volumeTrackHeightRef = useRef(volumeTrackHeight);
   const seekToTimeRef = useRef<(targetTime: number) => number>(() => 0);
   const seekToOffsetRef = useRef<(offsetX: number) => number>(() => 0);
+  const setVolumeRef = useRef<(targetVolume: number) => void>(() => undefined);
+  const setVolumeFromOffsetRef = useRef<(offsetY: number) => void>(
+    () => undefined
+  );
 
   videoPlayerRef.current = videoPlayer;
   playbackDurationRef.current = playbackDuration;
   seekTrackWidthRef.current = seekTrackWidth;
+  volumeTrackHeightRef.current = volumeTrackHeight;
   seekToTimeRef.current = (targetTime: number) => {
     const duration = playbackDurationRef.current;
 
@@ -1824,6 +1852,22 @@ function FeedVideoPlayback({
 
     const progress = Math.min(Math.max(offsetX / width, 0), 1);
     return seekToTimeRef.current(progress * duration);
+  };
+  setVolumeRef.current = (targetVolume: number) => {
+    const nextVolume = Math.min(Math.max(targetVolume, 0), 1);
+
+    setVolume(nextVolume);
+    videoPlayerRef.current.volume = nextVolume;
+    videoPlayerRef.current.muted = nextVolume <= 0;
+  };
+  setVolumeFromOffsetRef.current = (offsetY: number) => {
+    const height = volumeTrackHeightRef.current;
+
+    if (height <= 0) {
+      return;
+    }
+
+    setVolumeRef.current(1 - Math.min(Math.max(offsetY / height, 0), 1));
   };
 
   const seekPanResponder = useRef(
@@ -1849,6 +1893,37 @@ function FeedVideoPlayback({
       onStartShouldSetPanResponder: () => false
     })
   ).current;
+  const volumePanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: (event) => {
+        const locationY = getPointerLocationY(event.nativeEvent);
+
+        if (locationY !== null) {
+          setVolumeFromOffsetRef.current(locationY);
+        }
+      },
+      onPanResponderMove: (event) => {
+        const locationY = getPointerLocationY(event.nativeEvent);
+
+        if (locationY !== null) {
+          setVolumeFromOffsetRef.current(locationY);
+        }
+      },
+      onPanResponderTerminationRequest: () => false,
+      onShouldBlockNativeResponder: () => true,
+      onStartShouldSetPanResponder: () => false
+    })
+  ).current;
+
+  const volumeThumbOffset =
+    volumeTrackHeight > 10
+      ? Math.min(
+          Math.max(effectiveVolume * volumeTrackHeight - 5, 0),
+          volumeTrackHeight - 10
+        )
+      : 0;
 
   useEffect(() => {
     if (Number.isFinite(currentTime)) {
@@ -1911,22 +1986,6 @@ function FeedVideoPlayback({
         ) : null}
       </Pressable>
       <View style={styles.feedVideoFloatingControls}>
-        {hasAudio ? (
-          <Pressable
-            accessibilityLabel={muted ? "Ativar som" : "Silenciar video"}
-            accessibilityRole="button"
-            onPress={() => {
-              videoPlayer.muted = !muted;
-            }}
-            style={styles.feedVideoControlButton}
-          >
-            {muted ? (
-              <VolumeX color="#FFFFFF" size={20} />
-            ) : (
-              <Volume2 color="#FFFFFF" size={20} />
-            )}
-          </Pressable>
-        ) : null}
         <Pressable
           accessibilityLabel="Abrir video em tela cheia"
           accessibilityRole="button"
@@ -1935,6 +1994,89 @@ function FeedVideoPlayback({
         >
           <Expand color="#FFFFFF" size={20} />
         </Pressable>
+        {hasAudio ? (
+          <View style={styles.feedVideoVolumeControl}>
+            <Pressable
+              accessibilityLabel={
+                isVolumeControlVisible
+                  ? "Fechar controle de volume"
+                  : "Abrir controle de volume"
+              }
+              accessibilityRole="button"
+              onPress={() =>
+                setIsVolumeControlVisible((current) => !current)
+              }
+              style={styles.feedVideoControlButton}
+            >
+              {muted || effectiveVolume === 0 ? (
+                <VolumeX color="#FFFFFF" size={20} />
+              ) : (
+                <Volume2 color="#FFFFFF" size={20} />
+              )}
+            </Pressable>
+            {isVolumeControlVisible ? (
+              <View style={styles.feedVideoVolumeSlider}>
+                <Pressable
+                  accessibilityActions={[
+                    { label: "Aumentar volume", name: "increment" },
+                    { label: "Diminuir volume", name: "decrement" }
+                  ]}
+                  accessibilityLabel="Volume do video"
+                  accessibilityRole="adjustable"
+                  accessibilityValue={{
+                    max: 100,
+                    min: 0,
+                    now: Math.round(effectiveVolume * 100),
+                    text: `${Math.round(effectiveVolume * 100)}%`
+                  }}
+                  onAccessibilityAction={(event) => {
+                    if (event.nativeEvent.actionName === "increment") {
+                      setVolumeRef.current(effectiveVolume + 0.1);
+                    }
+
+                    if (event.nativeEvent.actionName === "decrement") {
+                      setVolumeRef.current(effectiveVolume - 0.1);
+                    }
+                  }}
+                  onLayout={(event) => {
+                    const nextHeight = event.nativeEvent.layout.height;
+
+                    volumeTrackHeightRef.current = nextHeight;
+                    setVolumeTrackHeight(nextHeight);
+                  }}
+                  onPress={(event) => {
+                    const locationY = getPointerLocationY(event.nativeEvent);
+
+                    if (locationY !== null) {
+                      setVolumeFromOffsetRef.current(locationY);
+                    }
+                  }}
+                  style={styles.feedVideoVolumePressable}
+                  {...volumePanResponder.panHandlers}
+                >
+                  <View
+                    pointerEvents="none"
+                    style={styles.feedVideoVolumeTrack}
+                  >
+                    <View
+                      style={[
+                        styles.feedVideoVolumeFill,
+                        { height: `${effectiveVolume * 100}%` }
+                      ]}
+                    />
+                  </View>
+                  <View
+                    pointerEvents="none"
+                    style={[
+                      styles.feedVideoVolumeThumb,
+                      { bottom: volumeThumbOffset }
+                    ]}
+                  />
+                </Pressable>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
       </View>
       {isWide ? (
         <View pointerEvents="none" style={styles.feedVideoCaptionStrip}>
@@ -4364,7 +4506,7 @@ const styles = StyleSheet.create({
     top: 0
   },
   feedVideoFloatingControls: {
-    flexDirection: "row",
+    alignItems: "center",
     gap: 7,
     position: "absolute",
     right: 10,
@@ -4380,6 +4522,47 @@ const styles = StyleSheet.create({
     height: 34,
     justifyContent: "center",
     width: 34
+  },
+  feedVideoVolumeControl: {
+    alignItems: "center",
+    gap: 7
+  },
+  feedVideoVolumeSlider: {
+    alignItems: "center",
+    backgroundColor: "rgba(5, 5, 3, 0.72)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 76,
+    justifyContent: "center",
+    width: 34
+  },
+  feedVideoVolumePressable: {
+    alignItems: "center",
+    height: 58,
+    justifyContent: "center",
+    position: "relative",
+    width: 34
+  },
+  feedVideoVolumeTrack: {
+    backgroundColor: "rgba(255, 255, 255, 0.32)",
+    borderRadius: 999,
+    height: "100%",
+    justifyContent: "flex-end",
+    overflow: "hidden",
+    width: 4
+  },
+  feedVideoVolumeFill: {
+    backgroundColor: colors.accent,
+    borderRadius: 999,
+    width: "100%"
+  },
+  feedVideoVolumeThumb: {
+    backgroundColor: colors.onPrimary,
+    borderRadius: 999,
+    height: 10,
+    position: "absolute",
+    width: 10
   },
   feedVideoControlIcon: {
     color: colors.onPrimary,
@@ -4590,11 +4773,6 @@ const styles = StyleSheet.create({
   feedReelBrandMark: {
     height: 25,
     width: 25
-  },
-  feedReelKicker: {
-    fontSize: 12,
-    fontWeight: "900",
-    textTransform: "uppercase"
   },
   feedReelCount: {
     fontSize: 12,

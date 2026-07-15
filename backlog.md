@@ -340,6 +340,31 @@ Criterios de aceite:
 - Perfil sem bolsa mostra `Este perfil nao possui um investimento aberto.`.
 - Nenhum valor financeiro e inventado para perfis sem bolsa.
 
+### Task HOTFIX-015 - Reorganizar marca e volume do player
+
+Tipo: Frontend/UI
+
+Objetivo: simplificar o topo do feed e oferecer ajuste de volume compacto junto aos controles do video.
+
+Tasks:
+
+- [x] Remover o texto `Radar` ao lado do simbolo da marca.
+- [x] Manter o simbolo NextStar sobreposto ao video.
+- [x] Posicionar o botao de volume abaixo do botao de tela cheia.
+- [x] Abrir uma barra vertical curta ao tocar no volume.
+- [x] Permitir ajuste de `0%` a `100%` por toque e arraste.
+- [x] Atualizar o icone entre som ativo e mudo.
+- [x] Adicionar acoes de acessibilidade em passos de `10%`.
+- [x] Atualizar README com o controle vertical de volume.
+
+Criterios de aceite:
+
+- O texto `Radar` nao aparece mais no topo do feed.
+- Tela cheia fica acima do controle de volume.
+- Tocar no volume abre e fecha a barra vertical.
+- Arrastar para cima aumenta o volume e arrastar para baixo diminui.
+- Volume em `0%` deixa o video mudo.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens
