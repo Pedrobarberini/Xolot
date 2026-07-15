@@ -3190,9 +3190,9 @@ export const styles = StyleSheet.create({
     marginBottom: 14,
     padding: 16
   },
-  investmentHeroIcon: {
+  investmentCloseButton: {
     alignItems: "center",
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.surfaceMuted,
     borderColor: colors.border,
     borderRadius: 6,
     borderWidth: 1,

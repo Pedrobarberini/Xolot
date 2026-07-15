@@ -615,3 +615,23 @@ Criterios de aceite:
 - Uma mensagem enviada aparece imediatamente no historico local.
 - A marca ocupa a mesma posicao e dimensao nas paginas contextuais.
 - Seta, logo e saldo permanecem fixos e sem sobreposicao.
+
+### Task HOTFIX-026 - Fechar pagina da bolsa pelo card do perfil
+
+Tipo: Frontend/UI/Navegacao
+
+Objetivo: deixar o retorno ao perfil imediatamente visivel dentro da pagina de investimento.
+
+Tasks:
+
+- [x] Remover o icone financeiro sem acao do card superior.
+- [x] Adicionar botao `X` no canto superior direito do card.
+- [x] Reutilizar a mesma acao de retorno do HUD fixo.
+- [x] Manter icone preto e area de toque de `40px`.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- Tocar no `X` fecha a pagina da bolsa.
+- O usuario retorna ao mesmo perfil visitado.
+- O botao permanece visivel sem competir com os dados financeiros.

@@ -81,7 +81,7 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 11. Pesquise uma conta pela aba `Pesquisar`; usuarios sem video tambem aparecem e abrem um perfil publico vazio.
 12. No perfil visitado, toque no icone de mensagem, escreva uma mensagem e confirme que ela aparece na conversa.
 13. Volte para a lista de conversas e reabra o historico criado durante a sessao.
-14. No perfil visitado, toque em um video para voltar ao reel correspondente ou use `Investir` para abrir a pagina da bolsa.
+14. No perfil visitado, toque em um video para voltar ao reel correspondente ou use `Investir` para abrir a pagina da bolsa; use o `X` para retornar ao perfil.
 15. Perfis sem bolsa em captacao exibem a acao de investimento desabilitada.
 16. Ao abrir um video pela galeria, use a seta no Inicio para retornar ao mesmo perfil.
 17. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
