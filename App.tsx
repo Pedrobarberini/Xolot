@@ -395,21 +395,31 @@ export default function App() {
           style={styles.keyboardView}
         >
           {selectedPlayer ? (
-            <ScreenFrame>
-              <PlayerDetail
-                canInvest={user.role === "Usuario"}
-                fund={athleteFunds.find(
-                  (item) => item.profileId === selectedPlayer.profileId
-                )}
-                onBack={() => setSelectedPlayer(null)}
-                onInvest={handleInvest}
-                player={selectedPlayer}
-                profileVideos={availablePlayers.filter(
-                  (item) => item.profileId === selectedPlayer.profileId
-                )}
-                walletBalance={walletBalance}
+            <>
+              <ScreenFrame>
+                <PlayerDetail
+                  canInvest={user.role === "Usuario"}
+                  fund={athleteFunds.find(
+                    (item) => item.profileId === selectedPlayer.profileId
+                  )}
+                  onBack={() => setSelectedPlayer(null)}
+                  onInvest={handleInvest}
+                  player={selectedPlayer}
+                  profileVideos={availablePlayers.filter(
+                    (item) => item.profileId === selectedPlayer.profileId
+                  )}
+                  walletBalance={walletBalance}
+                />
+              </ScreenFrame>
+              <BottomTabs
+                activeTab={tab}
+                onChange={(nextTab) => {
+                  setSelectedPlayer(null);
+                  setTab(nextTab);
+                }}
+                role={user.role}
               />
-            </ScreenFrame>
+            </>
           ) : (
             <>
               {tab !== "feed" ? (
@@ -1130,6 +1140,14 @@ function FeedScreen({
           </View>
         ))}
       </ScrollView>
+      <View pointerEvents="none" style={styles.feedFixedBrand}>
+        <Image
+          accessibilityLabel="NextStar"
+          resizeMode="contain"
+          source={NEXTSTAR_SYMBOL}
+          style={styles.feedReelBrandMark}
+        />
+      </View>
       {balance !== null ? <BalanceLine balance={balance} overlay /> : null}
     </View>
   );
@@ -1258,32 +1276,22 @@ function FeedReel({
             scoreColor={scoreColor}
           />
 
-          {!isWide ? (
+          {!isWide && evaluation ? (
             <View style={styles.feedReelHeaderOverlay}>
-              <View style={styles.feedReelBrandRow}>
-                <Image
-                  accessibilityLabel="NextStar"
-                  resizeMode="contain"
-                  source={NEXTSTAR_SYMBOL}
-                  style={styles.feedReelBrandMark}
-                />
+              <View
+                style={[
+                  styles.scoreBadge,
+                  styles.feedScoreBadge,
+                  { borderColor: scoreColor }
+                ]}
+              >
+                <Text style={[styles.scoreValue, { color: scoreColor }]}>
+                  {evaluation.score}
+                </Text>
+                <Text style={[styles.scoreLabel, { color: palette.muted }]}>
+                  score
+                </Text>
               </View>
-              {evaluation ? (
-                <View
-                  style={[
-                    styles.scoreBadge,
-                    styles.feedScoreBadge,
-                    { borderColor: scoreColor }
-                  ]}
-                >
-                  <Text style={[styles.scoreValue, { color: scoreColor }]}>
-                    {evaluation.score}
-                  </Text>
-                  <Text style={[styles.scoreLabel, { color: palette.muted }]}>
-                    score
-                  </Text>
-                </View>
-              ) : null}
             </View>
           ) : null}
 
@@ -2347,15 +2355,10 @@ function PlayerDetail({
   }, [player]);
 
   return (
-    <ScrollView contentContainerStyle={styles.detailContent}>
-      <View style={styles.detailTopBar}>
-        <Pressable
-          accessibilityLabel="Voltar"
-          onPress={onBack}
-          style={styles.backButton}
-        >
-          <ArrowLeft color={colors.primary} size={22} />
-        </Pressable>
+    <View style={styles.playerDetailShell}>
+      <ScrollView contentContainerStyle={styles.detailContent}>
+        <View style={styles.detailTopBar}>
+          <View style={styles.detailBackButtonSpacer} />
         <Text style={styles.detailRisk}>
           {activeVideo.isDemo
             ? "Demonstracao"
@@ -2363,7 +2366,7 @@ function PlayerDetail({
               ? `Risco ${evaluation.riskLevel}`
               : "Video aprovado"}
         </Text>
-      </View>
+        </View>
 
       {activeVideo.isDemo ? (
         <View style={styles.demoNotice}>
@@ -2585,7 +2588,16 @@ function PlayerDetail({
           </Text>
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+      <Pressable
+        accessibilityLabel="Voltar ao feed"
+        accessibilityRole="button"
+        onPress={onBack}
+        style={[styles.backButton, styles.detailBackButtonFixed]}
+      >
+        <ArrowLeft color={colors.primary} size={22} />
+      </Pressable>
+    </View>
   );
 }
 
@@ -4356,7 +4368,18 @@ const styles = StyleSheet.create({
   },
   feedPagerShell: {
     backgroundColor: colors.background,
-    flex: 1
+    flex: 1,
+    position: "relative"
+  },
+  feedFixedBrand: {
+    alignItems: "center",
+    height: 42,
+    justifyContent: "center",
+    left: 10,
+    position: "absolute",
+    top: 10,
+    width: 42,
+    zIndex: 7
   },
   feedPager: {
     backgroundColor: colors.background,
@@ -4758,17 +4781,12 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     flexDirection: "row",
     gap: 12,
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     left: 18,
     position: "absolute",
     right: 18,
     top: 18,
     zIndex: 4
-  },
-  feedReelBrandRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 7
   },
   feedReelBrandMark: {
     height: 25,
@@ -5461,11 +5479,19 @@ const styles = StyleSheet.create({
     paddingBottom: DETAIL_CONTENT_PADDING,
     width: "100%"
   },
+  playerDetailShell: {
+    flex: 1,
+    position: "relative"
+  },
   detailTopBar: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: 12
+  },
+  detailBackButtonSpacer: {
+    height: 42,
+    width: 42
   },
   backButton: {
     alignItems: "center",
@@ -5476,6 +5502,12 @@ const styles = StyleSheet.create({
     height: 42,
     justifyContent: "center",
     width: 42
+  },
+  detailBackButtonFixed: {
+    left: 22,
+    position: "absolute",
+    top: 12,
+    zIndex: 8
   },
   backButtonText: {
     color: colors.primary,

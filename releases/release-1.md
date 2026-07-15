@@ -347,3 +347,27 @@ Criterios de aceite:
 - Tocar no volume abre e fecha a barra vertical.
 - Arrastar para cima aumenta o volume e arrastar para baixo diminui.
 - Volume em `0%` deixa o video mudo.
+
+### Task HOTFIX-016 - Fixar marca e navegacao do perfil publico
+
+Tipo: Frontend/UI/Navegacao
+
+Objetivo: manter os principais controles de orientacao acessiveis durante a rolagem do feed e do perfil publico.
+
+Tasks:
+
+- [x] Mover o simbolo NextStar para uma camada fixa do `FeedScreen`.
+- [x] Remover a repeticao da marca dentro de cada item do feed.
+- [x] Transformar o botao de voltar do perfil publico em overlay fixo.
+- [x] Reservar espaco no topo do conteudo para o botao nao cobrir informacoes.
+- [x] Manter `BottomTabs` visivel durante a visualizacao do perfil publico.
+- [x] Fechar o perfil ao selecionar uma aba do footer.
+- [x] Atualizar README com a navegacao persistente.
+
+Criterios de aceite:
+
+- A logo permanece na mesma posicao ao trocar de video no feed.
+- O botao de voltar continua visivel ao rolar o perfil publico.
+- O footer permanece visivel e fora da area rolavel do perfil.
+- Tocar em Feed, Envio, Carteira ou Perfil fecha o perfil publico e abre a aba.
+- Conteudo, botao fixo e footer nao se sobrepoem de forma incoerente.
