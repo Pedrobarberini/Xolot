@@ -3,12 +3,11 @@ import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { ArrowLeft, Expand, Play, UserRound, Volume2, VolumeX } from "lucide-react-native";
-import { Alert, Animated, Easing, Image, PanResponder, Platform, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { Expand, Play, UserRound, Volume2, VolumeX } from "lucide-react-native";
+import { Alert, Animated, Easing, Image, PanResponder, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import {
   formatPlaybackTime,
   getCardPalette,
-  getCardPaletteFromId,
   getPointerLocationX,
   getPointerLocationY,
   getScoreColor
@@ -24,11 +23,13 @@ import { formatBRL, formatPercent } from "../utils/investment";
 
 export function FeedScreen({
   balance,
+  focusPlayerId,
   funds,
   onOpenPlayer,
   players: feedPlayers
 }: {
   balance: number | null;
+  focusPlayerId?: string | null;
   funds: AthleteFund[];
   onOpenPlayer: (player: Player) => void;
   players: Player[];
@@ -51,6 +52,33 @@ export function FeedScreen({
       setActiveFeedIndex(lastFeedIndex);
     }
   }, [activeFeedIndex, lastFeedIndex]);
+
+  useEffect(() => {
+    if (!focusPlayerId) {
+      return;
+    }
+
+    const targetIndex = feedPlayers.findIndex(
+      (player) => player.id === focusPlayerId
+    );
+
+    if (targetIndex < 0) {
+      return;
+    }
+
+    activeFeedIndexRef.current = targetIndex;
+    setActiveFeedIndex(targetIndex);
+    const frame = requestAnimationFrame(() => {
+      const sectionOffset = sectionOffsetsRef.current[targetIndex];
+
+      feedScrollRef.current?.scrollTo({
+        animated: false,
+        y: sectionOffset ?? targetIndex * pageHeight
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [feedPlayers, focusPlayerId, pageHeight]);
 
   function scrollToFeed(index: number) {
     const safeIndex = Math.min(Math.max(index, 0), lastFeedIndex);
@@ -1187,367 +1215,5 @@ function FeedVideoPlayback({
         </Pressable>
       </View>
     </View>
-  );
-}
-
-export function PlayerDetail({
-  canInvest,
-  fund,
-  onBack,
-  onInvest,
-  player,
-  profileVideos,
-  walletBalance
-}: {
-  canInvest: boolean;
-  fund?: AthleteFund;
-  onBack: () => void;
-  onInvest: (player: Player, amount: number) => void;
-  player: Player;
-  profileVideos: Player[];
-  walletBalance: number;
-}) {
-  const [activeVideo, setActiveVideo] = useState(player);
-  const palette = getCardPaletteFromId(activeVideo.id);
-  const evaluation = activeVideo.evaluation;
-  const scoreColor = evaluation
-    ? getScoreColor(evaluation.score)
-    : colors.muted;
-  const [amountText, setAmountText] = useState(
-    fund ? String(fund.minimumContribution) : ""
-  );
-  const amount = Number(amountText.replace(/\D/g, "")) || 0;
-  const remainingAmount = fund
-    ? Math.max(0, fund.goalAmount - fund.fundedAmount)
-    : 0;
-  const fundingProgress = fund
-    ? Math.min(fund.fundedAmount / fund.goalAmount, 1)
-    : 0;
-  const hasMinimumTicket = fund
-    ? amount >= fund.minimumContribution && amount <= remainingAmount
-    : false;
-  const hasAvailableBalance = amount <= walletBalance;
-  const canSubmitInvestment = Boolean(
-    fund &&
-      fund.status === "Captando" &&
-      canInvest &&
-      hasMinimumTicket &&
-      hasAvailableBalance
-  );
-
-  useEffect(() => {
-    setActiveVideo(player);
-  }, [player]);
-
-  return (
-    <View style={styles.playerDetailShell}>
-      <ScrollView contentContainerStyle={styles.detailContent}>
-      {activeVideo.isDemo ? (
-        <View style={styles.demoNotice}>
-          <Text style={styles.demoNoticeTitle}>Perfil demonstrativo</Text>
-          <Text style={styles.demoNoticeBody}>
-            O video e os dados deste perfil sao exclusivamente demonstrativos.
-          </Text>
-        </View>
-      ) : null}
-
-      <View
-        style={[
-          styles.detailVideo,
-          {
-            backgroundColor: palette.media,
-            borderColor: palette.border,
-            borderWidth: 1
-          }
-        ]}
-      >
-        <DetailVideoPlayback
-          key={activeVideo.id}
-          uri={activeVideo.videoUri}
-        />
-      </View>
-
-      <View style={styles.detailTitleRow}>
-        <View style={styles.detailTitleBlock}>
-          <Text style={styles.detailName}>{player.name}</Text>
-          <Text style={styles.detailMeta}>
-            {player.age} anos | {player.position} | {player.club}
-          </Text>
-        </View>
-        {evaluation ? (
-          <View style={[styles.scoreBadge, { borderColor: scoreColor }]}>
-            <Text style={[styles.scoreValue, { color: scoreColor }]}>
-              {evaluation.score}
-            </Text>
-            <Text style={[styles.scoreLabel, { color: palette.muted }]}>score</Text>
-          </View>
-        ) : null}
-      </View>
-
-      <View style={styles.profileVideosSection}>
-        <View style={styles.profileVideosHeader}>
-          <Text style={styles.sectionTitle}>Videos publicados</Text>
-          <Text style={styles.profileVideosCount}>
-            {profileVideos.length} {profileVideos.length === 1 ? "video" : "videos"}
-          </Text>
-        </View>
-        <ScrollView
-          contentContainerStyle={styles.profileVideosRail}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        >
-          {profileVideos.map((video) => (
-            <ProfileVideoCard
-              isSelected={video.id === activeVideo.id}
-              key={video.id}
-              onPress={() => setActiveVideo(video)}
-              video={video}
-            />
-          ))}
-        </ScrollView>
-      </View>
-
-      {evaluation ? (
-        <View style={styles.metricGrid}>
-        {evaluation.metrics.map((metric) => (
-          <View
-            key={metric.label}
-            style={[
-              styles.metricBox,
-              { backgroundColor: palette.accentSoft, borderColor: palette.border }
-            ]}
-          >
-            <Text style={[styles.metricValue, { color: palette.accent }]}>
-              {metric.value}
-            </Text>
-            <Text style={[styles.metricLabel, { color: palette.muted }]}>
-              {metric.label}
-            </Text>
-          </View>
-        ))}
-        </View>
-      ) : null}
-
-      <View style={styles.infoPanel}>
-        <Text style={styles.sectionTitle}>Principal destaque</Text>
-        <Text style={styles.bodyText}>{activeVideo.highlight}</Text>
-      </View>
-
-      <View style={styles.infoPanel}>
-        <Text style={styles.sectionTitle}>
-          {activeVideo.isDemo ? "Objetivo do video" : "Objetivo do aporte"}
-        </Text>
-        <Text style={styles.bodyText}>{activeVideo.objective}</Text>
-      </View>
-
-      {evaluation ? (
-      <View style={styles.infoPanel}>
-        <Text style={styles.sectionTitle}>Avaliacao</Text>
-        <Text style={styles.bodyText}>{evaluation.thesis}</Text>
-      </View>
-      ) : null}
-
-      {fund ? (
-        <View style={styles.infoPanel}>
-          <View style={styles.fundTitleRow}>
-            <Text style={styles.sectionTitle}>Bolsa do atleta</Text>
-            <Text
-              style={[
-                styles.fundStatus,
-                fund.status === "Concluida" ? styles.fundStatusComplete : null
-              ]}
-            >
-              {fund.status}
-            </Text>
-          </View>
-          <Text style={styles.bodyText}>
-            A bolsa pertence ao perfil de {player.name}. O video acima apenas
-            demonstra o talento do atleta.
-          </Text>
-
-          <View style={styles.fundProgressHeader}>
-            <Text style={styles.fundProgressValue}>
-              {formatBRL(fund.fundedAmount)} captados
-            </Text>
-            <Text style={styles.fundProgressGoal}>
-              Meta {formatBRL(fund.goalAmount)}
-            </Text>
-          </View>
-          <View style={styles.fundProgressTrack}>
-            <View
-              style={[
-                styles.fundProgressFill,
-                { width: `${fundingProgress * 100}%` }
-              ]}
-            />
-          </View>
-          <View style={styles.fundStatsRow}>
-            <View style={styles.fundStatItem}>
-              <Text style={styles.fundStatValue}>{formatBRL(remainingAmount)}</Text>
-              <Text style={styles.fundStatLabel}>restante</Text>
-            </View>
-            <View style={styles.fundStatItem}>
-              <Text style={styles.fundStatValue}>
-                {formatBRL(fund.minimumContribution)}
-              </Text>
-              <Text style={styles.fundStatLabel}>aporte minimo</Text>
-            </View>
-          </View>
-
-          {fund.status === "Concluida" ? (
-            <View style={styles.fundCompleteNotice}>
-              <Text style={styles.fundCompleteNoticeTitle}>
-                Investimento concluido
-              </Text>
-              <Text style={styles.fundCompleteNoticeBody}>
-                Meta atingida. Este atleta esta em busca de contratantes.
-              </Text>
-            </View>
-          ) : (
-            <>
-              <Text style={styles.availableBalanceText}>
-                Saldo disponivel: {formatBRL(walletBalance)}
-              </Text>
-              <View style={styles.inputRow}>
-                <Text style={styles.currencyPrefix}>R$</Text>
-                <TextInput
-                  keyboardType="number-pad"
-                  onChangeText={setAmountText}
-                  placeholder="Valor"
-                  placeholderTextColor={colors.muted}
-                  style={styles.amountInput}
-                  value={amountText}
-                />
-              </View>
-              <Text style={styles.fundCustodyNote}>
-                Transferencia simulada para custodia da bolsa. O atleta pode
-                acompanhar a captacao, mas nao pode sacar os recursos.
-              </Text>
-              {!hasMinimumTicket ? (
-                <Text style={styles.validationText}>
-                  Informe entre {formatBRL(fund.minimumContribution)} e{" "}
-                  {formatBRL(remainingAmount)}.
-                </Text>
-              ) : null}
-              {!canInvest ? (
-                <Text style={styles.validationText}>
-                  Aportes estao disponiveis apenas para contas de usuario.
-                </Text>
-              ) : null}
-              {!hasAvailableBalance ? (
-                <Text style={styles.validationText}>
-                  Saldo insuficiente. Abra a Carteira pelo menu do Perfil e use
-                  o botao Depositar.
-                </Text>
-              ) : null}
-              <Pressable
-                disabled={!canSubmitInvestment}
-                onPress={() => onInvest(player, amount)}
-                style={[
-                  styles.primaryButton,
-                  !canSubmitInvestment ? styles.primaryButtonDisabled : null
-                ]}
-              >
-                <Text style={styles.primaryButtonText}>
-                  Transferir para a bolsa
-                </Text>
-              </Pressable>
-            </>
-          )}
-        </View>
-      ) : (
-        <View style={styles.infoPanel}>
-          <Text style={styles.sectionTitle}>Bolsa do atleta</Text>
-          <Text style={styles.bodyText}>
-            Este perfil ainda nao abriu uma bolsa de investimento.
-          </Text>
-        </View>
-      )}
-      </ScrollView>
-      <View style={styles.detailFixedHud}>
-        <Pressable
-          accessibilityLabel="Voltar ao feed"
-          accessibilityRole="button"
-          hitSlop={6}
-          onPress={onBack}
-          style={styles.detailHudBackButton}
-        >
-          <ArrowLeft color={colors.text} size={21} strokeWidth={2.1} />
-        </Pressable>
-        <Text
-          accessibilityLabel={`Saldo disponivel ${formatBRL(walletBalance)}`}
-          numberOfLines={1}
-          style={styles.detailHudBalance}
-        >
-          {formatBRL(walletBalance)}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function DetailVideoPlayback({ uri }: { uri: string | number }) {
-  const detailPlayer = useVideoPlayer(uri, (player) => {
-    player.loop = true;
-  });
-
-  return (
-    <VideoView
-      allowsFullscreen
-      contentFit="contain"
-      nativeControls
-      player={detailPlayer}
-      playsInline
-      style={styles.detailVideoMedia}
-      surfaceType="textureView"
-    />
-  );
-}
-
-function ProfileVideoCard({
-  isSelected,
-  onPress,
-  video
-}: {
-  isSelected: boolean;
-  onPress: () => void;
-  video: Player;
-}) {
-  const previewPlayer = useVideoPlayer(video.videoUri, (player) => {
-    player.loop = false;
-    player.muted = true;
-  });
-
-  return (
-    <Pressable
-      accessibilityLabel={`Reproduzir ${video.videoTitle}`}
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.profileVideoCard,
-        isSelected ? styles.profileVideoCardSelected : null,
-        pressed ? styles.buttonPressed : null
-      ]}
-    >
-      <View style={styles.profileVideoThumbnail}>
-        <VideoView
-          contentFit="cover"
-          nativeControls={false}
-          player={previewPlayer}
-          pointerEvents="none"
-          style={styles.profileVideoThumbnailMedia}
-          surfaceType="textureView"
-        />
-        <View style={styles.profileVideoPlayIcon}>
-          <Play color={colors.onPrimary} fill={colors.onPrimary} size={16} />
-        </View>
-      </View>
-      <Text numberOfLines={2} style={styles.profileVideoTitle}>
-        {video.videoTitle}
-      </Text>
-      <Text style={styles.profileVideoDuration}>
-        {video.videoLength || "Video aprovado"}
-      </Text>
-    </Pressable>
   );
 }

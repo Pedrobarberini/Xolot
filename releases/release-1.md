@@ -531,3 +531,33 @@ Criterios de aceite:
 - Perfis sem video mostram um estado vazio sem inventar dados esportivos.
 - O menu de tres barras fecha ao tocar em qualquer regiao externa ao painel.
 - Os botoes dentro do menu continuam funcionando normalmente.
+
+### Task HOTFIX-023 - Unificar perfil publico, reels e pagina de investimento
+
+Tipo: Frontend/UI/Perfil/Investimento
+
+Objetivo: transformar o perfil visitado em uma vitrine consistente com o perfil da conta, manter a reproducao concentrada no Inicio e separar o aporte em uma pagina transacional.
+
+Tasks:
+
+- [x] Criar `ProfileVideoGallery` reutilizavel para perfil proprio e visitado.
+- [x] Aplicar avatar, identidade, estatisticas e galeria no mesmo modelo visual dos dois perfis.
+- [x] Remover o player grande do perfil publico.
+- [x] Remover o modal de pre-visualizacao do perfil proprio.
+- [x] Abrir o reel correspondente ao tocar em um video da galeria.
+- [x] Permitir que o feed inicie diretamente no video selecionado.
+- [x] Adicionar icone de investimento ao perfil proprio e ao perfil visitado.
+- [x] Criar `InvestmentScreen.tsx` com meta, captado, restante, aporte minimo, saldo e valor.
+- [x] Levar o botao `Investir` para a pagina dedicada de investimento.
+- [x] Desabilitar icone e botao quando nao houver bolsa em captacao.
+- [x] Manter HUD de voltar, saldo e footer nas paginas publicas e de investimento.
+- [x] Atualizar README e backlog.
+
+Criterios de aceite:
+
+- Perfil visitado tem a mesma linguagem visual do Perfil da conta.
+- Nenhum video e reproduzido dentro da pagina de perfil.
+- Tocar em uma miniatura abre o video correto no Inicio.
+- Perfil com bolsa aberta permite acessar a pagina de investimento.
+- Perfil sem bolsa aberta mostra `Bolsa indisponivel` em estado desabilitado.
+- Confirmacao do aporte continua usando saldo, bolsa e historico compartilhados.

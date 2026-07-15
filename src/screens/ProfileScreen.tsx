@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { VideoView, useVideoPlayer } from "expo-video";
+import React, { useState } from "react";
 import {
   ArrowLeft,
   Bell,
@@ -20,7 +19,10 @@ import {
   TextInput,
   View
 } from "react-native";
-import { SubmissionVideoPreview } from "../components/SubmissionComponents";
+import {
+  ProfileGalleryVideo,
+  ProfileVideoGallery
+} from "../components/ProfileVideoGallery";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, AthleteFund, Investment, Player, VideoSubmission } from "../types";
@@ -35,6 +37,7 @@ export function ProfileScreen({
   investments,
   onDeposit,
   onOpenFund,
+  onOpenVideo,
   onSignOut,
   player,
   submissions,
@@ -49,6 +52,7 @@ export function ProfileScreen({
     goalAmount: number,
     minimumContribution: number
   ) => void;
+  onOpenVideo: (video: VideoSubmission) => void;
   onSignOut: () => void;
   player?: Player;
   submissions: VideoSubmission[];
@@ -57,8 +61,6 @@ export function ProfileScreen({
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
   const [profileView, setProfileView] = useState<ProfileView>("overview");
-  const [selectedGalleryVideo, setSelectedGalleryVideo] =
-    useState<VideoSubmission | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
   const mySubmissions = submissions.filter((item) => item.userId === user.id);
@@ -72,6 +74,11 @@ export function ProfileScreen({
   const publishedVideos = mySubmissions.filter(
     (item) => item.status === "Aprovado" && item.videoLink.trim().length > 0
   );
+  const galleryVideos: ProfileGalleryVideo[] = publishedVideos.map((video) => ({
+    id: video.id,
+    title: video.videoTitle,
+    uri: video.videoLink
+  }));
   const profileInitials = user.name
     .split(" ")
     .slice(0, 2)
@@ -138,15 +145,31 @@ export function ProfileScreen({
               {user.role} | {user.email}
             </Text>
           </View>
-          <Pressable
-            accessibilityLabel="Abrir opcoes do perfil"
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={() => setIsOptionsVisible(true)}
-            style={styles.profileMenuButton}
-          >
-            <Menu color={colors.text} size={22} />
-          </Pressable>
+          <View style={styles.profileHeroActions}>
+            {user.role === "Usuario" ? (
+              <Pressable
+                accessibilityLabel="Abrir investimento do perfil"
+                accessibilityRole="button"
+                hitSlop={6}
+                onPress={() => setProfileView("settings")}
+                style={styles.profileMenuButton}
+              >
+                <CircleDollarSign
+                  color={fund ? colors.primary : colors.muted}
+                  size={22}
+                />
+              </Pressable>
+            ) : null}
+            <Pressable
+              accessibilityLabel="Abrir opcoes do perfil"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => setIsOptionsVisible(true)}
+              style={styles.profileMenuButton}
+            >
+              <Menu color={colors.text} size={22} />
+            </Pressable>
+          </View>
         </View>
         <View style={styles.profileQuickStats}>
           <View style={styles.profileQuickItem}>
@@ -165,8 +188,18 @@ export function ProfileScreen({
       </View>
 
       <ProfileVideoGallery
-        onOpenVideo={setSelectedGalleryVideo}
-        videos={publishedVideos}
+        emptyBody="Videos aprovados pela moderacao aparecerao nesta galeria."
+        emptyTitle="Poste um video para mostra-lo aqui"
+        onOpenVideo={(video) => {
+          const selectedVideo = publishedVideos.find(
+            (item) => item.id === video.id
+          );
+
+          if (selectedVideo) {
+            onOpenVideo(selectedVideo);
+          }
+        }}
+        videos={galleryVideos}
       />
 
       </ScrollView>
@@ -187,130 +220,7 @@ export function ProfileScreen({
         showWallet={user.role === "Usuario"}
         visible={isOptionsVisible}
       />
-      <ProfileVideoModal
-        onClose={() => setSelectedGalleryVideo(null)}
-        video={selectedGalleryVideo}
-      />
     </>
-  );
-}
-
-function ProfileVideoGallery({
-  onOpenVideo,
-  videos
-}: {
-  onOpenVideo: (video: VideoSubmission) => void;
-  videos: VideoSubmission[];
-}) {
-  return (
-    <View style={styles.profileGallerySection}>
-      <View style={styles.profileGalleryHeader}>
-        <Text style={styles.profileGalleryTitle}>Videos publicados</Text>
-        {videos.length > 0 ? (
-          <Text style={styles.profileGalleryCount}>{videos.length}</Text>
-        ) : null}
-      </View>
-
-      {videos.length === 0 ? (
-        <View style={styles.profileGalleryEmpty}>
-          <Play color={colors.muted} size={28} />
-          <Text style={styles.profileGalleryEmptyTitle}>
-            Poste um video para mostra-lo aqui
-          </Text>
-          <Text style={styles.profileGalleryEmptyBody}>
-            Videos aprovados pela moderacao aparecerao nesta galeria.
-          </Text>
-        </View>
-      ) : (
-        <View style={styles.profileGalleryGrid}>
-          {videos.map((video) => (
-            <Pressable
-              accessibilityLabel={`Assistir ${video.videoTitle}`}
-              accessibilityRole="button"
-              key={video.id}
-              onPress={() => onOpenVideo(video)}
-              style={({ pressed }) => [
-                styles.profileGalleryCard,
-                pressed ? styles.buttonPressed : null
-              ]}
-            >
-              <ProfileGalleryThumbnail uri={video.videoLink} />
-              <View style={styles.profileGalleryCardShade} />
-              <View style={styles.profileGalleryPlayBadge}>
-                <Play color={colors.onPrimary} fill={colors.onPrimary} size={14} />
-              </View>
-              <Text numberOfLines={2} style={styles.profileGalleryCardTitle}>
-                {video.videoTitle}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
-    </View>
-  );
-}
-
-function ProfileGalleryThumbnail({ uri }: { uri: string }) {
-  const thumbnailPlayer = useVideoPlayer(uri);
-
-  useEffect(() => {
-    thumbnailPlayer.pause();
-  }, [thumbnailPlayer]);
-
-  return (
-    <VideoView
-      contentFit="cover"
-      nativeControls={false}
-      player={thumbnailPlayer}
-      pointerEvents="none"
-      style={styles.profileGalleryMedia}
-      surfaceType="textureView"
-    />
-  );
-}
-
-function ProfileVideoModal({
-  onClose,
-  video
-}: {
-  onClose: () => void;
-  video: VideoSubmission | null;
-}) {
-  return (
-    <Modal
-      animationType="fade"
-      onRequestClose={onClose}
-      statusBarTranslucent
-      transparent
-      visible={Boolean(video)}
-    >
-      <View style={styles.profileVideoModalRoot}>
-        <Pressable
-          accessibilityLabel="Fechar video"
-          onPress={onClose}
-          style={styles.profileVideoModalBackdrop}
-        />
-        {video ? (
-          <View accessibilityViewIsModal style={styles.profileVideoDialog}>
-            <View style={styles.profileVideoDialogHeader}>
-              <Text numberOfLines={1} style={styles.profileVideoDialogTitle}>
-                {video.videoTitle}
-              </Text>
-              <Pressable
-                accessibilityLabel="Fechar video"
-                accessibilityRole="button"
-                hitSlop={8}
-                onPress={onClose}
-                style={styles.depositCloseButton}
-              >
-                <X color={colors.muted} size={20} />
-              </Pressable>
-            </View>
-            <SubmissionVideoPreview uri={video.videoLink} />
-          </View>
-        ) : null}
-      </View>
-    </Modal>
   );
 }
 

@@ -2697,6 +2697,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12
   },
+  profileHeroActions: {
+    flexDirection: "row",
+    gap: 6
+  },
   profileAvatar: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
@@ -2948,6 +2952,9 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     width: 40
   },
+  profileActionButtonDisabled: {
+    opacity: 0.5
+  },
   profileMenuModalRoot: {
     alignItems: "center",
     flex: 1
@@ -3102,81 +3109,72 @@ export const styles = StyleSheet.create({
     lineHeight: 17,
     marginTop: 3
   },
-  publicAccountShell: {
+  publicProfileShell: {
     flex: 1,
     position: "relative"
   },
-  publicAccountContent: {
-    alignSelf: "center",
-    flexGrow: 1,
-    maxWidth: 760,
-    paddingBottom: TAB_BAR_CONTENT_PADDING,
-    paddingHorizontal: 20,
-    paddingTop: 86,
-    width: "100%"
+  publicProfileContent: {
+    paddingTop: 70
   },
-  publicAccountIdentity: {
-    alignItems: "center",
-    paddingBottom: 30,
-    paddingTop: 18
+  publicProfileName: {
+    fontSize: 20,
+    lineHeight: 23
   },
-  publicAccountAvatar: {
+  publicProfileMeta: {
+    lineHeight: 16
+  },
+  publicProfileInvestButton: {
     alignItems: "center",
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.primary,
-    borderRadius: 999,
-    borderWidth: 2,
-    height: 78,
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 8,
     justifyContent: "center",
-    width: 78
+    marginTop: 12,
+    minHeight: 44,
+    paddingHorizontal: 14
   },
-  publicAccountAvatarText: {
-    color: colors.primary,
-    fontSize: 22,
+  publicProfileInvestButtonDisabled: {
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
+    borderWidth: 1
+  },
+  publicProfileInvestButtonText: {
+    color: colors.onPrimary,
+    fontSize: 14,
     fontWeight: "900"
   },
-  publicAccountName: {
-    color: colors.text,
-    fontSize: 24,
-    fontWeight: "900",
-    marginTop: 14,
+  publicProfileInvestButtonTextDisabled: {
+    color: colors.muted
+  },
+  publicProfileInvestmentHint: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    lineHeight: 16,
+    marginTop: 7,
     textAlign: "center"
   },
-  publicAccountMeta: {
-    color: colors.muted,
-    fontSize: 13,
-    fontWeight: "700",
-    marginTop: 4
+  investmentContent: {
+    paddingTop: 70
   },
-  publicAccountEmpty: {
-    alignItems: "center",
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    paddingHorizontal: 18,
-    paddingTop: 42
+  investmentPanel: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 14,
+    padding: 16
   },
-  publicAccountEmptyIcon: {
+  investmentHeroIcon: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
-    borderRadius: 999,
-    height: 54,
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 40,
     justifyContent: "center",
-    width: 54
-  },
-  publicAccountEmptyTitle: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: "900",
-    marginTop: 14,
-    textAlign: "center"
-  },
-  publicAccountEmptyBody: {
-    color: colors.muted,
-    fontSize: 13,
-    lineHeight: 19,
-    marginTop: 6,
-    maxWidth: 360,
-    textAlign: "center"
+    width: 40
   },
   discoveryContent: {
     alignSelf: "center",

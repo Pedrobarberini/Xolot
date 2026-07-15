@@ -9,10 +9,11 @@ import { BottomTabs, Header } from "./src/components/Navigation";
 import { demoPlayer } from "./src/data/demoPlayer";
 import { AdminScreen } from "./src/screens/AdminScreen";
 import { AuthScreen } from "./src/screens/AuthScreen";
-import { FeedScreen, PlayerDetail } from "./src/screens/FeedScreen";
+import { FeedScreen } from "./src/screens/FeedScreen";
+import { InvestmentScreen } from "./src/screens/InvestmentScreen";
 import { MessagesScreen } from "./src/screens/MessagesScreen";
 import { ProfileScreen } from "./src/screens/ProfileScreen";
-import { PublicAccountScreen } from "./src/screens/PublicAccountScreen";
+import { PublicProfileScreen } from "./src/screens/PublicProfileScreen";
 import { SearchScreen } from "./src/screens/SearchScreen";
 import { SubmitVideoScreen } from "./src/screens/SubmissionScreen";
 import { styles } from "./src/styles/appStyles";
@@ -28,6 +29,8 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("feed");
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<AppUser | null>(null);
+  const [investmentPlayer, setInvestmentPlayer] = useState<Player | null>(null);
+  const [feedFocusPlayerId, setFeedFocusPlayerId] = useState<string | null>(null);
   const [registeredUsers, setRegisteredUsers] = useState<AppUser[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [athleteFunds, setAthleteFunds] = useState<AthleteFund[]>(() => [
@@ -79,6 +82,42 @@ export default function App() {
   const currentUserInvestments = user
     ? investments.filter((investment) => investment.investorUserId === user.id)
     : [];
+  const selectedProfilePlayer = selectedPlayer ?? undefined;
+  const selectedProfileAccount = selectedAccount ?? (
+    selectedProfilePlayer?.ownerUserId
+      ? registeredUsers.find(
+          (account) => account.id === selectedProfilePlayer.ownerUserId
+        )
+      : undefined
+  );
+  const selectedProfileVideos = selectedProfilePlayer
+    ? availablePlayers.filter(
+        (player) => player.profileId === selectedProfilePlayer.profileId
+      )
+    : [];
+  const selectedProfileFund = selectedProfilePlayer
+    ? athleteFunds.find(
+        (fund) => fund.profileId === selectedProfilePlayer.profileId
+      )
+    : undefined;
+  const investmentFund = investmentPlayer
+    ? athleteFunds.find((fund) => fund.profileId === investmentPlayer.profileId)
+    : undefined;
+
+  function openTab(nextTab: Tab) {
+    setInvestmentPlayer(null);
+    setSelectedAccount(null);
+    setSelectedPlayer(null);
+    setTab(nextTab);
+  }
+
+  function openReel(player: Player) {
+    setInvestmentPlayer(null);
+    setSelectedAccount(null);
+    setSelectedPlayer(null);
+    setFeedFocusPlayerId(player.id);
+    setTab("feed");
+  }
 
   const {
     handleAuth,
@@ -131,49 +170,58 @@ export default function App() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={styles.keyboardView}
         >
-          {selectedPlayer ? (
+          {investmentPlayer && investmentFund ? (
             <>
               <ScreenFrame>
-                <PlayerDetail
-                  canInvest={user.role === "Usuario"}
-                  fund={athleteFunds.find(
-                    (item) => item.profileId === selectedPlayer.profileId
-                  )}
-                  onBack={() => setSelectedPlayer(null)}
-                  onInvest={handleInvest}
-                  player={selectedPlayer}
-                  profileVideos={availablePlayers.filter(
-                    (item) => item.profileId === selectedPlayer.profileId
-                  )}
+                <InvestmentScreen
+                  fund={investmentFund}
+                  onBack={() => setInvestmentPlayer(null)}
+                  onInvest={(player, amount) => {
+                    handleInvest(player, amount);
+                    setInvestmentPlayer(null);
+                  }}
+                  player={investmentPlayer}
                   walletBalance={walletBalance}
                 />
               </ScreenFrame>
               <BottomTabs
                 activeTab={tab}
-                onChange={(nextTab) => {
-                  setSelectedPlayer(null);
-                  setSelectedAccount(null);
-                  setTab(nextTab);
-                }}
+                onChange={openTab}
                 role={user.role}
               />
             </>
-          ) : selectedAccount ? (
+          ) : selectedProfilePlayer || selectedProfileAccount ? (
             <>
               <ScreenFrame>
-                <PublicAccountScreen
-                  account={selectedAccount}
-                  onBack={() => setSelectedAccount(null)}
+                <PublicProfileScreen
+                  account={selectedProfileAccount}
+                  canInvest={Boolean(
+                    user.role === "Usuario" &&
+                      selectedProfilePlayer &&
+                      selectedProfilePlayer.ownerUserId !== user.id
+                  )}
+                  fund={selectedProfileFund}
+                  onBack={() => {
+                    setSelectedAccount(null);
+                    setSelectedPlayer(null);
+                  }}
+                  onInvest={() => {
+                    if (
+                      selectedProfilePlayer &&
+                      selectedProfileFund?.status === "Captando"
+                    ) {
+                      setInvestmentPlayer(selectedProfilePlayer);
+                    }
+                  }}
+                  onOpenVideo={openReel}
+                  player={selectedProfilePlayer}
+                  videos={selectedProfileVideos}
                   walletBalance={walletBalance}
                 />
               </ScreenFrame>
               <BottomTabs
                 activeTab={tab}
-                onChange={(nextTab) => {
-                  setSelectedAccount(null);
-                  setSelectedPlayer(null);
-                  setTab(nextTab);
-                }}
+                onChange={openTab}
                 role={user.role}
               />
             </>
@@ -194,6 +242,7 @@ export default function App() {
               {tab === "feed" ? (
                 <FeedScreen
                   balance={user.role === "Usuario" ? walletBalance : null}
+                  focusPlayerId={feedFocusPlayerId}
                   funds={athleteFunds}
                   onOpenPlayer={setSelectedPlayer}
                   players={availablePlayers}
@@ -249,6 +298,15 @@ export default function App() {
                     )}
                     investments={currentUserInvestments}
                     onOpenFund={handleOpenFund}
+                    onOpenVideo={(submission) => {
+                      const reelPlayer = approvedSubmissionPlayers.find(
+                        (player) => player.id === `approved-${submission.id}`
+                      );
+
+                      if (reelPlayer) {
+                        openReel(reelPlayer);
+                      }
+                    }}
                     onDeposit={handleDeposit}
                     onSignOut={handleSignOut}
                     player={availablePlayers.find(
@@ -259,7 +317,7 @@ export default function App() {
                   />
                 </ScreenFrame>
               ) : null}
-              <BottomTabs activeTab={tab} onChange={setTab} role={user.role} />
+              <BottomTabs activeTab={tab} onChange={openTab} role={user.role} />
             </>
           )}
         </KeyboardAvoidingView>

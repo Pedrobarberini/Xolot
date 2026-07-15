@@ -339,6 +339,12 @@ Tasks:
 - [ ] Exibir avatar, nome, idade, posicao, cidade e clube.
 - [ ] Exibir bio curta.
 - [x] Exibir videos aprovados do atleta em uma galeria no proprio perfil.
+- [x] Reutilizar o mesmo modelo visual no perfil proprio e no perfil visitado.
+- [x] Remover player grande e modal de pre-visualizacao das paginas de perfil.
+- [x] Direcionar o toque em uma miniatura da galeria para o reel correspondente.
+- [x] Adicionar acao com icone para investimento no perfil.
+- [x] Criar pagina dedicada com dados da bolsa e formulario de aporte.
+- [x] Desabilitar a acao de investir quando a bolsa nao estiver aberta.
 - [ ] Exibir avaliacoes agregadas reais quando existirem.
 - [ ] Permitir editar dados do proprio perfil.
 - [x] Criar estado de perfil sem videos com orientacao para publicar.
@@ -350,6 +356,8 @@ Criterios de aceite:
 
 - Perfil nao mostra metricas fake.
 - Perfil funciona para atleta logado e visitante.
+- Videos do perfil sao reproduzidos no Inicio, sem player duplicado na pagina.
+- Investimento e preenchido em uma pagina propria, separada da vitrine publica.
 - Alteracoes salvas persistem apos refresh.
 
 ## Sprint 6 - Mobile e deploy
