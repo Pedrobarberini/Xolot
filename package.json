@@ -9,7 +9,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build:web": "node scripts/clean-dist.mjs && expo export --platform web --output-dir dist && node scripts/prepare-github-pages.mjs",
+    "build:web": "node scripts/clean-dist.mjs && expo export --platform web --output-dir dist && node scripts/prepare-github-pages.mjs && workbox generateSW workbox-config.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "workbox-cli": "^7.4.1"
   }
 }

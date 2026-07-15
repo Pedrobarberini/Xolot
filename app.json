@@ -37,8 +37,14 @@
     },
     "web": {
       "bundler": "metro",
+      "output": "single",
       "favicon": "./assets/brand/nextstar-app-icon.png",
-      "name": "NextStar"
+      "name": "NextStar",
+      "shortName": "NextStar",
+      "description": "Descubra, envie e avalie talentos do futebol.",
+      "themeColor": "#046136",
+      "backgroundColor": "#F5F8F5",
+      "lang": "pt-BR"
     },
     "plugins": [
       "expo-video",

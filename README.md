@@ -29,6 +29,8 @@ https://pedrobarberini.github.io/NextStar/
 
 O estado ainda fica apenas na memoria do navegador. Recarregar a pagina apaga contas, saldos, depositos, envios, moderacoes e reservas criadas durante o teste.
 
+A versao web e um PWA: no Chrome/Edge/Safari e possivel instalar o NextStar na tela inicial ou como aplicativo. O service worker faz cache dos assets para uso offline basico apos a primeira visita.
+
 ## Como rodar
 
 Requisitos: Node.js 20.19 ou superior e pnpm.
