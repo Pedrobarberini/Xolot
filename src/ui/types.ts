@@ -1,4 +1,10 @@
-export type Tab = "feed" | "portfolio" | "submit" | "admin" | "profile";
+export type Tab =
+  | "feed"
+  | "submit"
+  | "search"
+  | "messages"
+  | "admin"
+  | "profile";
 
 export type CardPalette = {
   name: string;

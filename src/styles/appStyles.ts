@@ -288,6 +288,9 @@ export const styles = StyleSheet.create({
     minWidth: 0,
     paddingRight: 156
   },
+  headerIdentityCompactSolo: {
+    paddingRight: 0
+  },
   headerLogo: {
     height: 42,
     marginRight: 8,
@@ -2808,6 +2811,324 @@ export const styles = StyleSheet.create({
     marginLeft: 12,
     textAlign: "right"
   },
+  profileMenuButton: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 40,
+    justifyContent: "center",
+    width: 40
+  },
+  profileMenuModalRoot: {
+    alignItems: "center",
+    flex: 1
+  },
+  profileMenuBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(20, 33, 24, 0.14)"
+  },
+  profileMenuLayer: {
+    alignItems: "flex-end",
+    maxWidth: 480,
+    paddingHorizontal: 16,
+    paddingTop: 88,
+    width: "100%"
+  },
+  profileMenuPanel: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    elevation: 12,
+    padding: 8,
+    shadowColor: "#10261A",
+    shadowOffset: { height: 6, width: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    width: 238
+  },
+  profileMenuTitle: {
+    color: colors.muted,
+    fontSize: 10,
+    fontWeight: "900",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    textTransform: "uppercase"
+  },
+  profileMenuItem: {
+    alignItems: "center",
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 48,
+    paddingHorizontal: 10
+  },
+  profileMenuItemText: {
+    color: colors.text,
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "800"
+  },
+  profileMenuSignOut: {
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    marginTop: 4
+  },
+  profileMenuSignOutText: {
+    color: colors.danger,
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "800"
+  },
+  profileSubviewHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 14,
+    minHeight: 42
+  },
+  profileSubviewBackButton: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 40,
+    justifyContent: "center",
+    width: 40
+  },
+  profileSubviewTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "900",
+    textAlign: "center"
+  },
+  profileSubviewSpacer: {
+    height: 40,
+    width: 40
+  },
+  settingsSection: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 12,
+    padding: 14
+  },
+  settingsSectionTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "900",
+    marginBottom: 4
+  },
+  settingsRow: {
+    alignItems: "center",
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 68,
+    paddingVertical: 10
+  },
+  settingsRowIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 6,
+    height: 36,
+    justifyContent: "center",
+    width: 36
+  },
+  settingsRowBody: {
+    flex: 1,
+    minWidth: 0
+  },
+  settingsRowTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  settingsRowDescription: {
+    color: colors.muted,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 2
+  },
+  discoveryContent: {
+    alignSelf: "center",
+    maxWidth: 760,
+    paddingBottom: TAB_BAR_CONTENT_PADDING,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    width: "100%"
+  },
+  discoveryHeader: {
+    marginBottom: 16
+  },
+  discoveryTitle: {
+    color: colors.text,
+    fontSize: 24,
+    fontWeight: "900"
+  },
+  discoverySubtitle: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 4
+  },
+  searchField: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderStrong,
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 9,
+    minHeight: 48,
+    paddingHorizontal: 13
+  },
+  searchInput: {
+    color: colors.text,
+    flex: 1,
+    fontSize: 14,
+    minWidth: 0,
+    paddingVertical: 10
+  },
+  searchClearButton: {
+    alignItems: "center",
+    height: 32,
+    justifyContent: "center",
+    width: 32
+  },
+  searchResultsHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+    marginTop: 20
+  },
+  searchResultsTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  searchResultsCount: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800"
+  },
+  searchProfileRow: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 8,
+    minHeight: 86,
+    padding: 12
+  },
+  searchProfileAvatar: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    height: 48,
+    justifyContent: "center",
+    width: 48
+  },
+  searchProfileAvatarText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  searchProfileBody: {
+    flex: 1,
+    minWidth: 0
+  },
+  searchProfileName: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "900"
+  },
+  searchProfileMeta: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 2
+  },
+  searchProfileFund: {
+    color: colors.muted,
+    fontSize: 10,
+    fontWeight: "800",
+    marginTop: 5
+  },
+  searchProfileFundActive: {
+    color: colors.primary
+  },
+  discoveryEmptyState: {
+    alignItems: "center",
+    paddingHorizontal: 22,
+    paddingTop: 54
+  },
+  discoveryEmptyTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 14,
+    textAlign: "center"
+  },
+  discoveryEmptyBody: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 6,
+    maxWidth: 390,
+    textAlign: "center"
+  },
+  messagesContent: {
+    alignSelf: "center",
+    flexGrow: 1,
+    maxWidth: 760,
+    paddingBottom: TAB_BAR_CONTENT_PADDING,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    width: "100%"
+  },
+  messagesEmptyState: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    paddingBottom: 70,
+    paddingHorizontal: 24
+  },
+  messagesIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 999,
+    height: 62,
+    justifyContent: "center",
+    width: 62
+  },
+  messagesSearchButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    marginTop: 20,
+    minHeight: 44,
+    paddingHorizontal: 16
+  },
+  messagesSearchButtonText: {
+    color: colors.onPrimary,
+    fontSize: 13,
+    fontWeight: "900"
+  },
   tabBar: {
     backgroundColor: colors.surface,
     borderTopColor: colors.border,
@@ -2828,7 +3149,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 6,
     flex: 1,
-    gap: 5,
+    gap: 3,
     minHeight: 56,
     paddingVertical: 8
   },
@@ -2847,7 +3168,7 @@ export const styles = StyleSheet.create({
   },
   tabText: {
     color: colors.muted,
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "900"
   },
   tabTextActive: {

@@ -10,8 +10,9 @@ import { demoPlayer } from "./src/data/demoPlayer";
 import { AdminScreen } from "./src/screens/AdminScreen";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { FeedScreen, PlayerDetail } from "./src/screens/FeedScreen";
-import { PortfolioScreen } from "./src/screens/WalletScreen";
+import { MessagesScreen } from "./src/screens/MessagesScreen";
 import { ProfileScreen } from "./src/screens/ProfileScreen";
+import { SearchScreen } from "./src/screens/SearchScreen";
 import { SubmitVideoScreen } from "./src/screens/SubmissionScreen";
 import { styles } from "./src/styles/appStyles";
 import { colors } from "./src/theme";
@@ -158,9 +159,9 @@ export default function App() {
                   onSignOut={handleSignOut}
                   pendingReviews={pendingReviews}
                   showBalance={
-                    user.role === "Usuario" &&
-                    (tab === "portfolio" || tab === "profile")
+                    user.role === "Usuario" && tab === "profile"
                   }
+                  showSignOut={user.role === "Admin" && tab !== "profile"}
                   user={user}
                   walletBalance={walletBalance}
                 />
@@ -173,13 +174,18 @@ export default function App() {
                   players={availablePlayers}
                 />
               ) : null}
-              {tab === "portfolio" ? (
+              {tab === "search" ? (
                 <ScreenFrame>
-                  <PortfolioScreen
-                    balance={walletBalance}
-                    investments={currentUserInvestments}
-                    onDeposit={handleDeposit}
+                  <SearchScreen
+                    funds={athleteFunds}
+                    onOpenPlayer={setSelectedPlayer}
+                    players={availablePlayers}
                   />
+                </ScreenFrame>
+              ) : null}
+              {tab === "messages" ? (
+                <ScreenFrame>
+                  <MessagesScreen onFindProfiles={() => setTab("search")} />
                 </ScreenFrame>
               ) : null}
               {tab === "submit" ? (
@@ -204,11 +210,13 @@ export default function App() {
               {tab === "profile" ? (
                 <ScreenFrame>
                   <ProfileScreen
+                    balance={walletBalance}
                     fund={athleteFunds.find(
                       (item) => item.ownerUserId === user.id
                     )}
                     investments={currentUserInvestments}
                     onOpenFund={handleOpenFund}
+                    onDeposit={handleDeposit}
                     onSignOut={handleSignOut}
                     player={availablePlayers.find(
                       (item) => item.ownerUserId === user.id

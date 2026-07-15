@@ -1436,7 +1436,8 @@ export function PlayerDetail({
               ) : null}
               {!hasAvailableBalance ? (
                 <Text style={styles.validationText}>
-                  Saldo insuficiente. Use o botao Depositar na Carteira.
+                  Saldo insuficiente. Abra a Carteira pelo menu do Perfil e use
+                  o botao Depositar.
                 </Text>
               ) : null}
               <Pressable

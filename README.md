@@ -7,10 +7,13 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Interface React Native com Expo e TypeScript para Android, iOS e web.
 - Identidade visual clara em verde, branco e tons neutros.
 - Icone do app com o simbolo NextStar e splash animada com a marca completa.
-- Feed vertical com video 9:16, reproducao automatica, controle vertical de volume, tela cheia e ficha expansivel.
+- Inicio com videos verticais 9:16, reproducao automatica, controle vertical de volume, tela cheia e ficha expansivel.
 - Logo fixa no feed e navegacao persistente no perfil publico, com HUD horizontal compacto de voltar/saldo e footer sempre acessiveis.
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao aprovada.
-- Conta comum `Usuario` com Feed, Envio, Carteira e Perfil no mesmo acesso.
+- Conta comum `Usuario` com Inicio, Envio, Pesquisar, Mensagens e Perfil no mesmo acesso.
+- Pesquisa por nome, posicao, cidade ou clube abre diretamente o perfil publico do atleta.
+- Mensagens possui uma area propria e estado vazio sem conversas demonstrativas.
+- Perfil possui menu de tres barras com Configuracoes, Carteira e Sair da conta.
 - Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.
 - Perfil publico acessivel pelo feed, com todos os videos aprovados do atleta e o estado da bolsa.
 - Legenda expandida do feed mostra bolsa aberta, valores captados, meta e progresso real.
@@ -20,7 +23,7 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Videos reais aprovados substituem o perfil demonstrativo.
 - Score, risco, metricas e valores financeiros so aparecem quando existe uma avaliacao explicita.
 - Saldo, depositos, aportes e bolsas permanecem simulados, sem pagamento, saque ou contrato real.
-- Carteira mostra o valor em reais e a porcentagem da cota adquirida em cada aporte.
+- Carteira, acessada pelo menu do Perfil, mostra saldo, deposito, valor em reais e porcentagem da cota adquirida.
 
 ## Teste online
 
@@ -53,7 +56,7 @@ pnpm run build:web
 
 O `App.tsx` mantem somente estado compartilhado, composicao e roteamento local. O restante esta organizado em:
 
-- `src/screens/`: telas de autenticacao, feed, envio, moderacao, carteira e perfil.
+- `src/screens/`: telas de autenticacao, inicio, envio, pesquisa, mensagens, moderacao, carteira e perfil.
 - `src/components/`: shell visual, navegacao e componentes compartilhados.
 - `src/actions/`: handlers de produto, formatadores e builders de dados.
 - `src/styles/`: estilos React Native extraidos do componente raiz.
@@ -67,15 +70,18 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 2. Saia e crie uma conta como `Admin`.
 3. Aprove, reprove ou solicite ajustes no envio.
 4. Confirme que a solicitacao revisada saiu da fila.
-5. Abra o `Feed` e confira o video aprovado.
+5. Abra o `Inicio` e confira o video aprovado.
 6. Verifique que publicacoes sem avaliacao nao exibem score, risco, box de aviso ou valores inventados.
-7. Na `Carteira`, use `Depositar` para adicionar saldo simulado.
-8. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
-9. Use o icone ao lado do nome para abrir o perfil e alternar entre os videos publicados.
-10. Expanda a legenda do feed e confira o estado e o progresso da bolsa abaixo das hashtags.
-11. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
-12. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
-13. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
+7. Abra `Perfil`, toque no menu de tres barras e entre em `Carteira`.
+8. Use `Depositar` para adicionar saldo simulado.
+9. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
+10. Use o icone ao lado do nome para abrir o perfil e alternar entre os videos publicados.
+11. Pesquise um atleta pela aba `Pesquisar` e abra o perfil encontrado.
+12. Confira o estado vazio honesto da aba `Mensagens`.
+13. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
+14. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
+15. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
+16. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
 
 ## Antes da abertura ao publico
 

@@ -42,9 +42,14 @@ Tasks:
 - [x] Criar `src/screens/AdminScreen.tsx`.
 - [x] Criar `src/screens/ProfileScreen.tsx`.
 - [x] Criar `src/screens/WalletScreen.tsx`.
+- [x] Criar `src/screens/SearchScreen.tsx` com pesquisa de perfis reais.
+- [x] Criar `src/screens/MessagesScreen.tsx` com estado vazio sem conversas fake.
 - [ ] Criar `src/components/VideoCard.tsx`.
 - [ ] Criar `src/components/VideoPlayer.tsx`.
 - [x] Extrair a navegacao inferior para `src/components/Navigation.tsx`.
+- [x] Renomear a aba `Feed` para `Inicio`.
+- [x] Substituir `Carteira` no footer por `Pesquisar` e adicionar `Mensagens`.
+- [x] Mover o acesso da Carteira para o menu de tres barras do Perfil.
 - [ ] Criar `src/components/AppToast.tsx`.
 - [x] Extrair estilos do `App.tsx` para `src/styles/appStyles.ts`.
 - [x] Extrair handlers de produto para `src/actions/createAppActions.ts`.

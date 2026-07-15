@@ -446,3 +446,34 @@ Criterios de aceite:
 - Acoes de produto nao ficam declaradas no componente raiz.
 - O layout e os fluxos existentes continuam com as mesmas props e regras.
 - As subdivisoes restantes ficam identificadas no backlog, sem serem marcadas como concluidas.
+
+### Task HOTFIX-020 - Reorganizar navegacao principal e menu do Perfil
+
+Tipo: Frontend/UI/Navegacao
+
+Objetivo: aproximar a navegacao do foco social em videos, retirar a Carteira do footer e centralizar opcoes de conta no Perfil.
+
+Tasks:
+
+- [x] Renomear a aba visivel `Feed` para `Inicio`.
+- [x] Remover `Carteira` da navegacao inferior.
+- [x] Adicionar a aba `Pesquisar` com busca por nome, posicao, cidade ou clube.
+- [x] Abrir o perfil publico a partir de um resultado de pesquisa.
+- [x] Adicionar a aba `Mensagens` com estado vazio sem dados inventados.
+- [x] Criar menu de tres barras no Perfil.
+- [x] Adicionar `Configuracoes`, `Carteira` e `Sair da conta` ao menu.
+- [x] Reutilizar saldo, deposito e historico da Carteira dentro do Perfil.
+- [x] Criar subarea de Configuracoes com preferencias de notificacao e reproducao automatica.
+- [x] Ajustar o footer para cinco itens em telas mobile.
+- [x] Atualizar textos, acessibilidade, README e backlog.
+- [x] Validar os fluxos no viewport mobile de `390x844`.
+
+Criterios de aceite:
+
+- Footer do Usuario exibe Inicio, Envio, Pesquisar, Mensagens e Perfil.
+- Os cinco rotulos cabem no celular sem sobreposicao.
+- Carteira nao aparece como aba principal.
+- Menu do Perfil abre como HUD e permite acessar Configuracoes, Carteira e Sair.
+- Pesquisa usa somente perfis disponiveis no estado atual.
+- Mensagens nao exibe conversas fake.
+- Saldo, deposito e investimentos continuam usando o mesmo estado compartilhado.

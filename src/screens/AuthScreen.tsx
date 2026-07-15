@@ -21,7 +21,7 @@ export function AuthScreen({
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const isCompact = width < 380;
   const authModeLabel = mode === "create" ? "Cadastro" : "Login";
-  const roleSummary = role === "Admin" ? "Moderacao" : "Feed, envio e carteira";
+  const roleSummary = role === "Admin" ? "Moderacao" : "Inicio, envio e perfis";
 
   const cleanName = name.trim();
   const cleanEmail = email.trim().toLowerCase();

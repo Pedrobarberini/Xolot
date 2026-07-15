@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CircleDollarSign, X } from "lucide-react-native";
+import { ArrowLeft, CircleDollarSign, X } from "lucide-react-native";
 import { Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
@@ -10,10 +10,12 @@ import { formatBRL, formatPercent } from "../utils/investment";
 export function PortfolioScreen({
   balance,
   investments,
+  onBack,
   onDeposit
 }: {
   balance: number;
   investments: Investment[];
+  onBack?: () => void;
   onDeposit: (amount: number) => void;
 }) {
   const { width } = useWindowDimensions();
@@ -27,6 +29,21 @@ export function PortfolioScreen({
   return (
     <>
       <ScrollView contentContainerStyle={styles.screenContent}>
+        {onBack ? (
+          <View style={styles.profileSubviewHeader}>
+            <Pressable
+              accessibilityLabel="Voltar ao perfil"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={onBack}
+              style={styles.profileSubviewBackButton}
+            >
+              <ArrowLeft color={colors.text} size={20} />
+            </Pressable>
+            <Text style={styles.profileSubviewTitle}>Carteira</Text>
+            <View style={styles.profileSubviewSpacer} />
+          </View>
+        ) : null}
         <View style={styles.summaryBand}>
           <View style={styles.summaryTopRow}>
             <Text style={styles.summaryLabel}>Saldo disponivel</Text>
@@ -82,8 +99,8 @@ export function PortfolioScreen({
               <View style={styles.emptyState}>
                 <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
                 <Text style={styles.emptyBody}>
-                  Deposite saldo simulado e abra um perfil no feed para criar
-                  uma reserva.
+                  Deposite saldo simulado e abra um perfil na tela Inicio para
+                  criar uma reserva.
                 </Text>
               </View>
             ) : (

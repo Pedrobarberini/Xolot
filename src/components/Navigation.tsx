@@ -1,5 +1,13 @@
 import React from "react";
-import { LogOut, ShieldCheck, Upload, UserRound, Video, WalletCards } from "lucide-react-native";
+import {
+  Home,
+  LogOut,
+  MessageCircle,
+  Search,
+  ShieldCheck,
+  Upload,
+  UserRound
+} from "lucide-react-native";
 import { Image, Pressable, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { NEXTSTAR_SYMBOL } from "../constants/assets";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
@@ -13,24 +21,31 @@ export function Header({
   onSignOut,
   pendingReviews,
   showBalance,
+  showSignOut = true,
   user,
   walletBalance
 }: {
   onSignOut: () => void;
   pendingReviews: number;
   showBalance: boolean;
+  showSignOut?: boolean;
   user: AppUser;
   walletBalance: number;
 }) {
   const { width } = useWindowDimensions();
   const isCompact = USE_CENTERED_WEB_LAYOUT || width < 520;
+  const hasHeaderActions =
+    showBalance || user.role === "Admin" || showSignOut;
 
   return (
     <View style={[styles.header, isCompact ? styles.headerCompact : null]}>
       <View
         style={[
           styles.headerIdentity,
-          isCompact ? styles.headerIdentityCompact : null
+          isCompact ? styles.headerIdentityCompact : null,
+          isCompact && !hasHeaderActions
+            ? styles.headerIdentityCompactSolo
+            : null
         ]}
       >
         <Image
@@ -49,27 +64,31 @@ export function Header({
           </Text>
         </View>
       </View>
-      <View
-        style={[
-          styles.headerActions,
-          isCompact ? styles.headerActionsCompact : null
-        ]}
-      >
-        {showBalance ? <BalanceLine balance={walletBalance} /> : null}
-        {user.role === "Admin" ? (
-          <Text style={styles.headerReviewLine}>{pendingReviews} pend.</Text>
-        ) : null}
-        <Pressable
-          accessibilityLabel="Sair da conta"
-          onPress={onSignOut}
+      {hasHeaderActions ? (
+        <View
           style={[
-            styles.signOutButton,
-            isCompact ? styles.signOutButtonCompact : null
+            styles.headerActions,
+            isCompact ? styles.headerActionsCompact : null
           ]}
         >
-          <LogOut color={colors.primary} size={20} strokeWidth={2.2} />
-        </Pressable>
-      </View>
+          {showBalance ? <BalanceLine balance={walletBalance} /> : null}
+          {user.role === "Admin" ? (
+            <Text style={styles.headerReviewLine}>{pendingReviews} pend.</Text>
+          ) : null}
+          {showSignOut ? (
+            <Pressable
+              accessibilityLabel="Sair da conta"
+              onPress={onSignOut}
+              style={[
+                styles.signOutButton,
+                isCompact ? styles.signOutButtonCompact : null
+              ]}
+            >
+              <LogOut color={colors.primary} size={20} strokeWidth={2.2} />
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -134,13 +153,16 @@ export function BottomTabs({
     role === "Admin"
         ? [
             { id: "admin", label: "Admin" },
-            { id: "feed", label: "Feed" },
+            { id: "feed", label: "Inicio" },
+            { id: "search", label: "Pesquisar" },
+            { id: "messages", label: "Mensagens" },
             { id: "profile", label: "Perfil" }
           ]
         : [
-            { id: "feed", label: "Feed" },
+            { id: "feed", label: "Inicio" },
             { id: "submit", label: "Envio" },
-            { id: "portfolio", label: "Carteira" },
+            { id: "search", label: "Pesquisar" },
+            { id: "messages", label: "Mensagens" },
             { id: "profile", label: "Perfil" }
           ];
 
@@ -153,11 +175,13 @@ export function BottomTabs({
             ? Upload
             : item.id === "admin"
               ? ShieldCheck
-              : item.id === "portfolio"
-                ? WalletCards
+              : item.id === "search"
+                ? Search
+                : item.id === "messages"
+                  ? MessageCircle
                 : item.id === "profile"
                   ? UserRound
-                  : Video;
+                  : Home;
 
         return (
           <Pressable
@@ -170,10 +194,13 @@ export function BottomTabs({
           >
             <TabIcon
               color={isActive ? colors.primary : colors.muted}
-              size={22}
+              size={21}
               strokeWidth={isActive ? 2.4 : 2}
             />
-            <Text style={[styles.tabText, isActive ? styles.tabTextActive : null]}>
+            <Text
+              numberOfLines={1}
+              style={[styles.tabText, isActive ? styles.tabTextActive : null]}
+            >
               {item.label}
             </Text>
           </Pressable>

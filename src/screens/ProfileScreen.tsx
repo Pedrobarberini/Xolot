@@ -1,23 +1,49 @@
 import React, { useState } from "react";
-import { CircleDollarSign, LogOut, X } from "lucide-react-native";
-import { Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from "react-native";
+import {
+  ArrowLeft,
+  Bell,
+  CircleDollarSign,
+  LogOut,
+  Menu,
+  Play,
+  Settings,
+  WalletCards,
+  X
+} from "lucide-react-native";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  View
+} from "react-native";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, AthleteFund, Investment, Player, VideoSubmission } from "../types";
 import { formatBRL } from "../utils/investment";
+import { PortfolioScreen } from "./WalletScreen";
+
+type ProfileView = "overview" | "wallet" | "settings";
 
 export function ProfileScreen({
+  balance,
   fund,
   investments,
+  onDeposit,
   onOpenFund,
   onSignOut,
   player,
   submissions,
   user
 }: {
+  balance: number;
   fund?: AthleteFund;
   investments: Investment[];
+  onDeposit: (amount: number) => void;
   onOpenFund: (
     player: Player,
     goalAmount: number,
@@ -30,6 +56,10 @@ export function ProfileScreen({
 }) {
   const { width } = useWindowDimensions();
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
+  const [isOptionsVisible, setIsOptionsVisible] = useState(false);
+  const [profileView, setProfileView] = useState<ProfileView>("overview");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [autoplayEnabled, setAutoplayEnabled] = useState(true);
   const isWide = !USE_CENTERED_WEB_LAYOUT && width >= 840;
   const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const mySubmissions = submissions.filter((item) => item.userId === user.id);
@@ -48,6 +78,30 @@ export function ProfileScreen({
     ? Math.min(fund.fundedAmount / fund.goalAmount, 1)
     : 0;
 
+  if (profileView === "wallet") {
+    return (
+      <PortfolioScreen
+        balance={balance}
+        investments={investments}
+        onBack={() => setProfileView("overview")}
+        onDeposit={onDeposit}
+      />
+    );
+  }
+
+  if (profileView === "settings") {
+    return (
+      <SettingsView
+        autoplayEnabled={autoplayEnabled}
+        notificationsEnabled={notificationsEnabled}
+        onBack={() => setProfileView("overview")}
+        onChangeAutoplay={setAutoplayEnabled}
+        onChangeNotifications={setNotificationsEnabled}
+        user={user}
+      />
+    );
+  }
+
   return (
     <>
       <ScrollView contentContainerStyle={styles.screenContent}>
@@ -62,9 +116,15 @@ export function ProfileScreen({
               {user.role} | {user.email}
             </Text>
           </View>
-          <View style={styles.profileStatusPill}>
-            <Text style={styles.profileStatusText}>{user.kycStatus}</Text>
-          </View>
+          <Pressable
+            accessibilityLabel="Abrir opcoes do perfil"
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={() => setIsOptionsVisible(true)}
+            style={styles.profileMenuButton}
+          >
+            <Menu color={colors.text} size={22} />
+          </Pressable>
         </View>
         <View style={styles.profileQuickStats}>
           <View style={styles.profileQuickItem}>
@@ -225,15 +285,24 @@ export function ProfileScreen({
         </Text>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        onPress={onSignOut}
-        style={styles.secondaryButton}
-      >
-        <LogOut color={colors.primary} size={18} />
-        <Text style={styles.secondaryButtonText}>Sair da conta</Text>
-      </Pressable>
       </ScrollView>
+      <ProfileOptionsMenu
+        onClose={() => setIsOptionsVisible(false)}
+        onOpenSettings={() => {
+          setIsOptionsVisible(false);
+          setProfileView("settings");
+        }}
+        onOpenWallet={() => {
+          setIsOptionsVisible(false);
+          setProfileView("wallet");
+        }}
+        onSignOut={() => {
+          setIsOptionsVisible(false);
+          onSignOut();
+        }}
+        showWallet={user.role === "Usuario"}
+        visible={isOptionsVisible}
+      />
       {player ? (
         <OpenFundModal
           onClose={() => setIsFundModalVisible(false)}
@@ -246,6 +315,160 @@ export function ProfileScreen({
         />
       ) : null}
     </>
+  );
+}
+
+function ProfileOptionsMenu({
+  onClose,
+  onOpenSettings,
+  onOpenWallet,
+  onSignOut,
+  showWallet,
+  visible
+}: {
+  onClose: () => void;
+  onOpenSettings: () => void;
+  onOpenWallet: () => void;
+  onSignOut: () => void;
+  showWallet: boolean;
+  visible: boolean;
+}) {
+  return (
+    <Modal
+      animationType="fade"
+      onRequestClose={onClose}
+      statusBarTranslucent
+      transparent
+      visible={visible}
+    >
+      <View style={styles.profileMenuModalRoot}>
+        <Pressable
+          accessibilityLabel="Fechar opcoes do perfil"
+          onPress={onClose}
+          style={styles.profileMenuBackdrop}
+        />
+        <View style={styles.profileMenuLayer}>
+          <View accessibilityViewIsModal style={styles.profileMenuPanel}>
+            <Text style={styles.profileMenuTitle}>Opcoes do perfil</Text>
+            <Pressable
+              accessibilityLabel="Abrir configuracoes"
+              accessibilityRole="button"
+              onPress={onOpenSettings}
+              style={styles.profileMenuItem}
+            >
+              <Settings color={colors.text} size={20} />
+              <Text style={styles.profileMenuItemText}>Configuracoes</Text>
+            </Pressable>
+            {showWallet ? (
+              <Pressable
+                accessibilityLabel="Abrir carteira"
+                accessibilityRole="button"
+                onPress={onOpenWallet}
+                style={styles.profileMenuItem}
+              >
+                <WalletCards color={colors.text} size={20} />
+                <Text style={styles.profileMenuItemText}>Carteira</Text>
+              </Pressable>
+            ) : null}
+            <Pressable
+              accessibilityLabel="Sair da conta"
+              accessibilityRole="button"
+              onPress={onSignOut}
+              style={[styles.profileMenuItem, styles.profileMenuSignOut]}
+            >
+              <LogOut color={colors.danger} size={20} />
+              <Text style={styles.profileMenuSignOutText}>Sair da conta</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function SettingsView({
+  autoplayEnabled,
+  notificationsEnabled,
+  onBack,
+  onChangeAutoplay,
+  onChangeNotifications,
+  user
+}: {
+  autoplayEnabled: boolean;
+  notificationsEnabled: boolean;
+  onBack: () => void;
+  onChangeAutoplay: (value: boolean) => void;
+  onChangeNotifications: (value: boolean) => void;
+  user: AppUser;
+}) {
+  return (
+    <ScrollView contentContainerStyle={styles.screenContent}>
+      <View style={styles.profileSubviewHeader}>
+        <Pressable
+          accessibilityLabel="Voltar ao perfil"
+          accessibilityRole="button"
+          hitSlop={8}
+          onPress={onBack}
+          style={styles.profileSubviewBackButton}
+        >
+          <ArrowLeft color={colors.text} size={20} />
+        </Pressable>
+        <Text style={styles.profileSubviewTitle}>Configuracoes</Text>
+        <View style={styles.profileSubviewSpacer} />
+      </View>
+
+      <View style={styles.settingsSection}>
+        <Text style={styles.settingsSectionTitle}>Preferencias</Text>
+        <View style={styles.settingsRow}>
+          <View style={styles.settingsRowIcon}>
+            <Bell color={colors.primary} size={19} />
+          </View>
+          <View style={styles.settingsRowBody}>
+            <Text style={styles.settingsRowTitle}>Notificacoes</Text>
+            <Text style={styles.settingsRowDescription}>
+              Avisos sobre videos, mensagens e investimentos.
+            </Text>
+          </View>
+          <Switch
+            onValueChange={onChangeNotifications}
+            thumbColor={colors.surface}
+            trackColor={{ false: colors.borderStrong, true: colors.primary }}
+            value={notificationsEnabled}
+          />
+        </View>
+        <View style={styles.settingsRow}>
+          <View style={styles.settingsRowIcon}>
+            <Play color={colors.primary} size={19} />
+          </View>
+          <View style={styles.settingsRowBody}>
+            <Text style={styles.settingsRowTitle}>Reproducao automatica</Text>
+            <Text style={styles.settingsRowDescription}>
+              Iniciar videos automaticamente na tela Inicio.
+            </Text>
+          </View>
+          <Switch
+            onValueChange={onChangeAutoplay}
+            thumbColor={colors.surface}
+            trackColor={{ false: colors.borderStrong, true: colors.primary }}
+            value={autoplayEnabled}
+          />
+        </View>
+      </View>
+
+      <View style={styles.settingsSection}>
+        <Text style={styles.settingsSectionTitle}>Conta</Text>
+        <View style={styles.profileRowNoBorder}>
+          <Text style={styles.profileLabel}>Email</Text>
+          <Text numberOfLines={1} style={styles.profileValue}>
+            {user.email}
+          </Text>
+        </View>
+        <View style={styles.profileRow}>
+          <Text style={styles.profileLabel}>Verificacao</Text>
+          <Text style={styles.profileValue}>{user.kycStatus}</Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 

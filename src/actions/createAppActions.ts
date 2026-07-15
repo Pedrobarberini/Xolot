@@ -81,7 +81,7 @@ export function createAppActions({
     if (amount > walletBalance) {
       Alert.alert(
         "Saldo insuficiente",
-        `Seu saldo disponivel e ${formatBRL(walletBalance)}. Deposite um valor simulado na Carteira antes de criar a reserva.`
+        `Seu saldo disponivel e ${formatBRL(walletBalance)}. Abra a Carteira pelo menu do Perfil e deposite um valor simulado antes de criar a reserva.`
       );
       return;
     }
@@ -127,7 +127,7 @@ export function createAppActions({
       }));
     }
     setSelectedPlayer(null);
-    setTab("portfolio");
+    setTab("profile");
     Alert.alert(
       isFundComplete ? "Bolsa concluida" : "Transferencia confirmada",
       isFundComplete
