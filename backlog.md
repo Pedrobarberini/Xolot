@@ -315,6 +315,31 @@ Criterios de aceite:
 - O status `Confirmada` aparece apenas uma vez por aporte.
 - Percentuais usam duas casas decimais e formato brasileiro.
 
+### Task HOTFIX-014 - Mostrar bolsa na legenda expandida do feed
+
+Tipo: Produto/Frontend
+
+Objetivo: permitir que o usuario identifique a disponibilidade e o progresso da bolsa sem sair do feed.
+
+Tasks:
+
+- [x] Disponibilizar as bolsas dos perfis para o componente `FeedScreen`.
+- [x] Vincular a bolsa ao video por `profileId`.
+- [x] Exibir o resumo abaixo das hashtags no estado expandido.
+- [x] Mostrar valor captado e meta formatados em reais.
+- [x] Criar barra de progresso baseada no valor real captado.
+- [x] Diferenciar bolsas abertas e concluidas.
+- [x] Exibir mensagem quando o perfil nao possuir bolsa aberta.
+- [x] Atualizar README com o novo fluxo do feed.
+
+Criterios de aceite:
+
+- O resumo aparece imediatamente abaixo de `#Novo #Video aprovado`.
+- Uma bolsa aberta mostra captado, meta e barra proporcional.
+- Uma bolsa concluida permanece visivel com progresso completo.
+- Perfil sem bolsa mostra `Este perfil nao possui um investimento aberto.`.
+- Nenhum valor financeiro e inventado para perfis sem bolsa.
+
 ## Sprint 1 - Base real de produto
 
 ### Task P0-001 - Criar estrutura de screens

@@ -427,6 +427,7 @@ export default function App() {
               {tab === "feed" ? (
                 <FeedScreen
                   balance={user.role === "Usuario" ? walletBalance : null}
+                  funds={athleteFunds}
                   onOpenPlayer={setSelectedPlayer}
                   players={availablePlayers}
                 />
@@ -971,10 +972,12 @@ function BalanceLine({
 
 function FeedScreen({
   balance,
+  funds,
   onOpenPlayer,
   players: feedPlayers
 }: {
   balance: number | null;
+  funds: AthleteFund[];
   onOpenPlayer: (player: Player) => void;
   players: Player[];
 }) {
@@ -1096,6 +1099,7 @@ function FeedScreen({
             }}
           >
             <FeedReel
+              fund={funds.find((item) => item.profileId === player.profileId)}
               isActive={index === activeFeedIndex}
               onOpen={() => onOpenPlayer(player)}
               palette={getCardPalette(index)}
@@ -1111,12 +1115,14 @@ function FeedScreen({
 }
 
 function FeedReel({
+  fund,
   isActive,
   onOpen,
   palette,
   player,
   reelHeight
 }: {
+  fund?: AthleteFund;
   isActive: boolean;
   onOpen: () => void;
   palette: CardPalette;
@@ -1148,6 +1154,9 @@ function FeedReel({
   const fundingProgressLabel = evaluation
     ? `${Math.round(progress * 100)}%`
     : null;
+  const fundProgress = fund
+    ? Math.min(Math.max(fund.fundedAmount / fund.goalAmount, 0), 1)
+    : 0;
   const minimumTicketLabel = evaluation
     ? formatBRL(evaluation.minimumTicket)
     : null;
@@ -1458,6 +1467,35 @@ function FeedReel({
                         ))}
                       </View>
                     ) : null}
+                    {fund ? (
+                      <View style={styles.feedCompactFundSection}>
+                        <Text style={styles.feedCompactFundTitle}>
+                          {fund.status === "Captando"
+                            ? "Bolsa de investimento aberta"
+                            : "Bolsa de investimento concluida"}
+                        </Text>
+                        <View style={styles.feedCompactFundValues}>
+                          <Text style={styles.feedCompactFundValue}>
+                            {formatBRL(fund.fundedAmount)} captados
+                          </Text>
+                          <Text style={styles.feedCompactFundGoal}>
+                            Meta {formatBRL(fund.goalAmount)}
+                          </Text>
+                        </View>
+                        <View style={styles.feedCompactFundTrack}>
+                          <View
+                            style={[
+                              styles.feedCompactFundFill,
+                              { width: `${fundProgress * 100}%` }
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    ) : (
+                      <Text style={styles.feedCompactFundEmpty}>
+                        Este perfil nao possui um investimento aberto.
+                      </Text>
+                    )}
                     <View style={styles.feedCompactExpandedActions}>
                       <Pressable
                         accessibilityRole="button"
@@ -4752,6 +4790,55 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.72)",
     textShadowOffset: { height: 1, width: 0 },
     textShadowRadius: 2
+  },
+  feedCompactFundSection: {
+    marginTop: 15,
+    zIndex: 2
+  },
+  feedCompactFundTitle: {
+    color: colors.onPrimary,
+    fontSize: 14,
+    fontWeight: "900",
+    lineHeight: 19
+  },
+  feedCompactFundValues: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    marginTop: 7
+  },
+  feedCompactFundValue: {
+    color: colors.onPrimary,
+    flexShrink: 1,
+    fontSize: 12,
+    fontWeight: "800"
+  },
+  feedCompactFundGoal: {
+    color: "rgba(255, 255, 255, 0.78)",
+    fontSize: 11,
+    fontWeight: "800",
+    textAlign: "right"
+  },
+  feedCompactFundTrack: {
+    backgroundColor: "rgba(255, 255, 255, 0.28)",
+    borderRadius: 999,
+    height: 6,
+    marginTop: 7,
+    overflow: "hidden"
+  },
+  feedCompactFundFill: {
+    backgroundColor: colors.accent,
+    borderRadius: 999,
+    height: "100%"
+  },
+  feedCompactFundEmpty: {
+    color: "rgba(255, 255, 255, 0.82)",
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 17,
+    marginTop: 15,
+    zIndex: 2
   },
   feedCompactExpandedActions: {
     alignItems: "center",
