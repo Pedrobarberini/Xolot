@@ -37,6 +37,23 @@ const pageShellStyle = `    <style id="nextstar-page-shell">
       }
     </style>`;
 
+const pwaHeadTags = `    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="NextStar" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />`;
+
+const serviceWorkerScript = `    <script id="nextstar-pwa-register">
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("./sw.js").catch(function () {
+            /* PWA opcional: falha silenciosa em ambientes sem SW */
+          });
+        });
+      }
+    </script>`;
+
 function getExtension(filePath) {
   const lastDot = filePath.lastIndexOf(".");
   return lastDot === -1 ? "" : filePath.slice(lastDot);
@@ -60,12 +77,25 @@ function walk(dir) {
     let updated = source
       .replace(/(["'=])\/_expo\//g, "$1./_expo/")
       .replace(/(["'=])\/assets\//g, "$1./assets/")
-      .replace(/(["'=])\/favicon\.ico/g, "$1./favicon.ico");
+      .replace(/(["'=])\/favicon\.ico/g, "$1./favicon.ico")
+      .replace(/(["'=])\/manifest\.json/g, "$1./manifest.json")
+      .replace(/(["'=])\/icons\//g, "$1./icons/")
+      .replace(/(["'=])\/sw\.js/g, "$1./sw.js");
 
-    if (getExtension(path) === ".html" && !updated.includes("nextstar-page-shell")) {
-      updated = updated
-        .replace('<html lang="en">', '<html lang="pt-BR">')
-        .replace(/<\/head>/i, `${pageShellStyle}\n  </head>`);
+    if (getExtension(path) === ".html") {
+      if (!updated.includes("nextstar-page-shell")) {
+        updated = updated
+          .replace('<html lang="en">', '<html lang="pt-BR">')
+          .replace(/<\/head>/i, `${pageShellStyle}\n  </head>`);
+      }
+
+      if (!updated.includes('rel="manifest"')) {
+        updated = updated.replace(/<\/head>/i, `${pwaHeadTags}\n  </head>`);
+      }
+
+      if (!updated.includes("nextstar-pwa-register")) {
+        updated = updated.replace(/<\/body>/i, `${serviceWorkerScript}\n  </body>`);
+      }
     }
 
     if (updated !== source) {
