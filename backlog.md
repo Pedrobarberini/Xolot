@@ -380,7 +380,7 @@ Criterios de aceite:
 
 Tipo: Frontend/Backend
 
-Status: Em andamento. O fluxo local de conversa foi entregue em 2026-07-15; persistencia e entrega entre contas dependem do backend.
+Status: Em andamento. O fluxo local por conta e a persistencia no dispositivo foram entregues; entrega remota e tempo real dependem do backend.
 
 Objetivo: permitir contato direto entre usuarios a partir de um perfil publico, com historico confiavel e controles de seguranca.
 
@@ -389,8 +389,12 @@ Tasks:
 - [x] Substituir o atalho financeiro duplicado do perfil publico por mensagem.
 - [x] Abrir a aba Mensagens com o perfil correto selecionado.
 - [x] Criar lista de conversas iniciadas pelo usuario.
-- [x] Criar thread com composer, envio e historico local da sessao.
-- [x] Limpar conversas locais ao sair da conta.
+- [x] Criar thread com composer, envio e historico local por conta.
+- [x] Isolar contatos e mensagens ao trocar de conta.
+- [x] Persistir contatos e mensagens locais no dispositivo.
+- [x] Separar Conversas de Solicitacoes de perfis nao seguidos.
+- [x] Ocultar mensagens recebidas de perfis nao seguidos ate o follow.
+- [x] Permitir somente uma mensagem inicial como solicitacao.
 - [x] Padronizar seta, logo e saldo no HUD das paginas de perfil e investimento.
 - [ ] Persistir conversas e mensagens no backend.
 - [ ] Entregar mensagens em tempo real entre contas autenticadas.
@@ -403,9 +407,42 @@ Criterios de aceite:
 
 - O icone de mensagem do perfil abre uma conversa com o destinatario correto.
 - Mensagens enviadas aparecem imediatamente na thread e na lista da sessao.
-- Sair da conta nao deixa o historico local visivel para o proximo login.
+- Sair da conta nao deixa o historico de uma conta visivel para outra.
+- Perfis seguidos aparecem em Conversas e perfis nao seguidos aparecem em Solicitacoes.
+- Uma mensagem recebida por solicitacao so fica visivel depois que o destinatario segue o remetente.
 - A versao publica nao trata estado local como entrega real ao destinatario.
 - Backend, moderacao e privacidade devem estar prontos antes de liberar mensagens para o publico.
+
+### Task P1-010 - Sistema de follow entre perfis
+
+Tipo: Frontend/Dados/Produto
+
+Status: Concluido localmente em 2026-07-16. Sincronizacao entre dispositivos depende do backend.
+
+Objetivo: permitir que usuarios acompanhem atletas e usar essa relacao para personalizar Inicio e Mensagens.
+
+Tasks:
+
+- [x] Criar vinculo persistente entre usuario e perfil seguido.
+- [x] Adicionar botao `Seguir` ao lado do perfil no Inicio.
+- [x] Exibir estado `Seguindo` sem divergencia entre Inicio e perfil publico.
+- [x] Permitir deixar de seguir pelas mesmas superficies.
+- [x] Exibir contagem de seguidores no perfil publico.
+- [x] Exibir seguidores e seguindo no perfil proprio.
+- [x] Priorizar videos de perfis seguidos no Inicio.
+- [x] Integrar follow com a liberacao de mensagens diretas.
+- [x] Persistir follows, contatos e mensagens com AsyncStorage.
+- [x] Separar estado e acoes sociais em `src/actions/useSocialActions.ts`.
+- [x] Separar persistencia em `src/services/socialStorage.ts`.
+
+Criterios de aceite:
+
+- Seguir no Inicio atualiza imediatamente o perfil publico e vice-versa.
+- O estado continua salvo depois de fechar e abrir o app.
+- Videos de perfis seguidos aparecem primeiro sem remover outros videos.
+- Contadores sociais usam a mesma fonte de dados do botao de follow.
+- Mensagens de perfis nao seguidos entram em Solicitacoes.
+- Seguir um contato move a solicitacao para Conversas e libera a thread.
 
 ## Sprint 6 - Mobile e deploy
 

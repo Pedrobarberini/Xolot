@@ -4,6 +4,7 @@ import * as SystemUI from "expo-system-ui";
 import { KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
 import { buildPlayerFromSubmission } from "./src/actions/appActions";
 import { createAppActions } from "./src/actions/createAppActions";
+import { useSocialActions } from "./src/actions/useSocialActions";
 import { BrandLaunchScreen, ScreenFrame } from "./src/components/AppShell";
 import { BottomTabs, Header } from "./src/components/Navigation";
 import { demoPlayer } from "./src/data/demoPlayer";
@@ -21,7 +22,6 @@ import { colors } from "./src/theme";
 import {
   AppUser,
   AthleteFund,
-  DirectMessage,
   Investment,
   MessageContact,
   Player,
@@ -46,8 +46,6 @@ export default function App() {
   const [reelReturnTarget, setReelReturnTarget] =
     useState<ReelReturnTarget | null>(null);
   const [registeredUsers, setRegisteredUsers] = useState<AppUser[]>([]);
-  const [messageContacts, setMessageContacts] = useState<MessageContact[]>([]);
-  const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
   const [activeMessageContactId, setActiveMessageContactId] = useState<
     string | null
   >(null);
@@ -94,6 +92,31 @@ export default function App() {
         : [demoPlayer],
     [approvedSubmissionPlayers]
   );
+  const {
+    addMessageContact,
+    currentMessageContacts,
+    directMessages,
+    followersByProfile,
+    followingProfileIds,
+    followingProfileSet,
+    ownProfileId,
+    sendDirectMessage,
+    toggleFollowProfile
+  } = useSocialActions({ players: availablePlayers, user });
+  const orderedFeedPlayers = useMemo(
+    () =>
+      availablePlayers
+        .map((player, index) => ({ index, player }))
+        .sort((left, right) => {
+          const followDifference =
+            Number(followingProfileSet.has(right.player.profileId)) -
+            Number(followingProfileSet.has(left.player.profileId));
+
+          return followDifference || left.index - right.index;
+        })
+        .map(({ player }) => player),
+    [availablePlayers, followingProfileSet]
+  );
 
   const pendingReviews = submissions.filter(
     (submission) => submission.status === "Em revisao"
@@ -122,6 +145,9 @@ export default function App() {
   const investmentFund = investmentPlayer
     ? athleteFunds.find((fund) => fund.profileId === investmentPlayer.profileId)
     : undefined;
+  const selectedProfileId =
+    selectedProfilePlayer?.profileId ??
+    (selectedProfileAccount ? `profile-${selectedProfileAccount.id}` : undefined);
 
   function openTab(nextTab: Tab) {
     setInvestmentPlayer(null);
@@ -161,6 +187,10 @@ export default function App() {
   }
 
   function openMessagesForSelectedProfile() {
+    if (!user) {
+      return;
+    }
+
     const contactId =
       selectedProfileAccount?.id ??
       selectedProfilePlayer?.ownerUserId ??
@@ -172,6 +202,9 @@ export default function App() {
 
     const contact: MessageContact = {
       id: contactId,
+      profileId:
+        selectedProfilePlayer?.profileId ??
+        `profile-${selectedProfileAccount?.id ?? contactId}`,
       name:
         selectedProfilePlayer?.name ??
         selectedProfileAccount?.name ??
@@ -181,37 +214,12 @@ export default function App() {
         : "Usuario NextStar"
     };
 
-    setMessageContacts((current) => {
-      const alreadyExists = current.some((item) => item.id === contact.id);
-
-      return alreadyExists
-        ? current.map((item) => (item.id === contact.id ? contact : item))
-        : [contact, ...current];
-    });
+    addMessageContact(contact);
     setActiveMessageContactId(contact.id);
     setInvestmentPlayer(null);
     setSelectedAccount(null);
     setSelectedPlayer(null);
     setTab("messages");
-  }
-
-  function sendDirectMessage(contactId: string, body: string) {
-    const trimmedBody = body.trim();
-
-    if (!user || !trimmedBody) {
-      return;
-    }
-
-    setDirectMessages((current) => [
-      ...current,
-      {
-        body: trimmedBody,
-        contactId,
-        createdAt: new Date().toISOString(),
-        id: `message-${Date.now()}-${current.length}`,
-        senderUserId: user.id
-      }
-    ]);
   }
 
   const {
@@ -237,10 +245,8 @@ export default function App() {
     walletBalance
   });
 
-  function signOutAndClearMessages() {
+  function signOutSession() {
     setActiveMessageContactId(null);
-    setDirectMessages([]);
-    setMessageContacts([]);
     handleSignOut();
   }
 
@@ -307,6 +313,15 @@ export default function App() {
                       selectedProfilePlayer.ownerUserId !== user.id
                   )}
                   fund={selectedProfileFund}
+                  followersCount={
+                    selectedProfileId
+                      ? followersByProfile[selectedProfileId] ?? 0
+                      : 0
+                  }
+                  isFollowing={Boolean(
+                    selectedProfileId &&
+                      followingProfileSet.has(selectedProfileId)
+                  )}
                   onBack={() => {
                     setSelectedAccount(null);
                     setSelectedPlayer(null);
@@ -320,6 +335,11 @@ export default function App() {
                     }
                   }}
                   onMessage={openMessagesForSelectedProfile}
+                  onToggleFollow={() => {
+                    if (selectedProfileId) {
+                      toggleFollowProfile(selectedProfileId);
+                    }
+                  }}
                   onOpenVideo={(player) =>
                     openReel(player, {
                       account: selectedProfileAccount,
@@ -328,6 +348,9 @@ export default function App() {
                     })
                   }
                   player={selectedProfilePlayer}
+                  showFollow={Boolean(
+                    selectedProfileId && selectedProfileId !== ownProfileId
+                  )}
                   videos={selectedProfileVideos}
                   walletBalance={walletBalance}
                 />
@@ -342,7 +365,7 @@ export default function App() {
             <>
               {tab !== "feed" ? (
                 <Header
-                  onSignOut={signOutAndClearMessages}
+                  onSignOut={signOutSession}
                   pendingReviews={pendingReviews}
                   showBalance={
                     user.role === "Usuario" && tab === "profile"
@@ -355,7 +378,9 @@ export default function App() {
               {tab === "feed" ? (
                 <FeedScreen
                   balance={user.role === "Usuario" ? walletBalance : null}
+                  currentUserId={user.id}
                   focusPlayerId={feedFocusPlayerId}
+                  followingProfileIds={followingProfileIds}
                   funds={athleteFunds}
                   onBackToProfile={
                     reelReturnTarget ? returnToReelOrigin : undefined
@@ -364,7 +389,11 @@ export default function App() {
                     setReelReturnTarget(null);
                     setSelectedPlayer(player);
                   }}
-                  players={availablePlayers}
+                  onToggleFollow={(player) => {
+                    setFeedFocusPlayerId(player.id);
+                    toggleFollowProfile(player.profileId);
+                  }}
+                  players={orderedFeedPlayers}
                 />
               ) : null}
               {tab === "search" ? (
@@ -390,12 +419,16 @@ export default function App() {
                 >
                   <MessagesScreen
                     activeContactId={activeMessageContactId}
-                    contacts={messageContacts}
+                    contacts={currentMessageContacts}
                     currentUserId={user.id}
+                    followingProfileIds={followingProfileIds}
                     messages={directMessages}
                     onFindProfiles={() => openTab("search")}
                     onSelectContact={setActiveMessageContactId}
                     onSendMessage={sendDirectMessage}
+                    onToggleFollow={(profileId) =>
+                      toggleFollowProfile(profileId)
+                    }
                   />
                 </ScreenFrame>
               ) : null}
@@ -426,6 +459,10 @@ export default function App() {
                       (item) => item.ownerUserId === user.id
                     )}
                     investments={currentUserInvestments}
+                    followersCount={
+                      ownProfileId ? followersByProfile[ownProfileId] ?? 0 : 0
+                    }
+                    followingCount={followingProfileIds.length}
                     onOpenFund={handleOpenFund}
                     onOpenVideo={(submission) => {
                       const reelPlayer = approvedSubmissionPlayers.find(
@@ -437,7 +474,7 @@ export default function App() {
                       }
                     }}
                     onDeposit={handleDeposit}
-                    onSignOut={signOutAndClearMessages}
+                    onSignOut={signOutSession}
                     player={availablePlayers.find(
                       (item) => item.ownerUserId === user.id
                     )}

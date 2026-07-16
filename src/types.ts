@@ -66,17 +66,22 @@ export type Investment = {
 
 export type MessageContact = {
   id: string;
+  profileId: string;
   name: string;
   subtitle: string;
 };
 
 export type DirectMessage = {
   id: string;
-  contactId: string;
   senderUserId: string;
+  recipientUserId: string;
   body: string;
   createdAt: string;
 };
+
+export type FollowingByUser = Record<string, string[]>;
+
+export type MessageContactsByUser = Record<string, MessageContact[]>;
 
 export type UserRole = "Usuario" | "Admin";
 

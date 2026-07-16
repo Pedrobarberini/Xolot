@@ -12,7 +12,10 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao aprovada.
 - Conta comum `Usuario` com Inicio, Envio, Pesquisar, Mensagens e Perfil no mesmo acesso.
 - Pesquisa por nome, posicao, cidade ou clube abre diretamente o perfil publico do atleta.
-- Mensagens pode ser iniciada pelo perfil visitado, com composer e historico local durante a sessao.
+- Perfis podem ser seguidos pelo Inicio ou pela pagina publica, com estado persistente e contagem social.
+- Videos de perfis seguidos recebem prioridade no Inicio sem ocultar os demais atletas.
+- Mensagens separa conversas liberadas de solicitacoes enviadas por perfis ainda nao seguidos.
+- Uma solicitacao inicial e permitida; mensagens recebidas e respostas sao liberadas ao seguir o perfil.
 - Paginas e subpaginas usam a mesma transicao suave de entrada, mantendo header e footer estaveis.
 - A descricao `Ver mais` expande e recolhe suavemente sobre o video.
 - Perfil possui menu de tres barras com Configuracoes, Carteira e Sair da conta.
@@ -35,7 +38,7 @@ A versao web e publicada em:
 
 https://pedrobarberini.github.io/NextStar/
 
-O estado ainda fica apenas na memoria do navegador. Recarregar a pagina apaga contas, saldos, depositos, envios, moderacoes e reservas criadas durante o teste.
+Follows, contatos e mensagens locais ficam persistidos neste dispositivo. Contas, saldos, depositos, envios, moderacoes e reservas ainda ficam apenas na memoria e sao apagados ao recarregar a pagina.
 
 A versao web e um PWA: no Chrome/Edge/Safari e possivel instalar o NextStar na tela inicial ou como aplicativo. O service worker faz cache dos assets para uso offline basico apos a primeira visita.
 

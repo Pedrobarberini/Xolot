@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
+  LockKeyhole,
   MessageCircle,
   Search,
-  Send
+  Send,
+  UserCheck,
+  UserPlus
 } from "lucide-react-native";
 import {
   Pressable,
@@ -25,33 +28,61 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
+function getConversationMessages(
+  messages: DirectMessage[],
+  currentUserId: string,
+  contactId: string
+) {
+  return messages.filter(
+    (message) =>
+      (message.senderUserId === currentUserId &&
+        message.recipientUserId === contactId) ||
+      (message.senderUserId === contactId &&
+        message.recipientUserId === currentUserId)
+  );
+}
+
 export function MessagesScreen({
   activeContactId,
   contacts,
   currentUserId,
+  followingProfileIds,
   messages,
   onFindProfiles,
   onSelectContact,
-  onSendMessage
+  onSendMessage,
+  onToggleFollow
 }: {
   activeContactId: string | null;
   contacts: MessageContact[];
   currentUserId: string;
+  followingProfileIds: string[];
   messages: DirectMessage[];
   onFindProfiles: () => void;
   onSelectContact: (contactId: string | null) => void;
   onSendMessage: (contactId: string, body: string) => void;
+  onToggleFollow: (profileId: string) => void;
 }) {
   const [draft, setDraft] = useState("");
+  const followingSet = useMemo(
+    () => new Set(followingProfileIds),
+    [followingProfileIds]
+  );
   const activeContact = contacts.find(
     (contact) => contact.id === activeContactId
   );
   const activeMessages = useMemo(
     () =>
       activeContact
-        ? messages.filter((message) => message.contactId === activeContact.id)
+        ? getConversationMessages(messages, currentUserId, activeContact.id)
         : [],
-    [activeContact, messages]
+    [activeContact, currentUserId, messages]
+  );
+  const followedContacts = contacts.filter((contact) =>
+    followingSet.has(contact.profileId)
+  );
+  const requestContacts = contacts.filter(
+    (contact) => !followingSet.has(contact.profileId)
   );
 
   useEffect(() => {
@@ -59,10 +90,24 @@ export function MessagesScreen({
   }, [activeContactId]);
 
   if (activeContact) {
+    const isFollowing = followingSet.has(activeContact.profileId);
+    const outgoingRequestMessages = activeMessages.filter(
+      (message) => message.senderUserId === currentUserId
+    );
+    const incomingRequestMessages = activeMessages.filter(
+      (message) => message.senderUserId === activeContact.id
+    );
+    const canSendInitialRequest =
+      !isFollowing && outgoingRequestMessages.length === 0;
+    const canCompose = isFollowing || canSendInitialRequest;
+    const visibleMessages = isFollowing
+      ? activeMessages
+      : outgoingRequestMessages;
+
     const sendDraft = () => {
       const body = draft.trim();
 
-      if (!body) {
+      if (!body || !canCompose) {
         return;
       }
 
@@ -92,27 +137,73 @@ export function MessagesScreen({
               {activeContact.name}
             </Text>
             <Text numberOfLines={1} style={styles.messagesContactSubtitle}>
-              {activeContact.subtitle}
+              {isFollowing ? "Seguindo" : "Perfil nao seguido"}
             </Text>
           </View>
+          <Pressable
+            accessibilityLabel={
+              isFollowing
+                ? `Deixar de seguir ${activeContact.name}`
+                : `Seguir ${activeContact.name}`
+            }
+            accessibilityRole="button"
+            onPress={() => onToggleFollow(activeContact.profileId)}
+            style={[
+              styles.messagesFollowButton,
+              isFollowing ? styles.messagesFollowButtonActive : null
+            ]}
+          >
+            {isFollowing ? (
+              <UserCheck color={colors.primary} size={17} strokeWidth={2.3} />
+            ) : (
+              <UserPlus color={colors.onPrimary} size={17} strokeWidth={2.3} />
+            )}
+          </Pressable>
         </View>
 
         <ScrollView
           contentContainerStyle={styles.messagesThreadContent}
           keyboardShouldPersistTaps="handled"
         >
-          {activeMessages.length === 0 ? (
+          {!isFollowing && incomingRequestMessages.length > 0 ? (
+            <View style={styles.messagesRequestGate}>
+              <View style={styles.messagesRequestGateIcon}>
+                <LockKeyhole color={colors.primary} size={24} />
+              </View>
+              <Text style={styles.messagesThreadEmptyTitle}>
+                Solicitacao de mensagem
+              </Text>
+              <Text style={styles.messagesThreadEmptyBody}>
+                Siga {activeContact.name} para visualizar as mensagens recebidas
+                e responder com seguranca.
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => onToggleFollow(activeContact.profileId)}
+                style={styles.messagesRequestFollowButton}
+              >
+                <UserPlus color={colors.onPrimary} size={17} />
+                <Text style={styles.messagesRequestFollowButtonText}>
+                  Seguir e liberar conversa
+                </Text>
+              </Pressable>
+            </View>
+          ) : visibleMessages.length === 0 ? (
             <View style={styles.messagesThreadEmpty}>
               <MessageCircle color={colors.primary} size={28} />
               <Text style={styles.messagesThreadEmptyTitle}>
-                Envie a primeira mensagem
+                {isFollowing
+                  ? "Envie a primeira mensagem"
+                  : "Envie uma solicitacao"}
               </Text>
               <Text style={styles.messagesThreadEmptyBody}>
-                Inicie uma conversa diretamente com este perfil.
+                {isFollowing
+                  ? "Inicie uma conversa diretamente com este perfil."
+                  : "Voce pode enviar uma mensagem inicial. Novas mensagens ficam liberadas quando o perfil for seguido."}
               </Text>
             </View>
           ) : (
-            activeMessages.map((message) => {
+            visibleMessages.map((message) => {
               const isMine = message.senderUserId === currentUserId;
 
               return (
@@ -142,26 +233,52 @@ export function MessagesScreen({
               );
             })
           )}
+
+          {!isFollowing && outgoingRequestMessages.length > 0 ? (
+            <View style={styles.messagesRequestSentNotice}>
+              <Text style={styles.messagesRequestSentTitle}>
+                Solicitacao enviada
+              </Text>
+              <Text style={styles.messagesRequestSentBody}>
+                A conversa completa sera liberada quando houver uma conexao por
+                follow.
+              </Text>
+            </View>
+          ) : null}
         </ScrollView>
 
         <View style={styles.messageComposer}>
           <TextInput
             accessibilityLabel={`Mensagem para ${activeContact.name}`}
+            editable={canCompose}
             multiline
             onChangeText={setDraft}
-            placeholder="Escreva uma mensagem"
+            placeholder={
+              canCompose
+                ? isFollowing
+                  ? "Escreva uma mensagem"
+                  : "Enviar uma solicitacao"
+                : "Aguardando conexao por follow"
+            }
             placeholderTextColor={colors.muted}
-            style={styles.messageComposerInput}
+            style={[
+              styles.messageComposerInput,
+              !canCompose ? styles.messageComposerInputDisabled : null
+            ]}
             value={draft}
           />
           <Pressable
-            accessibilityLabel="Enviar mensagem"
+            accessibilityLabel={
+              isFollowing ? "Enviar mensagem" : "Enviar solicitacao"
+            }
             accessibilityRole="button"
-            disabled={!draft.trim()}
+            disabled={!canCompose || !draft.trim()}
             onPress={sendDraft}
             style={[
               styles.messageSendButton,
-              !draft.trim() ? styles.messageSendButtonDisabled : null
+              !canCompose || !draft.trim()
+                ? styles.messageSendButtonDisabled
+                : null
             ]}
           >
             <Send color={colors.onPrimary} size={19} />
@@ -171,12 +288,58 @@ export function MessagesScreen({
     );
   }
 
+  function renderContact(contact: MessageContact, isRequest: boolean) {
+    const conversationMessages = getConversationMessages(
+      messages,
+      currentUserId,
+      contact.id
+    );
+    const lastMessage = conversationMessages.at(-1);
+    const hasHiddenIncomingMessage = conversationMessages.some(
+      (message) => message.senderUserId === contact.id
+    );
+
+    return (
+      <Pressable
+        accessibilityLabel={`Abrir conversa com ${contact.name}`}
+        accessibilityRole="button"
+        key={contact.id}
+        onPress={() => onSelectContact(contact.id)}
+        style={({ pressed }) => [
+          styles.messagesContactCard,
+          pressed ? styles.buttonPressed : null
+        ]}
+      >
+        <View style={styles.messagesContactAvatar}>
+          <Text style={styles.messagesContactAvatarText}>
+            {getInitials(contact.name)}
+          </Text>
+        </View>
+        <View style={styles.messagesContactIdentity}>
+          <Text numberOfLines={1} style={styles.messagesContactName}>
+            {contact.name}
+          </Text>
+          <Text numberOfLines={1} style={styles.messagesContactPreview}>
+            {isRequest && hasHiddenIncomingMessage
+              ? "Nova solicitacao de mensagem"
+              : lastMessage?.body ?? contact.subtitle}
+          </Text>
+        </View>
+        {isRequest ? (
+          <View style={styles.messagesRequestPill}>
+            <Text style={styles.messagesRequestPillText}>Solicitacao</Text>
+          </View>
+        ) : null}
+      </Pressable>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.messagesContent}>
       <View style={styles.discoveryHeader}>
         <Text style={styles.discoveryTitle}>Mensagens</Text>
         <Text style={styles.discoverySubtitle}>
-          Converse diretamente com os perfis que voce encontrou.
+          Conversas organizadas de acordo com os perfis que voce segue.
         </Text>
       </View>
 
@@ -203,40 +366,44 @@ export function MessagesScreen({
           </Pressable>
         </View>
       ) : (
-        <View style={styles.messagesContactList}>
-          {contacts.map((contact) => {
-            const lastMessage = [...messages]
-              .reverse()
-              .find((message) => message.contactId === contact.id);
+        <>
+          <View style={styles.messagesSectionHeader}>
+            <Text style={styles.messagesSectionTitle}>Conversas</Text>
+            <Text style={styles.messagesSectionCount}>
+              {followedContacts.length}
+            </Text>
+          </View>
+          {followedContacts.length > 0 ? (
+            <View style={styles.messagesContactList}>
+              {followedContacts.map((contact) => renderContact(contact, false))}
+            </View>
+          ) : (
+            <Text style={styles.messagesSectionEmpty}>
+              Siga um perfil para liberar conversas diretas.
+            </Text>
+          )}
 
-            return (
-              <Pressable
-                accessibilityLabel={`Abrir conversa com ${contact.name}`}
-                accessibilityRole="button"
-                key={contact.id}
-                onPress={() => onSelectContact(contact.id)}
-                style={({ pressed }) => [
-                  styles.messagesContactCard,
-                  pressed ? styles.buttonPressed : null
-                ]}
-              >
-                <View style={styles.messagesContactAvatar}>
-                  <Text style={styles.messagesContactAvatarText}>
-                    {getInitials(contact.name)}
-                  </Text>
-                </View>
-                <View style={styles.messagesContactIdentity}>
-                  <Text numberOfLines={1} style={styles.messagesContactName}>
-                    {contact.name}
-                  </Text>
-                  <Text numberOfLines={1} style={styles.messagesContactPreview}>
-                    {lastMessage?.body ?? contact.subtitle}
-                  </Text>
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
+          <View style={[styles.messagesSectionHeader, styles.messagesRequestHeader]}>
+            <View>
+              <Text style={styles.messagesSectionTitle}>Solicitacoes</Text>
+              <Text style={styles.messagesSectionSubtitle}>
+                Perfis que voce nao segue
+              </Text>
+            </View>
+            <Text style={styles.messagesSectionCount}>
+              {requestContacts.length}
+            </Text>
+          </View>
+          {requestContacts.length > 0 ? (
+            <View style={styles.messagesContactList}>
+              {requestContacts.map((contact) => renderContact(contact, true))}
+            </View>
+          ) : (
+            <Text style={styles.messagesSectionEmpty}>
+              Nenhuma solicitacao pendente.
+            </Text>
+          )}
+        </>
       )}
     </ScrollView>
   );

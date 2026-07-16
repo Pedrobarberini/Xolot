@@ -34,6 +34,8 @@ type ProfileView = "overview" | "wallet" | "settings";
 
 export function ProfileScreen({
   balance,
+  followersCount,
+  followingCount,
   fund,
   investments,
   onDeposit,
@@ -45,6 +47,8 @@ export function ProfileScreen({
   user
 }: {
   balance: number;
+  followersCount: number;
+  followingCount: number;
   fund?: AthleteFund;
   investments: Investment[];
   onDeposit: (amount: number) => void;
@@ -205,6 +209,21 @@ export function ProfileScreen({
                 </Text>
                 <Text style={styles.profileQuickLabel}>publicados</Text>
               </View>
+            </View>
+            <View style={styles.profileSocialMetrics}>
+              <Text style={styles.profileSocialMetricText}>
+                <Text style={styles.profileSocialMetricValue}>
+                  {followersCount}
+                </Text>{" "}
+                {followersCount === 1 ? "seguidor" : "seguidores"}
+              </Text>
+              <Text style={styles.profileSocialMetricDivider}>|</Text>
+              <Text style={styles.profileSocialMetricText}>
+                <Text style={styles.profileSocialMetricValue}>
+                  {followingCount}
+                </Text>{" "}
+                seguindo
+              </Text>
             </View>
           </View>
 

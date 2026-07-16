@@ -3,7 +3,7 @@ import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { ArrowLeft, Expand, Play, UserRound, Volume2, VolumeX } from "lucide-react-native";
+import { ArrowLeft, Expand, Play, UserCheck, UserPlus, UserRound, Volume2, VolumeX } from "lucide-react-native";
 import { Alert, Animated, Easing, Image, PanResponder, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import {
   formatPlaybackTime,
@@ -23,17 +23,23 @@ import { formatBRL, formatPercent } from "../utils/investment";
 
 export function FeedScreen({
   balance,
+  currentUserId,
   focusPlayerId,
+  followingProfileIds,
   funds,
   onBackToProfile,
   onOpenPlayer,
+  onToggleFollow,
   players: feedPlayers
 }: {
   balance: number | null;
+  currentUserId: string;
   focusPlayerId?: string | null;
+  followingProfileIds: string[];
   funds: AthleteFund[];
   onBackToProfile?: () => void;
   onOpenPlayer: (player: Player) => void;
+  onToggleFollow: (player: Player) => void;
   players: Player[];
 }) {
   const { height } = useWindowDimensions();
@@ -181,9 +187,12 @@ export function FeedScreen({
             }}
           >
             <FeedReel
+              currentUserId={currentUserId}
               fund={funds.find((item) => item.profileId === player.profileId)}
+              isFollowing={followingProfileIds.includes(player.profileId)}
               isActive={index === activeFeedIndex}
               onOpen={() => onOpenPlayer(player)}
+              onToggleFollow={() => onToggleFollow(player)}
               palette={getCardPalette(index)}
               player={player}
               reelHeight={pageHeight}
@@ -218,16 +227,22 @@ export function FeedScreen({
 }
 
 function FeedReel({
+  currentUserId,
   fund,
+  isFollowing,
   isActive,
   onOpen,
+  onToggleFollow,
   palette,
   player,
   reelHeight
 }: {
+  currentUserId: string;
   fund?: AthleteFund;
+  isFollowing: boolean;
   isActive: boolean;
   onOpen: () => void;
+  onToggleFollow: () => void;
   palette: CardPalette;
   player: Player;
   reelHeight: number;
@@ -238,6 +253,9 @@ function FeedReel({
   const revealProgress = useRef(new Animated.Value(0)).current;
   const isWide = !USE_CENTERED_WEB_LAYOUT && width >= 900;
   const evaluation = player.evaluation;
+  const canFollow =
+    player.ownerUserId !== currentUserId &&
+    player.profileId !== `profile-${currentUserId}`;
   const progress = evaluation
     ? Math.min(evaluation.funded / evaluation.fundingGoal, 1)
     : 0;
@@ -503,6 +521,51 @@ function FeedReel({
                   </Text>
                 ) : null}
               </View>
+              {canFollow ? (
+                <Pressable
+                  accessibilityLabel={
+                    isFollowing
+                      ? `Deixar de seguir ${player.name}`
+                      : `Seguir ${player.name}`
+                  }
+                  accessibilityRole="button"
+                  onPress={onToggleFollow}
+                  style={({ pressed }) => [
+                    styles.feedFollowButton,
+                    !isWide ? styles.feedFollowButtonCompact : null,
+                    isFollowing ? styles.feedFollowButtonActive : null,
+                    isFollowing && !isWide
+                      ? styles.feedFollowButtonActiveCompact
+                      : null,
+                    pressed ? styles.buttonPressed : null
+                  ]}
+                >
+                  {isFollowing ? (
+                    <UserCheck
+                      color={isWide ? colors.primary : colors.onPrimary}
+                      size={15}
+                      strokeWidth={2.4}
+                    />
+                  ) : (
+                    <UserPlus
+                      color={colors.onPrimary}
+                      size={15}
+                      strokeWidth={2.4}
+                    />
+                  )}
+                  <Text
+                    numberOfLines={1}
+                    style={[
+                      styles.feedFollowButtonText,
+                      isFollowing && isWide
+                        ? styles.feedFollowButtonTextActiveWide
+                        : null
+                    ]}
+                  >
+                    {isFollowing ? "Seguindo" : "Seguir"}
+                  </Text>
+                </Pressable>
+              ) : null}
               {isWide ? (
                 <View
                   style={[styles.feedStatusPill, { borderColor: palette.border }]}

@@ -1,5 +1,10 @@
 import React from "react";
-import { CircleDollarSign, MessageCircle } from "lucide-react-native";
+import {
+  CircleDollarSign,
+  MessageCircle,
+  UserCheck,
+  UserPlus
+} from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { DetailHud } from "../components/Navigation";
 import {
@@ -14,22 +19,30 @@ export function PublicProfileScreen({
   account,
   canInvest,
   fund,
+  followersCount,
+  isFollowing,
   onBack,
   onInvest,
   onMessage,
   onOpenVideo,
+  onToggleFollow,
   player,
+  showFollow,
   videos,
   walletBalance
 }: {
   account?: AppUser;
   canInvest: boolean;
   fund?: AthleteFund;
+  followersCount: number;
+  isFollowing: boolean;
   onBack: () => void;
   onInvest: () => void;
   onMessage: () => void;
   onOpenVideo: (player: Player) => void;
+  onToggleFollow: () => void;
   player?: Player;
+  showFollow: boolean;
   videos: Player[];
   walletBalance: number;
 }) {
@@ -94,6 +107,43 @@ export function PublicProfileScreen({
             >
               <MessageCircle color={colors.primary} size={22} />
             </Pressable>
+          </View>
+
+          <View style={styles.publicProfileSocialRow}>
+            <Text style={styles.publicProfileFollowerCount}>
+              {followersCount} {followersCount === 1 ? "seguidor" : "seguidores"}
+            </Text>
+            {showFollow ? (
+              <Pressable
+                accessibilityLabel={
+                  isFollowing
+                    ? `Deixar de seguir ${profileName}`
+                    : `Seguir ${profileName}`
+                }
+                accessibilityRole="button"
+                onPress={onToggleFollow}
+                style={[
+                  styles.publicProfileFollowButton,
+                  isFollowing ? styles.publicProfileFollowButtonActive : null
+                ]}
+              >
+                {isFollowing ? (
+                  <UserCheck color={colors.primary} size={17} strokeWidth={2.3} />
+                ) : (
+                  <UserPlus color={colors.onPrimary} size={17} strokeWidth={2.3} />
+                )}
+                <Text
+                  style={[
+                    styles.publicProfileFollowButtonText,
+                    isFollowing
+                      ? styles.publicProfileFollowButtonTextActive
+                      : null
+                  ]}
+                >
+                  {isFollowing ? "Seguindo" : "Seguir"}
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
 
           <View style={styles.profileQuickStats}>

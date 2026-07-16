@@ -936,6 +936,40 @@ export const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0
   },
+  feedFollowButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 5,
+    justifyContent: "center",
+    minHeight: 32,
+    paddingHorizontal: 10
+  },
+  feedFollowButtonCompact: {
+    backgroundColor: "rgba(5, 122, 75, 0.92)",
+    borderColor: "rgba(255, 255, 255, 0.78)",
+    minHeight: 31,
+    paddingHorizontal: 9
+  },
+  feedFollowButtonActive: {
+    backgroundColor: colors.surface,
+    borderColor: colors.primary
+  },
+  feedFollowButtonActiveCompact: {
+    backgroundColor: "rgba(5, 18, 12, 0.58)",
+    borderColor: "rgba(255, 255, 255, 0.68)"
+  },
+  feedFollowButtonText: {
+    color: colors.onPrimary,
+    fontSize: 11,
+    fontWeight: "900"
+  },
+  feedFollowButtonTextActiveWide: {
+    color: colors.primary
+  },
   feedProfileName: {
     flexShrink: 1,
     fontSize: 15,
@@ -3014,6 +3048,26 @@ export const styles = StyleSheet.create({
     paddingVertical: 8,
     textTransform: "uppercase"
   },
+  profileSocialMetrics: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 9,
+    marginTop: 13
+  },
+  profileSocialMetricText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700"
+  },
+  profileSocialMetricValue: {
+    color: colors.text,
+    fontWeight: "900"
+  },
+  profileSocialMetricDivider: {
+    color: colors.border,
+    fontSize: 12,
+    fontWeight: "800"
+  },
   profileMenuItem: {
     alignItems: "center",
     borderRadius: 6,
@@ -3141,6 +3195,42 @@ export const styles = StyleSheet.create({
   },
   publicProfileContent: {
     paddingTop: 70
+  },
+  publicProfileSocialRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 14
+  },
+  publicProfileFollowerCount: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: "800"
+  },
+  publicProfileFollowButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 38,
+    minWidth: 112,
+    paddingHorizontal: 13
+  },
+  publicProfileFollowButtonActive: {
+    backgroundColor: colors.surface,
+    borderColor: colors.primary
+  },
+  publicProfileFollowButtonText: {
+    color: colors.onPrimary,
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  publicProfileFollowButtonTextActive: {
+    color: colors.primary
   },
   publicProfileName: {
     fontSize: 20,
@@ -3427,6 +3517,20 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 2
   },
+  messagesFollowButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 38,
+    justifyContent: "center",
+    width: 38
+  },
+  messagesFollowButtonActive: {
+    backgroundColor: colors.surface,
+    borderColor: colors.primary
+  },
   messagesThreadContent: {
     flexGrow: 1,
     paddingHorizontal: 14,
@@ -3450,6 +3554,69 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     marginTop: 4,
+    textAlign: "center"
+  },
+  messagesRequestGate: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    justifyContent: "center",
+    margin: "auto",
+    maxWidth: 420,
+    minHeight: 260,
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+    width: "100%"
+  },
+  messagesRequestGateIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 999,
+    height: 52,
+    justifyContent: "center",
+    width: 52
+  },
+  messagesRequestFollowButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    marginTop: 18,
+    minHeight: 42,
+    paddingHorizontal: 15
+  },
+  messagesRequestFollowButtonText: {
+    color: colors.onPrimary,
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  messagesRequestSentNotice: {
+    alignSelf: "center",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 16,
+    maxWidth: 420,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    width: "100%"
+  },
+  messagesRequestSentTitle: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: "900",
+    textAlign: "center"
+  },
+  messagesRequestSentBody: {
+    color: colors.muted,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 3,
     textAlign: "center"
   },
   messageBubbleRow: {
@@ -3504,6 +3671,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10
   },
+  messageComposerInputDisabled: {
+    backgroundColor: colors.background,
+    opacity: 0.74
+  },
   messageSendButton: {
     alignItems: "center",
     backgroundColor: colors.primary,
@@ -3517,7 +3688,41 @@ export const styles = StyleSheet.create({
   },
   messagesContactList: {
     gap: 8,
-    marginTop: 16
+    marginTop: 9
+  },
+  messagesSectionHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20
+  },
+  messagesRequestHeader: {
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    marginTop: 24,
+    paddingTop: 20
+  },
+  messagesSectionTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "900"
+  },
+  messagesSectionSubtitle: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    marginTop: 2
+  },
+  messagesSectionCount: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  messagesSectionEmpty: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 9
   },
   messagesContactCard: {
     alignItems: "center",
@@ -3535,6 +3740,19 @@ export const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 12,
     marginTop: 3
+  },
+  messagesRequestPill: {
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 5
+  },
+  messagesRequestPillText: {
+    color: colors.primary,
+    fontSize: 9,
+    fontWeight: "900"
   },
   tabBar: {
     backgroundColor: colors.surface,

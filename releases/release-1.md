@@ -684,3 +684,32 @@ Criterios de aceite:
 - `mais` expande a descricao sem aparecimento brusco.
 - `menos` recolhe a descricao antes de voltar ao estado compacto.
 - A animacao nao altera a posicao do footer nem dos controles do video.
+
+### Task FEATURE-029 - Follow e solicitacoes de mensagem
+
+Tipo: Frontend/Dados/Produto
+
+Objetivo: criar uma relacao social persistente entre perfis e usa-la para organizar o Inicio e proteger mensagens diretas.
+
+Tasks:
+
+- [x] Persistir perfis seguidos por conta com AsyncStorage.
+- [x] Adicionar `Seguir` e `Seguindo` no Inicio.
+- [x] Reutilizar o mesmo estado no perfil publico.
+- [x] Exibir metricas de seguidores e seguindo.
+- [x] Priorizar videos dos perfis seguidos no Inicio.
+- [x] Separar Mensagens entre Conversas e Solicitacoes.
+- [x] Permitir uma unica mensagem inicial para perfil nao seguido.
+- [x] Ocultar mensagens recebidas ate o destinatario seguir o remetente.
+- [x] Liberar e mover a conversa automaticamente depois do follow.
+- [x] Isolar regras sociais em actions e services proprios.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- Feed e perfil exibem o mesmo estado de follow.
+- O follow permanece salvo depois de reiniciar o app.
+- Perfis seguidos ficam na area Conversas.
+- Perfis nao seguidos ficam na area Solicitacoes.
+- A thread recebida permanece protegida ate o follow.
+- Seguir pela conversa libera imediatamente mensagens e composer.
