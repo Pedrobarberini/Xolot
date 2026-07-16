@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { X } from "lucide-react-native";
+import { Minus, Plus, X } from "lucide-react-native";
 import { Image, Modal, PanResponder, Pressable, Text, View } from "react-native";
 import { Circle, Defs, Mask, Rect, Svg } from "react-native-svg";
 import { styles } from "../styles/appStyles";
@@ -8,11 +8,19 @@ import { ProfileAvatar } from "../types";
 import {
   AvatarPreviewSize,
   AvatarSourceSize,
+  DEFAULT_AVATAR_CROP_SCALE,
+  MAX_AVATAR_CROP_SCALE,
+  MIN_AVATAR_CROP_SCALE,
   getAvatarCropGeometry,
-  getAvatarFocusFromCropPoint
+  getAvatarCropScaleFromTrackPosition,
+  getAvatarCropTrackPosition,
+  getAvatarFocusFromCropPoint,
+  normalizeAvatarCropScale
 } from "../utils/avatarFocus";
 
 const DEFAULT_PREVIEW_SIZE = { height: 280, width: 324 };
+const DEFAULT_CROP_TRACK_WIDTH = 180;
+const CROP_SCALE_STEP = 0.05;
 const CROP_MASK_ID = "nextstar-avatar-crop-mask";
 
 function getStoredSourceSize(avatar: ProfileAvatar): AvatarSourceSize {
@@ -35,6 +43,10 @@ export function AvatarPositionModal({
 }) {
   const [focusX, setFocusX] = useState(50);
   const [focusY, setFocusY] = useState(50);
+  const [cropScale, setCropScale] = useState(DEFAULT_AVATAR_CROP_SCALE);
+  const [cropTrackWidth, setCropTrackWidth] = useState(
+    DEFAULT_CROP_TRACK_WIDTH
+  );
   const [previewSize, setPreviewSize] =
     useState<AvatarPreviewSize>(DEFAULT_PREVIEW_SIZE);
   const [sourceSize, setSourceSize] = useState<AvatarSourceSize>(() =>
@@ -42,11 +54,33 @@ export function AvatarPositionModal({
   );
   const previewSizeRef = useRef(previewSize);
   const sourceSizeRef = useRef(sourceSize);
+  const cropScaleRef = useRef(cropScale);
+  const cropTrackWidthRef = useRef(cropTrackWidth);
+
+  const updateCropScale = useCallback((nextCropScale: number) => {
+    const normalizedScale = normalizeAvatarCropScale(nextCropScale);
+
+    cropScaleRef.current = normalizedScale;
+    setCropScale(normalizedScale);
+  }, []);
+
+  const updateCropScaleFromPosition = useCallback(
+    (positionX: number) => {
+      updateCropScale(
+        getAvatarCropScaleFromTrackPosition(
+          positionX,
+          cropTrackWidthRef.current
+        )
+      );
+    },
+    [updateCropScale]
+  );
 
   const updateFocusFromPoint = useCallback((x: number, y: number) => {
     const nextFocus = getAvatarFocusFromCropPoint(
       x,
       y,
+      cropScaleRef.current,
       previewSizeRef.current,
       sourceSizeRef.current
     );
@@ -75,6 +109,20 @@ export function AvatarPositionModal({
     [updateFocusFromPoint]
   );
 
+  const cropScalePanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: (event) =>
+          updateCropScaleFromPosition(event.nativeEvent.locationX),
+        onPanResponderMove: (event) =>
+          updateCropScaleFromPosition(event.nativeEvent.locationX),
+        onPanResponderTerminationRequest: () => false,
+        onStartShouldSetPanResponder: () => true
+      }),
+    [updateCropScaleFromPosition]
+  );
+
   useEffect(() => {
     if (!visible || !avatar) {
       return;
@@ -82,6 +130,7 @@ export function AvatarPositionModal({
 
     setFocusX(avatar.focusX);
     setFocusY(avatar.focusY);
+    updateCropScale(avatar.cropScale);
 
     if (avatar.sourceWidth && avatar.sourceHeight) {
       const nextSourceSize = getStoredSourceSize(avatar);
@@ -107,7 +156,7 @@ export function AvatarPositionModal({
     return () => {
       isMounted = false;
     };
-  }, [avatar, visible]);
+  }, [avatar, updateCropScale, visible]);
 
   if (!avatar) {
     return null;
@@ -116,8 +165,14 @@ export function AvatarPositionModal({
   const cropGeometry = getAvatarCropGeometry(
     focusX,
     focusY,
+    cropScale,
     previewSize,
     sourceSize
+  );
+  const cropScalePercent = Math.round(cropScale * 100);
+  const cropThumbPosition = getAvatarCropTrackPosition(
+    cropScale,
+    cropTrackWidth
   );
 
   return (
@@ -228,12 +283,91 @@ export function AvatarPositionModal({
             </Svg>
           </View>
 
+          <View style={styles.avatarCropSizeSection}>
+            <View style={styles.avatarCropSizeHeader}>
+              <Text style={styles.avatarCropSizeLabel}>Tamanho do recorte</Text>
+              <Text style={styles.avatarCropSizeValue}>
+                {cropScalePercent}%
+              </Text>
+            </View>
+            <View style={styles.avatarCropSizeControl}>
+              <Pressable
+                accessibilityLabel="Diminuir recorte"
+                accessibilityRole="button"
+                disabled={cropScale <= MIN_AVATAR_CROP_SCALE}
+                onPress={() => updateCropScale(cropScale - CROP_SCALE_STEP)}
+                style={styles.avatarCropSizeButton}
+              >
+                <Minus color={colors.text} size={18} />
+              </Pressable>
+              <View
+                accessibilityActions={[
+                  { label: "Aumentar", name: "increment" },
+                  { label: "Diminuir", name: "decrement" }
+                ]}
+                accessibilityLabel="Tamanho do recorte"
+                accessibilityRole="adjustable"
+                accessibilityValue={{
+                  max: 100,
+                  min: 30,
+                  now: cropScalePercent,
+                  text: `${cropScalePercent}%`
+                }}
+                onAccessibilityAction={(event) => {
+                  updateCropScale(
+                    cropScale +
+                      (event.nativeEvent.actionName === "increment"
+                        ? CROP_SCALE_STEP
+                        : -CROP_SCALE_STEP)
+                  );
+                }}
+                onLayout={(event) => {
+                  const nextWidth = event.nativeEvent.layout.width;
+
+                  cropTrackWidthRef.current = nextWidth;
+                  setCropTrackWidth(nextWidth);
+                }}
+                style={styles.avatarCropSizeTrack}
+                {...cropScalePanResponder.panHandlers}
+              >
+                <View style={styles.avatarCropSizeRail} />
+                <View
+                  style={[
+                    styles.avatarCropSizeFill,
+                    { width: cropThumbPosition }
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.avatarCropSizeThumb,
+                    { left: cropThumbPosition - 10 }
+                  ]}
+                />
+              </View>
+              <Pressable
+                accessibilityLabel="Aumentar recorte"
+                accessibilityRole="button"
+                disabled={cropScale >= MAX_AVATAR_CROP_SCALE}
+                onPress={() => updateCropScale(cropScale + CROP_SCALE_STEP)}
+                style={styles.avatarCropSizeButton}
+              >
+                <Plus color={colors.text} size={18} />
+              </Pressable>
+            </View>
+            <View style={styles.avatarCropSizeRange}>
+              <Text style={styles.avatarCropSizeRangeText}>30%</Text>
+              <Text style={styles.avatarCropSizeRangeText}>100%</Text>
+            </View>
+          </View>
+
           <View style={styles.avatarPositionActions}>
             <Pressable onPress={onClose} style={styles.avatarPositionCancelButton}>
               <Text style={styles.avatarPositionCancelText}>Cancelar</Text>
             </Pressable>
             <Pressable
-              onPress={() => onSave({ ...avatar, focusX, focusY })}
+              onPress={() =>
+                onSave({ ...avatar, cropScale, focusX, focusY })
+              }
               style={styles.avatarPositionSaveButton}
             >
               <Text style={styles.avatarPositionSaveText}>Salvar</Text>

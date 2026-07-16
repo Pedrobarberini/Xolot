@@ -3262,6 +3262,87 @@ export const styles = StyleSheet.create({
   avatarPositionCropOverlay: {
     ...StyleSheet.absoluteFillObject
   },
+  avatarCropSizeSection: {
+    marginTop: 16
+  },
+  avatarCropSizeHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  avatarCropSizeLabel: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  avatarCropSizeValue: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  avatarCropSizeControl: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 8
+  },
+  avatarCropSizeButton: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 36,
+    justifyContent: "center",
+    width: 36
+  },
+  avatarCropSizeTrack: {
+    flex: 1,
+    height: 32,
+    position: "relative"
+  },
+  avatarCropSizeRail: {
+    backgroundColor: colors.borderStrong,
+    borderRadius: 999,
+    height: 4,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 14
+  },
+  avatarCropSizeFill: {
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    height: 4,
+    left: 0,
+    position: "absolute",
+    top: 14
+  },
+  avatarCropSizeThumb: {
+    backgroundColor: colors.surface,
+    borderColor: colors.primary,
+    borderRadius: 999,
+    borderWidth: 3,
+    height: 20,
+    position: "absolute",
+    shadowColor: "#000000",
+    shadowOffset: { height: 2, width: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 3,
+    top: 6,
+    width: 20
+  },
+  avatarCropSizeRange: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginHorizontal: 46,
+    marginTop: 1
+  },
+  avatarCropSizeRangeText: {
+    color: colors.muted,
+    fontSize: 10,
+    fontWeight: "800"
+  },
   avatarPositionActions: {
     flexDirection: "row",
     gap: 9,

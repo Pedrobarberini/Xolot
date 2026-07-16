@@ -844,3 +844,29 @@ Criterios de aceite:
 - O circulo nunca ultrapassa os limites reais da imagem.
 - Salvar mantem o mesmo enquadramento nas demais telas.
 - Configuracoes nao exibe mais a opcao `Remover`.
+
+### Task FEATURE-035 - Tamanho variavel do recorte circular
+
+Tipo: Frontend/UX/Dados
+
+Objetivo: permitir composicoes mais abertas ou fechadas sem trocar a foto escolhida.
+
+Tasks:
+
+- [x] Adicionar `cropScale` ao avatar persistido.
+- [x] Migrar fotos antigas para o tamanho visual anterior.
+- [x] Limitar o recorte ao intervalo de 30% a 100%.
+- [x] Fazer o limite de 100% tocar o menor lado da imagem.
+- [x] Criar slider arrastavel com metrica percentual.
+- [x] Adicionar botoes de diminuir e aumentar em passos de 5%.
+- [x] Aplicar o tamanho salvo em todas as ocorrencias do avatar.
+- [x] Cobrir limites, slider, geometria e migracao com testes.
+- [x] Atualizar README, backlog e release notes.
+
+Criterios de aceite:
+
+- O usuario consegue ajustar continuamente o tamanho do circulo.
+- O indicador mostra valores entre 30% e 100%.
+- O circulo nunca fica menor que 30% nem ultrapassa a imagem.
+- O avatar publicado corresponde a posicao e ao tamanho da HUD.
+- Recarregar o aplicativo preserva ambos os ajustes.

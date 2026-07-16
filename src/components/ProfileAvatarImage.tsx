@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, ImageStyle, StyleProp } from "react-native";
 import { ProfileAvatar } from "../types";
-import { AVATAR_DISPLAY_SCALE } from "../utils/avatarFocus";
+import { normalizeAvatarCropScale } from "../utils/avatarFocus";
 
 function getStoredAspectRatio(avatar: ProfileAvatar) {
   if (avatar.sourceWidth && avatar.sourceHeight) {
@@ -49,12 +49,13 @@ export function ProfileAvatarImage({
 
   const positionedStyle = useMemo<ImageStyle>(() => {
     const safeAspectRatio = Math.max(aspectRatio, 0.01);
+    const displayScale = 1 / normalizeAvatarCropScale(avatar.cropScale);
     const widthPercent =
       (safeAspectRatio >= 1 ? safeAspectRatio * 100 : 100) *
-      AVATAR_DISPLAY_SCALE;
+      displayScale;
     const heightPercent =
       (safeAspectRatio >= 1 ? 100 : (1 / safeAspectRatio) * 100) *
-      AVATAR_DISPLAY_SCALE;
+      displayScale;
     const horizontalOverflow = Math.max(widthPercent - 100, 0);
     const verticalOverflow = Math.max(heightPercent - 100, 0);
 
@@ -65,7 +66,7 @@ export function ProfileAvatarImage({
       top: `${-(verticalOverflow * avatar.focusY) / 100}%`,
       width: `${widthPercent}%`
     };
-  }, [aspectRatio, avatar.focusX, avatar.focusY]);
+  }, [aspectRatio, avatar.cropScale, avatar.focusX, avatar.focusY]);
 
   return (
     <Image

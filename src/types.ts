@@ -84,6 +84,7 @@ export type FollowingByUser = Record<string, string[]>;
 export type MessageContactsByUser = Record<string, MessageContact[]>;
 
 export type ProfileAvatar = {
+  cropScale: number;
   focusX: number;
   focusY: number;
   sourceHeight?: number;

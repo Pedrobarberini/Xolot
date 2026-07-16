@@ -1,4 +1,6 @@
-export const AVATAR_DISPLAY_SCALE = 1.22;
+export const MIN_AVATAR_CROP_SCALE = 0.3;
+export const MAX_AVATAR_CROP_SCALE = 1;
+export const DEFAULT_AVATAR_CROP_SCALE = 1 / 1.22;
 
 export type AvatarPreviewSize = {
   height: number;
@@ -22,6 +24,33 @@ export type AvatarCropGeometry = {
 
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(Math.max(value, minimum), maximum);
+}
+
+export function normalizeAvatarCropScale(value: number) {
+  return clamp(value, MIN_AVATAR_CROP_SCALE, MAX_AVATAR_CROP_SCALE);
+}
+
+export function getAvatarCropScaleFromTrackPosition(
+  positionX: number,
+  trackWidth: number
+) {
+  const progress = trackWidth > 0 ? clamp(positionX / trackWidth, 0, 1) : 0;
+
+  return (
+    MIN_AVATAR_CROP_SCALE +
+    progress * (MAX_AVATAR_CROP_SCALE - MIN_AVATAR_CROP_SCALE)
+  );
+}
+
+export function getAvatarCropTrackPosition(
+  cropScale: number,
+  trackWidth: number
+) {
+  const progress =
+    (normalizeAvatarCropScale(cropScale) - MIN_AVATAR_CROP_SCALE) /
+    (MAX_AVATAR_CROP_SCALE - MIN_AVATAR_CROP_SCALE);
+
+  return progress * Math.max(trackWidth, 0);
 }
 
 function getContainedImageBounds(
@@ -48,13 +77,15 @@ function getContainedImageBounds(
 export function getAvatarCropGeometry(
   focusX: number,
   focusY: number,
+  cropScale: number,
   previewSize: AvatarPreviewSize,
   sourceSize: AvatarSourceSize
 ): AvatarCropGeometry {
   const imageBounds = getContainedImageBounds(previewSize, sourceSize);
   const circleRadius =
-    Math.min(imageBounds.imageWidth, imageBounds.imageHeight) /
-    (2 * AVATAR_DISPLAY_SCALE);
+    (Math.min(imageBounds.imageWidth, imageBounds.imageHeight) *
+      normalizeAvatarCropScale(cropScale)) /
+    2;
   const horizontalTravel = Math.max(
     imageBounds.imageWidth - circleRadius * 2,
     0
@@ -81,10 +112,17 @@ export function getAvatarCropGeometry(
 export function getAvatarFocusFromCropPoint(
   x: number,
   y: number,
+  cropScale: number,
   previewSize: AvatarPreviewSize,
   sourceSize: AvatarSourceSize
 ) {
-  const geometry = getAvatarCropGeometry(50, 50, previewSize, sourceSize);
+  const geometry = getAvatarCropGeometry(
+    50,
+    50,
+    cropScale,
+    previewSize,
+    sourceSize
+  );
   const minimumX = geometry.imageX + geometry.circleRadius;
   const maximumX =
     geometry.imageX + geometry.imageWidth - geometry.circleRadius;

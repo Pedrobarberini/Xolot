@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  DEFAULT_AVATAR_CROP_SCALE,
   DEFAULT_AVATAR_FOCUS,
   normalizeProfileAvatar,
   parseProfileAvatars,
@@ -13,6 +14,7 @@ test("migra avatar antigo salvo apenas como URI", () => {
   );
 
   assert.deepEqual(avatars["profile-1"], {
+    cropScale: DEFAULT_AVATAR_CROP_SCALE,
     focusX: DEFAULT_AVATAR_FOCUS,
     focusY: DEFAULT_AVATAR_FOCUS,
     uri: "data:image/jpeg;base64,foto"
@@ -22,6 +24,7 @@ test("migra avatar antigo salvo apenas como URI", () => {
 test("normaliza foco e dimensoes invalidas", () => {
   assert.deepEqual(
     normalizeProfileAvatar({
+      cropScale: 2,
       focusX: -20,
       focusY: 140,
       sourceHeight: 0,
@@ -29,6 +32,7 @@ test("normaliza foco e dimensoes invalidas", () => {
       uri: "foto.jpg"
     }),
     {
+      cropScale: 1,
       focusX: 0,
       focusY: 100,
       sourceHeight: undefined,
@@ -41,6 +45,7 @@ test("normaliza foco e dimensoes invalidas", () => {
 test("preserva enquadramento na serializacao", () => {
   const avatars = {
     "profile-1": {
+      cropScale: 0.65,
       focusX: 100,
       focusY: 0,
       sourceHeight: 900,

@@ -469,6 +469,10 @@ Tasks:
 - [x] Abrir HUD de enquadramento ao tocar na foto escolhida.
 - [x] Exibir a foto inteira, sem recorte previo, durante a edicao.
 - [x] Permitir tocar e arrastar o circulo de recorte continuamente sobre a previa.
+- [x] Permitir redimensionar o circulo continuamente entre 30% e 100%.
+- [x] Exibir metrica percentual, slider e controles de menos/mais.
+- [x] Persistir o tamanho do recorte junto ao ponto focal.
+- [x] Migrar fotos antigas para o tamanho visual usado antes do slider.
 - [x] Escurecer a area externa e manter nitida a imagem dentro do circulo.
 - [x] Persistir ponto focal e dimensoes da imagem por perfil.
 - [x] Migrar automaticamente fotos antigas salvas apenas como URI.
@@ -490,6 +494,8 @@ Criterios de aceite:
 - O enquadramento escolhido e mantido em todas as superficies e apos reiniciar.
 - Fotos salvas antes da HUD continuam carregando com foco central.
 - A edicao mostra a foto completa e o circulo corresponde ao avatar final.
+- O circulo varia de 30% ate tocar o menor lado da imagem em 100%.
+- Posicao e tamanho salvos sao reproduzidos igualmente em todos os avatares.
 - Configuracoes oferece troca de foto, mas nao permite deixar o perfil sem imagem depois da escolha.
 - Tocar no nome do autor abre seu perfil, sem interferir no botao de follow.
 - `Investir` abre a bolsa do perfil exibido no reel e nunca a bolsa de outro atleta.

@@ -41,6 +41,7 @@ import {
   VideoSubmission
 } from "../types";
 import { formatBRL } from "../utils/investment";
+import { DEFAULT_AVATAR_CROP_SCALE } from "../utils/avatarFocus";
 import { PortfolioScreen } from "./WalletScreen";
 
 type ProfileView = "overview" | "wallet" | "settings";
@@ -454,6 +455,7 @@ function SettingsView({
         : asset.uri;
 
       onChangeAvatar({
+        cropScale: DEFAULT_AVATAR_CROP_SCALE,
         focusX: 50,
         focusY: 50,
         sourceHeight: asset.height,
