@@ -33,6 +33,8 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Score, risco, metricas e valores financeiros so aparecem quando existe uma avaliacao explicita.
 - Saldo, depositos, aportes e bolsas permanecem simulados, sem pagamento, saque ou contrato real.
 - Carteira, acessada pelo menu do Perfil, mostra saldo, deposito, valor em reais e porcentagem da cota adquirida.
+- Usuarios, sessao, envios, moderacao, saldos, bolsas e investimentos usam repository local versionado.
+- O repository possui testes de fallback, migracao, serializacao e persistencia.
 
 ## Teste online
 
@@ -40,7 +42,7 @@ A versao web e publicada em:
 
 https://pedrobarberini.github.io/NextStar/
 
-Follows, contatos, mensagens e fotos de perfil ficam persistidos neste dispositivo. Contas, saldos, depositos, envios, moderacoes e reservas ainda ficam apenas na memoria e sao apagados ao recarregar a pagina.
+Follows, contatos, mensagens, fotos, contas, sessao, saldos, envios, moderacoes, bolsas e investimentos ficam persistidos neste dispositivo. O registro da postagem sobrevive ao refresh, mas um video escolhido da galeria ainda pode usar uma URI temporaria; disponibilidade entre aparelhos depende de upload para storage remoto.
 
 A versao web e um PWA: no Chrome/Edge/Safari e possivel instalar o NextStar na tela inicial ou como aplicativo. O service worker faz cache dos assets para uso offline basico apos a primeira visita.
 
@@ -61,6 +63,12 @@ Para gerar a versao web usada pelo GitHub Pages:
 pnpm run build:web
 ```
 
+Para executar os testes do repository local:
+
+```bash
+pnpm test
+```
+
 ## Arquitetura do frontend
 
 O `App.tsx` mantem somente estado compartilhado, composicao e roteamento local. O restante esta organizado em:
@@ -68,6 +76,8 @@ O `App.tsx` mantem somente estado compartilhado, composicao e roteamento local. 
 - `src/screens/`: telas de autenticacao, inicio, envio, pesquisa, mensagens, moderacao, carteira e perfil.
 - `src/components/`: shell visual, navegacao e componentes compartilhados.
 - `src/actions/`: handlers de produto, formatadores e builders de dados.
+- `src/repositories/`: schema versionado e adaptador de persistencia do estado principal.
+- `src/services/`: persistencia local dos dominios social e de perfil.
 - `src/styles/`: estilos React Native extraidos do componente raiz.
 - `src/constants/` e `src/ui/`: constantes de layout, assets e tipos de interface.
 
@@ -97,6 +107,7 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 20. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
 21. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
 22. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
+23. Recarregue a pagina e confirme que a sessao, saldo, postagens e decisoes de moderacao continuam disponiveis.
 
 ## Antes da abertura ao publico
 

@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
 import { buildPlayerFromSubmission } from "./src/actions/appActions";
 import { createAppActions } from "./src/actions/createAppActions";
+import { usePersistentAppState } from "./src/actions/usePersistentAppState";
 import { useProfileActions } from "./src/actions/useProfileActions";
 import { useSocialActions } from "./src/actions/useSocialActions";
 import { BrandLaunchScreen, ScreenFrame } from "./src/components/AppShell";
@@ -23,10 +24,8 @@ import { colors } from "./src/theme";
 import {
   AppUser,
   AthleteFund,
-  Investment,
   MessageContact,
-  Player,
-  VideoSubmission
+  Player
 } from "./src/types";
 import { Tab } from "./src/ui/types";
 
@@ -36,8 +35,21 @@ type ReelReturnTarget =
   | { type: "own-profile" }
   | { account?: AppUser; player: Player; type: "public-profile" };
 
+const INITIAL_ATHLETE_FUNDS: AthleteFund[] = [
+  {
+    id: "demo-athlete-fund",
+    profileId: demoPlayer.profileId,
+    ownerUserId: "demo-athlete",
+    athleteName: demoPlayer.name,
+    goalAmount: 5000,
+    fundedAmount: 0,
+    minimumContribution: 50,
+    status: "Captando",
+    createdAt: "2026-07-01T00:00:00.000Z"
+  }
+];
+
 export default function App() {
-  const [user, setUser] = useState<AppUser | null>(null);
   const [isBrandLaunchVisible, setIsBrandLaunchVisible] = useState(true);
   const [tab, setTab] = useState<Tab>("feed");
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -46,34 +58,43 @@ export default function App() {
   const [feedFocusPlayerId, setFeedFocusPlayerId] = useState<string | null>(null);
   const [reelReturnTarget, setReelReturnTarget] =
     useState<ReelReturnTarget | null>(null);
-  const [registeredUsers, setRegisteredUsers] = useState<AppUser[]>([]);
+  const hasRestoredInitialRoute = useRef(false);
   const [activeMessageContactId, setActiveMessageContactId] = useState<
     string | null
   >(null);
-  const [investments, setInvestments] = useState<Investment[]>([]);
-  const [athleteFunds, setAthleteFunds] = useState<AthleteFund[]>(() => [
-    {
-      id: "demo-athlete-fund",
-      profileId: demoPlayer.profileId,
-      ownerUserId: "demo-athlete",
-      athleteName: demoPlayer.name,
-      goalAmount: 5000,
-      fundedAmount: 0,
-      minimumContribution: 50,
-      status: "Captando",
-      createdAt: new Date().toISOString()
-    }
-  ]);
-  const [walletBalances, setWalletBalances] = useState<Record<string, number>>(
-    {}
-  );
-  const [submissions, setSubmissions] = useState<VideoSubmission[]>([]);
+  const {
+    athleteFunds,
+    investments,
+    isAppStateLoaded,
+    registeredUsers,
+    setAthleteFunds,
+    setInvestments,
+    setRegisteredUsers,
+    setSubmissions,
+    setUser,
+    setWalletBalances,
+    submissions,
+    user,
+    walletBalances
+  } = usePersistentAppState(INITIAL_ATHLETE_FUNDS);
   const walletBalance = user ? (walletBalances[user.id] ?? 0) : 0;
 
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(colors.background).catch(() => undefined);
     SplashScreen.hideAsync().catch(() => undefined);
   }, []);
+
+  useEffect(() => {
+    if (!isAppStateLoaded || hasRestoredInitialRoute.current) {
+      return;
+    }
+
+    if (user?.role === "Admin") {
+      setTab("admin");
+    }
+
+    hasRestoredInitialRoute.current = true;
+  }, [isAppStateLoaded, user?.role]);
 
   const approvedSubmissionPlayers = useMemo(
     () =>
@@ -234,6 +255,7 @@ export default function App() {
     handleSubmitVideo
   } = createAppActions({
     athleteFunds,
+    registeredUsers,
     setAthleteFunds,
     setInvestments,
     setRegisteredUsers,
@@ -250,6 +272,22 @@ export default function App() {
   function signOutSession() {
     setActiveMessageContactId(null);
     handleSignOut();
+  }
+
+  if (!isAppStateLoaded) {
+    return (
+      <View style={styles.appRoot}>
+        <SafeAreaView style={styles.safeArea}>
+          <StatusBar
+            backgroundColor={colors.background}
+            barStyle="dark-content"
+          />
+        </SafeAreaView>
+        {isBrandLaunchVisible ? (
+          <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
+        ) : null}
+      </View>
+    );
   }
 
   if (!user) {

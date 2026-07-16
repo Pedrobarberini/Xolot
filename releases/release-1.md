@@ -739,3 +739,34 @@ Criterios de aceite:
 - Avatar e nome abrem o perfil correto.
 - `Investir` nunca abre uma bolsa diferente da vinculada ao reel.
 - A ausencia de bolsa mantem o investimento indisponivel.
+
+### Task FEATURE-031 - Repository local e persistencia do estado principal
+
+Tipo: Frontend/Arquitetura/Dados
+
+Objetivo: permitir testes continuos sem perder contas, postagens e operacoes simuladas ao recarregar o aplicativo.
+
+Tasks:
+
+- [x] Criar schema local com versao explicita.
+- [x] Criar migracao defensiva para dados antigos ou incompletos.
+- [x] Criar repository sobre `AsyncStorage`.
+- [x] Extrair hidratacao e setters persistentes para hook proprio.
+- [x] Persistir usuarios cadastrados e sessao ativa.
+- [x] Persistir envios e decisoes de moderacao.
+- [x] Persistir saldos, bolsas e investimentos.
+- [x] Restaurar a rota Admin para sessao administrativa.
+- [x] Preservar nome e dados da conta ao entrar novamente.
+- [x] Adicionar quatro testes automatizados do repository.
+- [x] Executar os testes no workflow de deploy.
+- [x] Corrigir encoding e status do `TechnicalDebt.md`.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- Recarregar o app nao apaga o estado principal.
+- Dados invalidos usam fallback seguro sem impedir a abertura.
+- Estado antigo sem versao e migrado para a versao atual.
+- Sair da conta limpa apenas a sessao ativa e preserva os dados cadastrados.
+- O CI bloqueia o deploy quando os testes do repository falham.
+- Video local continua identificado como temporario ate existir upload remoto.

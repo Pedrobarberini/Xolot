@@ -4,5 +4,5 @@
     "strict": true,
     "noImplicitReturns": true
   },
-  "exclude": ["dist", "build", "node_modules"]
+  "exclude": ["dist", "build", "node_modules", "tests"]
 }

@@ -13,6 +13,7 @@ import { formatBRL } from "../utils/investment";
 
 type CreateAppActionsOptions = {
   athleteFunds: AthleteFund[];
+  registeredUsers: AppUser[];
   setAthleteFunds: Dispatch<SetStateAction<AthleteFund[]>>;
   setInvestments: Dispatch<SetStateAction<Investment[]>>;
   setRegisteredUsers: Dispatch<SetStateAction<AppUser[]>>;
@@ -28,6 +29,7 @@ type CreateAppActionsOptions = {
 
 export function createAppActions({
   athleteFunds,
+  registeredUsers,
   setAthleteFunds,
   setInvestments,
   setRegisteredUsers,
@@ -41,24 +43,38 @@ export function createAppActions({
   walletBalance
 }: CreateAppActionsOptions) {
   function handleAuth(nextUser: AppUser) {
+    const existingAccount = registeredUsers.find(
+      (account) => account.id === nextUser.id
+    );
+    const authenticatedUser = existingAccount
+      ? {
+          ...nextUser,
+          acceptedTerms: existingAccount.acceptedTerms,
+          kycStatus: existingAccount.kycStatus,
+          name: existingAccount.name || nextUser.name
+        }
+      : nextUser;
+
     if (nextUser.role === "Usuario") {
       setRegisteredUsers((current) => {
-        const accountExists = current.some((item) => item.id === nextUser.id);
+        const accountExists = current.some(
+          (item) => item.id === authenticatedUser.id
+        );
 
         return accountExists
           ? current.map((item) =>
-              item.id === nextUser.id
-                ? { ...nextUser, name: item.name || nextUser.name }
+              item.id === authenticatedUser.id
+                ? authenticatedUser
                 : item
             )
-          : [nextUser, ...current];
+          : [authenticatedUser, ...current];
       });
     }
 
     setSelectedAccount(null);
     setSelectedPlayer(null);
-    setUser(nextUser);
-    setTab(nextUser.role === "Admin" ? "admin" : "feed");
+    setUser(authenticatedUser);
+    setTab(authenticatedUser.role === "Admin" ? "admin" : "feed");
   }
 
   function handleSignOut() {

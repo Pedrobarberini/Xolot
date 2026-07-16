@@ -72,6 +72,8 @@ Criterios de aceite:
 
 Tipo: Frontend/Arquitetura
 
+Status: Em andamento. Repository local versionado e persistencia dos estados principais entregues em 2026-07-16; services HTTP dependem do backend.
+
 Objetivo: preparar o app para trocar estado local por backend sem reescrever as telas.
 
 Tasks:
@@ -81,7 +83,13 @@ Tasks:
 - [ ] Criar `src/services/moderationService.ts`.
 - [ ] Criar `src/services/profileService.ts`.
 - [ ] Criar `src/services/messageService.ts`.
-- [ ] Criar `src/repositories/localRepository.ts` para estado temporario.
+- [x] Criar `src/repositories/localRepository.ts` para estado temporario.
+- [x] Criar schema versionado em `src/repositories/appStateSchema.ts`.
+- [x] Criar hook de hidratacao e persistencia em `src/actions/usePersistentAppState.ts`.
+- [x] Persistir usuarios, sessao, envios, moderacao, saldos, bolsas e investimentos.
+- [x] Restaurar a sessao e a rota administrativa depois do refresh.
+- [x] Criar migracao defensiva para estado sem versao ou parcialmente invalido.
+- [x] Cobrir fallback, migracao, serializacao e repository com testes automatizados.
 - [ ] Criar tipos de request/response em `src/types.ts` ou `src/api/types.ts`.
 
 Criterios de aceite:
@@ -89,6 +97,8 @@ Criterios de aceite:
 - Screens nao devem chamar diretamente arrays globais de usuarios/videos.
 - Deve ser possivel trocar `localRepository` por API HTTP depois.
 - Todos os dados demonstrativos devem estar marcados como `isDemo`.
+- Estado local valido deve sobreviver ao refresh sem misturar dados entre contas.
+- URI de arquivo local nao deve ser tratada como upload permanente.
 
 ### Task P0-003 - Backend minimo
 
