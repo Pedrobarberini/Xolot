@@ -276,16 +276,18 @@ Objetivo: criar fluxo de envio confiavel para atleta.
 
 Campos:
 
-- [ ] Nome do atleta.
-- [ ] Idade.
-- [ ] Cidade/UF.
-- [ ] Posicao.
-- [ ] Clube atual ou `Nenhum`.
-- [ ] Titulo do video.
-- [ ] Principal destaque.
-- [ ] Objetivo.
-- [ ] Consentimento do responsavel quando menor de idade.
-- [ ] Arquivo de video.
+- [x] Reutilizar nome, idade, cidade/UF, posicao e clube do perfil logado.
+- [x] Titulo do video.
+- [x] Principal destaque.
+- [x] Objetivo.
+- [x] Consentimento do responsavel quando menor de idade.
+- [x] Arquivo de video.
+
+Tasks:
+
+- [x] Remover do envio os campos pessoais ja preenchidos no cadastro.
+- [x] Usar o perfil ativo como fonte dos dados enviados para moderacao.
+- [x] Manter a biografia somente nas paginas de perfil, sem copia-la para a postagem.
 
 Criterios de aceite:
 
@@ -293,6 +295,7 @@ Criterios de aceite:
 - Apos envio, aparece toast/popup no rodape por cerca de 3 segundos.
 - Usuario nao precisa rolar a tela para descobrir se o envio funcionou.
 - Envio pendente aparece no status do atleta.
+- Alteracoes futuras no perfil nao exigem redigitar os dados em cada envio.
 
 ### Task P1-005 - AdminScreen de moderacao
 

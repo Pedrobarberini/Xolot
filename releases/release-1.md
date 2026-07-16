@@ -900,3 +900,25 @@ Criterios de aceite:
 - Dados salvos reaparecem preenchidos em Editar perfil.
 - Biografia e clube aparecem na vitrine do usuario.
 - Senha em texto puro nao e persistida no estado local.
+
+### Task FEATURE-037 - Envio vinculado ao perfil do atleta
+
+Tipo: Frontend/Dados/UX
+
+Objetivo: eliminar o preenchimento duplicado de dados pessoais em cada novo video.
+
+Tasks:
+
+- [x] Remover a secao `Dados do atleta` da tela de envio.
+- [x] Usar nome, idade, posicao, cidade e clube do perfil ativo.
+- [x] Preservar a validacao de idade minima e consentimento do responsavel.
+- [x] Manter no formulario apenas os dados relacionados ao video.
+- [x] Manter a biografia exclusivamente nos perfis proprio e publico.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- Usuario nao redigita dados pessoais ao publicar outro video.
+- Moderacao recebe os dados do perfil vinculados ao envio.
+- A postagem nao recebe nem exibe a biografia do atleta.
+- Alterar o perfil atualiza a fonte usada nos proximos envios.

@@ -11,11 +11,6 @@ import { colors } from "../theme";
 import { AppUser, VideoSubmission } from "../types";
 
 type SubmissionDraft = {
-  athleteName: string;
-  age: string;
-  city: string;
-  position: string;
-  club: string;
   videoTitle: string;
   videoLink: string;
   highlight: string;
@@ -30,11 +25,6 @@ type SelectedVideoMeta = {
 };
 
 const emptySubmissionDraft: SubmissionDraft = {
-  athleteName: "",
-  age: "",
-  city: "",
-  position: "",
-  club: "",
   videoTitle: "",
   videoLink: "",
   highlight: "",
@@ -53,26 +43,21 @@ export function SubmitVideoScreen({
 }) {
   const { width } = useWindowDimensions();
   const isCompact = USE_CENTERED_WEB_LAYOUT || width < 520;
-  const [draft, setDraft] = useState<SubmissionDraft>({
-    ...emptySubmissionDraft,
-    athleteName: user.name
-  });
+  const [draft, setDraft] = useState<SubmissionDraft>(emptySubmissionDraft);
   const [selectedVideo, setSelectedVideo] = useState<SelectedVideoMeta | null>(
     null
   );
   const [lastSubmittedId, setLastSubmittedId] = useState<string | null>(null);
   const submissionToastProgress = useRef(new Animated.Value(0)).current;
-  const age = Number(draft.age.replace(/\D/g, ""));
+  const age = user.age ?? 0;
   const needsGuardianConsent = age > 0 && age < 18;
   const hasRemoteVideoLink = /^https?:\/\/\S+$/i.test(draft.videoLink.trim());
   const hasVideoSource = selectedVideo !== null || hasRemoteVideoLink;
   const submissionIssues = [
-    draft.athleteName.trim().length >= 3
+    user.profileCompleted ? null : "Complete os dados do perfil antes de enviar.",
+    age >= 12
       ? null
-      : "Informe o nome completo do atleta.",
-    age >= 12 ? null : "Informe uma idade valida a partir de 12 anos.",
-    draft.position.trim().length >= 2 ? null : "Informe a posicao do atleta.",
-    draft.city.trim().length >= 2 ? null : "Informe a cidade do atleta.",
+      : "Revise a idade no perfil. Envios sao aceitos a partir de 12 anos.",
     draft.videoTitle.trim().length >= 4
       ? null
       : "O titulo do video precisa ter pelo menos 4 caracteres.",
@@ -184,11 +169,11 @@ export function SubmitVideoScreen({
     onSubmit({
       id,
       userId: user.id,
-      athleteName: draft.athleteName.trim(),
+      athleteName: user.name,
       age,
-      city: draft.city.trim(),
-      position: draft.position.trim(),
-      club: draft.club.trim() || "Sem clube informado",
+      city: user.city,
+      position: user.position,
+      club: user.club,
       videoTitle: draft.videoTitle.trim(),
       videoLink: draft.videoLink.trim(),
       videoDurationMs: selectedVideo?.durationMs,
@@ -203,10 +188,7 @@ export function SubmitVideoScreen({
     Keyboard.dismiss();
     setLastSubmittedId(id);
     setSelectedVideo(null);
-    setDraft({
-      ...emptySubmissionDraft,
-      athleteName: user.name
-    });
+    setDraft(emptySubmissionDraft);
   }
 
   return (
@@ -224,52 +206,6 @@ export function SubmitVideoScreen({
           O admin aprova, reprova ou pede ajustes. So oportunidades aprovadas
           entram no feed dos investidores.
         </Text>
-      </View>
-
-      <View
-        style={[
-          styles.infoPanel,
-          isCompact ? styles.submitInfoPanelCompact : null
-        ]}
-      >
-        <Text style={styles.sectionTitle}>Dados do atleta</Text>
-        <LabeledInput
-          label="Nome do atleta"
-          onChangeText={(value) => updateDraft("athleteName", value)}
-          placeholder="Nome completo"
-          value={draft.athleteName}
-        />
-        <View style={styles.twoColumnRow}>
-          <View style={styles.columnField}>
-            <LabeledInput
-              keyboardType="number-pad"
-              label="Idade"
-              onChangeText={(value) => updateDraft("age", value)}
-              placeholder="17"
-              value={draft.age}
-            />
-          </View>
-          <View style={styles.columnField}>
-            <LabeledInput
-              label="Posicao"
-              onChangeText={(value) => updateDraft("position", value)}
-              placeholder="Ponta"
-              value={draft.position}
-            />
-          </View>
-        </View>
-        <LabeledInput
-          label="Cidade"
-          onChangeText={(value) => updateDraft("city", value)}
-          placeholder="Cidade, UF"
-          value={draft.city}
-        />
-        <LabeledInput
-          label="Clube ou projeto"
-          onChangeText={(value) => updateDraft("club", value)}
-          placeholder="Clube atual"
-          value={draft.club}
-        />
       </View>
 
       <View

@@ -29,7 +29,8 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.
 - Perfil publico acessivel pelo feed, com todos os videos aprovados do atleta e o estado da bolsa.
 - Legenda expandida do feed mostra bolsa aberta, valores captados, meta e progresso real.
-- Envio por galeria ou link direto, com validacao e confirmacao animada.
+- Envio por galeria ou link direto, com dados do atleta reutilizados do perfil, validacao e confirmacao animada.
+- A biografia permanece exclusiva do perfil e nao e copiada para as postagens.
 - Moderacao local por perfil Admin: aprovar, pedir ajustes ou reprovar.
 - Solicitacoes revisadas saem imediatamente da fila administrativa.
 - Videos reais aprovados substituem o perfil demonstrativo.
