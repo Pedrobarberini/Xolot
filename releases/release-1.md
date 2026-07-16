@@ -713,3 +713,29 @@ Criterios de aceite:
 - Perfis nao seguidos ficam na area Solicitacoes.
 - A thread recebida permanece protegida ate o follow.
 - Seguir pela conversa libera imediatamente mensagens e composer.
+
+### Task FEATURE-030 - Foto de perfil e investimento direto pelo Inicio
+
+Tipo: Frontend/Dados/Navegacao
+
+Objetivo: aplicar uma identidade visual consistente aos perfis e encurtar o acesso a bolsa exibida no reel.
+
+Tasks:
+
+- [x] Criar persistencia local de fotos por `profileId`.
+- [x] Adicionar escolha, troca e remocao de foto em Configuracoes.
+- [x] Exibir a foto no Inicio, Perfil, Pesquisa, Mensagens e investimento.
+- [x] Preservar iniciais como fallback sem foto cadastrada.
+- [x] Tornar o nome do autor clicavel no Inicio.
+- [x] Substituir `Ver perfil` por `Investir` na descricao expandida.
+- [x] Abrir diretamente a bolsa vinculada ao video atual.
+- [x] Bloquear o CTA quando a bolsa nao estiver em captacao.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- A mesma foto aparece em todas as telas vinculadas ao perfil.
+- A foto permanece salva no mesmo dispositivo depois de reiniciar o app.
+- Avatar e nome abrem o perfil correto.
+- `Investir` nunca abre uma bolsa diferente da vinculada ao reel.
+- A ausencia de bolsa mantem o investimento indisponivel.

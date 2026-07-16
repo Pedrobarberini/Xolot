@@ -83,6 +83,8 @@ export type FollowingByUser = Record<string, string[]>;
 
 export type MessageContactsByUser = Record<string, MessageContact[]>;
 
+export type ProfileAvatarsByProfile = Record<string, string>;
+
 export type UserRole = "Usuario" | "Admin";
 
 export type KycStatus = "Nao iniciado" | "Pendente" | "Aprovado";

@@ -1,6 +1,6 @@
 # Backlog tecnico - NextStar
 
-Atualizado em 2026-07-15.
+Atualizado em 2026-07-16.
 
 Este backlog e escrito para desenvolvimento. Cada item deve virar issue/task no GitHub, Trello, Jira ou similar.
 
@@ -443,6 +443,37 @@ Criterios de aceite:
 - Contadores sociais usam a mesma fonte de dados do botao de follow.
 - Mensagens de perfis nao seguidos entram em Solicitacoes.
 - Seguir um contato move a solicitacao para Conversas e libera a thread.
+
+### Task P1-011 - Foto de perfil e acesso direto ao investimento
+
+Tipo: Frontend/Dados/Produto
+
+Status: Concluido localmente em 2026-07-16. Sincronizacao remota da foto depende do backend e de storage de midia.
+
+Objetivo: consolidar a identidade visual do perfil e reduzir passos entre descoberta e aporte.
+
+Tasks:
+
+- [x] Adicionar selecao de foto em Configuracoes com recorte quadrado.
+- [x] Adicionar acao para trocar e remover a foto.
+- [x] Persistir a foto por perfil com AsyncStorage.
+- [x] Exibir a foto no Inicio, Perfil, Pesquisa, Mensagens e pagina da bolsa.
+- [x] Manter iniciais como fallback quando nao houver foto.
+- [x] Tornar o nome do perfil no Inicio clicavel.
+- [x] Direcionar o clique no nome para o perfil publico correto.
+- [x] Substituir `Ver perfil` por `Investir` na descricao expandida.
+- [x] Abrir diretamente a bolsa vinculada ao video atual.
+- [x] Desabilitar `Investir` quando a bolsa nao estiver captando.
+- [ ] Enviar a foto para storage remoto e salvar `avatarUrl` no backend.
+- [ ] Redimensionar e otimizar a imagem no servidor antes da publicacao.
+
+Criterios de aceite:
+
+- A foto escolhida permanece depois de fechar e abrir o app no mesmo dispositivo.
+- Todas as superficies exibem a mesma foto para o mesmo `profileId`.
+- Tocar no nome do autor abre seu perfil, sem interferir no botao de follow.
+- `Investir` abre a bolsa do perfil exibido no reel e nunca a bolsa de outro atleta.
+- Perfil sem bolsa aberta nao permite iniciar aporte.
 
 ## Sprint 6 - Mobile e deploy
 

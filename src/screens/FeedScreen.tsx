@@ -17,7 +17,7 @@ import { NEXTSTAR_SYMBOL } from "../constants/assets";
 import { FEED_TEXT_LIMIT_COMPACT, FEED_TEXT_LIMIT_WIDE, USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import { AthleteFund, Player } from "../types";
+import { AthleteFund, Player, ProfileAvatarsByProfile } from "../types";
 import { CardPalette } from "../ui/types";
 import { formatBRL, formatPercent } from "../utils/investment";
 
@@ -28,9 +28,11 @@ export function FeedScreen({
   followingProfileIds,
   funds,
   onBackToProfile,
+  onOpenInvestment,
   onOpenPlayer,
   onToggleFollow,
-  players: feedPlayers
+  players: feedPlayers,
+  profileAvatars
 }: {
   balance: number | null;
   currentUserId: string;
@@ -38,9 +40,11 @@ export function FeedScreen({
   followingProfileIds: string[];
   funds: AthleteFund[];
   onBackToProfile?: () => void;
+  onOpenInvestment: (player: Player) => void;
   onOpenPlayer: (player: Player) => void;
   onToggleFollow: (player: Player) => void;
   players: Player[];
+  profileAvatars: ProfileAvatarsByProfile;
 }) {
   const { height } = useWindowDimensions();
   const [feedHeight, setFeedHeight] = useState(0);
@@ -187,10 +191,12 @@ export function FeedScreen({
             }}
           >
             <FeedReel
+              avatarUri={profileAvatars[player.profileId]}
               currentUserId={currentUserId}
               fund={funds.find((item) => item.profileId === player.profileId)}
               isFollowing={followingProfileIds.includes(player.profileId)}
               isActive={index === activeFeedIndex}
+              onInvest={() => onOpenInvestment(player)}
               onOpen={() => onOpenPlayer(player)}
               onToggleFollow={() => onToggleFollow(player)}
               palette={getCardPalette(index)}
@@ -227,20 +233,24 @@ export function FeedScreen({
 }
 
 function FeedReel({
+  avatarUri,
   currentUserId,
   fund,
   isFollowing,
   isActive,
+  onInvest,
   onOpen,
   onToggleFollow,
   palette,
   player,
   reelHeight
 }: {
+  avatarUri?: string;
   currentUserId: string;
   fund?: AthleteFund;
   isFollowing: boolean;
   isActive: boolean;
+  onInvest: () => void;
   onOpen: () => void;
   onToggleFollow: () => void;
   palette: CardPalette;
@@ -279,6 +289,7 @@ function FeedReel({
   const fundProgress = fund
     ? Math.min(Math.max(fund.fundedAmount / fund.goalAmount, 0), 1)
     : 0;
+  const canInvest = fund?.status === "Captando";
   const minimumTicketLabel = evaluation
     ? formatBRL(evaluation.minimumTicket)
     : null;
@@ -476,7 +487,14 @@ function FeedReel({
                   pressed ? styles.buttonPressed : null
                 ]}
               >
-                {isWide ? (
+                {avatarUri ? (
+                  <Image
+                    accessibilityIgnoresInvertColors
+                    resizeMode="cover"
+                    source={{ uri: avatarUri }}
+                    style={styles.profileAvatarImage}
+                  />
+                ) : isWide ? (
                   <Text
                     style={[styles.feedAvatarText, { color: palette.accent }]}
                   >
@@ -486,7 +504,13 @@ function FeedReel({
                   <UserRound color={colors.onPrimary} size={20} strokeWidth={2.2} />
                 )}
               </Pressable>
-              <View style={styles.feedProfileTextBlock}>
+              <Pressable
+                accessibilityLabel={`Abrir perfil de ${player.name}`}
+                accessibilityRole="button"
+                hitSlop={4}
+                onPress={onOpen}
+                style={styles.feedProfileTextBlock}
+              >
                 {!isWide ? (
                   <Text
                     numberOfLines={1}
@@ -520,7 +544,7 @@ function FeedReel({
                     {player.position} | {player.city}
                   </Text>
                 ) : null}
-              </View>
+              </Pressable>
               {canFollow ? (
                 <Pressable
                   accessibilityLabel={
@@ -708,13 +732,27 @@ function FeedReel({
                     )}
                     <View style={styles.feedCompactExpandedActions}>
                       <Pressable
+                        accessibilityLabel={`Investir no perfil de ${player.name}`}
                         accessibilityRole="button"
+                        disabled={!canInvest}
                         hitSlop={8}
-                        onPress={onOpen}
-                        style={styles.feedCompactTextButton}
+                        onPress={onInvest}
+                        style={[
+                          styles.feedCompactTextButton,
+                          !canInvest
+                            ? styles.feedCompactTextButtonDisabled
+                            : null
+                        ]}
                       >
-                        <Text style={styles.feedCompactTextButtonLabel}>
-                          Ver perfil
+                        <Text
+                          style={[
+                            styles.feedCompactTextButtonLabel,
+                            !canInvest
+                              ? styles.feedCompactTextButtonLabelDisabled
+                              : null
+                          ]}
+                        >
+                          Investir
                         </Text>
                       </Pressable>
                       <Pressable

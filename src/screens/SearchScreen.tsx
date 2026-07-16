@@ -1,9 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { ChevronRight, Search, X } from "lucide-react-native";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import { AppUser, AthleteFund, Player } from "../types";
+import {
+  AppUser,
+  AthleteFund,
+  Player,
+  ProfileAvatarsByProfile
+} from "../types";
 
 type SearchProfile = {
   fund?: AthleteFund;
@@ -11,6 +16,7 @@ type SearchProfile = {
   meta: string;
   name: string;
   player?: Player;
+  profileId: string;
   searchableText: string;
   user?: AppUser;
 };
@@ -20,12 +26,14 @@ export function SearchScreen({
   onOpenPlayer,
   onOpenUser,
   players,
+  profileAvatars,
   users
 }: {
   funds: AthleteFund[];
   onOpenPlayer: (player: Player) => void;
   onOpenUser: (user: AppUser) => void;
   players: Player[];
+  profileAvatars: ProfileAvatarsByProfile;
   users: AppUser[];
 }) {
   const [query, setQuery] = useState("");
@@ -53,6 +61,7 @@ export function SearchScreen({
           meta,
           name: player?.name ?? account.name,
           player,
+          profileId: player?.profileId ?? `profile-${account.id}`,
           searchableText: [
             account.name,
             player?.name,
@@ -75,6 +84,7 @@ export function SearchScreen({
           meta: `${player.position} | ${player.city}`,
           name: player.name,
           player,
+          profileId: player.profileId,
           searchableText: [
             player.name,
             player.position,
@@ -176,7 +186,16 @@ export function SearchScreen({
               ]}
             >
               <View style={styles.searchProfileAvatar}>
-                <Text style={styles.searchProfileAvatarText}>{initials}</Text>
+                {profileAvatars[profile.profileId] ? (
+                  <Image
+                    accessibilityIgnoresInvertColors
+                    resizeMode="cover"
+                    source={{ uri: profileAvatars[profile.profileId] }}
+                    style={styles.profileAvatarImage}
+                  />
+                ) : (
+                  <Text style={styles.searchProfileAvatarText}>{initials}</Text>
+                )}
               </View>
               <View style={styles.searchProfileBody}>
                 <Text numberOfLines={1} style={styles.searchProfileName}>

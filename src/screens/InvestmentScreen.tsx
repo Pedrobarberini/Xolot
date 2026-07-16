@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { CircleDollarSign, X } from "lucide-react-native";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { DetailHud } from "../components/Navigation";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
@@ -8,12 +8,14 @@ import { AthleteFund, Player } from "../types";
 import { formatBRL } from "../utils/investment";
 
 export function InvestmentScreen({
+  avatarUri,
   fund,
   onBack,
   onInvest,
   player,
   walletBalance
 }: {
+  avatarUri?: string;
   fund: AthleteFund;
   onBack: () => void;
   onInvest: (player: Player, amount: number) => void;
@@ -47,7 +49,16 @@ export function InvestmentScreen({
         <View style={styles.profileHero}>
           <View style={styles.profileHeroTopRow}>
             <View style={styles.profileAvatar}>
-              <Text style={styles.profileAvatarText}>{initials}</Text>
+              {avatarUri ? (
+                <Image
+                  accessibilityIgnoresInvertColors
+                  resizeMode="cover"
+                  source={{ uri: avatarUri }}
+                  style={styles.profileAvatarImage}
+                />
+              ) : (
+                <Text style={styles.profileAvatarText}>{initials}</Text>
+              )}
             </View>
             <View style={styles.profileTitleBlock}>
               <Text

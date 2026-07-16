@@ -5,7 +5,7 @@ import {
   UserCheck,
   UserPlus
 } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { DetailHud } from "../components/Navigation";
 import {
   ProfileGalleryVideo,
@@ -17,6 +17,7 @@ import { AppUser, AthleteFund, Player } from "../types";
 
 export function PublicProfileScreen({
   account,
+  avatarUri,
   canInvest,
   fund,
   followersCount,
@@ -32,6 +33,7 @@ export function PublicProfileScreen({
   walletBalance
 }: {
   account?: AppUser;
+  avatarUri?: string;
   canInvest: boolean;
   fund?: AthleteFund;
   followersCount: number;
@@ -83,7 +85,16 @@ export function PublicProfileScreen({
         <View style={styles.profileHero}>
           <View style={styles.profileHeroTopRow}>
             <View style={styles.profileAvatar}>
-              <Text style={styles.profileAvatarText}>{initials}</Text>
+              {avatarUri ? (
+                <Image
+                  accessibilityIgnoresInvertColors
+                  resizeMode="cover"
+                  source={{ uri: avatarUri }}
+                  style={styles.profileAvatarImage}
+                />
+              ) : (
+                <Text style={styles.profileAvatarText}>{initials}</Text>
+              )}
             </View>
             <View style={styles.profileTitleBlock}>
               <Text

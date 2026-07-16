@@ -917,6 +917,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     height: 40,
     marginTop: 1,
+    overflow: "hidden",
     width: 40
   },
   feedAvatar: {
@@ -926,6 +927,7 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     height: 42,
     justifyContent: "center",
+    overflow: "hidden",
     width: 42
   },
   feedAvatarText: {
@@ -1124,6 +1126,9 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 4
   },
+  feedCompactTextButtonDisabled: {
+    opacity: 0.52
+  },
   feedCompactTextButtonLabel: {
     color: colors.onPrimary,
     fontSize: 14,
@@ -1131,6 +1136,9 @@ export const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.72)",
     textShadowOffset: { height: 1, width: 0 },
     textShadowRadius: 2
+  },
+  feedCompactTextButtonLabelDisabled: {
+    color: "rgba(255, 255, 255, 0.72)"
   },
   feedReelMeta: {
     fontSize: 13,
@@ -2766,7 +2774,13 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     height: 50,
     justifyContent: "center",
+    overflow: "hidden",
     width: 50
+  },
+  profileAvatarImage: {
+    borderRadius: 999,
+    height: "100%",
+    width: "100%"
   },
   profileAvatarText: {
     color: colors.primary,
@@ -3137,6 +3151,73 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
     marginBottom: 4
   },
+  settingsAvatarRow: {
+    alignItems: "center",
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
+    paddingTop: 12
+  },
+  settingsAvatarPreview: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 62,
+    justifyContent: "center",
+    overflow: "hidden",
+    width: 62
+  },
+  settingsAvatarInitials: {
+    color: colors.primary,
+    fontSize: 17,
+    fontWeight: "900"
+  },
+  settingsAvatarBody: {
+    flex: 1,
+    minWidth: 0
+  },
+  settingsAvatarActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 14
+  },
+  settingsAvatarButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 40,
+    paddingHorizontal: 13
+  },
+  settingsAvatarButtonText: {
+    color: colors.onPrimary,
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  settingsAvatarRemoveButton: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderStrong,
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 40,
+    paddingHorizontal: 13
+  },
+  settingsAvatarRemoveButtonText: {
+    color: colors.danger,
+    fontSize: 12,
+    fontWeight: "900"
+  },
   settingsRow: {
     alignItems: "center",
     borderTopColor: colors.border,
@@ -3375,6 +3456,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
     height: 48,
     justifyContent: "center",
+    overflow: "hidden",
     width: 48
   },
   searchProfileAvatarText: {
@@ -3495,6 +3577,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
     height: 42,
     justifyContent: "center",
+    overflow: "hidden",
     width: 42
   },
   messagesContactAvatarText: {

@@ -4,6 +4,7 @@ import * as SystemUI from "expo-system-ui";
 import { KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
 import { buildPlayerFromSubmission } from "./src/actions/appActions";
 import { createAppActions } from "./src/actions/createAppActions";
+import { useProfileActions } from "./src/actions/useProfileActions";
 import { useSocialActions } from "./src/actions/useSocialActions";
 import { BrandLaunchScreen, ScreenFrame } from "./src/components/AppShell";
 import { BottomTabs, Header } from "./src/components/Navigation";
@@ -92,6 +93,7 @@ export default function App() {
         : [demoPlayer],
     [approvedSubmissionPlayers]
   );
+  const { profileAvatars, setProfileAvatar } = useProfileActions();
   const {
     addMessageContact,
     currentMessageContacts,
@@ -282,6 +284,7 @@ export default function App() {
             <>
               <ScreenFrame key={`investment-${investmentPlayer.id}`}>
                 <InvestmentScreen
+                  avatarUri={profileAvatars[investmentPlayer.profileId]}
                   fund={investmentFund}
                   onBack={() => setInvestmentPlayer(null)}
                   onInvest={(player, amount) => {
@@ -307,6 +310,11 @@ export default function App() {
               >
                 <PublicProfileScreen
                   account={selectedProfileAccount}
+                  avatarUri={
+                    selectedProfileId
+                      ? profileAvatars[selectedProfileId]
+                      : undefined
+                  }
                   canInvest={Boolean(
                     user.role === "Usuario" &&
                       selectedProfilePlayer &&
@@ -389,11 +397,21 @@ export default function App() {
                     setReelReturnTarget(null);
                     setSelectedPlayer(player);
                   }}
+                  onOpenInvestment={(player) => {
+                    const fund = athleteFunds.find(
+                      (item) => item.profileId === player.profileId
+                    );
+
+                    if (fund?.status === "Captando") {
+                      setInvestmentPlayer(player);
+                    }
+                  }}
                   onToggleFollow={(player) => {
                     setFeedFocusPlayerId(player.id);
                     toggleFollowProfile(player.profileId);
                   }}
                   players={orderedFeedPlayers}
+                  profileAvatars={profileAvatars}
                 />
               ) : null}
               {tab === "search" ? (
@@ -409,6 +427,7 @@ export default function App() {
                       setSelectedAccount(account);
                     }}
                     players={availablePlayers}
+                    profileAvatars={profileAvatars}
                     users={registeredUsers}
                   />
                 </ScreenFrame>
@@ -429,6 +448,7 @@ export default function App() {
                     onToggleFollow={(profileId) =>
                       toggleFollowProfile(profileId)
                     }
+                    profileAvatars={profileAvatars}
                   />
                 </ScreenFrame>
               ) : null}
@@ -454,6 +474,9 @@ export default function App() {
               {tab === "profile" ? (
                 <ScreenFrame animated={false} key="profile">
                   <ProfileScreen
+                    avatarUri={
+                      ownProfileId ? profileAvatars[ownProfileId] : undefined
+                    }
                     balance={walletBalance}
                     fund={athleteFunds.find(
                       (item) => item.ownerUserId === user.id
@@ -474,6 +497,11 @@ export default function App() {
                       }
                     }}
                     onDeposit={handleDeposit}
+                    onChangeAvatar={(uri) => {
+                      if (ownProfileId) {
+                        setProfileAvatar(ownProfileId, uri);
+                      }
+                    }}
                     onSignOut={signOutSession}
                     player={availablePlayers.find(
                       (item) => item.ownerUserId === user.id

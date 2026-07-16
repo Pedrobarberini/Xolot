@@ -19,6 +19,8 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Paginas e subpaginas usam a mesma transicao suave de entrada, mantendo header e footer estaveis.
 - A descricao `Ver mais` expande e recolhe suavemente sobre o video.
 - Perfil possui menu de tres barras com Configuracoes, Carteira e Sair da conta.
+- Configuracoes permite escolher, trocar ou remover a foto publica do perfil.
+- A foto fica persistida no dispositivo e aparece no Inicio, Pesquisa, Mensagens, Perfil e pagina da bolsa.
 - Perfil principal funciona como vitrine, com galeria de videos aprovados e estado vazio para novas contas.
 - Configuracoes concentra preferencias, verificacao/KYC, dados da Conta NextStar e gestao da bolsa.
 - Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.
@@ -38,7 +40,7 @@ A versao web e publicada em:
 
 https://pedrobarberini.github.io/NextStar/
 
-Follows, contatos e mensagens locais ficam persistidos neste dispositivo. Contas, saldos, depositos, envios, moderacoes e reservas ainda ficam apenas na memoria e sao apagados ao recarregar a pagina.
+Follows, contatos, mensagens e fotos de perfil ficam persistidos neste dispositivo. Contas, saldos, depositos, envios, moderacoes e reservas ainda ficam apenas na memoria e sao apagados ao recarregar a pagina.
 
 A versao web e um PWA: no Chrome/Edge/Safari e possivel instalar o NextStar na tela inicial ou como aplicativo. O service worker faz cache dos assets para uso offline basico apos a primeira visita.
 
@@ -82,7 +84,7 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 7. Abra `Perfil`, toque no menu de tres barras e entre em `Carteira`.
 8. Use `Depositar` para adicionar saldo simulado.
 9. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
-10. Use o icone ao lado do nome para abrir o perfil e alternar entre os videos publicados.
+10. Toque no avatar ou no nome do autor para abrir o perfil e alternar entre os videos publicados.
 11. Pesquise uma conta pela aba `Pesquisar`; usuarios sem video tambem aparecem e abrem um perfil publico vazio.
 12. No perfil visitado, toque no icone de mensagem, escreva uma mensagem e confirme que ela aparece na conversa.
 13. Volte para a lista de conversas e reabra o historico criado durante a sessao.
@@ -90,9 +92,11 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 15. Perfis sem bolsa em captacao exibem a acao de investimento desabilitada.
 16. Ao abrir um video pela galeria, use a seta no Inicio para retornar ao mesmo perfil.
 17. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
-18. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
-19. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
-20. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
+18. Use `Investir` na legenda expandida e confirme que a bolsa do mesmo perfil foi aberta.
+19. Em Perfil > Configuracoes, escolha uma foto e confira a mesma imagem no Inicio e na Pesquisa.
+20. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
+21. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
+22. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
 
 ## Antes da abertura ao publico
 

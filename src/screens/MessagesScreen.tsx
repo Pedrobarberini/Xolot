@@ -9,6 +9,7 @@ import {
   UserPlus
 } from "lucide-react-native";
 import {
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -17,7 +18,11 @@ import {
 } from "react-native";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import { DirectMessage, MessageContact } from "../types";
+import {
+  DirectMessage,
+  MessageContact,
+  ProfileAvatarsByProfile
+} from "../types";
 
 function getInitials(name: string) {
   return name
@@ -51,7 +56,8 @@ export function MessagesScreen({
   onFindProfiles,
   onSelectContact,
   onSendMessage,
-  onToggleFollow
+  onToggleFollow,
+  profileAvatars
 }: {
   activeContactId: string | null;
   contacts: MessageContact[];
@@ -62,6 +68,7 @@ export function MessagesScreen({
   onSelectContact: (contactId: string | null) => void;
   onSendMessage: (contactId: string, body: string) => void;
   onToggleFollow: (profileId: string) => void;
+  profileAvatars: ProfileAvatarsByProfile;
 }) {
   const [draft, setDraft] = useState("");
   const followingSet = useMemo(
@@ -128,9 +135,18 @@ export function MessagesScreen({
             <ArrowLeft color={colors.text} size={21} />
           </Pressable>
           <View style={styles.messagesContactAvatar}>
-            <Text style={styles.messagesContactAvatarText}>
-              {getInitials(activeContact.name)}
-            </Text>
+            {profileAvatars[activeContact.profileId] ? (
+              <Image
+                accessibilityIgnoresInvertColors
+                resizeMode="cover"
+                source={{ uri: profileAvatars[activeContact.profileId] }}
+                style={styles.profileAvatarImage}
+              />
+            ) : (
+              <Text style={styles.messagesContactAvatarText}>
+                {getInitials(activeContact.name)}
+              </Text>
+            )}
           </View>
           <View style={styles.messagesContactIdentity}>
             <Text numberOfLines={1} style={styles.messagesContactName}>
@@ -311,9 +327,18 @@ export function MessagesScreen({
         ]}
       >
         <View style={styles.messagesContactAvatar}>
-          <Text style={styles.messagesContactAvatarText}>
-            {getInitials(contact.name)}
-          </Text>
+          {profileAvatars[contact.profileId] ? (
+            <Image
+              accessibilityIgnoresInvertColors
+              resizeMode="cover"
+              source={{ uri: profileAvatars[contact.profileId] }}
+              style={styles.profileAvatarImage}
+            />
+          ) : (
+            <Text style={styles.messagesContactAvatarText}>
+              {getInitials(contact.name)}
+            </Text>
+          )}
         </View>
         <View style={styles.messagesContactIdentity}>
           <Text numberOfLines={1} style={styles.messagesContactName}>
