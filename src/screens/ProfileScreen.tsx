@@ -15,7 +15,6 @@ import {
 } from "lucide-react-native";
 import {
   Alert,
-  Image,
   Modal,
   Platform,
   Pressable,
@@ -25,21 +24,30 @@ import {
   TextInput,
   View
 } from "react-native";
+import { AvatarPositionModal } from "../components/AvatarPositionModal";
 import {
   ProfileGalleryVideo,
   ProfileVideoGallery
 } from "../components/ProfileVideoGallery";
+import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import { ScreenTransition } from "../components/AppShell";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import { AppUser, AthleteFund, Investment, Player, VideoSubmission } from "../types";
+import {
+  AppUser,
+  AthleteFund,
+  Investment,
+  Player,
+  ProfileAvatar,
+  VideoSubmission
+} from "../types";
 import { formatBRL } from "../utils/investment";
 import { PortfolioScreen } from "./WalletScreen";
 
 type ProfileView = "overview" | "wallet" | "settings";
 
 export function ProfileScreen({
-  avatarUri,
+  avatar,
   balance,
   followersCount,
   followingCount,
@@ -54,13 +62,13 @@ export function ProfileScreen({
   submissions,
   user
 }: {
-  avatarUri?: string;
+  avatar?: ProfileAvatar;
   balance: number;
   followersCount: number;
   followingCount: number;
   fund?: AthleteFund;
   investments: Investment[];
-  onChangeAvatar: (uri: string | null) => void;
+  onChangeAvatar: (avatar: ProfileAvatar | null) => void;
   onDeposit: (amount: number) => void;
   onOpenFund: (
     player: Player,
@@ -74,6 +82,7 @@ export function ProfileScreen({
   user: AppUser;
 }) {
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
+  const [isAvatarPositionVisible, setIsAvatarPositionVisible] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
   const [profileView, setProfileView] = useState<ProfileView>("overview");
   const profileNavigationTimer = useRef<ReturnType<typeof setTimeout> | null>(
@@ -129,6 +138,18 @@ export function ProfileScreen({
     }, 220);
   }
 
+  const avatarPositionModal = (
+    <AvatarPositionModal
+      avatar={avatar}
+      onClose={() => setIsAvatarPositionVisible(false)}
+      onSave={(nextAvatar) => {
+        onChangeAvatar(nextAvatar);
+        setIsAvatarPositionVisible(false);
+      }}
+      visible={isAvatarPositionVisible}
+    />
+  );
+
   if (profileView === "wallet") {
     return (
       <ScreenTransition key="wallet" style={styles.profileViewScene}>
@@ -149,7 +170,7 @@ export function ProfileScreen({
           <SettingsView
             accountSubmissions={accountSubmissions}
             autoplayEnabled={autoplayEnabled}
-            avatarUri={avatarUri}
+            avatar={avatar}
             fund={fund}
             investments={investments}
             notificationsEnabled={notificationsEnabled}
@@ -158,6 +179,7 @@ export function ProfileScreen({
             onChangeAutoplay={setAutoplayEnabled}
             onChangeNotifications={setNotificationsEnabled}
             onRequestOpenFund={() => setIsFundModalVisible(true)}
+            onRequestAvatarPosition={() => setIsAvatarPositionVisible(true)}
             player={player}
             user={user}
           />
@@ -173,6 +195,7 @@ export function ProfileScreen({
             visible={isFundModalVisible}
           />
         ) : null}
+        {avatarPositionModal}
       </>
     );
   }
@@ -183,18 +206,21 @@ export function ProfileScreen({
         <ScrollView contentContainerStyle={styles.screenContent}>
           <View style={styles.profileHero}>
             <View style={styles.profileHeroTopRow}>
-              <View style={styles.profileAvatar}>
-                {avatarUri ? (
-                  <Image
-                    accessibilityIgnoresInvertColors
-                    resizeMode="cover"
-                    source={{ uri: avatarUri }}
-                    style={styles.profileAvatarImage}
-                  />
+              <Pressable
+                accessibilityLabel={
+                  avatar ? "Ajustar enquadramento da foto" : "Foto do perfil"
+                }
+                accessibilityRole={avatar ? "button" : undefined}
+                disabled={!avatar}
+                onPress={() => setIsAvatarPositionVisible(true)}
+                style={styles.profileAvatar}
+              >
+                {avatar ? (
+                  <ProfileAvatarImage avatar={avatar} />
                 ) : (
                   <Text style={styles.profileAvatarText}>{profileInitials}</Text>
                 )}
-              </View>
+              </Pressable>
               <View style={styles.profileTitleBlock}>
                 <Text style={styles.profileName}>{user.name}</Text>
                 <Text style={styles.profileMeta}>
@@ -275,6 +301,7 @@ export function ProfileScreen({
         showWallet={user.role === "Usuario"}
         visible={isOptionsVisible}
       />
+      {avatarPositionModal}
     </>
   );
 }
@@ -351,7 +378,7 @@ function ProfileOptionsMenu({
 function SettingsView({
   accountSubmissions,
   autoplayEnabled,
-  avatarUri,
+  avatar,
   fund,
   investments,
   notificationsEnabled,
@@ -359,20 +386,22 @@ function SettingsView({
   onChangeAvatar,
   onChangeAutoplay,
   onChangeNotifications,
+  onRequestAvatarPosition,
   onRequestOpenFund,
   player,
   user
 }: {
   accountSubmissions: VideoSubmission[];
   autoplayEnabled: boolean;
-  avatarUri?: string;
+  avatar?: ProfileAvatar;
   fund?: AthleteFund;
   investments: Investment[];
   notificationsEnabled: boolean;
   onBack: () => void;
-  onChangeAvatar: (uri: string | null) => void;
+  onChangeAvatar: (avatar: ProfileAvatar | null) => void;
   onChangeAutoplay: (value: boolean) => void;
   onChangeNotifications: (value: boolean) => void;
+  onRequestAvatarPosition: () => void;
   onRequestOpenFund: () => void;
   player?: Player;
   user: AppUser;
@@ -410,8 +439,7 @@ function SettingsView({
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
+        allowsEditing: false,
         base64: true,
         mediaTypes: ["images"],
         quality: 0.5
@@ -426,7 +454,14 @@ function SettingsView({
         ? `data:${asset.mimeType ?? "image/jpeg"};base64,${asset.base64}`
         : asset.uri;
 
-      onChangeAvatar(persistentUri);
+      onChangeAvatar({
+        focusX: 50,
+        focusY: 50,
+        sourceHeight: asset.height,
+        sourceWidth: asset.width,
+        uri: persistentUri
+      });
+      onRequestAvatarPosition();
     } catch {
       Alert.alert(
         "Nao foi possivel abrir a galeria",
@@ -454,20 +489,23 @@ function SettingsView({
       <View style={styles.settingsSection}>
         <Text style={styles.settingsSectionTitle}>Foto do perfil</Text>
         <View style={styles.settingsAvatarRow}>
-          <View style={styles.settingsAvatarPreview}>
-            {avatarUri ? (
-              <Image
-                accessibilityIgnoresInvertColors
-                resizeMode="cover"
-                source={{ uri: avatarUri }}
-                style={styles.profileAvatarImage}
-              />
+          <Pressable
+            accessibilityLabel={
+              avatar ? "Ajustar enquadramento da foto" : "Foto do perfil"
+            }
+            accessibilityRole={avatar ? "button" : undefined}
+            disabled={!avatar}
+            onPress={onRequestAvatarPosition}
+            style={styles.settingsAvatarPreview}
+          >
+            {avatar ? (
+              <ProfileAvatarImage avatar={avatar} />
             ) : (
               <Text style={styles.settingsAvatarInitials}>
                 {profileInitials}
               </Text>
             )}
-          </View>
+          </Pressable>
           <View style={styles.settingsAvatarBody}>
             <Text style={styles.settingsRowTitle}>Imagem publica</Text>
             <Text style={styles.settingsRowDescription}>
@@ -477,17 +515,17 @@ function SettingsView({
         </View>
         <View style={styles.settingsAvatarActions}>
           <Pressable
-            accessibilityLabel={avatarUri ? "Trocar foto do perfil" : "Escolher foto do perfil"}
+            accessibilityLabel={avatar ? "Trocar foto do perfil" : "Escolher foto do perfil"}
             accessibilityRole="button"
             onPress={pickProfilePhoto}
             style={styles.settingsAvatarButton}
           >
             <Camera color={colors.onPrimary} size={18} />
             <Text style={styles.settingsAvatarButtonText}>
-              {avatarUri ? "Trocar foto" : "Escolher foto"}
+              {avatar ? "Trocar foto" : "Escolher foto"}
             </Text>
           </Pressable>
-          {avatarUri ? (
+          {avatar ? (
             <Pressable
               accessibilityLabel="Remover foto do perfil"
               accessibilityRole="button"

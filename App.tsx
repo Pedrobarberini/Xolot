@@ -322,7 +322,7 @@ export default function App() {
             <>
               <ScreenFrame key={`investment-${investmentPlayer.id}`}>
                 <InvestmentScreen
-                  avatarUri={profileAvatars[investmentPlayer.profileId]}
+                  avatar={profileAvatars[investmentPlayer.profileId]}
                   fund={investmentFund}
                   onBack={() => setInvestmentPlayer(null)}
                   onInvest={(player, amount) => {
@@ -348,7 +348,7 @@ export default function App() {
               >
                 <PublicProfileScreen
                   account={selectedProfileAccount}
-                  avatarUri={
+                  avatar={
                     selectedProfileId
                       ? profileAvatars[selectedProfileId]
                       : undefined
@@ -512,7 +512,7 @@ export default function App() {
               {tab === "profile" ? (
                 <ScreenFrame animated={false} key="profile">
                   <ProfileScreen
-                    avatarUri={
+                    avatar={
                       ownProfileId ? profileAvatars[ownProfileId] : undefined
                     }
                     balance={walletBalance}
@@ -535,9 +535,9 @@ export default function App() {
                       }
                     }}
                     onDeposit={handleDeposit}
-                    onChangeAvatar={(uri) => {
+                    onChangeAvatar={(avatar) => {
                       if (ownProfileId) {
-                        setProfileAvatar(ownProfileId, uri);
+                        setProfileAvatar(ownProfileId, avatar);
                       }
                     }}
                     onSignOut={signOutSession}

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { ChevronRight, Search, X } from "lucide-react-native";
-import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import {
@@ -187,11 +188,8 @@ export function SearchScreen({
             >
               <View style={styles.searchProfileAvatar}>
                 {profileAvatars[profile.profileId] ? (
-                  <Image
-                    accessibilityIgnoresInvertColors
-                    resizeMode="cover"
-                    source={{ uri: profileAvatars[profile.profileId] }}
-                    style={styles.profileAvatarImage}
+                  <ProfileAvatarImage
+                    avatar={profileAvatars[profile.profileId]}
                   />
                 ) : (
                   <Text style={styles.searchProfileAvatarText}>{initials}</Text>

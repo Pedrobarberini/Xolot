@@ -3,7 +3,7 @@ import {
   loadProfileAvatars,
   saveProfileAvatars
 } from "../services/profileStorage";
-import { ProfileAvatarsByProfile } from "../types";
+import { ProfileAvatar, ProfileAvatarsByProfile } from "../types";
 
 export function useProfileActions() {
   const [profileAvatars, setProfileAvatars] =
@@ -35,14 +35,14 @@ export function useProfileActions() {
     saveProfileAvatars(profileAvatars).catch(() => undefined);
   }, [isProfileStateLoaded, profileAvatars]);
 
-  function setProfileAvatar(profileId: string, uri: string | null) {
+  function setProfileAvatar(profileId: string, avatar: ProfileAvatar | null) {
     if (!profileId) {
       return;
     }
 
     setProfileAvatars((current) => {
-      if (uri?.trim()) {
-        return { ...current, [profileId]: uri };
+      if (avatar?.uri.trim()) {
+        return { ...current, [profileId]: avatar };
       }
 
       const nextAvatars = { ...current };

@@ -13,11 +13,17 @@ import {
   getScoreColor
 } from "../actions/appActions";
 import { BalanceLine } from "../components/Navigation";
+import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import { NEXTSTAR_SYMBOL } from "../constants/assets";
 import { FEED_TEXT_LIMIT_COMPACT, FEED_TEXT_LIMIT_WIDE, USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import { AthleteFund, Player, ProfileAvatarsByProfile } from "../types";
+import {
+  AthleteFund,
+  Player,
+  ProfileAvatar,
+  ProfileAvatarsByProfile
+} from "../types";
 import { CardPalette } from "../ui/types";
 import { formatBRL, formatPercent } from "../utils/investment";
 
@@ -191,7 +197,7 @@ export function FeedScreen({
             }}
           >
             <FeedReel
-              avatarUri={profileAvatars[player.profileId]}
+              avatar={profileAvatars[player.profileId]}
               currentUserId={currentUserId}
               fund={funds.find((item) => item.profileId === player.profileId)}
               isFollowing={followingProfileIds.includes(player.profileId)}
@@ -233,7 +239,7 @@ export function FeedScreen({
 }
 
 function FeedReel({
-  avatarUri,
+  avatar,
   currentUserId,
   fund,
   isFollowing,
@@ -245,7 +251,7 @@ function FeedReel({
   player,
   reelHeight
 }: {
-  avatarUri?: string;
+  avatar?: ProfileAvatar;
   currentUserId: string;
   fund?: AthleteFund;
   isFollowing: boolean;
@@ -487,13 +493,8 @@ function FeedReel({
                   pressed ? styles.buttonPressed : null
                 ]}
               >
-                {avatarUri ? (
-                  <Image
-                    accessibilityIgnoresInvertColors
-                    resizeMode="cover"
-                    source={{ uri: avatarUri }}
-                    style={styles.profileAvatarImage}
-                  />
+                {avatar ? (
+                  <ProfileAvatarImage avatar={avatar} />
                 ) : isWide ? (
                   <Text
                     style={[styles.feedAvatarText, { color: palette.accent }]}

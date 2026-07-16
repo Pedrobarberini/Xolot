@@ -770,3 +770,29 @@ Criterios de aceite:
 - Sair da conta limpa apenas a sessao ativa e preserva os dados cadastrados.
 - O CI bloqueia o deploy quando os testes do repository falham.
 - Video local continua identificado como temporario ate existir upload remoto.
+
+### Task FEATURE-032 - HUD de enquadramento da foto de perfil
+
+Tipo: Frontend/Dados/UX
+
+Objetivo: permitir que o usuario controle qual area da foto aparece nos avatares circulares do aplicativo.
+
+Tasks:
+
+- [x] Transformar o avatar persistido em dado estruturado com URI, foco e dimensoes.
+- [x] Migrar automaticamente o formato antigo salvo apenas como URI.
+- [x] Criar componente compartilhado para renderizar o enquadramento.
+- [x] Abrir a HUD ao tocar na foto do perfil ou na previa de Configuracoes.
+- [x] Disponibilizar nove pontos focais com previa imediata.
+- [x] Abrir a HUD logo depois de escolher uma nova foto.
+- [x] Aplicar o enquadramento no Inicio, Perfil, Pesquisa, Mensagens e investimento.
+- [x] Adicionar testes de migracao, normalizacao e serializacao.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- Tocar na foto propria abre a HUD sem navegar para outra pagina.
+- Cancelar preserva o enquadramento anterior.
+- Salvar atualiza imediatamente todas as ocorrencias do avatar.
+- O ponto focal permanece salvo depois de recarregar o aplicativo.
+- Fotos do formato antigo continuam visiveis com foco central.

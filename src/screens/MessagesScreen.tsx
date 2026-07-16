@@ -9,13 +9,13 @@ import {
   UserPlus
 } from "lucide-react-native";
 import {
-  Image,
   Pressable,
   ScrollView,
   Text,
   TextInput,
   View
 } from "react-native";
+import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import {
@@ -136,11 +136,8 @@ export function MessagesScreen({
           </Pressable>
           <View style={styles.messagesContactAvatar}>
             {profileAvatars[activeContact.profileId] ? (
-              <Image
-                accessibilityIgnoresInvertColors
-                resizeMode="cover"
-                source={{ uri: profileAvatars[activeContact.profileId] }}
-                style={styles.profileAvatarImage}
+              <ProfileAvatarImage
+                avatar={profileAvatars[activeContact.profileId]}
               />
             ) : (
               <Text style={styles.messagesContactAvatarText}>
@@ -328,12 +325,7 @@ export function MessagesScreen({
       >
         <View style={styles.messagesContactAvatar}>
           {profileAvatars[contact.profileId] ? (
-            <Image
-              accessibilityIgnoresInvertColors
-              resizeMode="cover"
-              source={{ uri: profileAvatars[contact.profileId] }}
-              style={styles.profileAvatarImage}
-            />
+            <ProfileAvatarImage avatar={profileAvatars[contact.profileId]} />
           ) : (
             <Text style={styles.messagesContactAvatarText}>
               {getInitials(contact.name)}

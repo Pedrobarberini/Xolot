@@ -2777,11 +2777,6 @@ export const styles = StyleSheet.create({
     overflow: "hidden",
     width: 50
   },
-  profileAvatarImage: {
-    borderRadius: 999,
-    height: "100%",
-    width: "100%"
-  },
   profileAvatarText: {
     color: colors.primary,
     fontSize: 15,
@@ -3216,6 +3211,123 @@ export const styles = StyleSheet.create({
   settingsAvatarRemoveButtonText: {
     color: colors.danger,
     fontSize: 12,
+    fontWeight: "900"
+  },
+  avatarPositionModalRoot: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    padding: 20
+  },
+  avatarPositionBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(5, 18, 12, 0.56)"
+  },
+  avatarPositionDialog: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    elevation: 20,
+    maxWidth: 360,
+    padding: 18,
+    shadowColor: "#000000",
+    shadowOffset: { height: 8, width: 0 },
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
+    width: "100%"
+  },
+  avatarPositionHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  avatarPositionTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: "900"
+  },
+  avatarPositionSubtitle: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 3
+  },
+  avatarPositionCloseButton: {
+    alignItems: "center",
+    height: 36,
+    justifyContent: "center",
+    width: 36
+  },
+  avatarPositionPreview: {
+    alignSelf: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.primary,
+    borderRadius: 999,
+    borderWidth: 3,
+    height: 210,
+    marginTop: 20,
+    overflow: "hidden",
+    position: "relative",
+    width: 210
+  },
+  avatarPositionGrid: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: "row",
+    flexWrap: "wrap"
+  },
+  avatarPositionGridCell: {
+    alignItems: "center",
+    borderColor: "rgba(255, 255, 255, 0.42)",
+    borderWidth: 0.5,
+    height: "33.333%",
+    justifyContent: "center",
+    width: "33.333%"
+  },
+  avatarPositionMarker: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderColor: colors.surface,
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 32,
+    justifyContent: "center",
+    shadowColor: "#000000",
+    shadowOffset: { height: 2, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    width: 32
+  },
+  avatarPositionActions: {
+    flexDirection: "row",
+    gap: 9,
+    marginTop: 20
+  },
+  avatarPositionCancelButton: {
+    alignItems: "center",
+    borderColor: colors.borderStrong,
+    borderRadius: 6,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 46
+  },
+  avatarPositionCancelText: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  avatarPositionSaveButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 46
+  },
+  avatarPositionSaveText: {
+    color: colors.onPrimary,
+    fontSize: 13,
     fontWeight: "900"
   },
   settingsRow: {

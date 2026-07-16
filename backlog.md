@@ -464,8 +464,12 @@ Objetivo: consolidar a identidade visual do perfil e reduzir passos entre descob
 
 Tasks:
 
-- [x] Adicionar selecao de foto em Configuracoes com recorte quadrado.
+- [x] Adicionar selecao de foto em Configuracoes com enquadramento personalizado.
 - [x] Adicionar acao para trocar e remover a foto.
+- [x] Abrir HUD de enquadramento ao tocar na foto escolhida.
+- [x] Permitir selecionar o ponto focal em uma grade de nove posicoes.
+- [x] Persistir ponto focal e dimensoes da imagem por perfil.
+- [x] Migrar automaticamente fotos antigas salvas apenas como URI.
 - [x] Persistir a foto por perfil com AsyncStorage.
 - [x] Exibir a foto no Inicio, Perfil, Pesquisa, Mensagens e pagina da bolsa.
 - [x] Manter iniciais como fallback quando nao houver foto.
@@ -481,6 +485,8 @@ Criterios de aceite:
 
 - A foto escolhida permanece depois de fechar e abrir o app no mesmo dispositivo.
 - Todas as superficies exibem a mesma foto para o mesmo `profileId`.
+- O enquadramento escolhido e mantido em todas as superficies e apos reiniciar.
+- Fotos salvas antes da HUD continuam carregando com foco central.
 - Tocar no nome do autor abre seu perfil, sem interferir no botao de follow.
 - `Investir` abre a bolsa do perfil exibido no reel e nunca a bolsa de outro atleta.
 - Perfil sem bolsa aberta nao permite iniciar aporte.

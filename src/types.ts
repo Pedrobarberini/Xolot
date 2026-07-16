@@ -83,7 +83,15 @@ export type FollowingByUser = Record<string, string[]>;
 
 export type MessageContactsByUser = Record<string, MessageContact[]>;
 
-export type ProfileAvatarsByProfile = Record<string, string>;
+export type ProfileAvatar = {
+  focusX: number;
+  focusY: number;
+  sourceHeight?: number;
+  sourceWidth?: number;
+  uri: string;
+};
+
+export type ProfileAvatarsByProfile = Record<string, ProfileAvatar>;
 
 export type UserRole = "Usuario" | "Admin";
 
