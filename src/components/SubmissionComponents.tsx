@@ -1,6 +1,7 @@
 import React from "react";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { Text, View } from "react-native";
+import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { styles } from "../styles/appStyles";
 import { VideoSubmission, VideoSubmissionStatus } from "../types";
 
@@ -11,8 +12,8 @@ export function SubmissionVideoPreview({
   compact?: boolean;
   uri: string;
 }) {
-  const previewPlayer = useVideoPlayer(uri, (player) => {
-    player.loop = true;
+  const resolvedVideo = useResolvedVideoSource(uri, {
+    allowEphemeralBrowserUri: !compact
   });
 
   return (
@@ -22,15 +23,44 @@ export function SubmissionVideoPreview({
         compact ? styles.submissionVideoPreviewCompact : null
       ]}
     >
-      <VideoView
-        allowsFullscreen
-        contentFit="contain"
-        nativeControls
-        player={previewPlayer}
-        playsInline
-        style={styles.submissionVideoPreviewMedia}
-        surfaceType="textureView"
-      />
+      {resolvedVideo.source ? (
+        <SubmissionVideoPlayer uri={resolvedVideo.source} />
+      ) : (
+        <VideoUnavailableState isLoading={resolvedVideo.status === "loading"} />
+      )}
+    </View>
+  );
+}
+
+function SubmissionVideoPlayer({ uri }: { uri: string | number }) {
+  const previewPlayer = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+  });
+
+  return (
+    <VideoView
+      allowsFullscreen
+      contentFit="contain"
+      nativeControls
+      player={previewPlayer}
+      playsInline
+      style={styles.submissionVideoPreviewMedia}
+      surfaceType="textureView"
+    />
+  );
+}
+
+function VideoUnavailableState({ isLoading }: { isLoading: boolean }) {
+  return (
+    <View style={styles.videoUnavailableState}>
+      <Text style={styles.videoUnavailableTitle}>
+        {isLoading ? "Carregando video..." : "Video indisponivel"}
+      </Text>
+      {!isLoading ? (
+        <Text style={styles.videoUnavailableBody}>
+          Este arquivo era temporario. Envie o video novamente.
+        </Text>
+      ) : null}
     </View>
   );
 }

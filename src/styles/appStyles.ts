@@ -585,6 +585,33 @@ export const styles = StyleSheet.create({
     position: "relative",
     top: 0
   },
+  videoUnavailableState: {
+    alignItems: "center",
+    backgroundColor: "#0D1511",
+    justifyContent: "center",
+    paddingHorizontal: 24
+  },
+  videoUnavailableTitle: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "900",
+    textAlign: "center"
+  },
+  videoUnavailableBody: {
+    color: "rgba(255, 255, 255, 0.72)",
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 17,
+    marginTop: 6,
+    maxWidth: 280,
+    textAlign: "center"
+  },
+  videoUnavailableCompactText: {
+    color: "rgba(255, 255, 255, 0.78)",
+    fontSize: 10,
+    fontWeight: "900",
+    textAlign: "center"
+  },
   feedVideoFloatingControls: {
     alignItems: "center",
     gap: 7,

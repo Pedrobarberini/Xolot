@@ -6,6 +6,7 @@ import { formatVideoDuration, formatVideoFileSize, getVideoTitleFromFileName } f
 import { LabeledInput } from "../components/Navigation";
 import { SubmissionList, SubmissionVideoPreview } from "../components/SubmissionComponents";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
+import { persistPickedVideo } from "../services/videoStorage";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, VideoSubmission } from "../types";
@@ -20,8 +21,11 @@ type SubmissionDraft = {
 
 type SelectedVideoMeta = {
   durationMs?: number;
+  file?: File;
   fileName: string;
   fileSize?: number;
+  mimeType?: string;
+  uri: string;
 };
 
 const emptySubmissionDraft: SubmissionDraft = {
@@ -47,6 +51,7 @@ export function SubmitVideoScreen({
   const [selectedVideo, setSelectedVideo] = useState<SelectedVideoMeta | null>(
     null
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSubmittedId, setLastSubmittedId] = useState<string | null>(null);
   const submissionToastProgress = useRef(new Animated.Value(0)).current;
   const age = user.age ?? 0;
@@ -69,7 +74,21 @@ export function SubmitVideoScreen({
       ? null
       : "Confirme a autorizacao do responsavel legal."
   ].filter((issue): issue is string => Boolean(issue));
-  const canSubmit = submissionIssues.length === 0;
+  const canSubmit = submissionIssues.length === 0 && !isSubmitting;
+
+  useEffect(() => {
+    const selectedUri = selectedVideo?.uri;
+
+    return () => {
+      if (
+        Platform.OS === "web" &&
+        selectedUri?.startsWith("blob:") &&
+        typeof URL !== "undefined"
+      ) {
+        URL.revokeObjectURL(selectedUri);
+      }
+    };
+  }, [selectedVideo?.uri]);
 
   useEffect(() => {
     if (!lastSubmittedId) {
@@ -140,8 +159,11 @@ export function SubmitVideoScreen({
 
       setSelectedVideo({
         durationMs: asset.duration ?? undefined,
+        file: asset.file,
         fileName,
-        fileSize: asset.fileSize
+        fileSize: asset.fileSize,
+        mimeType: asset.mimeType,
+        uri: asset.uri
       });
       setDraft((current) => ({
         ...current,
@@ -163,32 +185,56 @@ export function SubmitVideoScreen({
     updateDraft("videoLink", "");
   }
 
-  function submitDraft() {
+  async function submitDraft() {
+    if (!canSubmit) {
+      return;
+    }
+
     const id = `video-${Date.now()}`;
 
-    onSubmit({
-      id,
-      userId: user.id,
-      athleteName: user.name,
-      age,
-      city: user.city,
-      position: user.position,
-      club: user.club,
-      videoTitle: draft.videoTitle.trim(),
-      videoLink: draft.videoLink.trim(),
-      videoDurationMs: selectedVideo?.durationMs,
-      videoFileName: selectedVideo?.fileName,
-      videoFileSize: selectedVideo?.fileSize,
-      highlight: draft.highlight.trim(),
-      goals: draft.goals.trim() || "Objetivos ainda nao informados",
-      hasGuardianConsent: draft.hasGuardianConsent,
-      status: "Em revisao",
-      submittedAt: new Date().toISOString()
-    });
-    Keyboard.dismiss();
-    setLastSubmittedId(id);
-    setSelectedVideo(null);
-    setDraft(emptySubmissionDraft);
+    setIsSubmitting(true);
+
+    try {
+      const videoLink = selectedVideo
+        ? await persistPickedVideo(id, {
+            file: selectedVideo.file,
+            fileName: selectedVideo.fileName,
+            mimeType: selectedVideo.mimeType,
+            uri: selectedVideo.uri
+          })
+        : draft.videoLink.trim();
+
+      onSubmit({
+        id,
+        userId: user.id,
+        athleteName: user.name,
+        age,
+        city: user.city,
+        position: user.position,
+        club: user.club,
+        videoTitle: draft.videoTitle.trim(),
+        videoLink,
+        videoDurationMs: selectedVideo?.durationMs,
+        videoFileName: selectedVideo?.fileName,
+        videoFileSize: selectedVideo?.fileSize,
+        highlight: draft.highlight.trim(),
+        goals: draft.goals.trim() || "Objetivos ainda nao informados",
+        hasGuardianConsent: draft.hasGuardianConsent,
+        status: "Em revisao",
+        submittedAt: new Date().toISOString()
+      });
+      Keyboard.dismiss();
+      setLastSubmittedId(id);
+      setSelectedVideo(null);
+      setDraft(emptySubmissionDraft);
+    } catch {
+      Alert.alert(
+        "Nao foi possivel salvar o video",
+        "O arquivo nao foi enviado. Verifique o espaco do navegador e tente novamente."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -347,7 +393,9 @@ export function SubmitVideoScreen({
           ]}
         >
           <Send color={colors.onPrimary} size={19} />
-          <Text style={styles.primaryButtonText}>Enviar para moderacao</Text>
+          <Text style={styles.primaryButtonText}>
+            {isSubmitting ? "Salvando video..." : "Enviar para moderacao"}
+          </Text>
         </Pressable>
       </View>
 

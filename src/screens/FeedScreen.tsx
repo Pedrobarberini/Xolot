@@ -12,6 +12,7 @@ import {
   getPointerLocationY,
   getScoreColor
 } from "../actions/appActions";
+import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { BalanceLine } from "../components/Navigation";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import { NEXTSTAR_SYMBOL } from "../constants/assets";
@@ -64,10 +65,20 @@ export function FeedScreen({
   const pageHeight = feedHeight || height;
   const lastFeedIndex = Math.max(feedPlayers.length - 1, 0);
 
+  function activateFeedIndex(index: number) {
+    const safeIndex = Math.min(Math.max(index, 0), lastFeedIndex);
+
+    if (activeFeedIndexRef.current === safeIndex) {
+      return;
+    }
+
+    activeFeedIndexRef.current = safeIndex;
+    setActiveFeedIndex(safeIndex);
+  }
+
   useEffect(() => {
     if (activeFeedIndex > lastFeedIndex) {
-      activeFeedIndexRef.current = lastFeedIndex;
-      setActiveFeedIndex(lastFeedIndex);
+      activateFeedIndex(lastFeedIndex);
     }
   }, [activeFeedIndex, lastFeedIndex]);
 
@@ -84,8 +95,7 @@ export function FeedScreen({
       return;
     }
 
-    activeFeedIndexRef.current = targetIndex;
-    setActiveFeedIndex(targetIndex);
+    activateFeedIndex(targetIndex);
     const frame = requestAnimationFrame(() => {
       const sectionOffset = sectionOffsetsRef.current[targetIndex];
 
@@ -143,8 +153,7 @@ export function FeedScreen({
       lastFeedIndex
     );
 
-    activeFeedIndexRef.current = nextIndex;
-    setActiveFeedIndex(nextIndex);
+    activateFeedIndex(nextIndex);
     gestureSettledRef.current = true;
     scrollToFeed(nextIndex);
   }
@@ -165,6 +174,11 @@ export function FeedScreen({
         decelerationRate="normal"
         nativeID="nextstar-feed-scroll"
         ref={feedScrollRef}
+        onScroll={(event) => {
+          activateFeedIndex(
+            getNearestFeedIndex(event.nativeEvent.contentOffset.y)
+          );
+        }}
         onMomentumScrollEnd={(event) => {
           settleFeedGesture(event.nativeEvent.contentOffset.y);
         }}
@@ -175,8 +189,7 @@ export function FeedScreen({
             Math.max(getNearestFeedIndex(offsetY), 0),
             lastFeedIndex
           );
-          activeFeedIndexRef.current = gestureStartIndexRef.current;
-          setActiveFeedIndex(gestureStartIndexRef.current);
+          activateFeedIndex(gestureStartIndexRef.current);
           gestureStartOffsetRef.current = offsetY;
           gestureSettledRef.current = false;
         }}
@@ -978,17 +991,7 @@ function FeedVideoBox({
   );
 }
 
-function FeedVideoPlayback({
-  accent,
-  caption,
-  durationLabel,
-  hasAudio,
-  isActive,
-  isWide,
-  onAccent,
-  trackColor,
-  uri
-}: {
+type FeedVideoPlaybackProps = {
   accent: string;
   caption: string;
   durationLabel: string;
@@ -998,7 +1001,42 @@ function FeedVideoPlayback({
   onAccent: string;
   trackColor: string;
   uri: string | number;
-}) {
+};
+
+function FeedVideoPlayback(props: FeedVideoPlaybackProps) {
+  const resolvedVideo = useResolvedVideoSource(props.uri);
+
+  if (!resolvedVideo.source) {
+    return (
+      <View style={[styles.feedVideoPlayback, styles.videoUnavailableState]}>
+        <Text style={styles.videoUnavailableTitle}>
+          {resolvedVideo.status === "loading"
+            ? "Carregando video..."
+            : "Video indisponivel"}
+        </Text>
+        {resolvedVideo.status === "unavailable" ? (
+          <Text style={styles.videoUnavailableBody}>
+            O arquivo temporario expirou. O atleta precisa reenviar este video.
+          </Text>
+        ) : null}
+      </View>
+    );
+  }
+
+  return <ResolvedFeedVideoPlayback {...props} uri={resolvedVideo.source} />;
+}
+
+function ResolvedFeedVideoPlayback({
+  accent,
+  caption,
+  durationLabel,
+  hasAudio,
+  isActive,
+  isWide,
+  onAccent,
+  trackColor,
+  uri
+}: FeedVideoPlaybackProps) {
   const videoViewRef = useRef<VideoView | null>(null);
   const [playbackTime, setPlaybackTime] = useState(0);
   const [seekTrackWidth, setSeekTrackWidth] = useState(0);
@@ -1165,10 +1203,12 @@ function FeedVideoPlayback({
   useEffect(() => {
     if (isActive) {
       videoPlayer.play();
-      return;
+    } else {
+      videoPlayer.pause();
+      setIsVolumeControlVisible(false);
     }
 
-    videoPlayer.pause();
+    return () => videoPlayer.pause();
   }, [isActive, videoPlayer]);
 
   function togglePlayback() {

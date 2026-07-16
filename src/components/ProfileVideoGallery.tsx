@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { Play } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
+import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 
@@ -67,6 +68,22 @@ export function ProfileVideoGallery({
 }
 
 function ProfileGalleryThumbnail({ uri }: { uri: string | number }) {
+  const resolvedVideo = useResolvedVideoSource(uri);
+
+  if (!resolvedVideo.source) {
+    return (
+      <View style={[styles.profileGalleryMedia, styles.videoUnavailableState]}>
+        <Text style={styles.videoUnavailableCompactText}>
+          {resolvedVideo.status === "loading" ? "Carregando..." : "Reenvie o video"}
+        </Text>
+      </View>
+    );
+  }
+
+  return <ResolvedProfileGalleryThumbnail uri={resolvedVideo.source} />;
+}
+
+function ResolvedProfileGalleryThumbnail({ uri }: { uri: string | number }) {
   const thumbnailPlayer = useVideoPlayer(uri);
 
   useEffect(() => {

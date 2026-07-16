@@ -147,6 +147,10 @@ Objetivo: substituir links temporarios por upload real de arquivo.
 
 Tasks:
 
+- [x] Persistir provisoriamente no IndexedDB os videos escolhidos no navegador.
+- [x] Salvar no estado apenas uma referencia duravel, sem serializar URLs `blob:` temporarias.
+- [x] Resolver a referencia local em Feed, Perfil e Admin depois de recarregar a pagina.
+- [x] Exibir fallback de reenvio para videos antigos cujo arquivo temporario ja expirou.
 - [ ] Definir provider de storage: Supabase Storage, S3, Cloudflare R2 ou Firebase Storage.
 - [ ] Criar endpoint para gerar URL assinada de upload.
 - [ ] Validar formato: mp4, mov ou webm.
@@ -206,8 +210,8 @@ Objetivo: deixar o feed pronto para uso publico.
 Tasks:
 
 - [ ] Implementar lista paginada de videos aprovados.
-- [ ] Reproduzir automaticamente apenas o video visivel.
-- [ ] Pausar videos fora da tela.
+- [x] Reproduzir automaticamente apenas o video visivel.
+- [x] Pausar videos fora da tela durante a troca de item.
 - [ ] Manter estado de mute por usuario.
 - [ ] Criar botao de compartilhar.
 - [ ] Criar botao de denunciar.

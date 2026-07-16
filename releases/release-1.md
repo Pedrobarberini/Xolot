@@ -922,3 +922,29 @@ Criterios de aceite:
 - Moderacao recebe os dados do perfil vinculados ao envio.
 - A postagem nao recebe nem exibe a biografia do atleta.
 - Alterar o perfil atualiza a fonte usada nos proximos envios.
+
+### Task FIX-038 - Reproducao exclusiva e persistencia local de video
+
+Tipo: Frontend/Dados/Correcao
+
+Objetivo: impedir reproducao simultanea no Inicio e preservar arquivos escolhidos depois de recarregar o navegador.
+
+Tasks:
+
+- [x] Atualizar o item ativo continuamente durante a rolagem do feed.
+- [x] Pausar o player anterior e fechar seu controle de volume.
+- [x] Persistir arquivos locais do navegador em um object store do IndexedDB.
+- [x] Salvar referencias `nextstar-video:` no estado principal.
+- [x] Resolver as referencias persistentes em Feed, Perfil, Admin e pre-visualizacoes.
+- [x] Revogar URLs de objeto quando o player deixa a tela.
+- [x] Tratar URLs `blob:` antigas como indisponiveis e orientar o reenvio.
+- [x] Cobrir a referencia persistente e a deteccao de URLs temporarias com testes.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- Apenas o video mais visivel pode permanecer em reproducao.
+- O video anterior pausa ainda durante a troca de item.
+- Novo video selecionado continua disponivel apos atualizar a pagina no mesmo navegador.
+- Video temporario antigo nao fica apenas preto: a interface solicita o reenvio.
+- Upload definitivo entre dispositivos continua registrado em `P0-004` como dependencia de backend/storage.
