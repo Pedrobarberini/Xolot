@@ -31,6 +31,8 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Legenda expandida do feed mostra bolsa aberta, valores captados, meta e progresso real.
 - Envio por galeria ou link direto, com dados do atleta reutilizados do perfil, validacao e confirmacao animada.
 - A biografia permanece exclusiva do perfil e nao e copiada para as postagens.
+- Nome publico e `@username` sao identidades separadas: nomes podem se repetir, usernames e emails nao.
+- A pesquisa encontra atletas pelo nome ou username, e mensagens para a propria conta dispensam follow.
 - Videos escolhidos no navegador ficam no IndexedDB e sobrevivem ao recarregamento local da pagina.
 - O Inicio pausa o video anterior assim que outro item se torna o mais visivel.
 - Moderacao local por perfil Admin: aprovar, pedir ajustes ou reprovar.

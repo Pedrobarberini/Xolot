@@ -22,6 +22,7 @@ export type Player = {
   profileId: string;
   ownerUserId?: string;
   name: string;
+  username?: string;
   age: number;
   city: string;
   position: string;
@@ -69,6 +70,7 @@ export type MessageContact = {
   profileId: string;
   name: string;
   subtitle: string;
+  username?: string;
 };
 
 export type DirectMessage = {
@@ -111,6 +113,7 @@ export type AppUser = AccountProfile & {
   id: string;
   email: string;
   role: UserRole;
+  username: string;
   kycStatus: KycStatus;
   acceptedTerms: boolean;
   passwordHash?: string;

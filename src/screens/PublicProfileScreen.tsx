@@ -50,6 +50,7 @@ export function PublicProfileScreen({
   walletBalance: number;
 }) {
   const profileName = account?.name ?? player?.name ?? "Perfil NextStar";
+  const profileUsername = account?.username ?? player?.username;
   const initials = profileName
     .split(" ")
     .slice(0, 2)
@@ -103,6 +104,11 @@ export function PublicProfileScreen({
               >
                 {profileName}
               </Text>
+              {profileUsername ? (
+                <Text numberOfLines={1} style={styles.profileUsername}>
+                  @{profileUsername}
+                </Text>
+              ) : null}
               <Text
                 numberOfLines={2}
                 style={[styles.profileMeta, styles.publicProfileMeta]}

@@ -948,3 +948,29 @@ Criterios de aceite:
 - Novo video selecionado continua disponivel apos atualizar a pagina no mesmo navegador.
 - Video temporario antigo nao fica apenas preto: a interface solicita o reenvio.
 - Upload definitivo entre dispositivos continua registrado em `P0-004` como dependencia de backend/storage.
+
+### Task FIX-039 - Identidade unica e conversa com a propria conta
+
+Tipo: Frontend/Dados/Correcao
+
+Objetivo: separar nome publico de username, impedir contas duplicadas e remover a regra de follow ao enviar mensagens para si mesmo.
+
+Tasks:
+
+- [x] Adicionar `username` ao modelo de conta e elevar o schema local para a versao 3.
+- [x] Migrar contas antigas para usernames validos e unicos.
+- [x] Coletar nome do jogador e username durante o cadastro.
+- [x] Bloquear email e username ja cadastrados sem impedir nomes publicos iguais.
+- [x] Exibir username no cabecalho, Inicio, perfil proprio, perfil publico e mensagens.
+- [x] Pesquisar perfis por nome ou username.
+- [x] Tratar a propria conta como conversa liberada, sem follow ou solicitacao.
+- [x] Cobrir username, conflitos de identidade, migracao e acesso social com testes.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- Duas pessoas podem usar o mesmo nome publico.
+- Email e username nao podem ser reutilizados por outra conta no mesmo estado local.
+- Username e comparado sem diferenca entre letras maiusculas e minusculas.
+- Pesquisa por `Pedro Barberini` e por `@pedrobarberini` encontra o perfil correspondente.
+- Mensagem para a propria conta abre o compositor normalmente e nunca solicita follow.

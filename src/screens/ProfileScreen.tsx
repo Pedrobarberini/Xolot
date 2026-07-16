@@ -244,6 +244,9 @@ export function ProfileScreen({
               </Pressable>
               <View style={styles.profileTitleBlock}>
                 <Text style={styles.profileName}>{user.name}</Text>
+                <Text numberOfLines={1} style={styles.profileUsername}>
+                  @{user.username}
+                </Text>
                 <Text style={styles.profileMeta}>
                   {user.role === "Usuario" && user.profileCompleted
                     ? `${user.position} | ${user.city}`

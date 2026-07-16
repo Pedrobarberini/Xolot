@@ -534,6 +534,7 @@ function FeedReel({
                       { color: "rgba(255, 255, 255, 0.82)" }
                     ]}
                   >
+                    {player.username ? `@${player.username} | ` : ""}
                     {player.position} | {player.city}
                   </Text>
                 ) : null}
@@ -555,6 +556,7 @@ function FeedReel({
                       { color: palette.muted }
                     ]}
                   >
+                    {player.username ? `@${player.username} | ` : ""}
                     {player.position} | {player.city}
                   </Text>
                 ) : null}

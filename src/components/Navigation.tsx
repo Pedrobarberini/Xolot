@@ -61,7 +61,7 @@ export function Header({
         <View style={styles.headerTitleBlock}>
           <Text style={styles.brand}>NextStar</Text>
           <Text numberOfLines={1} style={styles.headerSubtitle}>
-            {user.role} | {user.name}
+            {user.role} | @{user.username}
           </Text>
         </View>
       </View>

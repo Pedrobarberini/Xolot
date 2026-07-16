@@ -20,6 +20,7 @@ type SearchProfile = {
   profileId: string;
   searchableText: string;
   user?: AppUser;
+  username?: string;
 };
 
 export function SearchScreen({
@@ -67,6 +68,8 @@ export function SearchScreen({
           profileId: player?.profileId ?? `profile-${account.id}`,
           searchableText: [
             account.name,
+            account.username,
+            `@${account.username}`,
             account.bio,
             account.position,
             account.city,
@@ -78,7 +81,8 @@ export function SearchScreen({
           ]
             .filter(Boolean)
             .join(" "),
-          user: account
+          user: account,
+          username: account.username
         };
       });
       const standaloneProfiles: SearchProfile[] = uniquePlayers
@@ -94,10 +98,12 @@ export function SearchScreen({
           profileId: player.profileId,
           searchableText: [
             player.name,
+            player.username,
             player.position,
             player.city,
             player.club
-          ].join(" ")
+          ].filter(Boolean).join(" "),
+          username: player.username
         }));
 
       return [...registeredProfiles, ...standaloneProfiles];
@@ -121,7 +127,7 @@ export function SearchScreen({
       <View style={styles.discoveryHeader}>
         <Text style={styles.discoveryTitle}>Pesquisar perfis</Text>
         <Text style={styles.discoverySubtitle}>
-          Encontre atletas por nome, posicao, cidade ou clube.
+          Encontre atletas por nome, @usuario, posicao, cidade ou clube.
         </Text>
       </View>
 
@@ -131,7 +137,7 @@ export function SearchScreen({
           accessibilityLabel="Pesquisar perfis"
           autoCapitalize="none"
           onChangeText={setQuery}
-          placeholder="Nome, posicao, cidade ou clube"
+          placeholder="Nome, @usuario, posicao, cidade ou clube"
           placeholderTextColor={colors.muted}
           returnKeyType="search"
           style={styles.searchInput}
@@ -205,6 +211,11 @@ export function SearchScreen({
                 <Text numberOfLines={1} style={styles.searchProfileName}>
                   {profile.name}
                 </Text>
+                {profile.username ? (
+                  <Text numberOfLines={1} style={styles.searchProfileUsername}>
+                    @{profile.username}
+                  </Text>
+                ) : null}
                 <Text numberOfLines={1} style={styles.searchProfileMeta}>
                   {profile.meta}
                 </Text>

@@ -23,6 +23,7 @@ import {
   MessageContact,
   ProfileAvatarsByProfile
 } from "../types";
+import { canExchangeDirectMessages } from "../utils/socialAccess";
 
 function getInitials(name: string) {
   return name
@@ -85,11 +86,13 @@ export function MessagesScreen({
         : [],
     [activeContact, currentUserId, messages]
   );
-  const followedContacts = contacts.filter((contact) =>
-    followingSet.has(contact.profileId)
+  const followedContacts = contacts.filter(
+    (contact) =>
+      contact.id === currentUserId || followingSet.has(contact.profileId)
   );
   const requestContacts = contacts.filter(
-    (contact) => !followingSet.has(contact.profileId)
+    (contact) =>
+      contact.id !== currentUserId && !followingSet.has(contact.profileId)
   );
 
   useEffect(() => {
@@ -98,6 +101,12 @@ export function MessagesScreen({
 
   if (activeContact) {
     const isFollowing = followingSet.has(activeContact.profileId);
+    const isSelf = activeContact.id === currentUserId;
+    const hasConversationAccess = canExchangeDirectMessages(
+      currentUserId,
+      activeContact.id,
+      isFollowing
+    );
     const outgoingRequestMessages = activeMessages.filter(
       (message) => message.senderUserId === currentUserId
     );
@@ -105,9 +114,9 @@ export function MessagesScreen({
       (message) => message.senderUserId === activeContact.id
     );
     const canSendInitialRequest =
-      !isFollowing && outgoingRequestMessages.length === 0;
-    const canCompose = isFollowing || canSendInitialRequest;
-    const visibleMessages = isFollowing
+      !hasConversationAccess && outgoingRequestMessages.length === 0;
+    const canCompose = hasConversationAccess || canSendInitialRequest;
+    const visibleMessages = hasConversationAccess
       ? activeMessages
       : outgoingRequestMessages;
 
@@ -150,35 +159,42 @@ export function MessagesScreen({
               {activeContact.name}
             </Text>
             <Text numberOfLines={1} style={styles.messagesContactSubtitle}>
-              {isFollowing ? "Seguindo" : "Perfil nao seguido"}
+              {activeContact.username ? `@${activeContact.username} | ` : ""}
+              {isSelf
+                ? "Sua conta"
+                : isFollowing
+                  ? "Seguindo"
+                  : "Perfil nao seguido"}
             </Text>
           </View>
-          <Pressable
-            accessibilityLabel={
-              isFollowing
-                ? `Deixar de seguir ${activeContact.name}`
-                : `Seguir ${activeContact.name}`
-            }
-            accessibilityRole="button"
-            onPress={() => onToggleFollow(activeContact.profileId)}
-            style={[
-              styles.messagesFollowButton,
-              isFollowing ? styles.messagesFollowButtonActive : null
-            ]}
-          >
-            {isFollowing ? (
-              <UserCheck color={colors.primary} size={17} strokeWidth={2.3} />
-            ) : (
-              <UserPlus color={colors.onPrimary} size={17} strokeWidth={2.3} />
-            )}
-          </Pressable>
+          {!isSelf ? (
+            <Pressable
+              accessibilityLabel={
+                isFollowing
+                  ? `Deixar de seguir ${activeContact.name}`
+                  : `Seguir ${activeContact.name}`
+              }
+              accessibilityRole="button"
+              onPress={() => onToggleFollow(activeContact.profileId)}
+              style={[
+                styles.messagesFollowButton,
+                isFollowing ? styles.messagesFollowButtonActive : null
+              ]}
+            >
+              {isFollowing ? (
+                <UserCheck color={colors.primary} size={17} strokeWidth={2.3} />
+              ) : (
+                <UserPlus color={colors.onPrimary} size={17} strokeWidth={2.3} />
+              )}
+            </Pressable>
+          ) : null}
         </View>
 
         <ScrollView
           contentContainerStyle={styles.messagesThreadContent}
           keyboardShouldPersistTaps="handled"
         >
-          {!isFollowing && incomingRequestMessages.length > 0 ? (
+          {!hasConversationAccess && incomingRequestMessages.length > 0 ? (
             <View style={styles.messagesRequestGate}>
               <View style={styles.messagesRequestGateIcon}>
                 <LockKeyhole color={colors.primary} size={24} />
@@ -205,13 +221,15 @@ export function MessagesScreen({
             <View style={styles.messagesThreadEmpty}>
               <MessageCircle color={colors.primary} size={28} />
               <Text style={styles.messagesThreadEmptyTitle}>
-                {isFollowing
+                {hasConversationAccess
                   ? "Envie a primeira mensagem"
                   : "Envie uma solicitacao"}
               </Text>
               <Text style={styles.messagesThreadEmptyBody}>
-                {isFollowing
-                  ? "Inicie uma conversa diretamente com este perfil."
+                {hasConversationAccess
+                  ? isSelf
+                    ? "Use esta conversa como um espaco privado para voce."
+                    : "Inicie uma conversa diretamente com este perfil."
                   : "Voce pode enviar uma mensagem inicial. Novas mensagens ficam liberadas quando o perfil for seguido."}
               </Text>
             </View>
@@ -247,7 +265,7 @@ export function MessagesScreen({
             })
           )}
 
-          {!isFollowing && outgoingRequestMessages.length > 0 ? (
+          {!hasConversationAccess && outgoingRequestMessages.length > 0 ? (
             <View style={styles.messagesRequestSentNotice}>
               <Text style={styles.messagesRequestSentTitle}>
                 Solicitacao enviada
@@ -268,7 +286,7 @@ export function MessagesScreen({
             onChangeText={setDraft}
             placeholder={
               canCompose
-                ? isFollowing
+                ? hasConversationAccess
                   ? "Escreva uma mensagem"
                   : "Enviar uma solicitacao"
                 : "Aguardando conexao por follow"
@@ -282,7 +300,7 @@ export function MessagesScreen({
           />
           <Pressable
             accessibilityLabel={
-              isFollowing ? "Enviar mensagem" : "Enviar solicitacao"
+              hasConversationAccess ? "Enviar mensagem" : "Enviar solicitacao"
             }
             accessibilityRole="button"
             disabled={!canCompose || !draft.trim()}

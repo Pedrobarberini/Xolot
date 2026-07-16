@@ -28,7 +28,7 @@ export function AccountSetupScreen({
   user: AppUser;
 }) {
   const { width } = useWindowDimensions();
-  const [name, setName] = useState(user.profileCompleted ? user.name : "");
+  const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio);
   const [ageText, setAgeText] = useState(user.age ? String(user.age) : "");
   const [position, setPosition] = useState(user.position);

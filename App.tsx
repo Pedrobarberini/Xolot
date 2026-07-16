@@ -120,7 +120,8 @@ export default function App() {
             city: account.city,
             club: account.club,
             name: account.name,
-            position: account.position
+            position: account.position,
+            username: account.username
           };
         }),
     [registeredUsers, submissions]
@@ -253,7 +254,9 @@ export default function App() {
         "Perfil NextStar",
       subtitle: selectedProfilePlayer
         ? `${selectedProfilePlayer.position} | ${selectedProfilePlayer.city}`
-        : "Usuario NextStar"
+        : "Usuario NextStar",
+      username:
+        selectedProfileAccount?.username ?? selectedProfilePlayer?.username
     };
 
     addMessageContact(contact);

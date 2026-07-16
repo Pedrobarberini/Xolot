@@ -179,6 +179,10 @@ Objetivo: substituir o acesso por nome e email por credenciais locais e coletar 
 Tasks:
 
 - [x] Usar email e senha no cadastro e no login.
+- [x] Separar nome publico do atleta e `@username` no cadastro.
+- [x] Permitir nomes publicos repetidos e exigir username unico sem diferenca entre maiusculas e minusculas.
+- [x] Bloquear email duplicado em toda a plataforma, independentemente do tipo de conta.
+- [x] Migrar contas existentes para usernames validos e sem repeticao.
 - [x] Solicitar confirmacao de senha durante o cadastro.
 - [x] Armazenar somente salt e hash SHA-256 no estado local, sem senha em texto puro.
 - [x] Migrar contas antigas para definicao de senha no proximo login.
@@ -188,6 +192,8 @@ Tasks:
 - [x] Reutilizar o formulario em `Perfil > Configuracoes > Editar perfil`.
 - [x] Exibir biografia, clube e dados atualizados nos perfis proprio e publico.
 - [x] Incluir os novos dados na pesquisa de perfis.
+- [x] Permitir pesquisa tanto pelo nome publico quanto pelo `@username`.
+- [x] Liberar conversa com a propria conta sem exigir follow.
 - [x] Versionar a migracao e cobrir hash e perfil com teste automatizado.
 
 Criterios de aceite:

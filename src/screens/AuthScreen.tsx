@@ -22,6 +22,11 @@ import {
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, UserRole } from "../types";
+import {
+  getAccountIdentityConflict,
+  isValidUsername,
+  normalizeUsername
+} from "../utils/userIdentity";
 
 export function AuthScreen({
   accounts,
@@ -33,6 +38,8 @@ export function AuthScreen({
   const { width } = useWindowDimensions();
   const [mode, setMode] = useState<"create" | "login">("create");
   const [role, setRole] = useState<UserRole>("Usuario");
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -43,11 +50,15 @@ export function AuthScreen({
   const authModeLabel = mode === "create" ? "Cadastro" : "Login";
   const roleSummary = role === "Admin" ? "Moderacao" : "Inicio, envio e perfis";
   const cleanEmail = email.trim().toLowerCase();
+  const cleanName = name.trim().replace(/\s+/g, " ");
+  const cleanUsername = normalizeUsername(username);
   const hasValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail);
   const hasValidPassword = password.length >= 6;
   const canContinue =
     hasValidEmail &&
     hasValidPassword &&
+    (mode === "login" || cleanName.length >= 3) &&
+    (mode === "login" || isValidUsername(cleanUsername)) &&
     (mode === "login" || password === passwordConfirmation) &&
     (mode === "login" || acceptedTerms) &&
     !isSubmitting;
@@ -68,14 +79,26 @@ export function AuthScreen({
     setIsSubmitting(true);
 
     try {
-      const accountId = `${role.toLowerCase()}-${cleanEmail}`;
       const existingAccount = accounts.find(
-        (account) => account.id === accountId
+        (account) => account.email.toLowerCase() === cleanEmail
       );
 
-      if (mode === "create" && existingAccount) {
-        setErrorMessage("Ja existe uma conta com este email.");
-        return;
+      if (mode === "create") {
+        const identityConflict = getAccountIdentityConflict(
+          accounts,
+          cleanEmail,
+          cleanUsername
+        );
+
+        if (identityConflict === "email") {
+          setErrorMessage("Ja existe uma conta com este email.");
+          return;
+        }
+
+        if (identityConflict === "username") {
+          setErrorMessage("Este nome de usuario ja esta em uso.");
+          return;
+        }
       }
 
       if (mode === "login" && !existingAccount) {
@@ -102,6 +125,7 @@ export function AuthScreen({
         return;
       }
 
+      const accountId = `${role.toLowerCase()}-${cleanEmail}`;
       const isAdmin = role === "Admin";
       onComplete({
         acceptedTerms,
@@ -112,11 +136,12 @@ export function AuthScreen({
         email: cleanEmail,
         id: accountId,
         kycStatus: isAdmin ? "Aprovado" : "Nao iniciado",
-        name: isAdmin ? "Admin NextStar" : cleanEmail.split("@")[0],
+        name: cleanName,
         ...credential,
         position: "",
         profileCompleted: isAdmin,
-        role
+        role,
+        username: cleanUsername
       });
     } catch {
       setErrorMessage("Nao foi possivel autenticar agora. Tente novamente.");
@@ -191,6 +216,40 @@ export function AuthScreen({
               );
             })}
           </View>
+
+          {mode === "create" ? (
+            <>
+              <LabeledInput
+                autoCapitalize="words"
+                label="Nome do jogador"
+                maxLength={80}
+                onChangeText={(value) => {
+                  setName(value);
+                  setErrorMessage("");
+                }}
+                placeholder="Pedro Barberini"
+                value={name}
+              />
+              <LabeledInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                label="Nome de usuario"
+                maxLength={30}
+                onChangeText={(value) => {
+                  setUsername(
+                    value.replace(/^@+/, "").replace(/[^a-zA-Z0-9._]/g, "")
+                  );
+                  setErrorMessage("");
+                }}
+                placeholder="pedrobarberini"
+                value={username}
+              />
+              <Text style={styles.authIdentityHint}>
+                Seu nome pode se repetir. O @usuario e unico e sera usado para
+                encontrar seu perfil.
+              </Text>
+            </>
+          ) : null}
 
           <LabeledInput
             autoCapitalize="none"

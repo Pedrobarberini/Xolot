@@ -55,6 +55,7 @@ test("migra estado sem versao e preserva dados validos", () => {
   assert.equal(migrated.activeUser?.profileCompleted, false);
   assert.equal(migrated.activeUser?.age, null);
   assert.equal(migrated.activeUser?.bio, "");
+  assert.equal(migrated.activeUser?.username, "teste");
   assert.equal(migrated.registeredUsers[0]?.id, "usuario-teste");
   assert.deepEqual(migrated.athleteFunds, [demoFund]);
   assert.deepEqual(migrated.walletBalances, { "usuario-teste": 350 });
@@ -90,7 +91,44 @@ test("preserva perfil completo e credencial sem expor senha em texto", () => {
   assert.equal(migrated.registeredUsers[0]?.profileCompleted, true);
   assert.equal(migrated.registeredUsers[0]?.bio, "Atleta focado em evolucao e oportunidades no futebol.");
   assert.equal(migrated.registeredUsers[0]?.passwordHash, "hash-seguro");
+  assert.equal(migrated.registeredUsers[0]?.username, "atleta");
   assert.equal("password" in migrated.registeredUsers[0], false);
+});
+
+test("migra usernames repetidos para identificadores unicos", () => {
+  const migrated = migrateLocalAppState(
+    {
+      activeUser: null,
+      registeredUsers: [
+        {
+          acceptedTerms: true,
+          email: "primeiro@nextstar.local",
+          id: "usuario-primeiro",
+          kycStatus: "Nao iniciado",
+          name: "Pedro Barberini",
+          role: "Usuario",
+          username: "pedro"
+        },
+        {
+          acceptedTerms: true,
+          email: "segundo@nextstar.local",
+          id: "usuario-segundo",
+          kycStatus: "Nao iniciado",
+          name: "Pedro Barberini",
+          role: "Usuario",
+          username: "Pedro"
+        }
+      ]
+    },
+    createDefaultLocalAppState()
+  );
+
+  assert.deepEqual(
+    migrated.registeredUsers.map((account) => account.username),
+    ["pedro", "pedro_2"]
+  );
+  assert.equal(migrated.registeredUsers[0]?.name, "Pedro Barberini");
+  assert.equal(migrated.registeredUsers[1]?.name, "Pedro Barberini");
 });
 
 test("serializacao e leitura preservam o estado completo", () => {

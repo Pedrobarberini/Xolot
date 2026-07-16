@@ -4,8 +4,12 @@ import type {
   Investment,
   VideoSubmission
 } from "../types";
+import {
+  claimUniqueUsername,
+  createUsernameSlug
+} from "../utils/userIdentity.ts";
 
-export const APP_STATE_SCHEMA_VERSION = 2;
+export const APP_STATE_SCHEMA_VERSION = 3;
 
 export type LocalAppState = {
   activeUser: AppUser | null;
@@ -119,7 +123,11 @@ function normalizeAppUser(value: unknown): AppUser | null {
       : {}),
     position: normalizeString(value.position),
     profileCompleted,
-    role
+    role,
+    username: createUsernameSlug(
+      normalizeString(value.username) || email.split("@")[0],
+      id
+    )
   };
 }
 
@@ -133,6 +141,19 @@ function normalizeUsers(value: unknown) {
     .filter((account): account is AppUser => Boolean(account));
 }
 
+function assignUniqueUsernames(users: AppUser[]) {
+  const takenUsernames = new Set<string>();
+
+  return users.map((account) => ({
+    ...account,
+    username: claimUniqueUsername(
+      account.username,
+      takenUsernames,
+      account.id
+    )
+  }));
+}
+
 export function migrateLocalAppState(
   value: unknown,
   fallback: LocalAppState
@@ -141,17 +162,26 @@ export function migrateLocalAppState(
     return fallback;
   }
 
-  const activeUser =
+  const normalizedActiveUser =
     value.activeUser === null
       ? null
       : normalizeAppUser(value.activeUser) ?? fallback.activeUser;
   const normalizedUsers = normalizeUsers(value.registeredUsers);
-  const registeredUsers = activeUser
-    ? [
-        activeUser,
-        ...normalizedUsers.filter((account) => account.id !== activeUser.id)
-      ]
-    : normalizedUsers;
+  const registeredUsers = assignUniqueUsernames(
+    normalizedActiveUser
+      ? [
+          normalizedActiveUser,
+          ...normalizedUsers.filter(
+            (account) => account.id !== normalizedActiveUser.id
+          )
+        ]
+      : normalizedUsers
+  );
+  const activeUser = normalizedActiveUser
+    ? registeredUsers.find(
+        (account) => account.id === normalizedActiveUser.id
+      ) ?? normalizedActiveUser
+    : null;
 
   return {
     activeUser,

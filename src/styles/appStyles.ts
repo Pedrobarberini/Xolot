@@ -229,6 +229,14 @@ export const styles = StyleSheet.create({
     lineHeight: 16,
     marginTop: 8
   },
+  authIdentityHint: {
+    color: colors.muted,
+    fontSize: 10,
+    fontWeight: "700",
+    lineHeight: 14,
+    marginBottom: 8,
+    marginTop: -2
+  },
   authErrorText: {
     color: colors.danger,
     fontSize: 12,
@@ -2847,6 +2855,12 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
     letterSpacing: 0
   },
+  profileUsername: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: "800",
+    marginTop: 2
+  },
   profileMeta: {
     color: colors.muted,
     fontSize: 13,
@@ -3786,6 +3800,12 @@ export const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 15,
     fontWeight: "900"
+  },
+  searchProfileUsername: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: "800",
+    marginTop: 1
   },
   searchProfileMeta: {
     color: colors.muted,
