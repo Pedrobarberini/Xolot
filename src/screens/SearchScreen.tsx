@@ -52,9 +52,11 @@ export function SearchScreen({
         const fund = player
           ? funds.find((item) => item.profileId === player.profileId)
           : undefined;
-        const meta = player
-          ? `${player.position} | ${player.city}`
-          : "Usuario NextStar | Sem videos publicados";
+        const meta = account.profileCompleted
+          ? `${account.position} | ${account.city}`
+          : player
+            ? `${player.position} | ${player.city}`
+            : "Usuario NextStar | Sem videos publicados";
 
         return {
           fund,
@@ -65,6 +67,10 @@ export function SearchScreen({
           profileId: player?.profileId ?? `profile-${account.id}`,
           searchableText: [
             account.name,
+            account.bio,
+            account.position,
+            account.city,
+            account.club,
             player?.name,
             player?.position,
             player?.city,

@@ -164,6 +164,37 @@ Criterios de aceite:
 - Admin consegue assistir o video enviado.
 - Feed reproduz o video aprovado.
 
+### Task P0-005 - Cadastro com senha e configuracao do perfil
+
+Tipo: Frontend/Dados/Autenticacao
+
+Status: Concluido localmente em 2026-07-16. Autenticacao server-side continua bloqueante para o lancamento publico.
+
+Objetivo: substituir o acesso por nome e email por credenciais locais e coletar os dados publicos do atleta no primeiro acesso.
+
+Tasks:
+
+- [x] Usar email e senha no cadastro e no login.
+- [x] Solicitar confirmacao de senha durante o cadastro.
+- [x] Armazenar somente salt e hash SHA-256 no estado local, sem senha em texto puro.
+- [x] Migrar contas antigas para definicao de senha no proximo login.
+- [x] Criar configuracao obrigatoria no primeiro acesso de contas Usuario.
+- [x] Coletar nome, biografia, idade, posicao, cidade e clube ou projeto.
+- [x] Persistir o perfil junto da conta cadastrada.
+- [x] Reutilizar o formulario em `Perfil > Configuracoes > Editar perfil`.
+- [x] Exibir biografia, clube e dados atualizados nos perfis proprio e publico.
+- [x] Incluir os novos dados na pesquisa de perfis.
+- [x] Versionar a migracao e cobrir hash e perfil com teste automatizado.
+
+Criterios de aceite:
+
+- Conta nova nao entra no Inicio antes de completar os dados obrigatorios.
+- Login posterior abre o app diretamente quando o perfil ja estiver completo.
+- Editar e salvar o perfil atualiza imediatamente a vitrine publica.
+- Recarregar o app preserva credenciais e dados do perfil neste dispositivo.
+- Nenhuma senha em texto puro e serializada pelo repository local.
+- A interface informa que autenticacao, recuperacao de senha e papeis reais ainda dependem do backend.
+
 ## Sprint 2 - Feed profissional
 
 ### Task P1-001 - Melhorar FeedScreen
@@ -352,8 +383,8 @@ Objetivo: criar pagina publica e editavel do atleta.
 
 Tasks:
 
-- [ ] Exibir avatar, nome, idade, posicao, cidade e clube.
-- [ ] Exibir bio curta.
+- [x] Exibir avatar, nome, idade, posicao, cidade e clube.
+- [x] Exibir bio curta.
 - [x] Exibir videos aprovados do atleta em uma galeria no proprio perfil.
 - [x] Reutilizar o mesmo modelo visual no perfil proprio e no perfil visitado.
 - [x] Remover player grande e modal de pre-visualizacao das paginas de perfil.
@@ -371,7 +402,7 @@ Tasks:
 - [x] Posicionar seta e marca lado a lado sem sobreposicao.
 - [x] Padronizar a marca do Inicio com o tamanho compacto do header.
 - [ ] Exibir avaliacoes agregadas reais quando existirem.
-- [ ] Permitir editar dados do proprio perfil.
+- [x] Permitir editar dados do proprio perfil.
 - [x] Criar estado de perfil sem videos com orientacao para publicar.
 - [x] Manter no Perfil apenas identidade resumida e conteudo publicado.
 - [x] Mover verificacao, KYC, Conta NextStar e bolsa para Configuracoes.

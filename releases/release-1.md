@@ -870,3 +870,33 @@ Criterios de aceite:
 - O circulo nunca fica menor que 30% nem ultrapassa a imagem.
 - O avatar publicado corresponde a posicao e ao tamanho da HUD.
 - Recarregar o aplicativo preserva ambos os ajustes.
+
+### Task FEATURE-036 - Login com senha e perfil do atleta
+
+Tipo: Frontend/Dados/Autenticacao
+
+Objetivo: tornar o acesso coerente com uma conta real e separar credenciais dos dados publicos do atleta.
+
+Tasks:
+
+- [x] Substituir nome e email por email e senha no cadastro e login.
+- [x] Adicionar confirmacao e validacao de senha no cadastro.
+- [x] Persistir somente salt e hash SHA-256 da senha local.
+- [x] Migrar o schema do estado principal para a versao 2.
+- [x] Permitir que contas antigas definam senha no proximo login.
+- [x] Criar tela obrigatoria de configuracao no primeiro acesso.
+- [x] Coletar nome, biografia, idade, posicao, cidade e clube ou projeto.
+- [x] Reutilizar o formulario em `Configuracoes > Editar perfil`.
+- [x] Exibir biografia e clube nos perfis proprio e publico.
+- [x] Atualizar resultados da pesquisa com os dados do perfil.
+- [x] Adicionar teste de migracao, preservacao das credenciais e ausencia de senha em texto puro.
+- [x] Validar cadastro, primeiro acesso, perfil e edicao em viewport mobile.
+- [x] Atualizar README, backlog e divida tecnica.
+
+Criterios de aceite:
+
+- Usuario novo informa apenas credenciais no cadastro e completa seus dados depois de entrar.
+- Perfil incompleto bloqueia o acesso as abas ate ser salvo.
+- Dados salvos reaparecem preenchidos em Editar perfil.
+- Biografia e clube aparecem na vitrine do usuario.
+- Senha em texto puro nao e persistida no estado local.

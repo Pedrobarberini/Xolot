@@ -11,6 +11,7 @@ import { BrandLaunchScreen, ScreenFrame } from "./src/components/AppShell";
 import { BottomTabs, Header } from "./src/components/Navigation";
 import { demoPlayer } from "./src/data/demoPlayer";
 import { AdminScreen } from "./src/screens/AdminScreen";
+import { AccountSetupScreen } from "./src/screens/AccountSetupScreen";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { FeedScreen } from "./src/screens/FeedScreen";
 import { InvestmentScreen } from "./src/screens/InvestmentScreen";
@@ -103,8 +104,26 @@ export default function App() {
           (submission) =>
             submission.status === "Aprovado" && submission.videoLink.trim().length > 0
         )
-        .map(buildPlayerFromSubmission),
-    [submissions]
+        .map(buildPlayerFromSubmission)
+        .map((player) => {
+          const account = player.ownerUserId
+            ? registeredUsers.find((item) => item.id === player.ownerUserId)
+            : undefined;
+
+          if (!account?.profileCompleted) {
+            return player;
+          }
+
+          return {
+            ...player,
+            age: account.age ?? player.age,
+            city: account.city,
+            club: account.club,
+            name: account.name,
+            position: account.position
+          };
+        }),
+    [registeredUsers, submissions]
   );
 
   const availablePlayers = useMemo(
@@ -252,7 +271,8 @@ export default function App() {
     handleOpenFund,
     handleReviewSubmission,
     handleSignOut,
-    handleSubmitVideo
+    handleSubmitVideo,
+    handleUpdateProfile
   } = createAppActions({
     athleteFunds,
     registeredUsers,
@@ -298,7 +318,39 @@ export default function App() {
             backgroundColor={colors.background}
             barStyle="dark-content"
           />
-          <AuthScreen onComplete={handleAuth} />
+          <AuthScreen accounts={registeredUsers} onComplete={handleAuth} />
+        </SafeAreaView>
+        {isBrandLaunchVisible ? (
+          <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
+        ) : null}
+      </View>
+    );
+  }
+
+  if (user.role === "Usuario" && !user.profileCompleted) {
+    return (
+      <View style={styles.appRoot}>
+        <SafeAreaView style={styles.safeArea}>
+          <StatusBar
+            backgroundColor={colors.background}
+            barStyle="dark-content"
+          />
+          <Header
+            onSignOut={signOutSession}
+            pendingReviews={pendingReviews}
+            showBalance={false}
+            showSignOut={false}
+            user={user}
+            walletBalance={walletBalance}
+          />
+          <ScreenFrame key="account-setup">
+            <AccountSetupScreen
+              isInitialSetup
+              onSave={handleUpdateProfile}
+              onSignOut={signOutSession}
+              user={user}
+            />
+          </ScreenFrame>
         </SafeAreaView>
         {isBrandLaunchVisible ? (
           <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
@@ -541,6 +593,7 @@ export default function App() {
                       }
                     }}
                     onSignOut={signOutSession}
+                    onUpdateProfile={handleUpdateProfile}
                     player={availablePlayers.find(
                       (item) => item.ownerUserId === user.id
                     )}

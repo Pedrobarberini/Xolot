@@ -9,6 +9,7 @@ import {
   Menu,
   Play,
   Settings,
+  UserRoundPen,
   WalletCards,
   X
 } from "lucide-react-native";
@@ -33,6 +34,7 @@ import { ScreenTransition } from "../components/AppShell";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import {
+  AccountProfile,
   AppUser,
   AthleteFund,
   Investment,
@@ -42,9 +44,10 @@ import {
 } from "../types";
 import { formatBRL } from "../utils/investment";
 import { DEFAULT_AVATAR_CROP_SCALE } from "../utils/avatarFocus";
+import { AccountSetupScreen } from "./AccountSetupScreen";
 import { PortfolioScreen } from "./WalletScreen";
 
-type ProfileView = "overview" | "wallet" | "settings";
+type ProfileView = "edit-profile" | "overview" | "wallet" | "settings";
 
 export function ProfileScreen({
   avatar,
@@ -58,6 +61,7 @@ export function ProfileScreen({
   onOpenFund,
   onOpenVideo,
   onSignOut,
+  onUpdateProfile,
   player,
   submissions,
   user
@@ -77,6 +81,7 @@ export function ProfileScreen({
   ) => void;
   onOpenVideo: (video: VideoSubmission) => void;
   onSignOut: () => void;
+  onUpdateProfile: (profile: AccountProfile) => void;
   player?: Player;
   submissions: VideoSubmission[];
   user: AppUser;
@@ -180,6 +185,7 @@ export function ProfileScreen({
             onChangeNotifications={setNotificationsEnabled}
             onRequestOpenFund={() => setIsFundModalVisible(true)}
             onRequestAvatarPosition={() => setIsAvatarPositionVisible(true)}
+            onOpenEditProfile={() => setProfileView("edit-profile")}
             player={player}
             user={user}
           />
@@ -197,6 +203,21 @@ export function ProfileScreen({
         ) : null}
         {avatarPositionModal}
       </>
+    );
+  }
+
+  if (profileView === "edit-profile") {
+    return (
+      <ScreenTransition key="edit-profile" style={styles.profileViewScene}>
+        <AccountSetupScreen
+          onBack={() => setProfileView("settings")}
+          onSave={(profile) => {
+            onUpdateProfile(profile);
+            setProfileView("settings");
+          }}
+          user={user}
+        />
+      </ScreenTransition>
     );
   }
 
@@ -224,7 +245,9 @@ export function ProfileScreen({
               <View style={styles.profileTitleBlock}>
                 <Text style={styles.profileName}>{user.name}</Text>
                 <Text style={styles.profileMeta}>
-                  {user.role} | {user.email}
+                  {user.role === "Usuario" && user.profileCompleted
+                    ? `${user.position} | ${user.city}`
+                    : `${user.role} | ${user.email}`}
                 </Text>
               </View>
               <Pressable
@@ -237,6 +260,12 @@ export function ProfileScreen({
                 <Menu color={colors.text} size={22} />
               </Pressable>
             </View>
+            {user.role === "Usuario" && user.bio ? (
+              <Text style={styles.profileBio}>{user.bio}</Text>
+            ) : null}
+            {user.role === "Usuario" && user.club ? (
+              <Text style={styles.profileClub}>{user.club}</Text>
+            ) : null}
             <View style={styles.profileQuickStats}>
               <View style={styles.profileQuickItem}>
                 <Text style={styles.profileQuickValue}>
@@ -387,6 +416,7 @@ function SettingsView({
   onChangeAutoplay,
   onChangeNotifications,
   onRequestAvatarPosition,
+  onOpenEditProfile,
   onRequestOpenFund,
   player,
   user
@@ -402,6 +432,7 @@ function SettingsView({
   onChangeAutoplay: (value: boolean) => void;
   onChangeNotifications: (value: boolean) => void;
   onRequestAvatarPosition: () => void;
+  onOpenEditProfile: () => void;
   onRequestOpenFund: () => void;
   player?: Player;
   user: AppUser;
@@ -486,6 +517,28 @@ function SettingsView({
         <Text style={styles.profileSubviewTitle}>Configuracoes</Text>
         <View style={styles.profileSubviewSpacer} />
       </View>
+
+      {user.role === "Usuario" ? (
+        <View style={styles.settingsSection}>
+          <Text style={styles.settingsSectionTitle}>Perfil publico</Text>
+          <Pressable
+            accessibilityLabel="Editar dados do perfil"
+            accessibilityRole="button"
+            onPress={onOpenEditProfile}
+            style={styles.settingsRow}
+          >
+            <View style={styles.settingsRowIcon}>
+              <UserRoundPen color={colors.primary} size={19} />
+            </View>
+            <View style={styles.settingsRowBody}>
+              <Text style={styles.settingsRowTitle}>Editar perfil</Text>
+              <Text style={styles.settingsRowDescription}>
+                Nome, biografia, idade, posicao, cidade e clube ou projeto.
+              </Text>
+            </View>
+          </Pressable>
+        </View>
+      ) : null}
 
       <View style={styles.settingsSection}>
         <Text style={styles.settingsSectionTitle}>Foto do perfil</Text>

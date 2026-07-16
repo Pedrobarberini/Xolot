@@ -52,8 +52,45 @@ test("migra estado sem versao e preserva dados validos", () => {
 
   assert.equal(migrated.version, APP_STATE_SCHEMA_VERSION);
   assert.equal(migrated.activeUser?.id, "usuario-teste");
+  assert.equal(migrated.activeUser?.profileCompleted, false);
+  assert.equal(migrated.activeUser?.age, null);
+  assert.equal(migrated.activeUser?.bio, "");
+  assert.equal(migrated.registeredUsers[0]?.id, "usuario-teste");
   assert.deepEqual(migrated.athleteFunds, [demoFund]);
   assert.deepEqual(migrated.walletBalances, { "usuario-teste": 350 });
+});
+
+test("preserva perfil completo e credencial sem expor senha em texto", () => {
+  const fallback = createDefaultLocalAppState();
+  const migrated = migrateLocalAppState(
+    {
+      activeUser: null,
+      registeredUsers: [
+        {
+          acceptedTerms: true,
+          age: 17,
+          bio: "Atleta focado em evolucao e oportunidades no futebol.",
+          city: "Sao Paulo, SP",
+          club: "Projeto NextStar",
+          email: "atleta@nextstar.local",
+          id: "usuario-atleta@nextstar.local",
+          kycStatus: "Nao iniciado",
+          name: "Atleta NextStar",
+          passwordHash: "hash-seguro",
+          passwordSalt: "salt-aleatorio",
+          position: "Ponta",
+          profileCompleted: true,
+          role: "Usuario"
+        }
+      ]
+    },
+    fallback
+  );
+
+  assert.equal(migrated.registeredUsers[0]?.profileCompleted, true);
+  assert.equal(migrated.registeredUsers[0]?.bio, "Atleta focado em evolucao e oportunidades no futebol.");
+  assert.equal(migrated.registeredUsers[0]?.passwordHash, "hash-seguro");
+  assert.equal("password" in migrated.registeredUsers[0], false);
 });
 
 test("serializacao e leitura preservam o estado completo", () => {

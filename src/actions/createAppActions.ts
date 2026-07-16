@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { Alert } from "react-native";
 import {
+  AccountProfile,
   AppUser,
   AthleteFund,
   Investment,
@@ -43,38 +44,39 @@ export function createAppActions({
   walletBalance
 }: CreateAppActionsOptions) {
   function handleAuth(nextUser: AppUser) {
-    const existingAccount = registeredUsers.find(
-      (account) => account.id === nextUser.id
-    );
-    const authenticatedUser = existingAccount
-      ? {
-          ...nextUser,
-          acceptedTerms: existingAccount.acceptedTerms,
-          kycStatus: existingAccount.kycStatus,
-          name: existingAccount.name || nextUser.name
-        }
-      : nextUser;
+    setRegisteredUsers((current) => {
+      const accountExists = current.some((item) => item.id === nextUser.id);
 
-    if (nextUser.role === "Usuario") {
-      setRegisteredUsers((current) => {
-        const accountExists = current.some(
-          (item) => item.id === authenticatedUser.id
-        );
-
-        return accountExists
-          ? current.map((item) =>
-              item.id === authenticatedUser.id
-                ? authenticatedUser
-                : item
-            )
-          : [authenticatedUser, ...current];
-      });
-    }
+      return accountExists
+        ? current.map((item) => (item.id === nextUser.id ? nextUser : item))
+        : [nextUser, ...current];
+    });
 
     setSelectedAccount(null);
     setSelectedPlayer(null);
-    setUser(authenticatedUser);
-    setTab(authenticatedUser.role === "Admin" ? "admin" : "feed");
+    setUser(nextUser);
+    setTab(nextUser.role === "Admin" ? "admin" : "feed");
+  }
+
+  function handleUpdateProfile(profile: AccountProfile) {
+    if (!user) {
+      return;
+    }
+
+    const updatedUser: AppUser = {
+      ...user,
+      ...profile,
+      profileCompleted: true
+    };
+
+    setUser(updatedUser);
+    setRegisteredUsers((current) =>
+      current.some((account) => account.id === updatedUser.id)
+        ? current.map((account) =>
+            account.id === updatedUser.id ? updatedUser : account
+          )
+        : [updatedUser, ...current]
+    );
   }
 
   function handleSignOut() {
@@ -245,6 +247,7 @@ export function createAppActions({
     handleOpenFund,
     handleReviewSubmission,
     handleSignOut,
-    handleSubmitVideo
+    handleSubmitVideo,
+    handleUpdateProfile
   };
 }

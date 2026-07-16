@@ -98,13 +98,24 @@ export type UserRole = "Usuario" | "Admin";
 
 export type KycStatus = "Nao iniciado" | "Pendente" | "Aprovado";
 
-export type AppUser = {
-  id: string;
+export type AccountProfile = {
+  age: number | null;
+  bio: string;
+  city: string;
+  club: string;
   name: string;
+  position: string;
+};
+
+export type AppUser = AccountProfile & {
+  id: string;
   email: string;
   role: UserRole;
   kycStatus: KycStatus;
   acceptedTerms: boolean;
+  passwordHash?: string;
+  passwordSalt?: string;
+  profileCompleted: boolean;
 };
 
 export type VideoSubmissionStatus =

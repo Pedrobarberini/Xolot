@@ -222,6 +222,20 @@ export const styles = StyleSheet.create({
     marginTop: 3,
     textTransform: "uppercase"
   },
+  authHelperText: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    lineHeight: 16,
+    marginTop: 8
+  },
+  authErrorText: {
+    color: colors.danger,
+    fontSize: 12,
+    fontWeight: "800",
+    lineHeight: 17,
+    marginTop: 12
+  },
   segmentedControl: {
     backgroundColor: colors.surfaceMuted,
     borderColor: colors.border,
@@ -2812,6 +2826,20 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 5
   },
+  profileBio: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "600",
+    lineHeight: 19,
+    marginTop: 14
+  },
+  profileClub: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: "900",
+    marginTop: 6,
+    textTransform: "uppercase"
+  },
   profileQuickStats: {
     backgroundColor: colors.surfaceMuted,
     borderColor: colors.border,
@@ -3111,6 +3139,108 @@ export const styles = StyleSheet.create({
   },
   profileViewScene: {
     flex: 1
+  },
+  accountSetupRoot: {
+    flex: 1
+  },
+  accountSetupContent: {
+    flexGrow: 1,
+    paddingBottom: 34,
+    paddingHorizontal: 16,
+    paddingTop: 16
+  },
+  accountSetupIntro: {
+    marginBottom: 18,
+    paddingHorizontal: 2
+  },
+  accountSetupEyebrow: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase"
+  },
+  accountSetupTitle: {
+    color: colors.text,
+    fontSize: 25,
+    fontWeight: "900",
+    marginTop: 6
+  },
+  accountSetupSubtitle: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 7,
+    maxWidth: 420
+  },
+  accountSetupSection: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 15
+  },
+  accountSetupSectionHeader: {
+    alignItems: "center",
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 2,
+    paddingBottom: 10
+  },
+  accountSetupRequired: {
+    color: colors.muted,
+    fontSize: 9,
+    fontWeight: "900",
+    textTransform: "uppercase"
+  },
+  accountSetupFieldRow: {
+    flexDirection: "row",
+    gap: 10
+  },
+  accountSetupFieldRowNarrow: {
+    flexDirection: "column",
+    gap: 0
+  },
+  accountSetupAgeField: {
+    flex: 0.7,
+    minWidth: 0
+  },
+  accountSetupPositionField: {
+    flex: 1.3,
+    minWidth: 0
+  },
+  accountSetupBioMeta: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 6
+  },
+  accountSetupHint: {
+    color: colors.muted,
+    fontSize: 10,
+    fontWeight: "700"
+  },
+  accountSetupCounter: {
+    color: colors.muted,
+    fontSize: 10,
+    fontWeight: "900"
+  },
+  accountSetupSaveButton: {
+    marginTop: 14
+  },
+  accountSetupSignOutButton: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 44,
+    marginTop: 8
+  },
+  accountSetupSignOutText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800"
   },
   profileSubviewBackButton: {
     alignItems: "center",

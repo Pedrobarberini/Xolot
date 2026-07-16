@@ -49,16 +49,20 @@ export function PublicProfileScreen({
   videos: Player[];
   walletBalance: number;
 }) {
-  const profileName = player?.name ?? account?.name ?? "Perfil NextStar";
+  const profileName = account?.name ?? player?.name ?? "Perfil NextStar";
   const initials = profileName
     .split(" ")
     .slice(0, 2)
     .map((part) => part[0])
     .join("")
     .toUpperCase();
-  const profileMeta = player
-    ? `${player.position} | ${player.city}`
-    : "Usuario NextStar | Sem videos publicados";
+  const profileMeta = account?.profileCompleted
+    ? `${account.position} | ${account.city}`
+    : player
+      ? `${player.position} | ${player.city}`
+      : "Usuario NextStar | Sem videos publicados";
+  const profileBio = account?.bio ?? "";
+  const profileClub = account?.club ?? player?.club ?? "";
   const fundProgress = fund
     ? Math.min(Math.max(fund.fundedAmount / fund.goalAmount, 0), 1)
     : 0;
@@ -115,6 +119,13 @@ export function PublicProfileScreen({
               <MessageCircle color={colors.primary} size={22} />
             </Pressable>
           </View>
+
+          {profileBio ? (
+            <Text style={styles.profileBio}>{profileBio}</Text>
+          ) : null}
+          {profileClub ? (
+            <Text style={styles.profileClub}>{profileClub}</Text>
+          ) : null}
 
           <View style={styles.publicProfileSocialRow}>
             <Text style={styles.publicProfileFollowerCount}>

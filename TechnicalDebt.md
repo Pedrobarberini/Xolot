@@ -46,11 +46,13 @@ Usuarios cadastrados, sessao ativa, envios, decisoes de moderacao, saldos, bolsa
 
 ## 4. Autenticacao simulada sem seguranca
 
-**Status:** Pendente.
+**Status:** Parcialmente resolvido localmente em 2026-07-16.
 
-Login e cadastro validam apenas email e nome. Nao existe senha, token ou verificacao server-side. O papel Admin ainda e escolhido no cliente para permitir a demonstracao.
+Cadastro e login agora usam email e senha. A senha nao e serializada em texto puro: o dispositivo armazena salt aleatorio e hash SHA-256, e contas antigas definem uma credencial no proximo acesso. O primeiro login tambem exige a conclusao do perfil do atleta.
 
-**Acao:** Implementar auth no backend e atribuir papel somente no servidor.
+**Risco residual:** Nao existe backend, sessao/token server-side, verificacao de email, recuperacao de senha, limitacao de tentativas nem sincronizacao entre dispositivos. O papel Admin ainda e escolhido no cliente para permitir a demonstracao; por isso, o fluxo atual nao e autenticacao segura para publico.
+
+**Acao:** Implementar auth no backend com hash apropriado no servidor, sessao segura, recuperacao de senha, verificacao de email, rate limit e atribuicao de papel somente no servidor.
 
 **Prioridade:** P0
 
@@ -138,7 +140,7 @@ O `StyleSheet` saiu do componente raiz, mas `appStyles.ts` possui aproximadament
 
 **Status:** Parcialmente resolvido em 2026-07-16.
 
-Existem quatro testes nativos do Node cobrindo fallback, migracao, serializacao e operacoes do repository local.
+Existe uma suite nativa do Node cobrindo fallback, migracao, serializacao, credenciais locais, perfil e operacoes do repository local.
 
 **Risco residual:** Ainda faltam testes de UI, moderacao, envio, follow, mensagens e aporte.
 
