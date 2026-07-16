@@ -783,7 +783,7 @@ Tasks:
 - [x] Migrar automaticamente o formato antigo salvo apenas como URI.
 - [x] Criar componente compartilhado para renderizar o enquadramento.
 - [x] Abrir a HUD ao tocar na foto do perfil ou na previa de Configuracoes.
-- [x] Disponibilizar nove pontos focais com previa imediata.
+- [x] Disponibilizar ponto focal arrastavel com previa imediata.
 - [x] Abrir a HUD logo depois de escolher uma nova foto.
 - [x] Aplicar o enquadramento no Inicio, Perfil, Pesquisa, Mensagens e investimento.
 - [x] Adicionar testes de migracao, normalizacao e serializacao.
@@ -796,3 +796,26 @@ Criterios de aceite:
 - Salvar atualiza imediatamente todas as ocorrencias do avatar.
 - O ponto focal permanece salvo depois de recarregar o aplicativo.
 - Fotos do formato antigo continuam visiveis com foco central.
+
+### Task FEATURE-033 - Ponto focal arrastavel
+
+Tipo: Frontend/UX
+
+Objetivo: dar controle continuo sobre o enquadramento da foto de perfil.
+
+Tasks:
+
+- [x] Substituir as nove posicoes fixas por coordenadas continuas.
+- [x] Permitir mover o foco tocando ou arrastando sobre a previa.
+- [x] Limitar o marcador aos limites circulares da foto.
+- [x] Atualizar a foto em tempo real durante o gesto.
+- [x] Manter as coordenadas compativeis com a persistencia existente.
+- [x] Atualizar README, backlog e release notes.
+
+Criterios de aceite:
+
+- O marcador acompanha o dedo durante todo o gesto.
+- Tocar em uma area da foto move imediatamente o ponto focal.
+- O marcador nao sai da area circular da previa.
+- Cancelar nao altera o enquadramento salvo.
+- Salvar mantem a posicao escolhida depois de recarregar o app.

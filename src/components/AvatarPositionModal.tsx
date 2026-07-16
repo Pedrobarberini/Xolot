@@ -1,22 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { Check, X } from "lucide-react-native";
-import { Modal, Pressable, Text, View } from "react-native";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Move, X } from "lucide-react-native";
+import { Modal, PanResponder, Pressable, Text, View } from "react-native";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { ProfileAvatar } from "../types";
+import {
+  AVATAR_FOCUS_MARKER_RADIUS,
+  AvatarPreviewSize,
+  getAvatarFocusFromPoint,
+  getAvatarMarkerPoint
+} from "../utils/avatarFocus";
 import { ProfileAvatarImage } from "./ProfileAvatarImage";
 
-const FOCUS_OPTIONS = [
-  { label: "Superior esquerdo", x: 0, y: 0 },
-  { label: "Superior central", x: 50, y: 0 },
-  { label: "Superior direito", x: 100, y: 0 },
-  { label: "Centro esquerdo", x: 0, y: 50 },
-  { label: "Centro", x: 50, y: 50 },
-  { label: "Centro direito", x: 100, y: 50 },
-  { label: "Inferior esquerdo", x: 0, y: 100 },
-  { label: "Inferior central", x: 50, y: 100 },
-  { label: "Inferior direito", x: 100, y: 100 }
-];
+const DEFAULT_PREVIEW_SIZE = 210;
 
 export function AvatarPositionModal({
   avatar,
@@ -31,6 +27,39 @@ export function AvatarPositionModal({
 }) {
   const [focusX, setFocusX] = useState(50);
   const [focusY, setFocusY] = useState(50);
+  const [previewSize, setPreviewSize] = useState<AvatarPreviewSize>({
+    height: DEFAULT_PREVIEW_SIZE,
+    width: DEFAULT_PREVIEW_SIZE
+  });
+  const previewSizeRef = useRef(previewSize);
+
+  const updateFocusFromPoint = useCallback((x: number, y: number) => {
+    const size = previewSizeRef.current;
+    const nextFocus = getAvatarFocusFromPoint(x, y, size);
+
+    setFocusX(nextFocus.focusX);
+    setFocusY(nextFocus.focusY);
+  }, []);
+
+  const focusPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: (event) =>
+          updateFocusFromPoint(
+            event.nativeEvent.locationX,
+            event.nativeEvent.locationY
+          ),
+        onPanResponderMove: (event) =>
+          updateFocusFromPoint(
+            event.nativeEvent.locationX,
+            event.nativeEvent.locationY
+          ),
+        onPanResponderTerminationRequest: () => false,
+        onStartShouldSetPanResponder: () => true
+      }),
+    [updateFocusFromPoint]
+  );
 
   useEffect(() => {
     if (visible && avatar) {
@@ -44,6 +73,7 @@ export function AvatarPositionModal({
   }
 
   const previewAvatar = { ...avatar, focusX, focusY };
+  const markerPoint = getAvatarMarkerPoint(focusX, focusY, previewSize);
 
   return (
     <Modal
@@ -64,7 +94,9 @@ export function AvatarPositionModal({
           <View style={styles.avatarPositionHeader}>
             <View>
               <Text style={styles.avatarPositionTitle}>Ajustar enquadramento</Text>
-              <Text style={styles.avatarPositionSubtitle}>Ponto em destaque</Text>
+              <Text style={styles.avatarPositionSubtitle}>
+                Arraste o ponto em destaque
+              </Text>
             </View>
             <Pressable
               accessibilityLabel="Fechar"
@@ -77,31 +109,41 @@ export function AvatarPositionModal({
             </Pressable>
           </View>
 
-          <View style={styles.avatarPositionPreview}>
-            <ProfileAvatarImage avatar={previewAvatar} />
-            <View style={styles.avatarPositionGrid}>
-              {FOCUS_OPTIONS.map((option) => {
-                const isActive = option.x === focusX && option.y === focusY;
+          <View
+            accessibilityLabel="Ponto focal da foto"
+            accessibilityRole="adjustable"
+            accessibilityValue={{
+              text: `${Math.round(focusX)}% horizontal, ${Math.round(focusY)}% vertical`
+            }}
+            onLayout={(event) => {
+              const nextSize = {
+                height: event.nativeEvent.layout.height,
+                width: event.nativeEvent.layout.width
+              };
 
-                return (
-                  <Pressable
-                    accessibilityLabel={`Enquadrar em ${option.label}`}
-                    accessibilityRole="button"
-                    key={option.label}
-                    onPress={() => {
-                      setFocusX(option.x);
-                      setFocusY(option.y);
-                    }}
-                    style={styles.avatarPositionGridCell}
-                  >
-                    {isActive ? (
-                      <View style={styles.avatarPositionMarker}>
-                        <Check color={colors.onPrimary} size={16} strokeWidth={3} />
-                      </View>
-                    ) : null}
-                  </Pressable>
-                );
-              })}
+              previewSizeRef.current = nextSize;
+              setPreviewSize(nextSize);
+            }}
+            style={styles.avatarPositionPreview}
+            {...focusPanResponder.panHandlers}
+          >
+            <ProfileAvatarImage avatar={previewAvatar} />
+            <View pointerEvents="none" style={styles.avatarPositionGrid}>
+              {Array.from({ length: 9 }, (_, index) => (
+                <View key={index} style={styles.avatarPositionGridCell} />
+              ))}
+            </View>
+            <View
+              pointerEvents="none"
+              style={[
+                styles.avatarPositionMarker,
+                {
+                  left: markerPoint.x - AVATAR_FOCUS_MARKER_RADIUS,
+                  top: markerPoint.y - AVATAR_FOCUS_MARKER_RADIUS
+                }
+              ]}
+            >
+              <Move color={colors.onPrimary} size={16} strokeWidth={2.8} />
             </View>
           </View>
 

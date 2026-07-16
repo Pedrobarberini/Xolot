@@ -467,7 +467,7 @@ Tasks:
 - [x] Adicionar selecao de foto em Configuracoes com enquadramento personalizado.
 - [x] Adicionar acao para trocar e remover a foto.
 - [x] Abrir HUD de enquadramento ao tocar na foto escolhida.
-- [x] Permitir selecionar o ponto focal em uma grade de nove posicoes.
+- [x] Permitir tocar e arrastar o ponto focal continuamente sobre a previa.
 - [x] Persistir ponto focal e dimensoes da imagem por perfil.
 - [x] Migrar automaticamente fotos antigas salvas apenas como URI.
 - [x] Persistir a foto por perfil com AsyncStorage.

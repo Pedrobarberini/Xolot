@@ -3292,6 +3292,7 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     height: 32,
     justifyContent: "center",
+    position: "absolute",
     shadowColor: "#000000",
     shadowOffset: { height: 2, width: 0 },
     shadowOpacity: 0.2,
