@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, ImageStyle, StyleProp } from "react-native";
 import { ProfileAvatar } from "../types";
-
-const AVATAR_DISPLAY_SCALE = 1.22;
+import { AVATAR_DISPLAY_SCALE } from "../utils/avatarFocus";
 
 function getStoredAspectRatio(avatar: ProfileAvatar) {
   if (avatar.sourceWidth && avatar.sourceHeight) {

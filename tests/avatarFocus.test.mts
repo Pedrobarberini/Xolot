@@ -1,42 +1,77 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  AVATAR_FOCUS_MARKER_RADIUS,
-  constrainAvatarFocusPoint,
-  getAvatarFocusFromPoint,
-  getAvatarMarkerPoint
+  AVATAR_DISPLAY_SCALE,
+  getAvatarCropGeometry,
+  getAvatarFocusFromCropPoint
 } from "../src/utils/avatarFocus.ts";
 
-const previewSize = { height: 210, width: 210 };
+const previewSize = { height: 280, width: 324 };
 
-test("mapeia o centro da previa para foco central", () => {
-  assert.deepEqual(getAvatarFocusFromPoint(105, 105, previewSize), {
-    focusX: 50,
-    focusY: 50
-  });
+test("exibe a foto inteira dentro da area de edicao", () => {
+  const geometry = getAvatarCropGeometry(
+    50,
+    50,
+    previewSize,
+    { height: 900, width: 1600 }
+  );
+
+  assert.equal(geometry.imageWidth, previewSize.width);
+  assert.ok(geometry.imageHeight < previewSize.height);
+  assert.ok(geometry.imageY > 0);
 });
 
-test("mapeia a borda direita para o limite horizontal", () => {
-  const maximumRadius =
-    previewSize.width / 2 - AVATAR_FOCUS_MARKER_RADIUS - 3;
+test("usa circulo equivalente ao recorte final do avatar", () => {
+  const geometry = getAvatarCropGeometry(
+    50,
+    50,
+    previewSize,
+    { height: 900, width: 1600 }
+  );
 
-  assert.deepEqual(
-    getAvatarFocusFromPoint(105 + maximumRadius, 105, previewSize),
-    { focusX: 100, focusY: 50 }
+  assert.equal(
+    geometry.circleRadius * 2,
+    Math.min(geometry.imageWidth, geometry.imageHeight) / AVATAR_DISPLAY_SCALE
   );
 });
 
-test("limita toque externo ao raio circular", () => {
-  const point = constrainAvatarFocusPoint(300, 300, previewSize);
-  const distance = Math.sqrt((point.x - 105) ** 2 + (point.y - 105) ** 2);
+test("mantem o circulo dentro dos limites da imagem", () => {
+  const geometry = getAvatarCropGeometry(
+    100,
+    0,
+    previewSize,
+    { height: 1600, width: 900 }
+  );
 
-  assert.ok(Math.abs(distance - point.maximumRadius) < 0.0001);
+  assert.ok(geometry.circleX + geometry.circleRadius <= geometry.imageX + geometry.imageWidth);
+  assert.ok(geometry.circleY - geometry.circleRadius >= geometry.imageY);
 });
 
-test("converte foco continuo em posicao do marcador", () => {
-  const marker = getAvatarMarkerPoint(75, 50, previewSize);
+test("mapeia toque no centro para foco central", () => {
+  const geometry = getAvatarCropGeometry(
+    50,
+    50,
+    previewSize,
+    { height: 900, width: 1600 }
+  );
+  const focus = getAvatarFocusFromCropPoint(
+    geometry.circleX,
+    geometry.circleY,
+    previewSize,
+    { height: 900, width: 1600 }
+  );
 
-  assert.equal(marker.y, 105);
-  assert.ok(marker.x > 105);
-  assert.ok(marker.x < 210);
+  assert.ok(Math.abs(focus.focusX - 50) < 0.0001);
+  assert.ok(Math.abs(focus.focusY - 50) < 0.0001);
+});
+
+test("limita toque externo ao recorte possivel", () => {
+  const focus = getAvatarFocusFromCropPoint(
+    1000,
+    -1000,
+    previewSize,
+    { height: 900, width: 1600 }
+  );
+
+  assert.deepEqual(focus, { focusX: 100, focusY: 0 });
 });

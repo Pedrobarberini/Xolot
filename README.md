@@ -19,8 +19,8 @@ Aplicativo mobile-first para descoberta, envio e moderacao de videos de atletas 
 - Paginas e subpaginas usam a mesma transicao suave de entrada, mantendo header e footer estaveis.
 - A descricao `Ver mais` expande e recolhe suavemente sobre o video.
 - Perfil possui menu de tres barras com Configuracoes, Carteira e Sair da conta.
-- Configuracoes permite escolher, enquadrar, trocar ou remover a foto publica do perfil.
-- Tocar na propria foto abre uma HUD com ponto focal arrastavel; o enquadramento fica persistido e aparece no Inicio, Pesquisa, Mensagens, Perfil e pagina da bolsa.
+- Configuracoes permite escolher, enquadrar ou trocar a foto publica do perfil.
+- Tocar na propria foto abre uma HUD com a imagem inteira e um recorte circular arrastavel; o enquadramento fica persistido e aparece no Inicio, Pesquisa, Mensagens, Perfil e pagina da bolsa.
 - Perfil principal funciona como vitrine, com galeria de videos aprovados e estado vazio para novas contas.
 - Configuracoes concentra preferencias, verificacao/KYC, dados da Conta NextStar e gestao da bolsa.
 - Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.
@@ -103,7 +103,7 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 16. Ao abrir um video pela galeria, use a seta no Inicio para retornar ao mesmo perfil.
 17. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
 18. Use `Investir` na legenda expandida e confirme que a bolsa do mesmo perfil foi aberta.
-19. Em Perfil > Configuracoes, escolha uma foto, arraste o ponto focal na HUD e confira a mesma composicao no Perfil, Inicio e Pesquisa.
+19. Em Perfil > Configuracoes, escolha uma foto, arraste o circulo de recorte sobre a imagem inteira e confira a mesma composicao no Perfil, Inicio e Pesquisa.
 20. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
 21. Para testar como atleta, envie e aprove um video, volte a mesma conta e abra uma bolsa pelo Perfil.
 22. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.

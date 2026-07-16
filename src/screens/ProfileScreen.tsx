@@ -9,7 +9,6 @@ import {
   Menu,
   Play,
   Settings,
-  Trash2,
   WalletCards,
   X
 } from "lucide-react-native";
@@ -525,17 +524,6 @@ function SettingsView({
               {avatar ? "Trocar foto" : "Escolher foto"}
             </Text>
           </Pressable>
-          {avatar ? (
-            <Pressable
-              accessibilityLabel="Remover foto do perfil"
-              accessibilityRole="button"
-              onPress={() => onChangeAvatar(null)}
-              style={styles.settingsAvatarRemoveButton}
-            >
-              <Trash2 color={colors.danger} size={18} />
-              <Text style={styles.settingsAvatarRemoveButtonText}>Remover</Text>
-            </Pressable>
-          ) : null}
         </View>
       </View>
 

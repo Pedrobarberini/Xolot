@@ -819,3 +819,28 @@ Criterios de aceite:
 - O marcador nao sai da area circular da previa.
 - Cancelar nao altera o enquadramento salvo.
 - Salvar mantem a posicao escolhida depois de recarregar o app.
+
+### Task FEATURE-034 - Recorte circular sobre a foto completa
+
+Tipo: Frontend/UX/Produto
+
+Objetivo: tornar o enquadramento previsivel sem esconder partes da foto durante a edicao.
+
+Tasks:
+
+- [x] Exibir a imagem completa com `contain`, sem recorte previo.
+- [x] Substituir o marcador pelo circulo que representa o avatar final.
+- [x] Permitir arrastar o circulo sobre toda a area valida da imagem.
+- [x] Escurecer somente a regiao externa ao recorte circular.
+- [x] Usar a mesma escala na HUD e no avatar publicado.
+- [x] Remover a acao de excluir foto e manter apenas `Trocar foto`.
+- [x] Adicionar testes da geometria, limites e correspondencia do recorte.
+- [x] Atualizar README, backlog e release notes.
+
+Criterios de aceite:
+
+- A foto inteira permanece visivel enquanto o usuario enquadra.
+- A area dentro do circulo permanece nitida e representa o avatar final.
+- O circulo nunca ultrapassa os limites reais da imagem.
+- Salvar mantem o mesmo enquadramento nas demais telas.
+- Configuracoes nao exibe mais a opcao `Remover`.

@@ -1,73 +1,107 @@
-export const AVATAR_FOCUS_MARKER_RADIUS = 16;
+export const AVATAR_DISPLAY_SCALE = 1.22;
 
 export type AvatarPreviewSize = {
   height: number;
   width: number;
 };
 
-function getMaximumRadius(size: AvatarPreviewSize) {
-  return Math.max(
-    Math.min(size.width, size.height) / 2 -
-      AVATAR_FOCUS_MARKER_RADIUS -
-      3,
-    1
+export type AvatarSourceSize = {
+  height: number;
+  width: number;
+};
+
+export type AvatarCropGeometry = {
+  circleRadius: number;
+  circleX: number;
+  circleY: number;
+  imageHeight: number;
+  imageWidth: number;
+  imageX: number;
+  imageY: number;
+};
+
+function clamp(value: number, minimum: number, maximum: number) {
+  return Math.min(Math.max(value, minimum), maximum);
+}
+
+function getContainedImageBounds(
+  previewSize: AvatarPreviewSize,
+  sourceSize: AvatarSourceSize
+) {
+  const safeSourceWidth = Math.max(sourceSize.width, 1);
+  const safeSourceHeight = Math.max(sourceSize.height, 1);
+  const scale = Math.min(
+    previewSize.width / safeSourceWidth,
+    previewSize.height / safeSourceHeight
   );
-}
-
-export function constrainAvatarFocusPoint(
-  x: number,
-  y: number,
-  size: AvatarPreviewSize
-) {
-  const centerX = size.width / 2;
-  const centerY = size.height / 2;
-  const maximumRadius = getMaximumRadius(size);
-  const offsetX = x - centerX;
-  const offsetY = y - centerY;
-  const distance = Math.sqrt(offsetX ** 2 + offsetY ** 2);
-
-  if (distance <= maximumRadius) {
-    return { maximumRadius, x, y };
-  }
-
-  const scale = maximumRadius / Math.max(distance, 1);
+  const imageWidth = safeSourceWidth * scale;
+  const imageHeight = safeSourceHeight * scale;
 
   return {
-    maximumRadius,
-    x: centerX + offsetX * scale,
-    y: centerY + offsetY * scale
+    imageHeight,
+    imageWidth,
+    imageX: (previewSize.width - imageWidth) / 2,
+    imageY: (previewSize.height - imageHeight) / 2
   };
 }
 
-export function getAvatarFocusFromPoint(
-  x: number,
-  y: number,
-  size: AvatarPreviewSize
-) {
-  const point = constrainAvatarFocusPoint(x, y, size);
-  const centerX = size.width / 2;
-  const centerY = size.height / 2;
-
-  return {
-    focusX: Math.min(
-      Math.max(50 + ((point.x - centerX) / point.maximumRadius) * 50, 0),
-      100
-    ),
-    focusY: Math.min(
-      Math.max(50 + ((point.y - centerY) / point.maximumRadius) * 50, 0),
-      100
-    )
-  };
-}
-
-export function getAvatarMarkerPoint(
+export function getAvatarCropGeometry(
   focusX: number,
   focusY: number,
-  size: AvatarPreviewSize
-) {
-  const maximumRadius = getMaximumRadius(size);
-  const x = size.width / 2 + ((focusX - 50) / 50) * maximumRadius;
-  const y = size.height / 2 + ((focusY - 50) / 50) * maximumRadius;
+  previewSize: AvatarPreviewSize,
+  sourceSize: AvatarSourceSize
+): AvatarCropGeometry {
+  const imageBounds = getContainedImageBounds(previewSize, sourceSize);
+  const circleRadius =
+    Math.min(imageBounds.imageWidth, imageBounds.imageHeight) /
+    (2 * AVATAR_DISPLAY_SCALE);
+  const horizontalTravel = Math.max(
+    imageBounds.imageWidth - circleRadius * 2,
+    0
+  );
+  const verticalTravel = Math.max(
+    imageBounds.imageHeight - circleRadius * 2,
+    0
+  );
 
-  return constrainAvatarFocusPoint(x, y, size);
+  return {
+    ...imageBounds,
+    circleRadius,
+    circleX:
+      imageBounds.imageX +
+      circleRadius +
+      horizontalTravel * (clamp(focusX, 0, 100) / 100),
+    circleY:
+      imageBounds.imageY +
+      circleRadius +
+      verticalTravel * (clamp(focusY, 0, 100) / 100)
+  };
+}
+
+export function getAvatarFocusFromCropPoint(
+  x: number,
+  y: number,
+  previewSize: AvatarPreviewSize,
+  sourceSize: AvatarSourceSize
+) {
+  const geometry = getAvatarCropGeometry(50, 50, previewSize, sourceSize);
+  const minimumX = geometry.imageX + geometry.circleRadius;
+  const maximumX =
+    geometry.imageX + geometry.imageWidth - geometry.circleRadius;
+  const minimumY = geometry.imageY + geometry.circleRadius;
+  const maximumY =
+    geometry.imageY + geometry.imageHeight - geometry.circleRadius;
+  const horizontalTravel = maximumX - minimumX;
+  const verticalTravel = maximumY - minimumY;
+
+  return {
+    focusX:
+      horizontalTravel > 0
+        ? ((clamp(x, minimumX, maximumX) - minimumX) / horizontalTravel) * 100
+        : 50,
+    focusY:
+      verticalTravel > 0
+        ? ((clamp(y, minimumY, maximumY) - minimumY) / verticalTravel) * 100
+        : 50
+  };
 }

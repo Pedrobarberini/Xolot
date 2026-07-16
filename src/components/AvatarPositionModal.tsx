@@ -1,18 +1,26 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Move, X } from "lucide-react-native";
-import { Modal, PanResponder, Pressable, Text, View } from "react-native";
+import { X } from "lucide-react-native";
+import { Image, Modal, PanResponder, Pressable, Text, View } from "react-native";
+import { Circle, Defs, Mask, Rect, Svg } from "react-native-svg";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { ProfileAvatar } from "../types";
 import {
-  AVATAR_FOCUS_MARKER_RADIUS,
   AvatarPreviewSize,
-  getAvatarFocusFromPoint,
-  getAvatarMarkerPoint
+  AvatarSourceSize,
+  getAvatarCropGeometry,
+  getAvatarFocusFromCropPoint
 } from "../utils/avatarFocus";
-import { ProfileAvatarImage } from "./ProfileAvatarImage";
 
-const DEFAULT_PREVIEW_SIZE = 210;
+const DEFAULT_PREVIEW_SIZE = { height: 280, width: 324 };
+const CROP_MASK_ID = "nextstar-avatar-crop-mask";
+
+function getStoredSourceSize(avatar: ProfileAvatar): AvatarSourceSize {
+  return {
+    height: avatar.sourceHeight ?? 1,
+    width: avatar.sourceWidth ?? 1
+  };
+}
 
 export function AvatarPositionModal({
   avatar,
@@ -27,15 +35,21 @@ export function AvatarPositionModal({
 }) {
   const [focusX, setFocusX] = useState(50);
   const [focusY, setFocusY] = useState(50);
-  const [previewSize, setPreviewSize] = useState<AvatarPreviewSize>({
-    height: DEFAULT_PREVIEW_SIZE,
-    width: DEFAULT_PREVIEW_SIZE
-  });
+  const [previewSize, setPreviewSize] =
+    useState<AvatarPreviewSize>(DEFAULT_PREVIEW_SIZE);
+  const [sourceSize, setSourceSize] = useState<AvatarSourceSize>(() =>
+    avatar ? getStoredSourceSize(avatar) : { height: 1, width: 1 }
+  );
   const previewSizeRef = useRef(previewSize);
+  const sourceSizeRef = useRef(sourceSize);
 
   const updateFocusFromPoint = useCallback((x: number, y: number) => {
-    const size = previewSizeRef.current;
-    const nextFocus = getAvatarFocusFromPoint(x, y, size);
+    const nextFocus = getAvatarFocusFromCropPoint(
+      x,
+      y,
+      previewSizeRef.current,
+      sourceSizeRef.current
+    );
 
     setFocusX(nextFocus.focusX);
     setFocusY(nextFocus.focusY);
@@ -62,18 +76,49 @@ export function AvatarPositionModal({
   );
 
   useEffect(() => {
-    if (visible && avatar) {
-      setFocusX(avatar.focusX);
-      setFocusY(avatar.focusY);
+    if (!visible || !avatar) {
+      return;
     }
+
+    setFocusX(avatar.focusX);
+    setFocusY(avatar.focusY);
+
+    if (avatar.sourceWidth && avatar.sourceHeight) {
+      const nextSourceSize = getStoredSourceSize(avatar);
+      sourceSizeRef.current = nextSourceSize;
+      setSourceSize(nextSourceSize);
+      return;
+    }
+
+    let isMounted = true;
+
+    Image.getSize(
+      avatar.uri,
+      (width, height) => {
+        if (isMounted && width > 0 && height > 0) {
+          const nextSourceSize = { height, width };
+          sourceSizeRef.current = nextSourceSize;
+          setSourceSize(nextSourceSize);
+        }
+      },
+      () => undefined
+    );
+
+    return () => {
+      isMounted = false;
+    };
   }, [avatar, visible]);
 
   if (!avatar) {
     return null;
   }
 
-  const previewAvatar = { ...avatar, focusX, focusY };
-  const markerPoint = getAvatarMarkerPoint(focusX, focusY, previewSize);
+  const cropGeometry = getAvatarCropGeometry(
+    focusX,
+    focusY,
+    previewSize,
+    sourceSize
+  );
 
   return (
     <Modal
@@ -95,7 +140,7 @@ export function AvatarPositionModal({
             <View>
               <Text style={styles.avatarPositionTitle}>Ajustar enquadramento</Text>
               <Text style={styles.avatarPositionSubtitle}>
-                Arraste o ponto em destaque
+                Arraste o circulo sobre a foto
               </Text>
             </View>
             <Pressable
@@ -110,7 +155,7 @@ export function AvatarPositionModal({
           </View>
 
           <View
-            accessibilityLabel="Ponto focal da foto"
+            accessibilityLabel="Recorte circular da foto"
             accessibilityRole="adjustable"
             accessibilityValue={{
               text: `${Math.round(focusX)}% horizontal, ${Math.round(focusY)}% vertical`
@@ -127,24 +172,60 @@ export function AvatarPositionModal({
             style={styles.avatarPositionPreview}
             {...focusPanResponder.panHandlers}
           >
-            <ProfileAvatarImage avatar={previewAvatar} />
-            <View pointerEvents="none" style={styles.avatarPositionGrid}>
-              {Array.from({ length: 9 }, (_, index) => (
-                <View key={index} style={styles.avatarPositionGridCell} />
-              ))}
-            </View>
-            <View
+            <Image
+              accessibilityIgnoresInvertColors
+              resizeMode="contain"
+              source={{ uri: avatar.uri }}
+              style={styles.avatarPositionFullImage}
+            />
+            <Svg
+              height="100%"
               pointerEvents="none"
-              style={[
-                styles.avatarPositionMarker,
-                {
-                  left: markerPoint.x - AVATAR_FOCUS_MARKER_RADIUS,
-                  top: markerPoint.y - AVATAR_FOCUS_MARKER_RADIUS
-                }
-              ]}
+              style={styles.avatarPositionCropOverlay}
+              width="100%"
             >
-              <Move color={colors.onPrimary} size={16} strokeWidth={2.8} />
-            </View>
+              <Defs>
+                <Mask id={CROP_MASK_ID} maskUnits="userSpaceOnUse">
+                  <Rect
+                    fill="#FFFFFF"
+                    height={previewSize.height}
+                    width={previewSize.width}
+                    x={0}
+                    y={0}
+                  />
+                  <Circle
+                    cx={cropGeometry.circleX}
+                    cy={cropGeometry.circleY}
+                    fill="#000000"
+                    r={cropGeometry.circleRadius}
+                  />
+                </Mask>
+              </Defs>
+              <Rect
+                fill="rgba(3, 12, 8, 0.62)"
+                height={cropGeometry.imageHeight}
+                mask={`url(#${CROP_MASK_ID})`}
+                width={cropGeometry.imageWidth}
+                x={cropGeometry.imageX}
+                y={cropGeometry.imageY}
+              />
+              <Circle
+                cx={cropGeometry.circleX}
+                cy={cropGeometry.circleY}
+                fill="transparent"
+                r={cropGeometry.circleRadius}
+                stroke="#FFFFFF"
+                strokeWidth={3}
+              />
+              <Circle
+                cx={cropGeometry.circleX}
+                cy={cropGeometry.circleY}
+                fill={colors.primary}
+                r={5}
+                stroke="#FFFFFF"
+                strokeWidth={2}
+              />
+            </Svg>
           </View>
 
           <View style={styles.avatarPositionActions}>
@@ -152,7 +233,7 @@ export function AvatarPositionModal({
               <Text style={styles.avatarPositionCancelText}>Cancelar</Text>
             </Pressable>
             <Pressable
-              onPress={() => onSave(previewAvatar)}
+              onPress={() => onSave({ ...avatar, focusX, focusY })}
               style={styles.avatarPositionSaveButton}
             >
               <Text style={styles.avatarPositionSaveText}>Salvar</Text>

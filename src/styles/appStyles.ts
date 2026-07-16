@@ -3196,23 +3196,6 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "900"
   },
-  settingsAvatarRemoveButton: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.borderStrong,
-    borderRadius: 6,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 7,
-    justifyContent: "center",
-    minHeight: 40,
-    paddingHorizontal: 13
-  },
-  settingsAvatarRemoveButtonText: {
-    color: colors.danger,
-    fontSize: 12,
-    fontWeight: "900"
-  },
   avatarPositionModalRoot: {
     alignItems: "center",
     flex: 1,
@@ -3261,43 +3244,23 @@ export const styles = StyleSheet.create({
   },
   avatarPositionPreview: {
     alignSelf: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.primary,
-    borderRadius: 999,
-    borderWidth: 3,
-    height: 210,
+    backgroundColor: "#07110D",
+    borderColor: colors.borderStrong,
+    borderRadius: 8,
+    borderWidth: 1,
+    height: 280,
     marginTop: 20,
     overflow: "hidden",
     position: "relative",
-    width: 210
+    width: "100%"
   },
-  avatarPositionGrid: {
+  avatarPositionFullImage: {
     ...StyleSheet.absoluteFillObject,
-    flexDirection: "row",
-    flexWrap: "wrap"
+    height: "100%",
+    width: "100%"
   },
-  avatarPositionGridCell: {
-    alignItems: "center",
-    borderColor: "rgba(255, 255, 255, 0.42)",
-    borderWidth: 0.5,
-    height: "33.333%",
-    justifyContent: "center",
-    width: "33.333%"
-  },
-  avatarPositionMarker: {
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    borderColor: colors.surface,
-    borderRadius: 999,
-    borderWidth: 2,
-    height: 32,
-    justifyContent: "center",
-    position: "absolute",
-    shadowColor: "#000000",
-    shadowOffset: { height: 2, width: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    width: 32
+  avatarPositionCropOverlay: {
+    ...StyleSheet.absoluteFillObject
   },
   avatarPositionActions: {
     flexDirection: "row",
