@@ -534,7 +534,7 @@ function FeedReel({
                       { color: "rgba(255, 255, 255, 0.82)" }
                     ]}
                   >
-                    {player.username ? `@${player.username} | ` : ""}
+                    {player.username ? `${player.name} | ` : ""}
                     {player.position} | {player.city}
                   </Text>
                 ) : null}
@@ -546,7 +546,7 @@ function FeedReel({
                     { color: isWide ? palette.text : colors.onPrimary }
                   ]}
                 >
-                  {player.name}
+                  {player.username ? `@${player.username}` : player.name}
                 </Text>
                 {isWide ? (
                   <Text
@@ -556,7 +556,7 @@ function FeedReel({
                       { color: palette.muted }
                     ]}
                   >
-                    {player.username ? `@${player.username} | ` : ""}
+                    {player.username ? `${player.name} | ` : ""}
                     {player.position} | {player.city}
                   </Text>
                 ) : null}

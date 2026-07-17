@@ -1035,11 +1035,13 @@ Tasks:
 - [x] Exibir `@username` como titulo do proprio perfil.
 - [x] Manter o nome publico logo abaixo como informacao secundaria.
 - [x] Aplicar a mesma hierarquia no perfil visitado e na pagina de investimento.
+- [x] Exibir `@username` em destaque no Inicio e mover o nome para a linha de posicao e cidade.
 - [x] Preservar o nome publico como fallback para perfis antigos sem username.
 - [x] Atualizar README e backlog tecnico.
 
 Criterios de aceite:
 
 - O username aparece antes e com maior destaque que o nome publico.
+- No Inicio, a linha secundaria mostra `Nome | Posicao | Cidade`.
 - O nome do jogador continua visivel no cabecalho do perfil.
 - Usernames longos permanecem em uma unica linha sem sobrepor os controles.
