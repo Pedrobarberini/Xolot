@@ -25,6 +25,7 @@ import {
   View
 } from "react-native";
 import { AvatarPositionModal } from "../components/AvatarPositionModal";
+import { DeleteVideoModal } from "../components/DeleteVideoModal";
 import {
   ProfileGalleryVideo,
   ProfileVideoGallery
@@ -57,6 +58,7 @@ export function ProfileScreen({
   fund,
   investments,
   onChangeAvatar,
+  onDeleteVideo,
   onDeposit,
   onOpenFund,
   onOpenVideo,
@@ -73,6 +75,7 @@ export function ProfileScreen({
   fund?: AthleteFund;
   investments: Investment[];
   onChangeAvatar: (avatar: ProfileAvatar | null) => void;
+  onDeleteVideo: (video: VideoSubmission) => Promise<boolean>;
   onDeposit: (amount: number) => void;
   onOpenFund: (
     player: Player,
@@ -88,7 +91,10 @@ export function ProfileScreen({
 }) {
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
   const [isAvatarPositionVisible, setIsAvatarPositionVisible] = useState(false);
+  const [isDeletingVideo, setIsDeletingVideo] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
+  const [videoPendingDeletion, setVideoPendingDeletion] =
+    useState<VideoSubmission | null>(null);
   const [profileView, setProfileView] = useState<ProfileView>("overview");
   const profileNavigationTimer = useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -141,6 +147,35 @@ export function ProfileScreen({
       setProfileView(nextView);
       profileNavigationTimer.current = null;
     }, 220);
+  }
+
+  async function confirmVideoDeletion() {
+    if (!videoPendingDeletion || isDeletingVideo) {
+      return;
+    }
+
+    setIsDeletingVideo(true);
+
+    try {
+      const wasDeleted = await onDeleteVideo(videoPendingDeletion);
+
+      if (!wasDeleted) {
+        Alert.alert(
+          "Nao foi possivel excluir",
+          "Este video nao pertence a conta conectada."
+        );
+        return;
+      }
+
+      setVideoPendingDeletion(null);
+    } catch {
+      Alert.alert(
+        "Nao foi possivel excluir",
+        "Tente novamente em alguns instantes."
+      );
+    } finally {
+      setIsDeletingVideo(false);
+    }
   }
 
   const avatarPositionModal = (
@@ -309,6 +344,15 @@ export function ProfileScreen({
           <ProfileVideoGallery
             emptyBody="Seus videos publicados aparecerao nesta galeria."
             emptyTitle="Poste um video para mostra-lo aqui"
+            onDeleteVideo={(video) => {
+              const selectedVideo = publishedVideos.find(
+                (item) => item.id === video.id
+              );
+
+              if (selectedVideo) {
+                setVideoPendingDeletion(selectedVideo);
+              }
+            }}
             onOpenVideo={(video) => {
               const selectedVideo = publishedVideos.find(
                 (item) => item.id === video.id
@@ -332,6 +376,17 @@ export function ProfileScreen({
         }}
         showWallet={user.role === "Usuario"}
         visible={isOptionsVisible}
+      />
+      <DeleteVideoModal
+        isDeleting={isDeletingVideo}
+        onClose={() => {
+          if (!isDeletingVideo) {
+            setVideoPendingDeletion(null);
+          }
+        }}
+        onConfirm={confirmVideoDeletion}
+        videoTitle={videoPendingDeletion?.videoTitle ?? ""}
+        visible={Boolean(videoPendingDeletion)}
       />
       {avatarPositionModal}
     </>

@@ -125,3 +125,30 @@ export async function loadStoredVideo(reference: string) {
     database.close();
   }
 }
+
+export async function deleteStoredVideo(reference: string) {
+  const storageKey = getLocalVideoStorageKey(reference);
+
+  if (!storageKey || Platform.OS !== "web") {
+    return false;
+  }
+
+  const database = await openVideoDatabase();
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction(VIDEO_STORE_NAME, "readwrite");
+
+      transaction.onabort = () =>
+        reject(transaction.error ?? new Error("Video deletion was aborted."));
+      transaction.onerror = () =>
+        reject(transaction.error ?? new Error("Video deletion failed."));
+      transaction.oncomplete = () => resolve();
+      transaction.objectStore(VIDEO_STORE_NAME).delete(storageKey);
+    });
+  } finally {
+    database.close();
+  }
+
+  return true;
+}

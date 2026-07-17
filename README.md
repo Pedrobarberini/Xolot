@@ -31,6 +31,7 @@ Aplicativo mobile-first para descoberta e publicacao de videos de atletas de fut
 - Legenda expandida do feed mostra bolsa aberta, valores captados, meta e progresso real.
 - Envio por galeria ou link direto, com dados do atleta reutilizados do perfil, texto da publicacao, validacao e confirmacao animada.
 - Durante os testes, novos videos sao publicados diretamente no Inicio e no perfil, sem fila manual.
+- O dono pode excluir um video pela propria galeria; a publicacao sai imediatamente do Inicio e do perfil.
 - O campo `Objetivo do aporte` foi removido das postagens; a bolsa continua vinculada ao perfil do atleta.
 - A biografia permanece exclusiva do perfil e nao e copiada para as postagens.
 - Nome publico e `@username` sao identidades separadas: nomes podem se repetir, usernames e emails nao.
@@ -98,25 +99,26 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 3. Abra `Perfil > Configuracoes > Editar perfil`, altere um dado e confirme a atualizacao no Perfil.
 4. Publique um video e confirme o toast de sucesso no rodape.
 5. Abra o `Inicio` e o Perfil e confirme que o video apareceu imediatamente.
-6. Verifique que a postagem mostra apenas titulo e texto, sem `Objetivo do aporte`.
-7. Verifique que publicacoes sem avaliacao nao exibem score, risco, box de aviso ou valores inventados.
-8. Abra `Perfil`, toque no menu de tres barras e entre em `Carteira`.
-9. Use `Depositar` para adicionar saldo simulado.
-10. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
-11. Toque no avatar ou no nome do autor para abrir o perfil e alternar entre os videos publicados.
-12. Pesquise uma conta pela aba `Pesquisar`; usuarios sem video tambem aparecem e abrem um perfil publico vazio.
-13. No perfil visitado, toque no icone de mensagem, escreva uma mensagem e confirme que ela aparece na conversa.
-14. Volte para a lista de conversas e reabra o historico criado durante a sessao.
-15. No perfil visitado, toque em um video para voltar ao reel correspondente ou use `Investir` para abrir a pagina da bolsa; use o `X` para retornar ao perfil.
-16. Perfis sem bolsa em captacao exibem a acao de investimento desabilitada.
-17. Ao abrir um video pela galeria, use a seta no Inicio para retornar ao mesmo perfil.
-18. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
-19. Use `Investir` na legenda expandida e confirme que a bolsa do mesmo perfil foi aberta.
-20. Em Perfil > Configuracoes, escolha uma foto, arraste o circulo sobre a imagem, ajuste o tamanho entre 30% e 100% e confira a mesma composicao no Perfil, Inicio e Pesquisa.
-21. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
-22. Para testar como atleta, publique um video e abra uma bolsa pelo Perfil.
-23. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
-24. Recarregue a pagina e confirme que a sessao, perfil, saldo e postagens continuam disponiveis.
+6. Na galeria do proprio Perfil, toque na lixeira, confirme a exclusao e confira que o video saiu tambem do Inicio.
+7. Verifique que a postagem mostra apenas titulo e texto, sem `Objetivo do aporte`.
+8. Verifique que publicacoes sem avaliacao nao exibem score, risco, box de aviso ou valores inventados.
+9. Abra `Perfil`, toque no menu de tres barras e entre em `Carteira`.
+10. Use `Depositar` para adicionar saldo simulado.
+11. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
+12. Toque no avatar ou no nome do autor para abrir o perfil e alternar entre os videos publicados.
+13. Pesquise uma conta pela aba `Pesquisar`; usuarios sem video tambem aparecem e abrem um perfil publico vazio.
+14. No perfil visitado, toque no icone de mensagem, escreva uma mensagem e confirme que ela aparece na conversa.
+15. Volte para a lista de conversas e reabra o historico criado durante a sessao.
+16. No perfil visitado, toque em um video para voltar ao reel correspondente ou use `Investir` para abrir a pagina da bolsa; use o `X` para retornar ao perfil.
+17. Perfis sem bolsa em captacao exibem a acao de investimento desabilitada.
+18. Ao abrir um video pela galeria, use a seta no Inicio para retornar ao mesmo perfil.
+19. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
+20. Use `Investir` na legenda expandida e confirme que a bolsa do mesmo perfil foi aberta.
+21. Em Perfil > Configuracoes, escolha uma foto, arraste o circulo sobre a imagem, ajuste o tamanho entre 30% e 100% e confira a mesma composicao no Perfil, Inicio e Pesquisa.
+22. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
+23. Para testar como atleta, publique um video e abra uma bolsa pelo Perfil.
+24. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
+25. Recarregue a pagina e confirme que a sessao, perfil, saldo e postagens continuam disponiveis.
 
 ## Antes da abertura ao publico
 

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { Play } from "lucide-react-native";
+import { Play, Trash2 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { styles } from "../styles/appStyles";
@@ -15,11 +15,13 @@ export type ProfileGalleryVideo = {
 export function ProfileVideoGallery({
   emptyBody,
   emptyTitle,
+  onDeleteVideo,
   onOpenVideo,
   videos
 }: {
   emptyBody: string;
   emptyTitle: string;
+  onDeleteVideo?: (video: ProfileGalleryVideo) => void;
   onOpenVideo: (video: ProfileGalleryVideo) => void;
   videos: ProfileGalleryVideo[];
 }) {
@@ -41,25 +43,51 @@ export function ProfileVideoGallery({
       ) : (
         <View style={styles.profileGalleryGrid}>
           {videos.map((video) => (
-            <Pressable
-              accessibilityLabel={`Abrir ${video.title} no Inicio`}
-              accessibilityRole="button"
-              key={video.id}
-              onPress={() => onOpenVideo(video)}
-              style={({ pressed }) => [
-                styles.profileGalleryCard,
-                pressed ? styles.buttonPressed : null
-              ]}
-            >
-              <ProfileGalleryThumbnail uri={video.uri} />
-              <View style={styles.profileGalleryCardShade} />
-              <View style={styles.profileGalleryPlayBadge}>
-                <Play color={colors.onPrimary} fill={colors.onPrimary} size={14} />
-              </View>
-              <Text numberOfLines={2} style={styles.profileGalleryCardTitle}>
-                {video.title}
-              </Text>
-            </Pressable>
+            <View key={video.id} style={styles.profileGalleryCard}>
+              <Pressable
+                accessibilityLabel={`Abrir ${video.title} no Inicio`}
+                accessibilityRole="button"
+                onPress={() => onOpenVideo(video)}
+                style={({ pressed }) => [
+                  styles.profileGalleryOpenButton,
+                  pressed ? styles.buttonPressed : null
+                ]}
+              >
+                <ProfileGalleryThumbnail uri={video.uri} />
+                <View style={styles.profileGalleryCardShade} />
+                <View
+                  style={[
+                    styles.profileGalleryPlayBadge,
+                    onDeleteVideo
+                      ? styles.profileGalleryPlayBadgeWithDelete
+                      : null
+                  ]}
+                >
+                  <Play
+                    color={colors.onPrimary}
+                    fill={colors.onPrimary}
+                    size={14}
+                  />
+                </View>
+                <Text numberOfLines={2} style={styles.profileGalleryCardTitle}>
+                  {video.title}
+                </Text>
+              </Pressable>
+              {onDeleteVideo ? (
+                <Pressable
+                  accessibilityLabel={`Excluir ${video.title}`}
+                  accessibilityRole="button"
+                  hitSlop={6}
+                  onPress={() => onDeleteVideo(video)}
+                  style={({ pressed }) => [
+                    styles.profileGalleryDeleteButton,
+                    pressed ? styles.buttonPressed : null
+                  ]}
+                >
+                  <Trash2 color={colors.onPrimary} size={15} />
+                </Pressable>
+              ) : null}
+            </View>
           ))}
         </View>
       )}

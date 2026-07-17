@@ -3012,6 +3012,9 @@ export const styles = StyleSheet.create({
     position: "relative",
     width: "31.9%"
   },
+  profileGalleryOpenButton: {
+    flex: 1
+  },
   profileGalleryMedia: {
     height: "100%",
     width: "100%"
@@ -3035,6 +3038,20 @@ export const styles = StyleSheet.create({
     top: 8,
     width: 30
   },
+  profileGalleryPlayBadgeWithDelete: {
+    right: 44
+  },
+  profileGalleryDeleteButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(196, 61, 77, 0.92)",
+    borderRadius: 999,
+    height: 30,
+    justifyContent: "center",
+    position: "absolute",
+    right: 8,
+    top: 8,
+    width: 30
+  },
   profileGalleryCardTitle: {
     bottom: 8,
     color: colors.onPrimary,
@@ -3044,6 +3061,63 @@ export const styles = StyleSheet.create({
     lineHeight: 14,
     position: "absolute",
     right: 8
+  },
+  deleteVideoDialog: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    elevation: 18,
+    maxWidth: 420,
+    padding: 18,
+    shadowColor: "#000000",
+    shadowOffset: { height: 8, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    width: "100%"
+  },
+  deleteVideoTitleRow: {
+    alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    gap: 11,
+    minWidth: 0
+  },
+  deleteVideoIcon: {
+    alignItems: "center",
+    backgroundColor: colors.dangerSoft,
+    borderRadius: 999,
+    height: 40,
+    justifyContent: "center",
+    width: 40
+  },
+  deleteVideoTitle: {
+    color: colors.text,
+    fontSize: 19,
+    fontWeight: "900"
+  },
+  deleteVideoBody: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 18
+  },
+  deleteVideoConfirmButton: {
+    alignItems: "center",
+    backgroundColor: colors.danger,
+    borderRadius: 6,
+    flex: 1.6,
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 46,
+    paddingHorizontal: 12
+  },
+  deleteVideoConfirmText: {
+    color: colors.onPrimary,
+    fontSize: 13,
+    fontWeight: "900",
+    textAlign: "center"
   },
   profileVideoModalRoot: {
     alignItems: "center",

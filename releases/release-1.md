@@ -999,3 +999,27 @@ Criterios de aceite:
 - O video aparece imediatamente no Inicio e na galeria do perfil.
 - A interface mostra apenas titulo e texto da publicacao, sem objetivo de aporte.
 - Pendencias locais anteriores deixam de depender de aprovacao manual.
+
+### Task FIX-041 - Exclusao de video pelo dono
+
+Tipo: Frontend/Dados/UX
+
+Objetivo: permitir que o usuario remova uma publicacao que nao deseja mais exibir.
+
+Tasks:
+
+- [x] Adicionar botao de lixeira somente na galeria do proprio perfil.
+- [x] Exibir confirmacao antes de concluir a exclusao.
+- [x] Remover a publicacao do Inicio e da galeria imediatamente.
+- [x] Excluir do IndexedDB a copia local do video no navegador.
+- [x] Validar o ID do dono antes de alterar a lista persistida.
+- [x] Manter videos de outros usuarios protegidos contra exclusao.
+- [x] Cobrir propriedade e exclusao com testes automatizados.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- A lixeira aparece apenas para videos da conta conectada.
+- Cancelar o modal mantem o video publicado.
+- Confirmar remove o video do Perfil e do Inicio sem recarregar.
+- Uma conta nao consegue excluir o video de outra.

@@ -11,6 +11,8 @@ import {
 } from "../types";
 import { Tab } from "../ui/types";
 import { formatBRL } from "../utils/investment";
+import { deleteStoredVideo } from "../services/videoStorage";
+import { removeOwnedVideoSubmission } from "../utils/videoSubmission";
 
 type CreateAppActionsOptions = {
   athleteFunds: AthleteFund[];
@@ -216,6 +218,19 @@ export function createAppActions({
     setSubmissions((current) => [submission, ...current]);
   }
 
+  async function handleDeleteVideo(submission: VideoSubmission) {
+    if (!user || submission.userId !== user.id) {
+      return false;
+    }
+
+    setSubmissions((current) =>
+      removeOwnedVideoSubmission(current, submission.id, user.id)
+    );
+    await deleteStoredVideo(submission.videoLink).catch(() => false);
+
+    return true;
+  }
+
   function handleReviewSubmission(
     submissionId: string,
     status: VideoSubmissionStatus,
@@ -242,6 +257,7 @@ export function createAppActions({
 
   return {
     handleAuth,
+    handleDeleteVideo,
     handleDeposit,
     handleInvest,
     handleOpenFund,

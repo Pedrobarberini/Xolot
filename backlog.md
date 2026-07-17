@@ -300,6 +300,9 @@ Tasks:
 - [x] Manter a biografia somente nas paginas de perfil, sem copia-la para a postagem.
 - [x] Publicar diretamente durante a fase de testes, sem fila manual.
 - [x] Migrar envios antigos em revisao para publicados.
+- [x] Permitir que o dono exclua um video pela galeria do proprio perfil.
+- [x] Remover a publicacao do Inicio, do perfil e do armazenamento local ao excluir.
+- [x] Exigir confirmacao antes da exclusao definitiva.
 
 Criterios de aceite:
 
@@ -307,6 +310,8 @@ Criterios de aceite:
 - Apos envio, aparece toast/popup no rodape por cerca de 3 segundos.
 - Usuario nao precisa rolar a tela para descobrir se o envio funcionou.
 - Publicacao aparece imediatamente no Inicio e no perfil do atleta.
+- Exclusao feita pelo dono atualiza Inicio e perfil sem recarregar a pagina.
+- Uma conta nao consegue excluir publicacoes pertencentes a outro usuario.
 - Alteracoes futuras no perfil nao exigem redigitar os dados em cada envio.
 
 ### Task P1-005 - Moderacao automatica de conteudo

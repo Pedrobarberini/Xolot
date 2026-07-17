@@ -269,6 +269,7 @@ export default function App() {
 
   const {
     handleAuth,
+    handleDeleteVideo,
     handleDeposit,
     handleInvest,
     handleOpenFund,
@@ -579,6 +580,7 @@ export default function App() {
                       ownProfileId ? followersByProfile[ownProfileId] ?? 0 : 0
                     }
                     followingCount={followingProfileIds.length}
+                    onDeleteVideo={handleDeleteVideo}
                     onOpenFund={handleOpenFund}
                     onOpenVideo={(submission) => {
                       const reelPlayer = approvedSubmissionPlayers.find(
