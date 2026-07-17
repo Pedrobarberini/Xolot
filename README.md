@@ -35,6 +35,7 @@ Aplicativo mobile-first para descoberta e publicacao de videos de atletas de fut
 - O campo `Objetivo do aporte` foi removido das postagens; a bolsa continua vinculada ao perfil do atleta.
 - A biografia permanece exclusiva do perfil e nao e copiada para as postagens.
 - Nome publico e `@username` sao identidades separadas: nomes podem se repetir, usernames e emails nao.
+- Nos perfis, o `@username` aparece como identidade principal e o nome do jogador como informacao secundaria.
 - A pesquisa encontra atletas pelo nome ou username, e mensagens para a propria conta dispensam follow.
 - Videos escolhidos no navegador ficam no IndexedDB e sobrevivem ao recarregamento local da pagina.
 - O Inicio pausa o video anterior assim que outro item se torna o mais visivel.

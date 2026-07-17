@@ -58,11 +58,16 @@ export function InvestmentScreen({
             </View>
             <View style={styles.profileTitleBlock}>
               <Text
-                numberOfLines={2}
-                style={[styles.profileName, styles.publicProfileName]}
+                numberOfLines={1}
+                style={styles.profilePrimaryUsername}
               >
-                {player.name}
+                {player.username ? `@${player.username}` : player.name}
               </Text>
+              {player.username ? (
+                <Text numberOfLines={1} style={styles.profileSecondaryName}>
+                  {player.name}
+                </Text>
+              ) : null}
               <Text numberOfLines={1} style={styles.profileMeta}>
                 {player.position} | {player.city}
               </Text>

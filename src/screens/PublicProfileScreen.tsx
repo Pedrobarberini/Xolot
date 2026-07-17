@@ -99,14 +99,14 @@ export function PublicProfileScreen({
             </View>
             <View style={styles.profileTitleBlock}>
               <Text
-                numberOfLines={2}
-                style={[styles.profileName, styles.publicProfileName]}
+                numberOfLines={1}
+                style={styles.profilePrimaryUsername}
               >
-                {profileName}
+                {profileUsername ? `@${profileUsername}` : profileName}
               </Text>
               {profileUsername ? (
-                <Text numberOfLines={1} style={styles.profileUsername}>
-                  @{profileUsername}
+                <Text numberOfLines={1} style={styles.profileSecondaryName}>
+                  {profileName}
                 </Text>
               ) : null}
               <Text

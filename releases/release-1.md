@@ -1023,3 +1023,23 @@ Criterios de aceite:
 - Cancelar o modal mantem o video publicado.
 - Confirmar remove o video do Perfil e do Inicio sem recarregar.
 - Uma conta nao consegue excluir o video de outra.
+
+### Task FIX-042 - Username como identidade principal
+
+Tipo: Frontend/UX
+
+Objetivo: priorizar a identidade unica da plataforma nas telas de perfil.
+
+Tasks:
+
+- [x] Exibir `@username` como titulo do proprio perfil.
+- [x] Manter o nome publico logo abaixo como informacao secundaria.
+- [x] Aplicar a mesma hierarquia no perfil visitado e na pagina de investimento.
+- [x] Preservar o nome publico como fallback para perfis antigos sem username.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- O username aparece antes e com maior destaque que o nome publico.
+- O nome do jogador continua visivel no cabecalho do perfil.
+- Usernames longos permanecem em uma unica linha sem sobrepor os controles.

@@ -2861,6 +2861,18 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     marginTop: 2
   },
+  profilePrimaryUsername: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: "900",
+    letterSpacing: 0
+  },
+  profileSecondaryName: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: "800",
+    marginTop: 2
+  },
   profileMeta: {
     color: colors.muted,
     fontSize: 13,

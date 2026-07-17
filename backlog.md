@@ -191,6 +191,7 @@ Tasks:
 - [x] Persistir o perfil junto da conta cadastrada.
 - [x] Reutilizar o formulario em `Perfil > Configuracoes > Editar perfil`.
 - [x] Exibir biografia, clube e dados atualizados nos perfis proprio e publico.
+- [x] Exibir `@username` antes do nome publico nos perfis proprio, publico e de investimento.
 - [x] Incluir os novos dados na pesquisa de perfis.
 - [x] Permitir pesquisa tanto pelo nome publico quanto pelo `@username`.
 - [x] Liberar conversa com a propria conta sem exigir follow.

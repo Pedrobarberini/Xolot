@@ -278,9 +278,11 @@ export function ProfileScreen({
                 )}
               </Pressable>
               <View style={styles.profileTitleBlock}>
-                <Text style={styles.profileName}>{user.name}</Text>
-                <Text numberOfLines={1} style={styles.profileUsername}>
+                <Text numberOfLines={1} style={styles.profilePrimaryUsername}>
                   @{user.username}
+                </Text>
+                <Text numberOfLines={1} style={styles.profileSecondaryName}>
+                  {user.name}
                 </Text>
                 <Text style={styles.profileMeta}>
                   {user.role === "Usuario" && user.profileCompleted
