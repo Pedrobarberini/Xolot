@@ -33,7 +33,6 @@ export type Player = {
   hasAudio?: boolean;
   isDemo?: boolean;
   highlight: string;
-  objective: string;
   tags: string[];
   evaluation?: PlayerEvaluation;
 };
@@ -141,7 +140,6 @@ export type VideoSubmission = {
   videoFileName?: string;
   videoFileSize?: number;
   highlight: string;
-  goals: string;
   hasGuardianConsent: boolean;
   status: VideoSubmissionStatus;
   submittedAt: string;

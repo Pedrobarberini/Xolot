@@ -280,7 +280,7 @@ export function ProfileScreen({
               </View>
               <View style={styles.profileQuickItem}>
                 <Text style={styles.profileQuickValue}>{approved}</Text>
-                <Text style={styles.profileQuickLabel}>aprovados</Text>
+                <Text style={styles.profileQuickLabel}>publicados</Text>
               </View>
               <View style={styles.profileQuickItem}>
                 <Text style={styles.profileQuickValue}>
@@ -307,7 +307,7 @@ export function ProfileScreen({
           </View>
 
           <ProfileVideoGallery
-            emptyBody="Videos aprovados pela moderacao aparecerao nesta galeria."
+            emptyBody="Seus videos publicados aparecerao nesta galeria."
             emptyTitle="Poste um video para mostra-lo aqui"
             onOpenVideo={(video) => {
               const selectedVideo = publishedVideos.find(
@@ -660,7 +660,7 @@ function SettingsView({
           </View>
           <View style={styles.profileRow}>
             <Text style={styles.profileLabel}>Status padrao</Text>
-            <Text style={styles.profileValue}>Moderacao manual</Text>
+            <Text style={styles.profileValue}>Publicacao direta (teste)</Text>
           </View>
         </View>
       ) : (
@@ -671,7 +671,7 @@ function SettingsView({
             <Text style={styles.profileValue}>{pending}</Text>
           </View>
           <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Aprovados</Text>
+            <Text style={styles.profileLabel}>Publicados</Text>
             <Text style={styles.profileValue}>{approved}</Text>
           </View>
         </View>
@@ -739,8 +739,8 @@ function SettingsView({
               </Text>
               {!player ? (
                 <Text style={styles.validationText}>
-                  Envie um video e aguarde a aprovacao para criar seu perfil
-                  publico antes de abrir a bolsa.
+                  Publique um video para criar seu perfil publico antes de abrir
+                  a bolsa.
                 </Text>
               ) : null}
               <Pressable
@@ -765,8 +765,8 @@ function SettingsView({
       <View style={styles.settingsSection}>
         <Text style={styles.settingsSectionTitle}>Ambiente demonstrativo</Text>
         <Text style={styles.bodyText}>
-          Cadastro, moderacao, aportes, KYC e distribuicao ainda sao simulados.
-          Nenhuma operacao possui validade financeira ou juridica.
+          Cadastro, publicacao direta, aportes, KYC e distribuicao ainda sao
+          simulados. Nenhuma operacao possui validade financeira ou juridica.
         </Text>
       </View>
     </ScrollView>

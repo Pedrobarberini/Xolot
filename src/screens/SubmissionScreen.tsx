@@ -10,12 +10,12 @@ import { persistPickedVideo } from "../services/videoStorage";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, VideoSubmission } from "../types";
+import { DIRECT_PUBLICATION_STATUS } from "../utils/publication";
 
 type SubmissionDraft = {
   videoTitle: string;
   videoLink: string;
   highlight: string;
-  goals: string;
   hasGuardianConsent: boolean;
 };
 
@@ -32,7 +32,6 @@ const emptySubmissionDraft: SubmissionDraft = {
   videoTitle: "",
   videoLink: "",
   highlight: "",
-  goals: "",
   hasGuardianConsent: false
 };
 
@@ -69,7 +68,7 @@ export function SubmitVideoScreen({
     hasVideoSource ? null : "Selecione um video ou informe um link direto.",
     draft.highlight.trim().length >= 4
       ? null
-      : "Descreva o principal destaque com pelo menos 4 caracteres.",
+      : "Escreva um texto para a publicacao com pelo menos 4 caracteres.",
     !needsGuardianConsent || draft.hasGuardianConsent
       ? null
       : "Confirme a autorizacao do responsavel legal."
@@ -218,10 +217,10 @@ export function SubmitVideoScreen({
         videoFileName: selectedVideo?.fileName,
         videoFileSize: selectedVideo?.fileSize,
         highlight: draft.highlight.trim(),
-        goals: draft.goals.trim() || "Objetivos ainda nao informados",
         hasGuardianConsent: draft.hasGuardianConsent,
-        status: "Em revisao",
-        submittedAt: new Date().toISOString()
+        status: DIRECT_PUBLICATION_STATUS,
+        submittedAt: new Date().toISOString(),
+        approvedAt: new Date().toISOString()
       });
       Keyboard.dismiss();
       setLastSubmittedId(id);
@@ -247,10 +246,10 @@ export function SubmitVideoScreen({
       >
       <View style={styles.submitHero}>
         <Text style={styles.heroKicker}>Area do atleta</Text>
-        <Text style={styles.heroTitle}>Envie seu video para analise.</Text>
+        <Text style={styles.heroTitle}>Publique seu video.</Text>
         <Text style={styles.heroBody}>
-          O admin aprova, reprova ou pede ajustes. So oportunidades aprovadas
-          entram no feed dos investidores.
+          Adicione seu melhor lance e ele aparecera imediatamente no Inicio e
+          no seu perfil durante esta fase de testes.
         </Text>
       </View>
 
@@ -333,18 +332,11 @@ export function SubmitVideoScreen({
           <SubmissionVideoPreview uri={draft.videoLink.trim()} />
         ) : null}
         <LabeledInput
-          label="Principal destaque"
+          label="Texto da publicacao"
           multiline
           onChangeText={(value) => updateDraft("highlight", value)}
-          placeholder="Descreva o lance, qualidade ou competicao"
+          placeholder="Conte o que acontece no video"
           value={draft.highlight}
-        />
-        <LabeledInput
-          label="Objetivo do aporte"
-          multiline
-          onChangeText={(value) => updateDraft("goals", value)}
-          placeholder="Ex: viagem, material, avaliacao, treino"
-          value={draft.goals}
         />
 
         {needsGuardianConsent ? (
@@ -394,7 +386,7 @@ export function SubmitVideoScreen({
         >
           <Send color={colors.onPrimary} size={19} />
           <Text style={styles.primaryButtonText}>
-            {isSubmitting ? "Salvando video..." : "Enviar para moderacao"}
+            {isSubmitting ? "Publicando video..." : "Publicar video"}
           </Text>
         </Pressable>
       </View>
@@ -427,9 +419,9 @@ export function SubmitVideoScreen({
               <Check color={colors.primary} size={19} strokeWidth={3} />
             </View>
             <View style={styles.submissionToastTextBlock}>
-              <Text style={styles.submissionToastTitle}>Video enviado</Text>
+              <Text style={styles.submissionToastTitle}>Video publicado</Text>
               <Text style={styles.submissionToastBody}>
-                Recebido. Agora ele esta em revisao.
+                Ele ja esta disponivel no Inicio e no seu perfil.
               </Text>
             </View>
           </Animated.View>

@@ -226,7 +226,7 @@ export function PublicProfileScreen({
         </View>
 
         <ProfileVideoGallery
-          emptyBody="Este usuario ainda nao possui videos aprovados para mostrar no perfil."
+          emptyBody="Este usuario ainda nao possui videos publicados para mostrar no perfil."
           emptyTitle="Nenhum video publicado"
           onOpenVideo={(video) => {
             const selectedVideo = videos.find((item) => item.id === video.id);

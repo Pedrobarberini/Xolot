@@ -31,8 +31,7 @@ export function buildPlayerFromSubmission(submission: VideoSubmission): Player {
     videoUri: submission.videoLink,
     hasAudio: true,
     highlight: submission.highlight,
-    objective: submission.goals,
-    tags: ["Novo", "Video aprovado"]
+    tags: ["Novo", "Publicado"]
   };
 }
 

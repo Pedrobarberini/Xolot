@@ -974,3 +974,28 @@ Criterios de aceite:
 - Username e comparado sem diferenca entre letras maiusculas e minusculas.
 - Pesquisa por `Pedro Barberini` e por `@pedrobarberini` encontra o perfil correspondente.
 - Mensagem para a propria conta abre o compositor normalmente e nunca solicita follow.
+
+### Task FIX-040 - Publicacao direta e texto unico
+
+Tipo: Frontend/Dados/UX
+
+Objetivo: retirar a fila manual durante os testes e simplificar o conteudo da postagem.
+
+Tasks:
+
+- [x] Publicar novos videos diretamente com status interno aprovado.
+- [x] Adicionar data de publicacao no momento do envio.
+- [x] Migrar envios antigos em revisao para publicacoes visiveis.
+- [x] Remover o campo `Objetivo do aporte` do formulario e do modelo do feed.
+- [x] Renomear `Principal destaque` para `Texto da publicacao`.
+- [x] Atualizar botao, toast, status, perfil e textos auxiliares.
+- [x] Manter a estrutura administrativa reservada para a futura moderacao automatica.
+- [x] Cobrir status direto e migracao de pendencias com testes.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- O usuario publica sem abrir ou aguardar a tela Admin.
+- O video aparece imediatamente no Inicio e na galeria do perfil.
+- A interface mostra apenas titulo e texto da publicacao, sem objetivo de aporte.
+- Pendencias locais anteriores deixam de depender de aprovacao manual.

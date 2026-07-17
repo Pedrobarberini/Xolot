@@ -16,7 +16,5 @@ export const demoPlayer: Player = {
   isDemo: true,
   highlight:
     "Movimentacao, dominio e intensidade em uma sequencia curta de treino.",
-  objective:
-    "Apresentar o funcionamento do feed de videos do NextStar.",
   tags: ["Demonstracao", "Treino", "Tecnica"]
 };

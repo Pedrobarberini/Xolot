@@ -72,10 +72,10 @@ export function SubmissionList({
 }) {
   return (
     <View style={styles.infoPanel}>
-      <Text style={styles.sectionTitle}>Meus envios</Text>
+      <Text style={styles.sectionTitle}>Minhas publicacoes</Text>
       {submissions.length === 0 ? (
         <Text style={styles.bodyText}>
-          Nenhum video enviado por esta conta ainda.
+          Nenhum video publicado por esta conta ainda.
         </Text>
       ) : (
         submissions.map((submission) => (
@@ -114,7 +114,9 @@ export function StatusPill({ status }: { status: VideoSubmissionStatus }) {
 
   return (
     <View style={[styles.statusPill, styleByStatus]}>
-      <Text style={styles.statusPillText}>{status}</Text>
+      <Text style={styles.statusPillText}>
+        {status === "Aprovado" ? "Publicado" : status}
+      </Text>
     </View>
   );
 }

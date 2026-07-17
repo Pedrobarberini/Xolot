@@ -291,7 +291,7 @@ function FeedReel({
   const scoreColor = evaluation
     ? getScoreColor(evaluation.score)
     : colors.muted;
-  const presentationText = `${player.highlight} ${player.objective}`.trim();
+  const presentationText = player.highlight.trim();
   const textLimit = isWide ? FEED_TEXT_LIMIT_WIDE : FEED_TEXT_LIMIT_COMPACT;
   const hasMoreText = presentationText.length > textLimit;
   const visibleText =
@@ -611,7 +611,7 @@ function FeedReel({
                   style={[styles.feedStatusPill, { borderColor: palette.border }]}
                 >
                   <Text style={[styles.feedStatusText, { color: palette.accent }]}>
-                    {player.isDemo ? "Demonstracao" : "Aprovado"}
+                    {player.isDemo ? "Demonstracao" : "Publicado"}
                   </Text>
                 </View>
               ) : null}

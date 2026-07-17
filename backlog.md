@@ -267,7 +267,7 @@ Tasks:
 - [x] Criar versao compacta com nome, posicao, cidade e titulo do video.
 - [x] Criar botao `Ver mais`.
 - [x] Ao expandir, permitir cobrir parte do video de forma intencional.
-- [x] Adicionar destaque, objetivo e tags somente quando existirem.
+- [x] Adicionar texto da publicacao e tags somente quando existirem.
 - [x] Evitar texto cortado em telas pequenas.
 
 Criterios de aceite:
@@ -276,7 +276,7 @@ Criterios de aceite:
 - Usuario consegue expandir e recolher.
 - Layout fica estavel em telas pequenas.
 
-## Sprint 3 - Envio e moderacao
+## Sprint 3 - Envio e publicacao
 
 ### Task P1-004 - SubmissionScreen completa
 
@@ -288,48 +288,51 @@ Campos:
 
 - [x] Reutilizar nome, idade, cidade/UF, posicao e clube do perfil logado.
 - [x] Titulo do video.
-- [x] Principal destaque.
-- [x] Objetivo.
+- [x] Texto da publicacao.
+- [x] Remover o campo `Objetivo do aporte` do envio e do feed.
 - [x] Consentimento do responsavel quando menor de idade.
 - [x] Arquivo de video.
 
 Tasks:
 
 - [x] Remover do envio os campos pessoais ja preenchidos no cadastro.
-- [x] Usar o perfil ativo como fonte dos dados enviados para moderacao.
+- [x] Usar o perfil ativo como fonte dos dados publicados.
 - [x] Manter a biografia somente nas paginas de perfil, sem copia-la para a postagem.
+- [x] Publicar diretamente durante a fase de testes, sem fila manual.
+- [x] Migrar envios antigos em revisao para publicados.
 
 Criterios de aceite:
 
 - Botao de enviar fica desabilitado ate os campos obrigatorios estarem validos.
 - Apos envio, aparece toast/popup no rodape por cerca de 3 segundos.
 - Usuario nao precisa rolar a tela para descobrir se o envio funcionou.
-- Envio pendente aparece no status do atleta.
+- Publicacao aparece imediatamente no Inicio e no perfil do atleta.
 - Alteracoes futuras no perfil nao exigem redigitar os dados em cada envio.
 
-### Task P1-005 - AdminScreen de moderacao
+### Task P1-005 - Moderacao automatica de conteudo
 
-Tipo: Frontend/Backend
+Tipo: Backend/IA/Seguranca
 
-Objetivo: revisar videos com clareza e remover itens da fila apos decisao.
+Objetivo: analisar video e texto automaticamente antes da abertura ao publico.
+
+Status: Adiado. O teste atual usa publicacao direta e nao depende de fila manual.
 
 Tasks:
 
-- [ ] Listar apenas videos pendentes.
-- [ ] Abrir detalhe do video.
-- [ ] Reproduzir video dentro da tela admin.
-- [ ] Aprovar.
-- [ ] Reprovar com motivo.
-- [ ] Solicitar ajustes com mensagem.
-- [ ] Mostrar loading na acao.
-- [ ] Remover item da fila apos decisao confirmada.
-- [ ] Criar filtro por data, atleta e status.
+- [ ] Definir provedor e regras para analise automatica de video e texto.
+- [ ] Enviar a publicacao para processamento assincrono no backend.
+- [ ] Bloquear conteudo com alta confianca de violacao antes da exibicao publica.
+- [ ] Criar estado de recurso para o usuario.
+- [ ] Encaminhar casos inconclusivos e recursos para uma fila humana.
+- [ ] Registrar versao da regra, resultado, motivo e timestamps em trilha de auditoria.
+- [ ] Notificar o usuario quando uma publicacao for restringida.
+- [ ] Criar filtros de data, atleta, status e motivo para a fila de excecoes.
 
 Criterios de aceite:
 
-- Decisao nao duplica requisicao em toque repetido.
-- Admin ve confirmacao apos acao.
-- Fila atualiza sem precisar recarregar.
+- Conteudo claramente proibido nao entra no Inicio.
+- Cada decisao automatica pode ser auditada e contestada.
+- Falha do provedor nao publica silenciosamente nem perde a postagem.
 
 ### Task P1-006 - Denuncias e seguranca de conteudo
 
@@ -599,8 +602,9 @@ Fluxos para cobrir:
 
 - [ ] Cadastro/login.
 - [ ] Envio de video.
-- [ ] Moderacao aprovar/reprovar/pedir ajustes.
-- [ ] Feed exibindo apenas aprovados.
+- [x] Publicacao direta sem fila manual durante os testes.
+- [x] Feed exibindo imediatamente as novas publicacoes.
+- [ ] Moderacao automatica e fluxo de recurso antes da abertura ao publico.
 - [ ] Avaliacao comunitaria.
 - [ ] Denuncia de video.
 
@@ -619,7 +623,7 @@ Tasks:
 - [ ] Registrar falhas de upload.
 - [ ] Medir tempo de carregamento do feed.
 - [ ] Medir taxa de envio concluido.
-- [ ] Medir tempo medio de moderacao.
+- [ ] Medir tempo e taxa de decisao da moderacao automatica.
 - [ ] Criar painel simples de saude do produto.
 
 Criterios de aceite:
@@ -653,6 +657,6 @@ Criterios de aceite:
 3. P0-003 - Backend minimo.
 4. P0-004 - Upload real de video.
 5. P1-001 - Melhorar FeedScreen.
-6. P1-005 - AdminScreen de moderacao.
+6. P1-005 - Moderacao automatica de conteudo.
 7. P1-007 - Sistema de avaliacao comunitaria.
 8. P2-001 - Build Android com EAS.

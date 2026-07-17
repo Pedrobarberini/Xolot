@@ -8,8 +8,9 @@ import {
   claimUniqueUsername,
   createUsernameSlug
 } from "../utils/userIdentity.ts";
+import { migrateSubmissionToDirectPublication } from "../utils/publication.ts";
 
-export const APP_STATE_SCHEMA_VERSION = 3;
+export const APP_STATE_SCHEMA_VERSION = 4;
 
 export type LocalAppState = {
   activeUser: AppUser | null;
@@ -189,7 +190,10 @@ export function migrateLocalAppState(
     investments: normalizeArray(value.investments, fallback.investments),
     registeredUsers:
       registeredUsers.length > 0 ? registeredUsers : fallback.registeredUsers,
-    submissions: normalizeArray(value.submissions, fallback.submissions),
+    submissions: normalizeArray(
+      value.submissions,
+      fallback.submissions
+    ).map(migrateSubmissionToDirectPublication),
     version: APP_STATE_SCHEMA_VERSION,
     walletBalances: normalizeWalletBalances(value.walletBalances)
   };
