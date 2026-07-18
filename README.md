@@ -10,8 +10,10 @@ Aplicativo mobile-first para descoberta e publicacao de videos de atletas de fut
 - Inicio com videos verticais 9:16, reproducao automatica, controle vertical de volume, tela cheia e ficha expansivel.
 - Logo fixa no feed e HUD contextual padronizado com voltar, marca e saldo nas paginas publicas.
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao de usuario.
-- Cadastro e login locais por email e senha, com salt e hash persistidos no dispositivo.
-- Primeiro acesso solicita nome, biografia, idade, posicao, cidade e clube ou projeto antes de liberar o aplicativo.
+- Login por email e senha como tela inicial, com salt e hash persistidos no dispositivo.
+- Cadastro local simplificado para email, senha e aceite dos termos; novos cadastros sao sempre contas Usuario.
+- Botao visual `Continuar com Google` preparado para uma integracao futura, ainda sem autenticacao real.
+- Primeiro acesso abre um modal obrigatorio para username, nome, biografia, idade, posicao, cidade e clube ou projeto.
 - Conta comum `Usuario` com Inicio, Envio, Pesquisar, Mensagens e Perfil no mesmo acesso.
 - Pesquisa por nome, posicao, cidade ou clube abre diretamente o perfil publico do atleta.
 - Perfis podem ser seguidos pelo Inicio ou pela pagina publica, com estado persistente e contagem social.
@@ -95,8 +97,8 @@ As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` 
 
 ## Fluxo principal de teste
 
-1. Crie uma conta como `Usuario` usando email e senha.
-2. Complete nome, biografia, idade, posicao, cidade e clube ou projeto no primeiro acesso.
+1. Na tela inicial de login, toque em `Cadastrar` e crie uma conta usando email e senha.
+2. Complete username, nome, biografia, idade, posicao, cidade e clube ou projeto no modal de primeiro acesso.
 3. Abra `Perfil > Configuracoes > Editar perfil`, altere um dado e confirme a atualizacao no Perfil.
 4. Publique um video e confirme o toast de sucesso no rodape.
 5. Abra o `Inicio` e o Perfil e confirme que o video apareceu imediatamente.

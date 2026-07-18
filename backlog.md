@@ -179,7 +179,10 @@ Objetivo: substituir o acesso por nome e email por credenciais locais e coletar 
 Tasks:
 
 - [x] Usar email e senha no cadastro e no login.
-- [x] Separar nome publico do atleta e `@username` no cadastro.
+- [x] Exibir login como tela inicial e oferecer `Cadastrar` como acao secundaria.
+- [x] Manter no cadastro somente email, senha, confirmacao e aceite dos termos.
+- [x] Preparar botao com icone para a futura autenticacao pelo Google.
+- [x] Separar nome publico do atleta e `@username` na configuracao de perfil.
 - [x] Permitir nomes publicos repetidos e exigir username unico sem diferenca entre maiusculas e minusculas.
 - [x] Bloquear email duplicado em toda a plataforma, independentemente do tipo de conta.
 - [x] Migrar contas existentes para usernames validos e sem repeticao.
@@ -187,6 +190,8 @@ Tasks:
 - [x] Armazenar somente salt e hash SHA-256 no estado local, sem senha em texto puro.
 - [x] Migrar contas antigas para definicao de senha no proximo login.
 - [x] Criar configuracao obrigatoria no primeiro acesso de contas Usuario.
+- [x] Apresentar a configuracao inicial em modal sobre a area autenticada.
+- [x] Validar disponibilidade do username no primeiro acesso e na edicao do perfil.
 - [x] Coletar nome, biografia, idade, posicao, cidade e clube ou projeto.
 - [x] Persistir o perfil junto da conta cadastrada.
 - [x] Reutilizar o formulario em `Perfil > Configuracoes > Editar perfil`.

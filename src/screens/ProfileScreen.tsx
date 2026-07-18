@@ -51,6 +51,7 @@ import { PortfolioScreen } from "./WalletScreen";
 type ProfileView = "edit-profile" | "overview" | "wallet" | "settings";
 
 export function ProfileScreen({
+  accounts,
   avatar,
   balance,
   followersCount,
@@ -68,6 +69,7 @@ export function ProfileScreen({
   submissions,
   user
 }: {
+  accounts: AppUser[];
   avatar?: ProfileAvatar;
   balance: number;
   followersCount: number;
@@ -245,6 +247,7 @@ export function ProfileScreen({
     return (
       <ScreenTransition key="edit-profile" style={styles.profileViewScene}>
         <AccountSetupScreen
+          accounts={accounts}
           onBack={() => setProfileView("settings")}
           onSave={(profile) => {
             onUpdateProfile(profile);

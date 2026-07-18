@@ -2,6 +2,7 @@ const USERNAME_PATTERN = /^[a-z0-9][a-z0-9._]{1,28}[a-z0-9]$/;
 
 type AccountIdentity = {
   email: string;
+  id?: string;
   username: string;
 };
 
@@ -11,6 +12,23 @@ export function normalizeUsername(value: string) {
 
 export function isValidUsername(value: string) {
   return USERNAME_PATTERN.test(normalizeUsername(value));
+}
+
+export function isUsernameAvailable(
+  accounts: AccountIdentity[],
+  username: string,
+  ignoredAccountId?: string
+) {
+  const normalizedUsername = normalizeUsername(username);
+
+  return (
+    isValidUsername(normalizedUsername) &&
+    !accounts.some(
+      (account) =>
+        account.id !== ignoredAccountId &&
+        normalizeUsername(account.username) === normalizedUsername
+    )
+  );
 }
 
 export function getAccountIdentityConflict(

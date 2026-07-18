@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowLeft, Check, LogOut } from "lucide-react-native";
 import {
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -13,38 +14,55 @@ import { LabeledInput } from "../components/Navigation";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AccountProfile, AppUser } from "../types";
+import {
+  isUsernameAvailable,
+  normalizeUsername
+} from "../utils/userIdentity";
 
-export function AccountSetupScreen({
-  isInitialSetup = false,
-  onBack,
-  onSave,
-  onSignOut,
-  user
-}: {
+type AccountSetupProps = {
+  accounts: AppUser[];
   isInitialSetup?: boolean;
   onBack?: () => void;
   onSave: (profile: AccountProfile) => void;
   onSignOut?: () => void;
   user: AppUser;
-}) {
+};
+
+export function AccountSetupScreen({
+  accounts,
+  isInitialSetup = false,
+  onBack,
+  onSave,
+  onSignOut,
+  user
+}: AccountSetupProps) {
   const { width } = useWindowDimensions();
   const [name, setName] = useState(user.name);
+  const [username, setUsername] = useState(user.username);
   const [bio, setBio] = useState(user.bio);
   const [ageText, setAgeText] = useState(user.age ? String(user.age) : "");
   const [position, setPosition] = useState(user.position);
   const [city, setCity] = useState(user.city);
   const [club, setClub] = useState(user.club);
   const age = Number(ageText);
+  const cleanUsername = normalizeUsername(username);
+  const usernameAvailable = isUsernameAvailable(
+    accounts,
+    cleanUsername,
+    user.id
+  );
   const cleanProfile: AccountProfile = {
     age: Number.isInteger(age) ? age : null,
     bio: bio.trim(),
     city: city.trim(),
     club: club.trim(),
     name: name.trim(),
-    position: position.trim()
+    position: position.trim(),
+    username: cleanUsername
   };
   const canSave =
     cleanProfile.name.length >= 3 &&
+    usernameAvailable &&
     cleanProfile.bio.length >= 10 &&
     cleanProfile.bio.length <= 240 &&
     cleanProfile.age !== null &&
@@ -81,17 +99,21 @@ export function AccountSetupScreen({
         ) : (
           <View style={styles.accountSetupIntro}>
             <Text style={styles.accountSetupEyebrow}>Primeiro acesso</Text>
-            <Text style={styles.accountSetupTitle}>Complete seu perfil</Text>
+            <Text style={styles.accountSetupTitle}>Configure seu perfil</Text>
             <Text style={styles.accountSetupSubtitle}>
-              Esses dados identificam voce no Inicio, na pesquisa e para outros
-              usuarios da plataforma.
+              Escolha sua identidade publica e complete seus dados de atleta.
             </Text>
           </View>
         )}
 
-        <View style={styles.accountSetupSection}>
+        <View
+          style={[
+            styles.accountSetupSection,
+            isInitialSetup ? styles.accountSetupSectionInitial : null
+          ]}
+        >
           <View style={styles.accountSetupSectionHeader}>
-            <Text style={styles.settingsSectionTitle}>Dados do atleta</Text>
+            <Text style={styles.settingsSectionTitle}>Perfil publico</Text>
             <Text style={styles.accountSetupRequired}>Obrigatorio</Text>
           </View>
 
@@ -103,6 +125,31 @@ export function AccountSetupScreen({
             placeholder="Nome completo"
             value={name}
           />
+
+          <LabeledInput
+            autoCapitalize="none"
+            autoCorrect={false}
+            label="Nome de usuario"
+            maxLength={30}
+            onChangeText={(value) =>
+              setUsername(
+                value.replace(/^@+/, "").replace(/[^a-zA-Z0-9._]/g, "")
+              )
+            }
+            placeholder="seu.username"
+            value={username}
+          />
+          <Text
+            style={
+              cleanUsername.length >= 3 && !usernameAvailable
+                ? styles.accountSetupUsernameError
+                : styles.accountSetupHint
+            }
+          >
+            {cleanUsername.length >= 3 && !usernameAvailable
+              ? "Este nome de usuario ja esta em uso ou nao e valido."
+              : "Identidade unica usada no Inicio, pesquisa e mensagens."}
+          </Text>
 
           <View
             style={[
@@ -177,7 +224,7 @@ export function AccountSetupScreen({
         >
           <Check color={colors.onPrimary} size={19} strokeWidth={2.5} />
           <Text style={styles.primaryButtonText}>
-            {isInitialSetup ? "Salvar e continuar" : "Salvar alteracoes"}
+            {isInitialSetup ? "Concluir perfil" : "Salvar alteracoes"}
           </Text>
         </Pressable>
 
@@ -193,5 +240,27 @@ export function AccountSetupScreen({
         ) : null}
       </ScrollView>
     </KeyboardAvoidingView>
+  );
+}
+
+export function AccountSetupModal({
+  visible,
+  ...props
+}: AccountSetupProps & { visible: boolean }) {
+  return (
+    <Modal
+      animationType="fade"
+      onRequestClose={props.onSignOut}
+      statusBarTranslucent
+      transparent
+      visible={visible}
+    >
+      <View style={styles.accountSetupModalRoot}>
+        <View pointerEvents="none" style={styles.accountSetupModalBackdrop} />
+        <View accessibilityViewIsModal style={styles.accountSetupModalDialog}>
+          <AccountSetupScreen {...props} isInitialSetup />
+        </View>
+      </View>
+    </Modal>
   );
 }

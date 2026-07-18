@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Check } from "lucide-react-native";
+import { Check, LogIn, UserPlus } from "lucide-react-native";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -21,12 +22,13 @@ import {
 } from "../services/authCredentials";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import { AppUser, UserRole } from "../types";
+import { AppUser } from "../types";
 import {
-  getAccountIdentityConflict,
-  isValidUsername,
+  claimUniqueUsername,
   normalizeUsername
 } from "../utils/userIdentity";
+
+type AuthMode = "create" | "login";
 
 export function AuthScreen({
   accounts,
@@ -36,10 +38,7 @@ export function AuthScreen({
   onComplete: (user: AppUser) => void;
 }) {
   const { width } = useWindowDimensions();
-  const [mode, setMode] = useState<"create" | "login">("create");
-  const [role, setRole] = useState<UserRole>("Usuario");
-  const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
+  const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -47,27 +46,29 @@ export function AuthScreen({
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isCompact = width < 380;
-  const authModeLabel = mode === "create" ? "Cadastro" : "Login";
-  const roleSummary = role === "Admin" ? "Moderacao" : "Inicio, envio e perfis";
   const cleanEmail = email.trim().toLowerCase();
-  const cleanName = name.trim().replace(/\s+/g, " ");
-  const cleanUsername = normalizeUsername(username);
   const hasValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail);
   const hasValidPassword = password.length >= 6;
   const canContinue =
     hasValidEmail &&
     hasValidPassword &&
-    (mode === "login" || cleanName.length >= 3) &&
-    (mode === "login" || isValidUsername(cleanUsername)) &&
     (mode === "login" || password === passwordConfirmation) &&
     (mode === "login" || acceptedTerms) &&
     !isSubmitting;
 
-  function changeMode(nextMode: "create" | "login") {
+  function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
     setErrorMessage("");
     setPassword("");
     setPasswordConfirmation("");
+    setAcceptedTerms(false);
+  }
+
+  function showGoogleComingSoon() {
+    Alert.alert(
+      "Login com Google",
+      "Essa opcao esta preparada para a futura integracao com o Google."
+    );
   }
 
   async function submitAuth() {
@@ -83,26 +84,13 @@ export function AuthScreen({
         (account) => account.email.toLowerCase() === cleanEmail
       );
 
-      if (mode === "create") {
-        const identityConflict = getAccountIdentityConflict(
-          accounts,
-          cleanEmail,
-          cleanUsername
-        );
-
-        if (identityConflict === "email") {
-          setErrorMessage("Ja existe uma conta com este email.");
-          return;
-        }
-
-        if (identityConflict === "username") {
-          setErrorMessage("Este nome de usuario ja esta em uso.");
-          return;
-        }
+      if (mode === "create" && existingAccount) {
+        setErrorMessage("Ja existe uma conta com este email.");
+        return;
       }
 
       if (mode === "login" && !existingAccount) {
-        setErrorMessage("Conta nao encontrada. Confira o email ou crie uma conta.");
+        setErrorMessage("Conta nao encontrada. Confira o email ou cadastre-se.");
         return;
       }
 
@@ -125,8 +113,16 @@ export function AuthScreen({
         return;
       }
 
-      const accountId = `${role.toLowerCase()}-${cleanEmail}`;
-      const isAdmin = role === "Admin";
+      const accountId = `usuario-${cleanEmail}`;
+      const takenUsernames = new Set(
+        accounts.map((account) => normalizeUsername(account.username))
+      );
+      const provisionalUsername = claimUniqueUsername(
+        cleanEmail.split("@")[0],
+        takenUsernames,
+        accountId
+      );
+
       onComplete({
         acceptedTerms,
         age: null,
@@ -135,13 +131,13 @@ export function AuthScreen({
         club: "",
         email: cleanEmail,
         id: accountId,
-        kycStatus: isAdmin ? "Aprovado" : "Nao iniciado",
-        name: cleanName,
+        kycStatus: "Nao iniciado",
+        name: cleanEmail.split("@")[0],
         ...credential,
         position: "",
-        profileCompleted: isAdmin,
-        role,
-        username: cleanUsername
+        profileCompleted: false,
+        role: "Usuario",
+        username: provisionalUsername
       });
     } catch {
       setErrorMessage("Nao foi possivel autenticar agora. Tente novamente.");
@@ -149,6 +145,9 @@ export function AuthScreen({
       setIsSubmitting(false);
     }
   }
+
+  const submitLabel = mode === "login" ? "Entrar" : "Criar conta";
+  const SubmitIcon = mode === "login" ? LogIn : UserPlus;
 
   return (
     <KeyboardAvoidingView
@@ -164,7 +163,9 @@ export function AuthScreen({
           <View style={styles.authTopRow}>
             <Text style={styles.authPanelKicker}>Talentos em movimento</Text>
             <View style={styles.authModePill}>
-              <Text style={styles.authModeText}>{authModeLabel}</Text>
+              <Text style={styles.authModeText}>
+                {mode === "login" ? "Login" : "Cadastro"}
+              </Text>
             </View>
           </View>
           <Image
@@ -175,81 +176,26 @@ export function AuthScreen({
           />
           <Text style={styles.authEyebrow}>Descubra. Avalie. Conecte.</Text>
           <Text style={styles.authTitle}>
-            {mode === "create" ? "Criar conta" : "Entrar"}
+            {mode === "login" ? "Entre na sua conta" : "Crie sua conta"}
           </Text>
-          <View style={styles.authSignalStrip}>
-            <View style={styles.authSignalItem}>
-              <Text style={styles.authSignalValue}>{role}</Text>
-              <Text style={styles.authSignalLabel}>perfil</Text>
+
+          <Pressable
+            accessibilityLabel="Continuar com Google"
+            accessibilityRole="button"
+            onPress={showGoogleComingSoon}
+            style={styles.authGoogleButton}
+          >
+            <View style={styles.authGoogleIcon}>
+              <Text style={styles.authGoogleIconText}>G</Text>
             </View>
-            <View style={styles.authSignalItem}>
-              <Text style={styles.authSignalValue}>{roleSummary}</Text>
-              <Text style={styles.authSignalLabel}>fluxo</Text>
-            </View>
+            <Text style={styles.authGoogleButtonText}>Continuar com Google</Text>
+          </Pressable>
+
+          <View style={styles.authDivider}>
+            <View style={styles.authDividerLine} />
+            <Text style={styles.authDividerText}>ou use seu email</Text>
+            <View style={styles.authDividerLine} />
           </View>
-
-          <View style={styles.segmentedControl}>
-            {(["Usuario", "Admin"] as UserRole[]).map((item) => {
-              const isActive = role === item;
-
-              return (
-                <Pressable
-                  key={item}
-                  onPress={() => {
-                    setRole(item);
-                    setErrorMessage("");
-                  }}
-                  style={[
-                    styles.segmentButton,
-                    isActive ? styles.segmentButtonActive : null
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.segmentText,
-                      isActive ? styles.segmentTextActive : null
-                    ]}
-                  >
-                    {item}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {mode === "create" ? (
-            <>
-              <LabeledInput
-                autoCapitalize="words"
-                label="Nome do jogador"
-                maxLength={80}
-                onChangeText={(value) => {
-                  setName(value);
-                  setErrorMessage("");
-                }}
-                placeholder="Pedro Barberini"
-                value={name}
-              />
-              <LabeledInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                label="Nome de usuario"
-                maxLength={30}
-                onChangeText={(value) => {
-                  setUsername(
-                    value.replace(/^@+/, "").replace(/[^a-zA-Z0-9._]/g, "")
-                  );
-                  setErrorMessage("");
-                }}
-                placeholder="pedrobarberini"
-                value={username}
-              />
-              <Text style={styles.authIdentityHint}>
-                Seu nome pode se repetir. O @usuario e unico e sera usado para
-                encontrar seu perfil.
-              </Text>
-            </>
-          ) : null}
 
           <LabeledInput
             autoCapitalize="none"
@@ -260,9 +206,7 @@ export function AuthScreen({
               setEmail(value);
               setErrorMessage("");
             }}
-            placeholder={
-              role === "Admin" ? "admin@nextstar.local" : "voce@email.com"
-            }
+            placeholder="voce@email.com"
             value={email}
           />
 
@@ -298,14 +242,11 @@ export function AuthScreen({
             />
           ) : null}
 
-          <Text style={styles.authHelperText}>
-            {mode === "login"
-              ? "Contas antigas definem a senha na primeira entrada."
-              : "Depois do cadastro voce completa seus dados de perfil."}
-          </Text>
-
           {mode === "create" ? (
             <Pressable
+              accessibilityLabel="Aceitar termos do ambiente demonstrativo"
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: acceptedTerms }}
               onPress={() => setAcceptedTerms((current) => !current)}
               style={styles.checkRow}
             >
@@ -333,6 +274,7 @@ export function AuthScreen({
           ) : null}
 
           <Pressable
+            accessibilityRole="button"
             disabled={!canContinue}
             onPress={submitAuth}
             style={[
@@ -342,18 +284,24 @@ export function AuthScreen({
           >
             {isSubmitting ? (
               <ActivityIndicator color={colors.onPrimary} size="small" />
-            ) : null}
-            <Text style={styles.primaryButtonText}>
-              {mode === "create" ? "Criar conta" : "Entrar"}
-            </Text>
+            ) : (
+              <SubmitIcon color={colors.onPrimary} size={19} strokeWidth={2.3} />
+            )}
+            <Text style={styles.primaryButtonText}>{submitLabel}</Text>
           </Pressable>
 
           <Pressable
-            onPress={() => changeMode(mode === "create" ? "login" : "create")}
+            accessibilityRole="button"
+            onPress={() => changeMode(mode === "login" ? "create" : "login")}
             style={styles.secondaryButton}
           >
+            {mode === "login" ? (
+              <UserPlus color={colors.primary} size={18} />
+            ) : (
+              <LogIn color={colors.primary} size={18} />
+            )}
             <Text style={styles.secondaryButtonText}>
-              {mode === "create" ? "Ja tenho conta" : "Criar nova conta"}
+              {mode === "login" ? "Cadastrar" : "Voltar para login"}
             </Text>
           </Pressable>
         </ScreenTransition>

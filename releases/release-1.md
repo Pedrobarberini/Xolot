@@ -1045,3 +1045,31 @@ Criterios de aceite:
 - No Inicio, a linha secundaria mostra `Nome | Posicao | Cidade`.
 - O nome do jogador continua visivel no cabecalho do perfil.
 - Usernames longos permanecem em uma unica linha sem sobrepor os controles.
+
+### Task FIX-043 - Login principal e perfil apos cadastro
+
+Tipo: Frontend/Dados/UX
+
+Objetivo: reduzir o formulario de cadastro e concluir a identidade publica em uma etapa separada.
+
+Tasks:
+
+- [x] Abrir a autenticacao sempre no modo Login.
+- [x] Trocar o acesso ao cadastro por uma acao clara `Cadastrar`.
+- [x] Remover nome, username e tipo de conta da tela de cadastro.
+- [x] Criar novas contas Usuario usando somente email, senha e aceite dos termos.
+- [x] Adicionar comandos com icones para entrar, cadastrar e preparar login com Google.
+- [x] Informar que a autenticacao Google ainda depende de integracao futura.
+- [x] Mover nome e username para a configuracao do perfil.
+- [x] Validar formato e unicidade do username antes de concluir o perfil.
+- [x] Exibir a configuracao obrigatoria em modal apos o cadastro.
+- [x] Reutilizar os mesmos campos em `Configuracoes > Editar perfil`.
+- [x] Atualizar README e backlog tecnico.
+
+Criterios de aceite:
+
+- Usuario sem sessao visualiza primeiro o formulario de login.
+- Cadastro nao solicita nome, username ou selecao entre Usuario e Admin.
+- Conta nova abre o modal de perfil antes de acessar o Inicio.
+- Username duplicado impede a conclusao do perfil.
+- Fechar e reabrir o editor mantem os dados persistidos da conta.

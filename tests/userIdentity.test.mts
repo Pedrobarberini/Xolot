@@ -4,6 +4,7 @@ import {
   claimUniqueUsername,
   createUsernameSlug,
   getAccountIdentityConflict,
+  isUsernameAvailable,
   isValidUsername,
   normalizeUsername
 } from "../src/utils/userIdentity.ts";
@@ -45,4 +46,21 @@ test("bloqueia email ou username duplicado sem comparar nome publico", () => {
     getAccountIdentityConflict(accounts, "outro@nextstar.com", "outro.user"),
     null
   );
+});
+
+test("valida disponibilidade do username ao configurar o perfil", () => {
+  const accounts = [
+    { id: "user-1", email: "um@nextstar.com", username: "jogador.um" },
+    { id: "user-2", email: "dois@nextstar.com", username: "jogador.dois" }
+  ];
+
+  assert.equal(
+    isUsernameAvailable(accounts, "jogador.um", "user-1"),
+    true
+  );
+  assert.equal(
+    isUsernameAvailable(accounts, "JOGADOR.DOIS", "user-1"),
+    false
+  );
+  assert.equal(isUsernameAvailable(accounts, "nome invalido", "user-1"), false);
 });

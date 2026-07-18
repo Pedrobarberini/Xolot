@@ -1,17 +1,18 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
-import { KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
+import { Image, KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
 import { buildPlayerFromSubmission } from "./src/actions/appActions";
 import { createAppActions } from "./src/actions/createAppActions";
 import { usePersistentAppState } from "./src/actions/usePersistentAppState";
 import { useProfileActions } from "./src/actions/useProfileActions";
 import { useSocialActions } from "./src/actions/useSocialActions";
-import { BrandLaunchScreen, ScreenFrame } from "./src/components/AppShell";
+import { BrandLaunchScreen, ScreenBackdrop, ScreenFrame } from "./src/components/AppShell";
 import { BottomTabs, Header } from "./src/components/Navigation";
+import { NEXTSTAR_WORDMARK } from "./src/constants/assets";
 import { demoPlayer } from "./src/data/demoPlayer";
 import { AdminScreen } from "./src/screens/AdminScreen";
-import { AccountSetupScreen } from "./src/screens/AccountSetupScreen";
+import { AccountSetupModal } from "./src/screens/AccountSetupScreen";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { FeedScreen } from "./src/screens/FeedScreen";
 import { InvestmentScreen } from "./src/screens/InvestmentScreen";
@@ -339,22 +340,22 @@ export default function App() {
             backgroundColor={colors.background}
             barStyle="dark-content"
           />
-          <Header
-            onSignOut={signOutSession}
-            pendingReviews={pendingReviews}
-            showBalance={false}
-            showSignOut={false}
-            user={user}
-            walletBalance={walletBalance}
-          />
-          <ScreenFrame key="account-setup">
-            <AccountSetupScreen
-              isInitialSetup
-              onSave={handleUpdateProfile}
-              onSignOut={signOutSession}
-              user={user}
+          <ScreenBackdrop />
+          <View style={styles.accountSetupModalBrand}>
+            <Image
+              accessibilityLabel="Logo NextStar"
+              resizeMode="contain"
+              source={NEXTSTAR_WORDMARK}
+              style={styles.accountSetupModalBrandLogo}
             />
-          </ScreenFrame>
+          </View>
+          <AccountSetupModal
+            accounts={registeredUsers}
+            onSave={handleUpdateProfile}
+            onSignOut={signOutSession}
+            user={user}
+            visible
+          />
         </SafeAreaView>
         {isBrandLaunchVisible ? (
           <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
@@ -568,6 +569,7 @@ export default function App() {
               {tab === "profile" ? (
                 <ScreenFrame animated={false} key="profile">
                   <ProfileScreen
+                    accounts={registeredUsers}
                     avatar={
                       ownProfileId ? profileAvatars[ownProfileId] : undefined
                     }

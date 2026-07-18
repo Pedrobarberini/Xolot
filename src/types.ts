@@ -106,6 +106,7 @@ export type AccountProfile = {
   club: string;
   name: string;
   position: string;
+  username: string;
 };
 
 export type AppUser = AccountProfile & {

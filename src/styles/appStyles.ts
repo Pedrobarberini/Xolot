@@ -244,6 +244,54 @@ export const styles = StyleSheet.create({
     lineHeight: 17,
     marginTop: 12
   },
+  authGoogleButton: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderStrong,
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 9,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 14
+  },
+  authGoogleButtonText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  authGoogleIcon: {
+    alignItems: "center",
+    borderColor: colors.borderStrong,
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 24,
+    justifyContent: "center",
+    width: 24
+  },
+  authGoogleIconText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  authDivider: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 2,
+    marginTop: 14
+  },
+  authDividerLine: {
+    backgroundColor: colors.border,
+    flex: 1,
+    height: 1
+  },
+  authDividerText: {
+    color: colors.muted,
+    fontSize: 10,
+    fontWeight: "800"
+  },
   segmentedControl: {
     backgroundColor: colors.surfaceMuted,
     borderColor: colors.border,
@@ -3268,7 +3316,45 @@ export const styles = StyleSheet.create({
     flex: 1
   },
   accountSetupRoot: {
+    backgroundColor: colors.surface,
     flex: 1
+  },
+  accountSetupModalBrand: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    padding: 36
+  },
+  accountSetupModalBrandLogo: {
+    height: 190,
+    opacity: 0.18,
+    width: "86%"
+  },
+  accountSetupModalRoot: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    padding: 16
+  },
+  accountSetupModalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(5, 18, 12, 0.58)"
+  },
+  accountSetupModalDialog: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    elevation: 18,
+    height: "90%",
+    maxHeight: 760,
+    maxWidth: 520,
+    overflow: "hidden",
+    shadowColor: "#000000",
+    shadowOffset: { height: 8, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    width: "100%"
   },
   accountSetupContent: {
     flexGrow: 1,
@@ -3305,6 +3391,10 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     padding: 15
+  },
+  accountSetupSectionInitial: {
+    borderWidth: 0,
+    padding: 0
   },
   accountSetupSectionHeader: {
     alignItems: "center",
@@ -3347,6 +3437,13 @@ export const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 10,
     fontWeight: "700"
+  },
+  accountSetupUsernameError: {
+    color: colors.danger,
+    fontSize: 10,
+    fontWeight: "800",
+    lineHeight: 15,
+    marginTop: 6
   },
   accountSetupCounter: {
     color: colors.muted,
