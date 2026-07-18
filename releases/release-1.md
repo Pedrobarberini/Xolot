@@ -1094,3 +1094,24 @@ Criterios de aceite:
 - `App.tsx` nao faz mais derivacoes com `filter`, `find`, `sort` ou `map` diretamente.
 - Seletores preservam a regra do demo player, prioridade de perfis seguidos e dados do perfil completo.
 - Typecheck e testes automatizados passam com Node 22.
+
+### Task IMPROV-002 - Hook de navegacao local do App
+
+Tipo: Refactor/Arquitetura
+
+Objetivo: reduzir a responsabilidade do `App.tsx` centralizando estado e handlers de navegacao local.
+
+Tasks:
+
+- [x] Criar `src/app/useAppNavigation.ts`.
+- [x] Mover estado de aba, perfil selecionado, investimento, foco do feed, retorno do reel e conversa ativa.
+- [x] Mover handlers de troca de aba, abertura de reel, retorno ao perfil, abertura de investimento e abertura de contato de mensagem.
+- [x] Preservar setters usados por `createAppActions` durante a transicao incremental.
+- [x] Atualizar `TechnicalDebt.md`.
+
+Criterios de aceite:
+
+- `App.tsx` nao declara mais estados locais de navegacao com `useState`.
+- Trocar de aba continua limpando perfil, investimento e retorno de reel.
+- Abrir video pelo perfil continua preservando o retorno correto.
+- Typecheck e testes automatizados passam com Node 22.

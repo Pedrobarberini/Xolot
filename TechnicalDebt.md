@@ -13,9 +13,9 @@ Documento de divida tecnica do estado atual do repositorio, atualizado em 2026-0
 
 **Status:** Parcialmente resolvido.
 
-O `App.tsx` possui cerca de 580 linhas e ainda concentra boot do Expo, estado de navegacao, selecao de perfil, retorno do reel, montagem de telas e conexao com actions. Telas, actions, repositories, services, seletores puros e estilos ja estao separados em `src/`.
+O `App.tsx` possui cerca de 535 linhas e ainda concentra boot do Expo, montagem de telas e conexao com actions. Telas, actions, repositories, services, seletores puros, navegacao local e estilos ja estao separados em `src/`.
 
-**Risco residual:** mudancas em fluxo de navegacao, perfil publico, investimento ou mensagens ainda passam pelo mesmo arquivo central. `FeedScreen.tsx` e `src/styles/appStyles.ts` continuam grandes. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos.
+**Risco residual:** mudancas em rotas autenticadas e shells de entrada ainda passam pelo mesmo arquivo central. `FeedScreen.tsx` e `src/styles/appStyles.ts` continuam grandes. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos.
 
 **Acao:** Reduzir o `App.tsx` para inicializacao, providers e montagem de um root app. Extrair seletores puros, navegacao local, shells de entrada e rotas autenticadas em passos separados.
 
@@ -57,17 +57,17 @@ src/pages/FeedPage/
 
 Players aprovados, players disponiveis, ordenacao do feed, videos do perfil selecionado, fundos, contagem de pendencias, investimentos do usuario e outros dados derivados foram movidos para `src/app/appSelectors.ts`.
 
-**Risco residual:** `App.tsx` ainda concentra navegacao local e JSX de rotas autenticadas. Os proximos passos sao `useAppNavigation`, shells de entrada e `AppRoutes`.
+**Risco residual:** `App.tsx` ainda concentra JSX de rotas autenticadas. Os proximos passos sao shells de entrada e `AppRoutes`.
 
 **Prioridade:** P1
 
 ## 1.2. Navegacao local sem isolamento
 
-**Status:** Pendente.
+**Status:** Concluido em 2026-07-18.
 
-Estados como `tab`, `selectedPlayer`, `selectedAccount`, `investmentPlayer`, `feedFocusPlayerId`, `reelReturnTarget` e `activeMessageContactId` vivem diretamente em `App.tsx`. Os resets entre abas, retorno do reel e abertura de mensagens ficam espalhados no componente.
+Estados como `tab`, `selectedPlayer`, `selectedAccount`, `investmentPlayer`, `feedFocusPlayerId`, `reelReturnTarget` e `activeMessageContactId` foram movidos para `src/app/useAppNavigation.ts`.
 
-**Acao:** Criar `useAppNavigation` para centralizar estado e handlers de navegacao local, preservando o comportamento atual antes de adotar um roteador real.
+**Risco residual:** `createAppActions` ainda recebe setters React para manter compatibilidade com o fluxo atual. A adocao futura de Expo Router ou React Navigation continua pendente no item 6.
 
 **Prioridade:** P1
 

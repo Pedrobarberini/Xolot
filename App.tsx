@@ -22,6 +22,7 @@ import {
   selectProfileVideos,
   selectUserSubmissions
 } from "./src/app/appSelectors";
+import { useAppNavigation } from "./src/app/useAppNavigation";
 import { BrandLaunchScreen, ScreenBackdrop, ScreenFrame } from "./src/components/AppShell";
 import { BottomTabs, Header } from "./src/components/Navigation";
 import { NEXTSTAR_WORDMARK } from "./src/constants/assets";
@@ -39,18 +40,11 @@ import { SubmitVideoScreen } from "./src/screens/SubmissionScreen";
 import { styles } from "./src/styles/appStyles";
 import { colors } from "./src/theme";
 import {
-  AppUser,
   AthleteFund,
-  MessageContact,
-  Player
+  MessageContact
 } from "./src/types";
-import { Tab } from "./src/ui/types";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
-
-type ReelReturnTarget =
-  | { type: "own-profile" }
-  | { account?: AppUser; player: Player; type: "public-profile" };
 
 const INITIAL_ATHLETE_FUNDS: AthleteFund[] = [
   {
@@ -68,17 +62,31 @@ const INITIAL_ATHLETE_FUNDS: AthleteFund[] = [
 
 export default function App() {
   const [isBrandLaunchVisible, setIsBrandLaunchVisible] = useState(true);
-  const [tab, setTab] = useState<Tab>("feed");
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [selectedAccount, setSelectedAccount] = useState<AppUser | null>(null);
-  const [investmentPlayer, setInvestmentPlayer] = useState<Player | null>(null);
-  const [feedFocusPlayerId, setFeedFocusPlayerId] = useState<string | null>(null);
-  const [reelReturnTarget, setReelReturnTarget] =
-    useState<ReelReturnTarget | null>(null);
   const hasRestoredInitialRoute = useRef(false);
-  const [activeMessageContactId, setActiveMessageContactId] = useState<
-    string | null
-  >(null);
+  const {
+    activeMessageContactId,
+    clearSelectedProfile,
+    closeInvestment,
+    feedFocusPlayerId,
+    focusFeedPlayer,
+    investmentPlayer,
+    openInvestment,
+    openMessageContact,
+    openPlayerProfile,
+    openReel,
+    openTab,
+    openUserProfile,
+    reelReturnTarget,
+    resetSessionNavigation,
+    returnToReelOrigin,
+    selectedAccount,
+    selectedPlayer,
+    setActiveMessageContactId,
+    setSelectedAccount,
+    setSelectedPlayer,
+    setTab,
+    tab
+  } = useAppNavigation();
   const {
     athleteFunds,
     investments,
@@ -158,43 +166,6 @@ export default function App() {
     selectedProfileAccount
   );
 
-  function openTab(nextTab: Tab) {
-    setInvestmentPlayer(null);
-    setReelReturnTarget(null);
-    setSelectedAccount(null);
-    setSelectedPlayer(null);
-    setTab(nextTab);
-  }
-
-  function openReel(
-    player: Player,
-    returnTarget: ReelReturnTarget | null = null
-  ) {
-    setInvestmentPlayer(null);
-    setReelReturnTarget(returnTarget);
-    setSelectedAccount(null);
-    setSelectedPlayer(null);
-    setFeedFocusPlayerId(player.id);
-    setTab("feed");
-  }
-
-  function returnToReelOrigin() {
-    if (!reelReturnTarget) {
-      return;
-    }
-
-    const returnTarget = reelReturnTarget;
-
-    setReelReturnTarget(null);
-    if (returnTarget.type === "own-profile") {
-      setTab("profile");
-      return;
-    }
-
-    setSelectedAccount(returnTarget.account ?? null);
-    setSelectedPlayer(returnTarget.player);
-  }
-
   function openMessagesForSelectedProfile() {
     if (!user) {
       return;
@@ -226,11 +197,7 @@ export default function App() {
     };
 
     addMessageContact(contact);
-    setActiveMessageContactId(contact.id);
-    setInvestmentPlayer(null);
-    setSelectedAccount(null);
-    setSelectedPlayer(null);
-    setTab("messages");
+    openMessageContact(contact.id);
   }
 
   const {
@@ -260,7 +227,7 @@ export default function App() {
   });
 
   function signOutSession() {
-    setActiveMessageContactId(null);
+    resetSessionNavigation();
     handleSignOut();
   }
 
@@ -346,10 +313,10 @@ export default function App() {
                 <InvestmentScreen
                   avatar={profileAvatars[investmentPlayer.profileId]}
                   fund={investmentFund}
-                  onBack={() => setInvestmentPlayer(null)}
+                  onBack={closeInvestment}
                   onInvest={(player, amount) => {
                     handleInvest(player, amount);
-                    setInvestmentPlayer(null);
+                    closeInvestment();
                   }}
                   player={investmentPlayer}
                   walletBalance={walletBalance}
@@ -390,16 +357,13 @@ export default function App() {
                     selectedProfileId &&
                       followingProfileSet.has(selectedProfileId)
                   )}
-                  onBack={() => {
-                    setSelectedAccount(null);
-                    setSelectedPlayer(null);
-                  }}
+                  onBack={clearSelectedProfile}
                   onInvest={() => {
                     if (
                       selectedProfilePlayer &&
                       selectedProfileFund?.status === "Captando"
                     ) {
-                      setInvestmentPlayer(selectedProfilePlayer);
+                      openInvestment(selectedProfilePlayer);
                     }
                   }}
                   onMessage={openMessagesForSelectedProfile}
@@ -453,19 +417,16 @@ export default function App() {
                   onBackToProfile={
                     reelReturnTarget ? returnToReelOrigin : undefined
                   }
-                  onOpenPlayer={(player) => {
-                    setReelReturnTarget(null);
-                    setSelectedPlayer(player);
-                  }}
+                  onOpenPlayer={openPlayerProfile}
                   onOpenInvestment={(player) => {
                     const fund = selectProfileFund(player, athleteFunds);
 
                     if (fund?.status === "Captando") {
-                      setInvestmentPlayer(player);
+                      openInvestment(player);
                     }
                   }}
                   onToggleFollow={(player) => {
-                    setFeedFocusPlayerId(player.id);
+                    focusFeedPlayer(player.id);
                     toggleFollowProfile(player.profileId);
                   }}
                   players={orderedFeedPlayers}
@@ -476,14 +437,8 @@ export default function App() {
                 <ScreenFrame key="search">
                   <SearchScreen
                     funds={athleteFunds}
-                    onOpenPlayer={(player) => {
-                      setSelectedAccount(null);
-                      setSelectedPlayer(player);
-                    }}
-                    onOpenUser={(account) => {
-                      setSelectedPlayer(null);
-                      setSelectedAccount(account);
-                    }}
+                    onOpenPlayer={openPlayerProfile}
+                    onOpenUser={openUserProfile}
                     players={availablePlayers}
                     profileAvatars={profileAvatars}
                     users={registeredUsers}
