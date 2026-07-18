@@ -15,11 +15,17 @@ import {
 import { ScreenBackdrop, ScreenTransition } from "../components/AppShell";
 import { LabeledInput } from "../components/Navigation";
 import { NEXTSTAR_WORDMARK } from "../constants/assets";
+import { useGoogleSignIn } from "../hooks/useGoogleSignIn";
 import {
   createPasswordCredential,
   hasPasswordCredential,
   verifyPassword
 } from "../services/authCredentials";
+import {
+  GoogleAuthCancelledError,
+  GoogleAuthConfigurationError,
+  GoogleIdentity
+} from "../services/googleAuth";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser } from "../types";
@@ -45,16 +51,24 @@ export function AuthScreen({
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    isAvailable: isGoogleAvailable,
+    isReady: isGoogleReady,
+    isSigningIn: isGoogleSigningIn,
+    signInWithGoogle
+  } = useGoogleSignIn();
   const isCompact = width < 380;
   const cleanEmail = email.trim().toLowerCase();
   const hasValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail);
   const hasValidPassword = password.length >= 6;
+  const isBusy = isSubmitting || isGoogleSigningIn;
   const canContinue =
     hasValidEmail &&
     hasValidPassword &&
     (mode === "login" || password === passwordConfirmation) &&
     (mode === "login" || acceptedTerms) &&
-    !isSubmitting;
+    !isBusy;
+  const canContinueWithGoogle = !isBusy && (Platform.OS === "web" || isGoogleReady);
 
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
@@ -64,11 +78,90 @@ export function AuthScreen({
     setAcceptedTerms(false);
   }
 
-  function showGoogleComingSoon() {
-    Alert.alert(
-      "Login com Google",
-      "Essa opcao esta preparada para a futura integracao com o Google."
+  function completeWithGoogleIdentity(identity: GoogleIdentity) {
+    const existingAccount = accounts.find(
+      (account) =>
+        account.googleUid === identity.uid ||
+        account.email.toLowerCase() === identity.email
     );
+
+    if (existingAccount) {
+      onComplete({
+        ...existingAccount,
+        authProvider: "google",
+        email: identity.email,
+        googleUid: identity.uid,
+        name: existingAccount.name || identity.name,
+        ...(identity.photoURL ? { photoURL: identity.photoURL } : {})
+      });
+      return;
+    }
+
+    const accountId = `google-${identity.uid}`;
+    const takenUsernames = new Set(
+      accounts.map((account) => normalizeUsername(account.username))
+    );
+    const provisionalUsername = claimUniqueUsername(
+      identity.email.split("@")[0],
+      takenUsernames,
+      accountId
+    );
+
+    onComplete({
+      acceptedTerms: true,
+      age: null,
+      authProvider: "google",
+      bio: "",
+      city: "",
+      club: "",
+      email: identity.email,
+      googleUid: identity.uid,
+      id: accountId,
+      kycStatus: "Nao iniciado",
+      name: identity.name,
+      ...(identity.photoURL ? { photoURL: identity.photoURL } : {}),
+      position: "",
+      profileCompleted: false,
+      role: "Usuario",
+      username: provisionalUsername
+    });
+  }
+
+  async function handleGooglePress() {
+    setErrorMessage("");
+
+    if (!isGoogleAvailable) {
+      Alert.alert(
+        "Login com Google",
+        "Configure o Firebase no arquivo .env (veja .env.example) e reinicie o Expo."
+      );
+      return;
+    }
+
+    if (mode === "create" && !acceptedTerms) {
+      setErrorMessage("Aceite os termos para criar a conta com Google.");
+      return;
+    }
+
+    try {
+      const identity = await signInWithGoogle();
+      completeWithGoogleIdentity(identity);
+    } catch (error) {
+      if (error instanceof GoogleAuthCancelledError) {
+        return;
+      }
+
+      if (error instanceof GoogleAuthConfigurationError) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Nao foi possivel autenticar com Google.";
+      setErrorMessage(message);
+    }
   }
 
   async function submitAuth() {
@@ -94,6 +187,13 @@ export function AuthScreen({
         return;
       }
 
+      if (existingAccount?.authProvider === "google" && !hasPasswordCredential(existingAccount)) {
+        setErrorMessage(
+          "Esta conta usa Google. Toque em Continuar com Google para entrar."
+        );
+        return;
+      }
+
       if (existingAccount && hasPasswordCredential(existingAccount)) {
         const isPasswordValid = await verifyPassword(existingAccount, password);
 
@@ -109,7 +209,11 @@ export function AuthScreen({
       const credential = await createPasswordCredential(password);
 
       if (existingAccount) {
-        onComplete({ ...existingAccount, ...credential });
+        onComplete({
+          ...existingAccount,
+          ...credential,
+          authProvider: "password"
+        });
         return;
       }
 
@@ -126,6 +230,7 @@ export function AuthScreen({
       onComplete({
         acceptedTerms,
         age: null,
+        authProvider: "password",
         bio: "",
         city: "",
         club: "",
@@ -182,12 +287,20 @@ export function AuthScreen({
           <Pressable
             accessibilityLabel="Continuar com Google"
             accessibilityRole="button"
-            onPress={showGoogleComingSoon}
-            style={styles.authGoogleButton}
+            disabled={!canContinueWithGoogle}
+            onPress={handleGooglePress}
+            style={[
+              styles.authGoogleButton,
+              !canContinueWithGoogle ? styles.authGoogleButtonDisabled : null
+            ]}
           >
-            <View style={styles.authGoogleIcon}>
-              <Text style={styles.authGoogleIconText}>G</Text>
-            </View>
+            {isGoogleSigningIn ? (
+              <ActivityIndicator color={colors.text} size="small" />
+            ) : (
+              <View style={styles.authGoogleIcon}>
+                <Text style={styles.authGoogleIconText}>G</Text>
+              </View>
+            )}
             <Text style={styles.authGoogleButtonText}>Continuar com Google</Text>
           </Pressable>
 

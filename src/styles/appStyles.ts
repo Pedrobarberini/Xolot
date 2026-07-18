@@ -256,6 +256,9 @@ export const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: 14
   },
+  authGoogleButtonDisabled: {
+    opacity: 0.55
+  },
   authGoogleButtonText: {
     color: colors.text,
     fontSize: 14,

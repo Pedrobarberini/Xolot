@@ -92,6 +92,16 @@ function normalizeAppUser(value: unknown): AppUser | null {
       : null;
   const passwordHash = normalizeString(value.passwordHash);
   const passwordSalt = normalizeString(value.passwordSalt);
+  const googleUid = normalizeString(value.googleUid);
+  const photoURL = normalizeString(value.photoURL);
+  const authProvider =
+    value.authProvider === "google" || value.authProvider === "password"
+      ? value.authProvider
+      : googleUid
+        ? "google"
+        : passwordHash && passwordSalt
+          ? "password"
+          : undefined;
   const bio = normalizeString(value.bio);
   const profileCompleted =
     role === "Admin" ||
@@ -107,10 +117,12 @@ function normalizeAppUser(value: unknown): AppUser | null {
   return {
     acceptedTerms: value.acceptedTerms === true,
     age,
+    ...(authProvider ? { authProvider } : {}),
     bio,
     city: normalizeString(value.city),
     club: normalizeString(value.club),
     email,
+    ...(googleUid ? { googleUid } : {}),
     id,
     kycStatus:
       value.kycStatus === "Pendente" || value.kycStatus === "Aprovado"
@@ -122,6 +134,7 @@ function normalizeAppUser(value: unknown): AppUser | null {
     ...(passwordHash && passwordSalt
       ? { passwordHash, passwordSalt }
       : {}),
+    ...(photoURL ? { photoURL } : {}),
     position: normalizeString(value.position),
     profileCompleted,
     role,

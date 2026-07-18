@@ -82,6 +82,9 @@ export function createAppActions({
   }
 
   function handleSignOut() {
+    void import("../services/googleAuth").then(({ signOutFromGoogle }) =>
+      signOutFromGoogle()
+    );
     setSelectedAccount(null);
     setSelectedPlayer(null);
     setUser(null);

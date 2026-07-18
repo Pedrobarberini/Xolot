@@ -12,7 +12,7 @@ Aplicativo mobile-first para descoberta e publicacao de videos de atletas de fut
 - Video demonstrativo real de 5 segundos enquanto nao houver publicacao de usuario.
 - Login por email e senha como tela inicial, com salt e hash persistidos no dispositivo.
 - Cadastro local simplificado para email, senha e aceite dos termos; novos cadastros sao sempre contas Usuario.
-- Botao visual `Continuar com Google` preparado para uma integracao futura, ainda sem autenticacao real.
+- Login com Google via Firebase Auth (popup na web; OAuth + credential no mobile).
 - Primeiro acesso abre um modal obrigatorio para username, nome, biografia, idade, posicao, cidade e clube ou projeto.
 - Conta comum `Usuario` com Inicio, Envio, Pesquisar, Mensagens e Perfil no mesmo acesso.
 - Pesquisa por nome, posicao, cidade ou clube abre diretamente o perfil publico do atleta.
@@ -64,10 +64,27 @@ Requisitos: Node.js 22 ou superior e pnpm 11.
 
 ```bash
 pnpm install
+cp .env.example .env
 pnpm start --tunnel
 ```
 
 O modo `--tunnel` permite abrir o projeto no Expo Go mesmo quando computador e celular nao estao na mesma rede local.
+
+### Login com Google (Firebase)
+
+O Firebase UI do React web nao e usado aqui. A integracao e:
+
+- **Web / PWA:** Firebase Auth com `signInWithPopup` (Google).
+- **iOS / Android:** `expo-auth-session` obtém o ID token e o Firebase conclui com `signInWithCredential`.
+
+1. Crie um projeto no [Firebase Console](https://console.firebase.google.com/) e ative **Authentication > Sign-in method > Google**.
+2. Em Project settings, copie as chaves do app web para o `.env` (`EXPO_PUBLIC_FIREBASE_*`).
+3. No Google Cloud Console vinculado ao Firebase, copie o **OAuth 2.0 Client ID** do tipo Web para `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`.
+4. Em Authentication > Settings > Authorized domains, inclua `localhost` e `pedrobarberini.github.io` (GitHub Pages).
+5. Reinicie o Expo apos alterar o `.env`.
+6. Para o GitHub Pages, cadastre as mesmas chaves como Secrets do repositorio (nomes iguais aos do `.env.example`). O workflow de deploy ja as injeta no `build:web`.
+
+Sem essas variaveis, o botao Google mostra o aviso de configuracao e o login por email/senha continua funcionando.
 
 Para gerar a versao web usada pelo GitHub Pages:
 

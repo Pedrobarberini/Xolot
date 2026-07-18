@@ -109,6 +109,8 @@ export type AccountProfile = {
   username: string;
 };
 
+export type AuthProvider = "password" | "google";
+
 export type AppUser = AccountProfile & {
   id: string;
   email: string;
@@ -116,6 +118,9 @@ export type AppUser = AccountProfile & {
   username: string;
   kycStatus: KycStatus;
   acceptedTerms: boolean;
+  authProvider?: AuthProvider;
+  googleUid?: string;
+  photoURL?: string;
   passwordHash?: string;
   passwordSalt?: string;
   profileCompleted: boolean;
