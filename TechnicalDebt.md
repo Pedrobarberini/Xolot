@@ -13,9 +13,9 @@ Documento de divida tecnica do estado atual do repositorio, atualizado em 2026-0
 
 **Status:** Parcialmente resolvido.
 
-O `App.tsx` possui cerca de 535 linhas e ainda concentra boot do Expo, montagem de telas e conexao com actions. Telas, actions, repositories, services, seletores puros, navegacao local e estilos ja estao separados em `src/`.
+O `App.tsx` possui cerca de 500 linhas e ainda concentra montagem de telas autenticadas e conexao com actions. Telas, actions, repositories, services, seletores puros, navegacao local, shells de entrada, boot do Expo e estilos ja estao separados em `src/`.
 
-**Risco residual:** mudancas em rotas autenticadas e shells de entrada ainda passam pelo mesmo arquivo central. `FeedScreen.tsx` e `src/styles/appStyles.ts` continuam grandes. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos.
+**Risco residual:** mudancas em rotas autenticadas ainda passam pelo mesmo arquivo central. `FeedScreen.tsx` e `src/styles/appStyles.ts` continuam grandes. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos.
 
 **Acao:** Reduzir o `App.tsx` para inicializacao, providers e montagem de um root app. Extrair seletores puros, navegacao local, shells de entrada e rotas autenticadas em passos separados.
 
@@ -57,7 +57,7 @@ src/pages/FeedPage/
 
 Players aprovados, players disponiveis, ordenacao do feed, videos do perfil selecionado, fundos, contagem de pendencias, investimentos do usuario e outros dados derivados foram movidos para `src/app/appSelectors.ts`.
 
-**Risco residual:** `App.tsx` ainda concentra JSX de rotas autenticadas. Os proximos passos sao shells de entrada e `AppRoutes`.
+**Risco residual:** `App.tsx` ainda concentra JSX de rotas autenticadas. O proximo passo e `AppRoutes`.
 
 **Prioridade:** P1
 
@@ -73,11 +73,11 @@ Estados como `tab`, `selectedPlayer`, `selectedAccount`, `investmentPlayer`, `fe
 
 ## 1.3. Shells de entrada duplicados
 
-**Status:** Pendente.
+**Status:** Concluido em 2026-07-18.
 
-Loading, login e setup obrigatorio repetem `View`, `SafeAreaView`, `StatusBar` e `BrandLaunchScreen`. A inicializacao de splash/system UI tambem esta acoplada ao componente raiz.
+Loading, login e setup obrigatorio foram movidos para `src/app/AppEntryShells.tsx`. A inicializacao de splash/system UI foi movida para `src/app/useExpoBoot.ts`.
 
-**Acao:** Extrair `useExpoBoot` ou `AppProviders`, alem de componentes pequenos como `LoadingAppShell`, `LoggedOutAppShell` e `AccountSetupGate`.
+**Risco residual:** o shell autenticado e as rotas condicionais ainda vivem no `App.tsx` e devem ser extraidos no item 1.4.
 
 **Prioridade:** P2
 

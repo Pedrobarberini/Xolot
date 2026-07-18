@@ -1115,3 +1115,23 @@ Criterios de aceite:
 - Trocar de aba continua limpando perfil, investimento e retorno de reel.
 - Abrir video pelo perfil continua preservando o retorno correto.
 - Typecheck e testes automatizados passam com Node 22.
+
+### Task IMPROV-003 - Shells de entrada e boot do App
+
+Tipo: Refactor/Arquitetura
+
+Objetivo: reduzir duplicacao no `App.tsx` extraindo shells de loading, login, setup obrigatorio e inicializacao do Expo.
+
+Tasks:
+
+- [x] Criar `src/app/AppEntryShells.tsx`.
+- [x] Extrair `LoadingAppShell`, `LoggedOutAppShell`, `AccountSetupGate` e `BrandLaunchOverlay`.
+- [x] Criar `src/app/useExpoBoot.ts`.
+- [x] Mover `SplashScreen.preventAutoHideAsync`, `SystemUI.setBackgroundColorAsync` e `SplashScreen.hideAsync`.
+- [x] Atualizar `TechnicalDebt.md`.
+
+Criterios de aceite:
+
+- Loading, login e setup obrigatorio nao repetem mais o mesmo shell no `App.tsx`.
+- O overlay de brand launch continua disponivel nos estados de entrada e no app autenticado.
+- Typecheck e testes automatizados passam com Node 22.

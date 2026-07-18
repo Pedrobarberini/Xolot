@@ -1,11 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import * as SplashScreen from "expo-splash-screen";
-import * as SystemUI from "expo-system-ui";
-import { Image, KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
+import { KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
 import { createAppActions } from "./src/actions/createAppActions";
 import { usePersistentAppState } from "./src/actions/usePersistentAppState";
 import { useProfileActions } from "./src/actions/useProfileActions";
 import { useSocialActions } from "./src/actions/useSocialActions";
+import {
+  AccountSetupGate,
+  BrandLaunchOverlay,
+  LoadingAppShell,
+  LoggedOutAppShell
+} from "./src/app/AppEntryShells";
 import {
   selectApprovedSubmissionPlayers,
   selectApprovedPlayerForSubmission,
@@ -23,13 +27,11 @@ import {
   selectUserSubmissions
 } from "./src/app/appSelectors";
 import { useAppNavigation } from "./src/app/useAppNavigation";
-import { BrandLaunchScreen, ScreenBackdrop, ScreenFrame } from "./src/components/AppShell";
+import { useExpoBoot } from "./src/app/useExpoBoot";
+import { ScreenFrame } from "./src/components/AppShell";
 import { BottomTabs, Header } from "./src/components/Navigation";
-import { NEXTSTAR_WORDMARK } from "./src/constants/assets";
 import { demoPlayer } from "./src/data/demoPlayer";
 import { AdminScreen } from "./src/screens/AdminScreen";
-import { AccountSetupModal } from "./src/screens/AccountSetupScreen";
-import { AuthScreen } from "./src/screens/AuthScreen";
 import { FeedScreen } from "./src/screens/FeedScreen";
 import { InvestmentScreen } from "./src/screens/InvestmentScreen";
 import { MessagesScreen } from "./src/screens/MessagesScreen";
@@ -43,8 +45,6 @@ import {
   AthleteFund,
   MessageContact
 } from "./src/types";
-
-SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 const INITIAL_ATHLETE_FUNDS: AthleteFund[] = [
   {
@@ -63,6 +63,7 @@ const INITIAL_ATHLETE_FUNDS: AthleteFund[] = [
 export default function App() {
   const [isBrandLaunchVisible, setIsBrandLaunchVisible] = useState(true);
   const hasRestoredInitialRoute = useRef(false);
+  useExpoBoot();
   const {
     activeMessageContactId,
     clearSelectedProfile,
@@ -103,11 +104,6 @@ export default function App() {
     walletBalances
   } = usePersistentAppState(INITIAL_ATHLETE_FUNDS);
   const walletBalance = user ? (walletBalances[user.id] ?? 0) : 0;
-
-  useEffect(() => {
-    SystemUI.setBackgroundColorAsync(colors.background).catch(() => undefined);
-    SplashScreen.hideAsync().catch(() => undefined);
-  }, []);
 
   useEffect(() => {
     if (!isAppStateLoaded || hasRestoredInitialRoute.current) {
@@ -233,66 +229,34 @@ export default function App() {
 
   if (!isAppStateLoaded) {
     return (
-      <View style={styles.appRoot}>
-        <SafeAreaView style={styles.safeArea}>
-          <StatusBar
-            backgroundColor={colors.background}
-            barStyle="dark-content"
-          />
-        </SafeAreaView>
-        {isBrandLaunchVisible ? (
-          <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
-        ) : null}
-      </View>
+      <LoadingAppShell
+        isVisible={isBrandLaunchVisible}
+        onFinish={() => setIsBrandLaunchVisible(false)}
+      />
     );
   }
 
   if (!user) {
     return (
-      <View style={styles.appRoot}>
-        <SafeAreaView style={styles.safeArea}>
-          <StatusBar
-            backgroundColor={colors.background}
-            barStyle="dark-content"
-          />
-          <AuthScreen accounts={registeredUsers} onComplete={handleAuth} />
-        </SafeAreaView>
-        {isBrandLaunchVisible ? (
-          <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
-        ) : null}
-      </View>
+      <LoggedOutAppShell
+        accounts={registeredUsers}
+        isVisible={isBrandLaunchVisible}
+        onComplete={handleAuth}
+        onFinish={() => setIsBrandLaunchVisible(false)}
+      />
     );
   }
 
   if (user.role === "Usuario" && !user.profileCompleted) {
     return (
-      <View style={styles.appRoot}>
-        <SafeAreaView style={styles.safeArea}>
-          <StatusBar
-            backgroundColor={colors.background}
-            barStyle="dark-content"
-          />
-          <ScreenBackdrop />
-          <View style={styles.accountSetupModalBrand}>
-            <Image
-              accessibilityLabel="Logo NextStar"
-              resizeMode="contain"
-              source={NEXTSTAR_WORDMARK}
-              style={styles.accountSetupModalBrandLogo}
-            />
-          </View>
-          <AccountSetupModal
-            accounts={registeredUsers}
-            onSave={handleUpdateProfile}
-            onSignOut={signOutSession}
-            user={user}
-            visible
-          />
-        </SafeAreaView>
-        {isBrandLaunchVisible ? (
-          <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
-        ) : null}
-      </View>
+      <AccountSetupGate
+        accounts={registeredUsers}
+        isVisible={isBrandLaunchVisible}
+        onFinish={() => setIsBrandLaunchVisible(false)}
+        onSave={handleUpdateProfile}
+        onSignOut={signOutSession}
+        user={user}
+      />
     );
   }
 
@@ -527,9 +491,10 @@ export default function App() {
           )}
         </KeyboardAvoidingView>
       </SafeAreaView>
-      {isBrandLaunchVisible ? (
-        <BrandLaunchScreen onFinish={() => setIsBrandLaunchVisible(false)} />
-      ) : null}
+      <BrandLaunchOverlay
+        isVisible={isBrandLaunchVisible}
+        onFinish={() => setIsBrandLaunchVisible(false)}
+      />
     </View>
   );
 }
