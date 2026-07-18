@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
 import { createAppActions } from "./src/actions/createAppActions";
 import { usePersistentAppState } from "./src/actions/usePersistentAppState";
 import { useProfileActions } from "./src/actions/useProfileActions";
@@ -10,37 +9,22 @@ import {
   LoadingAppShell,
   LoggedOutAppShell
 } from "./src/app/AppEntryShells";
+import { AppRoutes } from "./src/app/AppRoutes";
 import {
   selectApprovedSubmissionPlayers,
-  selectApprovedPlayerForSubmission,
   selectAvailablePlayers,
   selectCurrentUserInvestments,
-  selectFundByOwner,
   selectInvestmentFund,
   selectOrderedFeedPlayers,
   selectPendingReviews,
-  selectPlayerByOwner,
   selectProfileAccount,
   selectProfileFund,
   selectProfileId,
-  selectProfileVideos,
-  selectUserSubmissions
+  selectProfileVideos
 } from "./src/app/appSelectors";
 import { useAppNavigation } from "./src/app/useAppNavigation";
 import { useExpoBoot } from "./src/app/useExpoBoot";
-import { ScreenFrame } from "./src/components/AppShell";
-import { BottomTabs, Header } from "./src/components/Navigation";
 import { demoPlayer } from "./src/data/demoPlayer";
-import { AdminScreen } from "./src/screens/AdminScreen";
-import { FeedScreen } from "./src/screens/FeedScreen";
-import { InvestmentScreen } from "./src/screens/InvestmentScreen";
-import { MessagesScreen } from "./src/screens/MessagesScreen";
-import { ProfileScreen } from "./src/screens/ProfileScreen";
-import { PublicProfileScreen } from "./src/screens/PublicProfileScreen";
-import { SearchScreen } from "./src/screens/SearchScreen";
-import { SubmitVideoScreen } from "./src/screens/SubmissionScreen";
-import { styles } from "./src/styles/appStyles";
-import { colors } from "./src/theme";
 import {
   AthleteFund,
   MessageContact
@@ -261,240 +245,59 @@ export default function App() {
   }
 
   return (
-    <View style={styles.appRoot}>
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar
-          backgroundColor={colors.background}
-          barStyle="dark-content"
-        />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.keyboardView}
-        >
-          {investmentPlayer && investmentFund ? (
-            <>
-              <ScreenFrame key={`investment-${investmentPlayer.id}`}>
-                <InvestmentScreen
-                  avatar={profileAvatars[investmentPlayer.profileId]}
-                  fund={investmentFund}
-                  onBack={closeInvestment}
-                  onInvest={(player, amount) => {
-                    handleInvest(player, amount);
-                    closeInvestment();
-                  }}
-                  player={investmentPlayer}
-                  walletBalance={walletBalance}
-                />
-              </ScreenFrame>
-              <BottomTabs
-                activeTab={tab}
-                onChange={openTab}
-                role={user.role}
-              />
-            </>
-          ) : selectedProfilePlayer || selectedProfileAccount ? (
-            <>
-              <ScreenFrame
-                key={`public-profile-${
-                  selectedProfilePlayer?.profileId ?? selectedProfileAccount?.id
-                }`}
-              >
-                <PublicProfileScreen
-                  account={selectedProfileAccount}
-                  avatar={
-                    selectedProfileId
-                      ? profileAvatars[selectedProfileId]
-                      : undefined
-                  }
-                  canInvest={Boolean(
-                    user.role === "Usuario" &&
-                      selectedProfilePlayer &&
-                      selectedProfilePlayer.ownerUserId !== user.id
-                  )}
-                  fund={selectedProfileFund}
-                  followersCount={
-                    selectedProfileId
-                      ? followersByProfile[selectedProfileId] ?? 0
-                      : 0
-                  }
-                  isFollowing={Boolean(
-                    selectedProfileId &&
-                      followingProfileSet.has(selectedProfileId)
-                  )}
-                  onBack={clearSelectedProfile}
-                  onInvest={() => {
-                    if (
-                      selectedProfilePlayer &&
-                      selectedProfileFund?.status === "Captando"
-                    ) {
-                      openInvestment(selectedProfilePlayer);
-                    }
-                  }}
-                  onMessage={openMessagesForSelectedProfile}
-                  onToggleFollow={() => {
-                    if (selectedProfileId) {
-                      toggleFollowProfile(selectedProfileId);
-                    }
-                  }}
-                  onOpenVideo={(player) =>
-                    openReel(player, {
-                      account: selectedProfileAccount,
-                      player: selectedProfilePlayer ?? player,
-                      type: "public-profile"
-                    })
-                  }
-                  player={selectedProfilePlayer}
-                  showFollow={Boolean(
-                    selectedProfileId && selectedProfileId !== ownProfileId
-                  )}
-                  videos={selectedProfileVideos}
-                  walletBalance={walletBalance}
-                />
-              </ScreenFrame>
-              <BottomTabs
-                activeTab={tab}
-                onChange={openTab}
-                role={user.role}
-              />
-            </>
-          ) : (
-            <>
-              {tab !== "feed" ? (
-                <Header
-                  onSignOut={signOutSession}
-                  pendingReviews={pendingReviews}
-                  showBalance={
-                    user.role === "Usuario" && tab === "profile"
-                  }
-                  showSignOut={user.role === "Admin" && tab !== "profile"}
-                  user={user}
-                  walletBalance={walletBalance}
-                />
-              ) : null}
-              {tab === "feed" ? (
-                <FeedScreen
-                  balance={user.role === "Usuario" ? walletBalance : null}
-                  currentUserId={user.id}
-                  focusPlayerId={feedFocusPlayerId}
-                  followingProfileIds={followingProfileIds}
-                  funds={athleteFunds}
-                  onBackToProfile={
-                    reelReturnTarget ? returnToReelOrigin : undefined
-                  }
-                  onOpenPlayer={openPlayerProfile}
-                  onOpenInvestment={(player) => {
-                    const fund = selectProfileFund(player, athleteFunds);
-
-                    if (fund?.status === "Captando") {
-                      openInvestment(player);
-                    }
-                  }}
-                  onToggleFollow={(player) => {
-                    focusFeedPlayer(player.id);
-                    toggleFollowProfile(player.profileId);
-                  }}
-                  players={orderedFeedPlayers}
-                  profileAvatars={profileAvatars}
-                />
-              ) : null}
-              {tab === "search" ? (
-                <ScreenFrame key="search">
-                  <SearchScreen
-                    funds={athleteFunds}
-                    onOpenPlayer={openPlayerProfile}
-                    onOpenUser={openUserProfile}
-                    players={availablePlayers}
-                    profileAvatars={profileAvatars}
-                    users={registeredUsers}
-                  />
-                </ScreenFrame>
-              ) : null}
-              {tab === "messages" ? (
-                <ScreenFrame
-                  key={`messages-${activeMessageContactId ?? "list"}`}
-                >
-                  <MessagesScreen
-                    activeContactId={activeMessageContactId}
-                    contacts={currentMessageContacts}
-                    currentUserId={user.id}
-                    followingProfileIds={followingProfileIds}
-                    messages={directMessages}
-                    onFindProfiles={() => openTab("search")}
-                    onSelectContact={setActiveMessageContactId}
-                    onSendMessage={sendDirectMessage}
-                    onToggleFollow={(profileId) =>
-                      toggleFollowProfile(profileId)
-                    }
-                    profileAvatars={profileAvatars}
-                  />
-                </ScreenFrame>
-              ) : null}
-              {tab === "submit" ? (
-                <ScreenFrame key="submit">
-                  <SubmitVideoScreen
-                    onSubmit={handleSubmitVideo}
-                    submissions={selectUserSubmissions(submissions, user.id)}
-                    user={user}
-                  />
-                </ScreenFrame>
-              ) : null}
-              {tab === "admin" ? (
-                <ScreenFrame key="admin">
-                  <AdminScreen
-                    onReview={handleReviewSubmission}
-                    submissions={submissions}
-                  />
-                </ScreenFrame>
-              ) : null}
-              {tab === "profile" ? (
-                <ScreenFrame animated={false} key="profile">
-                  <ProfileScreen
-                    accounts={registeredUsers}
-                    avatar={
-                      ownProfileId ? profileAvatars[ownProfileId] : undefined
-                    }
-                    balance={walletBalance}
-                    fund={selectFundByOwner(athleteFunds, user.id)}
-                    investments={currentUserInvestments}
-                    followersCount={
-                      ownProfileId ? followersByProfile[ownProfileId] ?? 0 : 0
-                    }
-                    followingCount={followingProfileIds.length}
-                    onDeleteVideo={handleDeleteVideo}
-                    onOpenFund={handleOpenFund}
-                    onOpenVideo={(submission) => {
-                      const reelPlayer = selectApprovedPlayerForSubmission(
-                        approvedSubmissionPlayers,
-                        submission.id
-                      );
-
-                      if (reelPlayer) {
-                        openReel(reelPlayer, { type: "own-profile" });
-                      }
-                    }}
-                    onDeposit={handleDeposit}
-                    onChangeAvatar={(avatar) => {
-                      if (ownProfileId) {
-                        setProfileAvatar(ownProfileId, avatar);
-                      }
-                    }}
-                    onSignOut={signOutSession}
-                    onUpdateProfile={handleUpdateProfile}
-                    player={selectPlayerByOwner(availablePlayers, user.id)}
-                    submissions={submissions}
-                    user={user}
-                  />
-                </ScreenFrame>
-              ) : null}
-              <BottomTabs activeTab={tab} onChange={openTab} role={user.role} />
-            </>
-          )}
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-      <BrandLaunchOverlay
-        isVisible={isBrandLaunchVisible}
-        onFinish={() => setIsBrandLaunchVisible(false)}
-      />
-    </View>
+    <AppRoutes
+      activeMessageContactId={activeMessageContactId}
+      approvedSubmissionPlayers={approvedSubmissionPlayers}
+      athleteFunds={athleteFunds}
+      availablePlayers={availablePlayers}
+      clearSelectedProfile={clearSelectedProfile}
+      closeInvestment={closeInvestment}
+      currentMessageContacts={currentMessageContacts}
+      currentUserInvestments={currentUserInvestments}
+      directMessages={directMessages}
+      feedFocusPlayerId={feedFocusPlayerId}
+      focusFeedPlayer={focusFeedPlayer}
+      followersByProfile={followersByProfile}
+      followingProfileIds={followingProfileIds}
+      followingProfileSet={followingProfileSet}
+      handleDeleteVideo={handleDeleteVideo}
+      handleDeposit={handleDeposit}
+      handleInvest={handleInvest}
+      handleOpenFund={handleOpenFund}
+      handleReviewSubmission={handleReviewSubmission}
+      handleSubmitVideo={handleSubmitVideo}
+      handleUpdateProfile={handleUpdateProfile}
+      investmentFund={investmentFund}
+      investmentPlayer={investmentPlayer}
+      isBrandLaunchVisible={isBrandLaunchVisible}
+      onBrandLaunchFinish={() => setIsBrandLaunchVisible(false)}
+      onOpenMessagesForSelectedProfile={openMessagesForSelectedProfile}
+      openInvestment={openInvestment}
+      openPlayerProfile={openPlayerProfile}
+      openReel={openReel}
+      openTab={openTab}
+      openUserProfile={openUserProfile}
+      orderedFeedPlayers={orderedFeedPlayers}
+      ownProfileId={ownProfileId}
+      pendingReviews={pendingReviews}
+      profileAvatars={profileAvatars}
+      registeredUsers={registeredUsers}
+      reelReturnTarget={reelReturnTarget}
+      returnToReelOrigin={returnToReelOrigin}
+      selectedProfileAccount={selectedProfileAccount}
+      selectedProfileFund={selectedProfileFund}
+      selectedProfileId={selectedProfileId}
+      selectedProfilePlayer={selectedProfilePlayer}
+      selectedProfileVideos={selectedProfileVideos}
+      sendDirectMessage={sendDirectMessage}
+      setActiveMessageContactId={setActiveMessageContactId}
+      setProfileAvatar={setProfileAvatar}
+      signOutSession={signOutSession}
+      submissions={submissions}
+      tab={tab}
+      toggleFollowProfile={toggleFollowProfile}
+      user={user}
+      walletBalance={walletBalance}
+    />
   );
 }

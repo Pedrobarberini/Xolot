@@ -1135,3 +1135,22 @@ Criterios de aceite:
 - Loading, login e setup obrigatorio nao repetem mais o mesmo shell no `App.tsx`.
 - O overlay de brand launch continua disponivel nos estados de entrada e no app autenticado.
 - Typecheck e testes automatizados passam com Node 22.
+
+### Task IMPROV-004 - Rotas autenticadas do App
+
+Tipo: Refactor/Arquitetura
+
+Objetivo: reduzir o JSX do `App.tsx` movendo a montagem das telas autenticadas para um roteador local dedicado.
+
+Tasks:
+
+- [x] Criar `src/app/AppRoutes.tsx`.
+- [x] Mover renderizacao de investimento, perfil publico, feed, pesquisa, mensagens, envio, admin e perfil proprio.
+- [x] Manter `App.tsx` responsavel por hooks globais, actions e gates de entrada.
+- [x] Atualizar `TechnicalDebt.md`.
+
+Criterios de aceite:
+
+- `App.tsx` nao contem mais o bloco condicional das telas autenticadas.
+- O comportamento de tabs, perfil publico, investimento e retorno ao reel permanece centralizado em `useAppNavigation`.
+- Typecheck e testes automatizados passam com Node 22.

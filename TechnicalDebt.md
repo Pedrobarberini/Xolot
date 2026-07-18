@@ -13,9 +13,9 @@ Documento de divida tecnica do estado atual do repositorio, atualizado em 2026-0
 
 **Status:** Parcialmente resolvido.
 
-O `App.tsx` possui cerca de 500 linhas e ainda concentra montagem de telas autenticadas e conexao com actions. Telas, actions, repositories, services, seletores puros, navegacao local, shells de entrada, boot do Expo e estilos ja estao separados em `src/`.
+O `App.tsx` possui cerca de 300 linhas e ainda concentra conexao entre hooks globais, actions e o roteador local. Telas, actions, repositories, services, seletores puros, navegacao local, shells de entrada, rotas autenticadas, boot do Expo e estilos ja estao separados em `src/`.
 
-**Risco residual:** mudancas em rotas autenticadas ainda passam pelo mesmo arquivo central. `FeedScreen.tsx` e `src/styles/appStyles.ts` continuam grandes. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos.
+**Risco residual:** `AppRoutes.tsx` ainda concentra todas as rotas autenticadas em um unico arquivo. `FeedScreen.tsx` e `src/styles/appStyles.ts` continuam grandes. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos.
 
 **Acao:** Reduzir o `App.tsx` para inicializacao, providers e montagem de um root app. Extrair seletores puros, navegacao local, shells de entrada e rotas autenticadas em passos separados.
 
@@ -57,7 +57,7 @@ src/pages/FeedPage/
 
 Players aprovados, players disponiveis, ordenacao do feed, videos do perfil selecionado, fundos, contagem de pendencias, investimentos do usuario e outros dados derivados foram movidos para `src/app/appSelectors.ts`.
 
-**Risco residual:** `App.tsx` ainda concentra JSX de rotas autenticadas. O proximo passo e `AppRoutes`.
+**Risco residual:** `AppRoutes.tsx` ainda concentra JSX de rotas autenticadas. O proximo passo e quebrar rotas maiores em subcomponentes ou paginas.
 
 **Prioridade:** P1
 
@@ -83,11 +83,11 @@ Loading, login e setup obrigatorio foram movidos para `src/app/AppEntryShells.ts
 
 ## 1.4. Rotas autenticadas embutidas no JSX principal
 
-**Status:** Pendente.
+**Status:** Concluido em 2026-07-18.
 
-As renderizacoes de `InvestmentScreen`, `PublicProfileScreen`, `FeedScreen`, `SearchScreen`, `MessagesScreen`, `SubmitVideoScreen`, `AdminScreen` e `ProfileScreen` ficam no mesmo bloco condicional. Isso aumenta o risco de regressao ao mexer em uma unica tela.
+As renderizacoes de `InvestmentScreen`, `PublicProfileScreen`, `FeedScreen`, `SearchScreen`, `MessagesScreen`, `SubmitVideoScreen`, `AdminScreen` e `ProfileScreen` foram movidas para `src/app/AppRoutes.tsx`.
 
-**Acao:** Criar `AppRoutes` e, se necessario, subcomponentes `FeedRoute`, `SearchRoute`, `MessagesRoute`, `SubmitRoute`, `AdminRoute` e `ProfileRoute` para reduzir o JSX do root.
+**Risco residual:** `AppRoutes.tsx` ainda tem uma lista longa de props e deve ser quebrado em subcomponentes `FeedRoute`, `SearchRoute`, `MessagesRoute`, `SubmitRoute`, `AdminRoute` e `ProfileRoute` quando as telas forem migradas para `src/pages/`.
 
 **Prioridade:** P1
 
