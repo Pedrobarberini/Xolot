@@ -60,7 +60,7 @@ A versao web e um PWA: no Chrome/Edge/Safari e possivel instalar o NextStar na t
 
 ## Como rodar
 
-Requisitos: Node.js 20.19 ou superior e pnpm.
+Requisitos: Node.js 22 ou superior e pnpm 11.
 
 ```bash
 pnpm install

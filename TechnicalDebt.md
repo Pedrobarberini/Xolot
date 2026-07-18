@@ -1,6 +1,6 @@
 # Technical Debt - NextStar
 
-Documento de divida tecnica do estado atual do repositorio, atualizado em 2026-07-16.
+Documento de divida tecnica do estado atual do repositorio, atualizado em 2026-07-18.
 
 ## Legenda
 
@@ -13,9 +13,81 @@ Documento de divida tecnica do estado atual do repositorio, atualizado em 2026-0
 
 **Status:** Parcialmente resolvido.
 
-O `App.tsx` possui cerca de 520 linhas e concentra composicao, roteamento local e integracao dos hooks globais. Telas, actions, repositories, services e estilos ja estao separados em `src/`.
+O `App.tsx` possui cerca de 580 linhas e ainda concentra boot do Expo, estado de navegacao, selecao de perfil, retorno do reel, montagem de telas e conexao com actions. Telas, actions, repositories, services, seletores puros e estilos ja estao separados em `src/`.
 
-**Risco residual:** `FeedScreen.tsx` e `src/styles/appStyles.ts` continuam grandes. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos.
+**Risco residual:** mudancas em fluxo de navegacao, perfil publico, investimento ou mensagens ainda passam pelo mesmo arquivo central. `FeedScreen.tsx` e `src/styles/appStyles.ts` continuam grandes. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos.
+
+**Acao:** Reduzir o `App.tsx` para inicializacao, providers e montagem de um root app. Extrair seletores puros, navegacao local, shells de entrada e rotas autenticadas em passos separados.
+
+**Prioridade:** P1
+
+## Convencao de refactor
+
+Durante a reorganizacao, novas telas devem viver em `src/pages/` e componentes reutilizaveis em `src/components/`. Cada componente extraido deve preferir uma pasta propria, mantendo implementacao, estilos e tipos locais juntos.
+
+Formato recomendado:
+
+```txt
+src/components/VideoPlayer/
+  VideoPlayer.tsx
+  VideoPlayer.styles.ts
+  VideoPlayer.types.ts
+  index.ts
+```
+
+Para componentes especificos de uma pagina, manter dentro da propria pagina ate existir reutilizacao real:
+
+```txt
+src/pages/FeedPage/
+  FeedPage.tsx
+  FeedPage.styles.ts
+  components/
+    FeedCaption/
+      FeedCaption.tsx
+      FeedCaption.styles.ts
+      FeedCaption.types.ts
+      index.ts
+```
+
+`theme.ts` deve guardar apenas tokens compartilhados, como cores, espacamento, raio, sombras e tipografia base. Estilos estruturais de tela ou componente nao devem continuar crescendo dentro de `src/styles/appStyles.ts`.
+
+## 1.1. Seletores e dados derivados ainda dentro do `App.tsx`
+
+**Status:** Concluido em 2026-07-18.
+
+Players aprovados, players disponiveis, ordenacao do feed, videos do perfil selecionado, fundos, contagem de pendencias, investimentos do usuario e outros dados derivados foram movidos para `src/app/appSelectors.ts`.
+
+**Risco residual:** `App.tsx` ainda concentra navegacao local e JSX de rotas autenticadas. Os proximos passos sao `useAppNavigation`, shells de entrada e `AppRoutes`.
+
+**Prioridade:** P1
+
+## 1.2. Navegacao local sem isolamento
+
+**Status:** Pendente.
+
+Estados como `tab`, `selectedPlayer`, `selectedAccount`, `investmentPlayer`, `feedFocusPlayerId`, `reelReturnTarget` e `activeMessageContactId` vivem diretamente em `App.tsx`. Os resets entre abas, retorno do reel e abertura de mensagens ficam espalhados no componente.
+
+**Acao:** Criar `useAppNavigation` para centralizar estado e handlers de navegacao local, preservando o comportamento atual antes de adotar um roteador real.
+
+**Prioridade:** P1
+
+## 1.3. Shells de entrada duplicados
+
+**Status:** Pendente.
+
+Loading, login e setup obrigatorio repetem `View`, `SafeAreaView`, `StatusBar` e `BrandLaunchScreen`. A inicializacao de splash/system UI tambem esta acoplada ao componente raiz.
+
+**Acao:** Extrair `useExpoBoot` ou `AppProviders`, alem de componentes pequenos como `LoadingAppShell`, `LoggedOutAppShell` e `AccountSetupGate`.
+
+**Prioridade:** P2
+
+## 1.4. Rotas autenticadas embutidas no JSX principal
+
+**Status:** Pendente.
+
+As renderizacoes de `InvestmentScreen`, `PublicProfileScreen`, `FeedScreen`, `SearchScreen`, `MessagesScreen`, `SubmitVideoScreen`, `AdminScreen` e `ProfileScreen` ficam no mesmo bloco condicional. Isso aumenta o risco de regressao ao mexer em uma unica tela.
+
+**Acao:** Criar `AppRoutes` e, se necessario, subcomponentes `FeedRoute`, `SearchRoute`, `MessagesRoute`, `SubmitRoute`, `AdminRoute` e `ProfileRoute` para reduzir o JSX do root.
 
 **Prioridade:** P1
 
@@ -72,7 +144,7 @@ Arquivos nao sao enviados para bucket nem validados no servidor. URI local pode 
 
 Rotas usam `useState<Tab>` e selecao condicional. Nao existe deep link, URL de perfil ou historico real do navegador.
 
-**Acao:** Adotar Expo Router ou React Navigation com rotas tipadas.
+**Acao:** Primeiro isolar a navegacao manual em `useAppNavigation`. Depois adotar Expo Router ou React Navigation com rotas tipadas, deep links e historico real quando os fluxos estiverem estabilizados.
 
 **Prioridade:** P1
 
@@ -130,9 +202,9 @@ Helpers sairam do `App.tsx`, mas `appActions.ts` ainda mistura builders, formata
 
 **Status:** Parcialmente resolvido.
 
-O `StyleSheet` saiu do componente raiz, mas `appStyles.ts` possui aproximadamente 3.800 linhas.
+O `StyleSheet` saiu do componente raiz, mas `appStyles.ts` possui aproximadamente 4.400 linhas.
 
-**Acao:** Separar estilos por tela ou dominio, mantendo tokens em `theme.ts`.
+**Acao:** Separar estilos por pagina e por componente. Cada componente extraido deve carregar seus proprios estilos em uma pasta dedicada, evitando mover tudo para arquivos grandes de estilo da pagina. Manter somente tokens compartilhados em `theme.ts`.
 
 **Prioridade:** P2
 
@@ -217,9 +289,11 @@ Consentimentos, KYC e termos nao possuem registro server-side auditavel. A carte
 ## Ordem atual recomendada
 
 1. Upload remoto, backend e autenticacao real.
-2. Extrair `VideoPlayer` e virtualizar o feed.
-3. Limpar o dominio financeiro e codigo morto.
-4. Adicionar ErrorBoundary, lint e testes dos fluxos criticos.
-5. Adotar navegacao tipada e deep links.
-6. Separar estilos por dominio.
-7. Configurar EAS e validacao mobile no CI.
+2. Extrair seletores puros e navegacao local do `App.tsx`.
+3. Extrair shells de entrada e rotas autenticadas do `App.tsx`.
+4. Extrair `VideoPlayer` e virtualizar o feed.
+5. Limpar o dominio financeiro e codigo morto.
+6. Adicionar ErrorBoundary, lint e testes dos fluxos criticos.
+7. Adotar navegacao tipada e deep links.
+8. Separar estilos por dominio.
+9. Configurar EAS e validacao mobile no CI.

@@ -1073,3 +1073,24 @@ Criterios de aceite:
 - Conta nova abre o modal de perfil antes de acessar o Inicio.
 - Username duplicado impede a conclusao do perfil.
 - Fechar e reabrir o editor mantem os dados persistidos da conta.
+
+### Task IMPROV-001 - Seletores puros do App
+
+Tipo: Refactor/Arquitetura
+
+Objetivo: reduzir a responsabilidade do `App.tsx` movendo dados derivados para seletores puros e testaveis.
+
+Tasks:
+
+- [x] Criar `src/app/appSelectors.ts`.
+- [x] Mover selecao de videos aprovados, players disponiveis e ordenacao do feed.
+- [x] Mover selecao de perfil publico, videos do perfil, fundos e investimentos.
+- [x] Mover contagem de pendencias, submissoes do usuario e lookup de player por dono/submissao.
+- [x] Cobrir seletores com testes automatizados.
+- [x] Atualizar `TechnicalDebt.md`.
+
+Criterios de aceite:
+
+- `App.tsx` nao faz mais derivacoes com `filter`, `find`, `sort` ou `map` diretamente.
+- Seletores preservam a regra do demo player, prioridade de perfis seguidos e dados do perfil completo.
+- Typecheck e testes automatizados passam com Node 22.

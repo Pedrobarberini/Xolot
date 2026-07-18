@@ -2,11 +2,26 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { Image, KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
-import { buildPlayerFromSubmission } from "./src/actions/appActions";
 import { createAppActions } from "./src/actions/createAppActions";
 import { usePersistentAppState } from "./src/actions/usePersistentAppState";
 import { useProfileActions } from "./src/actions/useProfileActions";
 import { useSocialActions } from "./src/actions/useSocialActions";
+import {
+  selectApprovedSubmissionPlayers,
+  selectApprovedPlayerForSubmission,
+  selectAvailablePlayers,
+  selectCurrentUserInvestments,
+  selectFundByOwner,
+  selectInvestmentFund,
+  selectOrderedFeedPlayers,
+  selectPendingReviews,
+  selectPlayerByOwner,
+  selectProfileAccount,
+  selectProfileFund,
+  selectProfileId,
+  selectProfileVideos,
+  selectUserSubmissions
+} from "./src/app/appSelectors";
 import { BrandLaunchScreen, ScreenBackdrop, ScreenFrame } from "./src/components/AppShell";
 import { BottomTabs, Header } from "./src/components/Navigation";
 import { NEXTSTAR_WORDMARK } from "./src/constants/assets";
@@ -99,40 +114,12 @@ export default function App() {
   }, [isAppStateLoaded, user?.role]);
 
   const approvedSubmissionPlayers = useMemo(
-    () =>
-      submissions
-        .filter(
-          (submission) =>
-            submission.status === "Aprovado" && submission.videoLink.trim().length > 0
-        )
-        .map(buildPlayerFromSubmission)
-        .map((player) => {
-          const account = player.ownerUserId
-            ? registeredUsers.find((item) => item.id === player.ownerUserId)
-            : undefined;
-
-          if (!account?.profileCompleted) {
-            return player;
-          }
-
-          return {
-            ...player,
-            age: account.age ?? player.age,
-            city: account.city,
-            club: account.club,
-            name: account.name,
-            position: account.position,
-            username: account.username
-          };
-        }),
+    () => selectApprovedSubmissionPlayers(submissions, registeredUsers),
     [registeredUsers, submissions]
   );
 
   const availablePlayers = useMemo(
-    () =>
-      approvedSubmissionPlayers.length > 0
-        ? approvedSubmissionPlayers
-        : [demoPlayer],
+    () => selectAvailablePlayers(approvedSubmissionPlayers, demoPlayer),
     [approvedSubmissionPlayers]
   );
   const { profileAvatars, setProfileAvatar } = useProfileActions();
@@ -148,50 +135,28 @@ export default function App() {
     toggleFollowProfile
   } = useSocialActions({ players: availablePlayers, user });
   const orderedFeedPlayers = useMemo(
-    () =>
-      availablePlayers
-        .map((player, index) => ({ index, player }))
-        .sort((left, right) => {
-          const followDifference =
-            Number(followingProfileSet.has(right.player.profileId)) -
-            Number(followingProfileSet.has(left.player.profileId));
-
-          return followDifference || left.index - right.index;
-        })
-        .map(({ player }) => player),
+    () => selectOrderedFeedPlayers(availablePlayers, followingProfileSet),
     [availablePlayers, followingProfileSet]
   );
 
-  const pendingReviews = submissions.filter(
-    (submission) => submission.status === "Em revisao"
-  ).length;
-  const currentUserInvestments = user
-    ? investments.filter((investment) => investment.investorUserId === user.id)
-    : [];
+  const pendingReviews = selectPendingReviews(submissions);
+  const currentUserInvestments = selectCurrentUserInvestments(investments, user);
   const selectedProfilePlayer = selectedPlayer ?? undefined;
-  const selectedProfileAccount = selectedAccount ?? (
-    selectedProfilePlayer?.ownerUserId
-      ? registeredUsers.find(
-          (account) => account.id === selectedProfilePlayer.ownerUserId
-        )
-      : undefined
+  const selectedProfileAccount = selectProfileAccount(
+    selectedAccount,
+    selectedPlayer,
+    registeredUsers
   );
-  const selectedProfileVideos = selectedProfilePlayer
-    ? availablePlayers.filter(
-        (player) => player.profileId === selectedProfilePlayer.profileId
-      )
-    : [];
-  const selectedProfileFund = selectedProfilePlayer
-    ? athleteFunds.find(
-        (fund) => fund.profileId === selectedProfilePlayer.profileId
-      )
-    : undefined;
-  const investmentFund = investmentPlayer
-    ? athleteFunds.find((fund) => fund.profileId === investmentPlayer.profileId)
-    : undefined;
-  const selectedProfileId =
-    selectedProfilePlayer?.profileId ??
-    (selectedProfileAccount ? `profile-${selectedProfileAccount.id}` : undefined);
+  const selectedProfileVideos = selectProfileVideos(
+    selectedPlayer,
+    availablePlayers
+  );
+  const selectedProfileFund = selectProfileFund(selectedPlayer, athleteFunds);
+  const investmentFund = selectInvestmentFund(investmentPlayer, athleteFunds);
+  const selectedProfileId = selectProfileId(
+    selectedPlayer,
+    selectedProfileAccount
+  );
 
   function openTab(nextTab: Tab) {
     setInvestmentPlayer(null);
@@ -493,9 +458,7 @@ export default function App() {
                     setSelectedPlayer(player);
                   }}
                   onOpenInvestment={(player) => {
-                    const fund = athleteFunds.find(
-                      (item) => item.profileId === player.profileId
-                    );
+                    const fund = selectProfileFund(player, athleteFunds);
 
                     if (fund?.status === "Captando") {
                       setInvestmentPlayer(player);
@@ -551,9 +514,7 @@ export default function App() {
                 <ScreenFrame key="submit">
                   <SubmitVideoScreen
                     onSubmit={handleSubmitVideo}
-                    submissions={submissions.filter(
-                      (item) => item.userId === user.id
-                    )}
+                    submissions={selectUserSubmissions(submissions, user.id)}
                     user={user}
                   />
                 </ScreenFrame>
@@ -574,9 +535,7 @@ export default function App() {
                       ownProfileId ? profileAvatars[ownProfileId] : undefined
                     }
                     balance={walletBalance}
-                    fund={athleteFunds.find(
-                      (item) => item.ownerUserId === user.id
-                    )}
+                    fund={selectFundByOwner(athleteFunds, user.id)}
                     investments={currentUserInvestments}
                     followersCount={
                       ownProfileId ? followersByProfile[ownProfileId] ?? 0 : 0
@@ -585,8 +544,9 @@ export default function App() {
                     onDeleteVideo={handleDeleteVideo}
                     onOpenFund={handleOpenFund}
                     onOpenVideo={(submission) => {
-                      const reelPlayer = approvedSubmissionPlayers.find(
-                        (player) => player.id === `approved-${submission.id}`
+                      const reelPlayer = selectApprovedPlayerForSubmission(
+                        approvedSubmissionPlayers,
+                        submission.id
                       );
 
                       if (reelPlayer) {
@@ -601,9 +561,7 @@ export default function App() {
                     }}
                     onSignOut={signOutSession}
                     onUpdateProfile={handleUpdateProfile}
-                    player={availablePlayers.find(
-                      (item) => item.ownerUserId === user.id
-                    )}
+                    player={selectPlayerByOwner(availablePlayers, user.id)}
                     submissions={submissions}
                     user={user}
                   />

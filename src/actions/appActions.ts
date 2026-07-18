@@ -1,6 +1,6 @@
-import { colors } from "../theme";
-import { Player, VideoSubmission } from "../types";
-import { CardPalette } from "../ui/types";
+import { colors } from "../theme.ts";
+import type { Player, VideoSubmission } from "../types.ts";
+import type { CardPalette } from "../ui/types.ts";
 
 const CARD_PALETTE: CardPalette = {
   name: "NextStar",
