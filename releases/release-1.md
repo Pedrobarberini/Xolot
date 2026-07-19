@@ -1154,3 +1154,22 @@ Criterios de aceite:
 - `App.tsx` nao contem mais o bloco condicional das telas autenticadas.
 - O comportamento de tabs, perfil publico, investimento e retorno ao reel permanece centralizado em `useAppNavigation`.
 - Typecheck e testes automatizados passam com Node 22.
+
+### Task IMPROV-005 - Divisao inicial dos estilos do App
+
+Tipo: Refactor/Arquitetura
+
+Objetivo: reduzir o tamanho fisico de `src/styles/appStyles.ts` sem quebrar os imports atuais de `styles`.
+
+Tasks:
+
+- [x] Transformar `src/styles/appStyles.ts` em agregador.
+- [x] Separar estilos em modulos por dominio dentro de `src/styles/app/`.
+- [x] Preservar a API publica `styles` para manter as telas atuais estaveis.
+- [x] Atualizar `TechnicalDebt.md` com a divida residual de estilos colocalizados.
+
+Criterios de aceite:
+
+- `src/styles/appStyles.ts` continua exportando `styles`.
+- Os modulos de estilo preservam literais de React Native para manter o typecheck estavel.
+- Typecheck e testes automatizados passam com Node 22.

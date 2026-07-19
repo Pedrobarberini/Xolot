@@ -15,7 +15,7 @@ Documento de divida tecnica do estado atual do repositorio, atualizado em 2026-0
 
 O `App.tsx` possui cerca de 300 linhas e ainda concentra conexao entre hooks globais, actions e o roteador local. Telas, actions, repositories, services, seletores puros, navegacao local, shells de entrada, rotas autenticadas, boot do Expo e estilos ja estao separados em `src/`.
 
-**Risco residual:** `AppRoutes.tsx` ainda concentra todas as rotas autenticadas em um unico arquivo. `FeedScreen.tsx` e `src/styles/appStyles.ts` continuam grandes. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos.
+**Risco residual:** `AppRoutes.tsx` ainda concentra todas as rotas autenticadas em um unico arquivo. `FeedScreen.tsx` continua grande. `VideoPlayer`, cards e estilos por dominio ainda devem ser extraidos para pastas de paginas/componentes.
 
 **Acao:** Reduzir o `App.tsx` para inicializacao, providers e montagem de um root app. Extrair seletores puros, navegacao local, shells de entrada e rotas autenticadas em passos separados.
 
@@ -198,11 +198,13 @@ Helpers sairam do `App.tsx`, mas `appActions.ts` ainda mistura builders, formata
 
 **Prioridade:** P2
 
-## 12. Estilos em arquivo unico
+## 12. Estilos globais ainda agrupados por dominio amplo
 
 **Status:** Parcialmente resolvido.
 
-O `StyleSheet` saiu do componente raiz, mas `appStyles.ts` possui aproximadamente 4.400 linhas.
+O `StyleSheet` saiu do componente raiz e `src/styles/appStyles.ts` agora funciona como agregador. Os estilos foram separados em modulos por dominio dentro de `src/styles/app/`, preservando a API publica `styles` para reduzir risco durante o refactor.
+
+**Risco residual:** os estilos ainda nao estao colocalizados nas futuras pastas de `src/pages/` e `src/components/`. Ao extrair telas e componentes, cada pasta deve assumir seus proprios arquivos `.styles.ts` e `.types.ts`.
 
 **Acao:** Separar estilos por pagina e por componente. Cada componente extraido deve carregar seus proprios estilos em uma pasta dedicada, evitando mover tudo para arquivos grandes de estilo da pagina. Manter somente tokens compartilhados em `theme.ts`.
 
