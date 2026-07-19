@@ -21,7 +21,7 @@ test("migra avatar antigo salvo apenas como URI", () => {
   });
 });
 
-test("normaliza foco e dimensoes invalidas", () => {
+test("normaliza foco e dimensões inválidas", () => {
   assert.deepEqual(
     normalizeProfileAvatar({
       cropScale: 2,
@@ -42,7 +42,7 @@ test("normaliza foco e dimensoes invalidas", () => {
   );
 });
 
-test("preserva enquadramento na serializacao", () => {
+test("preserva enquadramento na serialização", () => {
   const avatars = {
     "profile-1": {
       cropScale: 0.65,

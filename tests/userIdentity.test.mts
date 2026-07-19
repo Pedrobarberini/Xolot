@@ -9,19 +9,19 @@ import {
   normalizeUsername
 } from "../src/utils/userIdentity.ts";
 
-test("normaliza username sem alterar o nome publico", () => {
+test("normaliza username sem alterar o nome público", () => {
   assert.equal(normalizeUsername("  @Pedro.Barberini  "), "pedro.barberini");
   assert.equal(createUsernameSlug("Pedro Barberini"), "pedro.barberini");
 });
 
-test("aceita apenas usernames de tres a trinta caracteres", () => {
+test("aceita apenas usernames de três a trinta caracteres", () => {
   assert.equal(isValidUsername("pedro_barberini"), true);
   assert.equal(isValidUsername("PB"), false);
   assert.equal(isValidUsername("pedro barberini"), false);
   assert.equal(isValidUsername("pedro@barberini"), false);
 });
 
-test("gera usernames unicos sem bloquear nomes publicos iguais", () => {
+test("gera usernames únicos sem bloquear nomes públicos iguais", () => {
   const taken = new Set<string>();
 
   assert.equal(claimUniqueUsername("pedro", taken, "conta-1"), "pedro");
@@ -29,7 +29,7 @@ test("gera usernames unicos sem bloquear nomes publicos iguais", () => {
   assert.equal(claimUniqueUsername("pedro", taken, "conta-3"), "pedro_3");
 });
 
-test("bloqueia email ou username duplicado sem comparar nome publico", () => {
+test("bloqueia email ou username duplicado sem comparar nome público", () => {
   const accounts = [
     { email: "pedro@nextstar.com", username: "pedrobarberini" }
   ];
@@ -62,5 +62,5 @@ test("valida disponibilidade do username ao configurar o perfil", () => {
     isUsernameAvailable(accounts, "JOGADOR.DOIS", "user-1"),
     false
   );
-  assert.equal(isUsernameAvailable(accounts, "nome invalido", "user-1"), false);
+  assert.equal(isUsernameAvailable(accounts, "nome inválido", "user-1"), false);
 });

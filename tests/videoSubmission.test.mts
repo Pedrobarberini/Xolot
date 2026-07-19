@@ -7,10 +7,10 @@ function createSubmission(id: string, userId: string): VideoSubmission {
   return {
     age: 18,
     athleteName: `Atleta ${userId}`,
-    city: "Sao Paulo, SP",
+    city: "São Paulo, SP",
     club: "Projeto NextStar",
     guardianConsent: true,
-    highlight: "Texto da publicacao",
+    highlight: "Texto da publicação",
     id,
     position: "Ponta",
     status: "Aprovado",
@@ -21,7 +21,7 @@ function createSubmission(id: string, userId: string): VideoSubmission {
   };
 }
 
-test("remove somente o video pertencente ao usuario conectado", () => {
+test("remove somente o vídeo pertencente ao usuário conectado", () => {
   const ownVideo = createSubmission("video-1", "user-1");
   const otherVideo = createSubmission("video-1", "user-2");
 
@@ -34,7 +34,7 @@ test("remove somente o video pertencente ao usuario conectado", () => {
   assert.deepEqual(result, [otherVideo]);
 });
 
-test("nao remove video pertencente a outro usuario", () => {
+test("não remove vídeo pertencente a outro usuário", () => {
   const ownVideo = createSubmission("video-1", "user-1");
   const otherVideo = createSubmission("video-2", "user-2");
   const submissions = [ownVideo, otherVideo];

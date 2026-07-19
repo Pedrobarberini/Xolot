@@ -37,7 +37,7 @@ export type Player = {
   evaluation?: PlayerEvaluation;
 };
 
-export type AthleteFundStatus = "Captando" | "Concluida";
+export type AthleteFundStatus = "Captando" | "Concluída";
 
 export type AthleteFund = {
   id: string;
@@ -95,9 +95,9 @@ export type ProfileAvatar = {
 
 export type ProfileAvatarsByProfile = Record<string, ProfileAvatar>;
 
-export type UserRole = "Usuario" | "Admin";
+export type UserRole = "Usuário" | "Admin";
 
-export type KycStatus = "Nao iniciado" | "Pendente" | "Aprovado";
+export type KycStatus = "Não iniciado" | "Pendente" | "Aprovado";
 
 export type AccountProfile = {
   age: number | null;
@@ -109,6 +109,8 @@ export type AccountProfile = {
   username: string;
 };
 
+export type AuthProvider = "password" | "google";
+
 export type AppUser = AccountProfile & {
   id: string;
   email: string;
@@ -116,13 +118,16 @@ export type AppUser = AccountProfile & {
   username: string;
   kycStatus: KycStatus;
   acceptedTerms: boolean;
+  authProvider?: AuthProvider;
+  googleUid?: string;
+  photoURL?: string;
   passwordHash?: string;
   passwordSalt?: string;
   profileCompleted: boolean;
 };
 
 export type VideoSubmissionStatus =
-  | "Em revisao"
+  | "Em revisão"
   | "Ajustes solicitados"
   | "Aprovado"
   | "Reprovado";

@@ -45,7 +45,7 @@ export function ProfileVideoGallery({
           {videos.map((video) => (
             <View key={video.id} style={styles.profileGalleryCard}>
               <Pressable
-                accessibilityLabel={`Abrir ${video.title} no Inicio`}
+                accessibilityLabel={`Abrir ${video.title} no Início`}
                 accessibilityRole="button"
                 onPress={() => onOpenVideo(video)}
                 style={({ pressed }) => [
@@ -102,7 +102,7 @@ function ProfileGalleryThumbnail({ uri }: { uri: string | number }) {
     return (
       <View style={[styles.profileGalleryMedia, styles.videoUnavailableState]}>
         <Text style={styles.videoUnavailableCompactText}>
-          {resolvedVideo.status === "loading" ? "Carregando..." : "Reenvie o video"}
+          {resolvedVideo.status === "loading" ? "Carregando..." : "Reenvie o vídeo"}
         </Text>
       </View>
     );

@@ -103,7 +103,7 @@ export function BalanceLine({
 }) {
   return (
     <View
-      accessibilityLabel={`Saldo disponivel ${formatBRL(balance)}`}
+      accessibilityLabel={`Saldo disponível ${formatBRL(balance)}`}
       style={[styles.balanceLine, overlay ? styles.balanceLineOverlay : null]}
     >
       <Text
@@ -148,7 +148,7 @@ export function DetailHud({
         />
       </View>
       <Text
-        accessibilityLabel={`Saldo disponivel ${formatBRL(walletBalance)}`}
+        accessibilityLabel={`Saldo disponível ${formatBRL(walletBalance)}`}
         numberOfLines={1}
         style={styles.detailHudBalance}
       >
@@ -193,13 +193,13 @@ export function BottomTabs({
     role === "Admin"
         ? [
             { id: "admin", label: "Admin" },
-            { id: "feed", label: "Inicio" },
+            { id: "feed", label: "Início" },
             { id: "search", label: "Pesquisar" },
             { id: "messages", label: "Mensagens" },
             { id: "profile", label: "Perfil" }
           ]
         : [
-            { id: "feed", label: "Inicio" },
+            { id: "feed", label: "Início" },
             { id: "submit", label: "Envio" },
             { id: "search", label: "Pesquisar" },
             { id: "messages", label: "Mensagens" },

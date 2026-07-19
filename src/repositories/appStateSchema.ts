@@ -77,7 +77,7 @@ function normalizeAppUser(value: unknown): AppUser | null {
 
   const id = normalizeString(value.id);
   const email = normalizeString(value.email).toLowerCase();
-  const role = value.role === "Admin" ? "Admin" : "Usuario";
+  const role = value.role === "Admin" ? "Admin" : "Usuário";
 
   if (!id || !email.includes("@")) {
     return null;
@@ -92,6 +92,16 @@ function normalizeAppUser(value: unknown): AppUser | null {
       : null;
   const passwordHash = normalizeString(value.passwordHash);
   const passwordSalt = normalizeString(value.passwordSalt);
+  const googleUid = normalizeString(value.googleUid);
+  const photoURL = normalizeString(value.photoURL);
+  const authProvider =
+    value.authProvider === "google" || value.authProvider === "password"
+      ? value.authProvider
+      : googleUid
+        ? "google"
+        : passwordHash && passwordSalt
+          ? "password"
+          : undefined;
   const bio = normalizeString(value.bio);
   const profileCompleted =
     role === "Admin" ||
@@ -107,21 +117,24 @@ function normalizeAppUser(value: unknown): AppUser | null {
   return {
     acceptedTerms: value.acceptedTerms === true,
     age,
+    ...(authProvider ? { authProvider } : {}),
     bio,
     city: normalizeString(value.city),
     club: normalizeString(value.club),
     email,
+    ...(googleUid ? { googleUid } : {}),
     id,
     kycStatus:
       value.kycStatus === "Pendente" || value.kycStatus === "Aprovado"
         ? value.kycStatus
-        : "Nao iniciado",
+        : "Não iniciado",
     name:
       normalizeString(value.name) ||
       (role === "Admin" ? "Admin NextStar" : email.split("@")[0]),
     ...(passwordHash && passwordSalt
       ? { passwordHash, passwordSalt }
       : {}),
+    ...(photoURL ? { photoURL } : {}),
     position: normalizeString(value.position),
     profileCompleted,
     role,
@@ -130,6 +143,19 @@ function normalizeAppUser(value: unknown): AppUser | null {
       id
     )
   };
+}
+
+function normalizeAthleteFundStatus(value: unknown): AthleteFund["status"] {
+  return value === "Concluída" || value === "Concluida"
+    ? "Concluída"
+    : "Captando";
+}
+
+function normalizeAthleteFunds(value: unknown, fallback: AthleteFund[]) {
+  return normalizeArray(value, fallback).map((fund) => ({
+    ...fund,
+    status: normalizeAthleteFundStatus(fund.status)
+  }));
 }
 
 function normalizeUsers(value: unknown) {
@@ -186,7 +212,7 @@ export function migrateLocalAppState(
 
   return {
     activeUser,
-    athleteFunds: normalizeArray(value.athleteFunds, fallback.athleteFunds),
+    athleteFunds: normalizeAthleteFunds(value.athleteFunds, fallback.athleteFunds),
     investments: normalizeArray(value.investments, fallback.investments),
     registeredUsers:
       registeredUsers.length > 0 ? registeredUsers : fallback.registeredUsers,

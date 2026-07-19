@@ -61,7 +61,7 @@ export function PublicProfileScreen({
     ? `${account.position} | ${account.city}`
     : player
       ? `${player.position} | ${player.city}`
-      : "Usuario NextStar | Sem videos publicados";
+      : "Usuário NextStar | Sem vídeos publicados";
   const profileBio = account?.bio ?? "";
   const profileClub = account?.club ?? player?.club ?? "";
   const fundProgress = fund
@@ -71,12 +71,12 @@ export function PublicProfileScreen({
     canInvest && fund && fund.status === "Captando"
   );
   const investmentLabel = !fund
-    ? "Bolsa indisponivel"
-    : fund.status === "Concluida"
-      ? "Bolsa concluida"
+    ? "Bolsa indisponível"
+    : fund.status === "Concluída"
+      ? "Bolsa concluída"
       : canInvest
         ? "Investir"
-        : "Investimento indisponivel";
+        : "Investimento indisponível";
   const galleryVideos: ProfileGalleryVideo[] = videos.map((video) => ({
     id: video.id,
     title: video.videoTitle,
@@ -185,8 +185,8 @@ export function PublicProfileScreen({
               <Text numberOfLines={1} style={styles.profileQuickValue}>
                 {fund?.status === "Captando"
                   ? "Aberta"
-                  : fund?.status === "Concluida"
-                    ? "Concluida"
+                  : fund?.status === "Concluída"
+                    ? "Concluída"
                     : "Fechada"}
               </Text>
               <Text style={styles.profileQuickLabel}>bolsa</Text>
@@ -220,14 +220,14 @@ export function PublicProfileScreen({
           </Pressable>
           {!fund ? (
             <Text style={styles.publicProfileInvestmentHint}>
-              Este perfil nao possui uma bolsa de investimento aberta.
+              Este perfil não possui uma bolsa de investimento aberta.
             </Text>
           ) : null}
         </View>
 
         <ProfileVideoGallery
-          emptyBody="Este usuario ainda nao possui videos publicados para mostrar no perfil."
-          emptyTitle="Nenhum video publicado"
+          emptyBody="Este usuário ainda não possui vídeos publicados para mostrar no perfil."
+          emptyTitle="Nenhum vídeo publicado"
           onOpenVideo={(video) => {
             const selectedVideo = videos.find((item) => item.id === video.id);
 

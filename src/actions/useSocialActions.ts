@@ -11,6 +11,7 @@ import {
   MessageContactsByUser,
   Player
 } from "../types";
+import { buildFollowerUserIdsByProfile } from "../utils/profileFollowers";
 
 function upsertMessageContact(
   contacts: MessageContact[],
@@ -91,6 +92,10 @@ export function useSocialActions({
 
     return followerCounts;
   }, [followingByUser]);
+  const followerUserIdsByProfile = useMemo(
+    () => buildFollowerUserIdsByProfile(followingByUser),
+    [followingByUser]
+  );
   const currentMessageContacts = user
     ? messageContactsByUser[user.id] ?? []
     : [];
@@ -126,7 +131,7 @@ export function useSocialActions({
       name: ownPlayer?.name ?? user.name,
       subtitle: ownPlayer
         ? `${ownPlayer.position} | ${ownPlayer.city}`
-        : "Usuario NextStar",
+        : "Usuário NextStar",
       username: user.username
     };
 
@@ -173,6 +178,7 @@ export function useSocialActions({
     currentMessageContacts,
     directMessages,
     followersByProfile,
+    followerUserIdsByProfile,
     followingProfileIds,
     followingProfileSet,
     ownProfileId,

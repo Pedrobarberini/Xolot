@@ -18,7 +18,7 @@ export function AdminScreen({
   submissions: VideoSubmission[];
 }) {
   const reviewQueue = submissions.filter(
-    (item) => item.status === "Em revisao"
+    (item) => item.status === "Em revisão"
   );
   const pending = reviewQueue.length;
   const approved = submissions.filter((item) => item.status === "Aprovado").length;
@@ -44,7 +44,7 @@ export function AdminScreen({
       </View>
 
       <View style={styles.infoPanel}>
-        <Text style={styles.sectionTitle}>Fila de revisao</Text>
+        <Text style={styles.sectionTitle}>Fila de revisão</Text>
         {reviewQueue.length === 0 ? (
           <Text style={styles.bodyText}>Nenhuma solicitacao pendente.</Text>
         ) : (
@@ -69,7 +69,7 @@ export function AdminScreen({
               <Text style={styles.submissionBody}>{submission.highlight}</Text>
               <Text style={styles.adminFinePrint}>
                 Video: {submission.videoTitle} | Consentimento:{" "}
-                {submission.hasGuardianConsent ? "Sim" : "Nao aplicavel"}
+                {submission.hasGuardianConsent ? "Sim" : "Não aplicavel"}
               </Text>
               {submission.reviewNote ? (
                 <Text style={styles.reviewNote}>{submission.reviewNote}</Text>
@@ -81,7 +81,7 @@ export function AdminScreen({
                     onReview(
                       submission.id,
                       "Aprovado",
-                      "Aprovado pela moderacao e publicado no feed."
+                      "Aprovado pela moderação e publicado no feed."
                     )
                   }
                   style={[styles.smallButton, styles.approveButton]}

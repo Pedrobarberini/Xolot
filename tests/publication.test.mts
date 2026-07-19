@@ -8,31 +8,31 @@ import {
 const pendingSubmission = {
   age: 18,
   athleteName: "Atleta Teste",
-  city: "Sao Paulo, SP",
+  city: "São Paulo, SP",
   club: "Projeto Teste",
   hasGuardianConsent: false,
-  highlight: "Texto da publicacao",
+  highlight: "Texto da publicação",
   id: "video-pendente",
   position: "Ponta",
-  status: "Em revisao" as const,
+  status: "Em revisão" as const,
   submittedAt: "2026-07-16T20:00:00.000Z",
   userId: "usuario-teste",
   videoLink: "https://nextstar.test/video.mp4",
   videoTitle: "Melhores lances"
 };
 
-test("define novos envios como publicacao direta", () => {
+test("define novos envios como publicação direta", () => {
   assert.equal(DIRECT_PUBLICATION_STATUS, "Aprovado");
 });
 
-test("migra pendencia antiga para publicacao visivel", () => {
+test("migra pendência antiga para publicação visível", () => {
   const migrated = migrateSubmissionToDirectPublication(pendingSubmission);
 
   assert.equal(migrated.status, "Aprovado");
   assert.equal(migrated.approvedAt, pendingSubmission.submittedAt);
 });
 
-test("preserva uma publicacao que ja recebeu decisao", () => {
+test("preserva uma publicação que já recebeu decisão", () => {
   const rejected = {
     ...pendingSubmission,
     status: "Reprovado" as const

@@ -54,11 +54,11 @@ function VideoUnavailableState({ isLoading }: { isLoading: boolean }) {
   return (
     <View style={styles.videoUnavailableState}>
       <Text style={styles.videoUnavailableTitle}>
-        {isLoading ? "Carregando video..." : "Video indisponivel"}
+        {isLoading ? "Carregando vídeo..." : "Video indisponível"}
       </Text>
       {!isLoading ? (
         <Text style={styles.videoUnavailableBody}>
-          Este arquivo era temporario. Envie o video novamente.
+          Este arquivo era temporário. Envie o vídeo novamente.
         </Text>
       ) : null}
     </View>
@@ -72,10 +72,10 @@ export function SubmissionList({
 }) {
   return (
     <View style={styles.infoPanel}>
-      <Text style={styles.sectionTitle}>Minhas publicacoes</Text>
+      <Text style={styles.sectionTitle}>Minhas publicações</Text>
       {submissions.length === 0 ? (
         <Text style={styles.bodyText}>
-          Nenhum video publicado por esta conta ainda.
+          Nenhum vídeo publicado por esta conta ainda.
         </Text>
       ) : (
         submissions.map((submission) => (

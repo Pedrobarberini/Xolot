@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import {
   ArrowLeft,
@@ -27,6 +27,10 @@ import {
 import { AvatarPositionModal } from "../components/AvatarPositionModal";
 import { DeleteVideoModal } from "../components/DeleteVideoModal";
 import {
+  ProfileListModal,
+  type ProfileListItemData
+} from "../components/ProfileListModal";
+import {
   ProfileGalleryVideo,
   ProfileVideoGallery
 } from "../components/ProfileVideoGallery";
@@ -41,6 +45,7 @@ import {
   Investment,
   Player,
   ProfileAvatar,
+  ProfileAvatarsByProfile,
   VideoSubmission
 } from "../types";
 import { formatBRL } from "../utils/investment";
@@ -54,7 +59,9 @@ export function ProfileScreen({
   accounts,
   avatar,
   balance,
+  followers,
   followersCount,
+  following,
   followingCount,
   fund,
   investments,
@@ -66,13 +73,16 @@ export function ProfileScreen({
   onSignOut,
   onUpdateProfile,
   player,
+  profileAvatars,
   submissions,
   user
 }: {
   accounts: AppUser[];
   avatar?: ProfileAvatar;
   balance: number;
+  followers: AppUser[];
   followersCount: number;
+  following: AppUser[];
   followingCount: number;
   fund?: AthleteFund;
   investments: Investment[];
@@ -88,10 +98,13 @@ export function ProfileScreen({
   onSignOut: () => void;
   onUpdateProfile: (profile: AccountProfile) => void;
   player?: Player;
+  profileAvatars: ProfileAvatarsByProfile;
   submissions: VideoSubmission[];
   user: AppUser;
 }) {
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
+  const [isFollowersVisible, setIsFollowersVisible] = useState(false);
+  const [isFollowingVisible, setIsFollowingVisible] = useState(false);
   const [isAvatarPositionVisible, setIsAvatarPositionVisible] = useState(false);
   const [isDeletingVideo, setIsDeletingVideo] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
@@ -109,7 +122,7 @@ export function ProfileScreen({
     (item) => item.status === "Aprovado"
   ).length;
   const pending = accountSubmissions.filter(
-    (item) => item.status === "Em revisao"
+    (item) => item.status === "Em revisão"
   ).length;
   const publishedVideos = mySubmissions.filter(
     (item) => item.status === "Aprovado" && item.videoLink.trim().length > 0
@@ -128,6 +141,16 @@ export function ProfileScreen({
   const profilePrimaryMetric =
     user.role === "Admin" ? String(pending) : String(mySubmissions.length);
   const profilePrimaryLabel = user.role === "Admin" ? "pendentes" : "envios";
+  const followerListItems = useMemo<ProfileListItemData[]>(
+    () =>
+      followers.map((follower) => toProfileListItem(follower, profileAvatars)),
+    [followers, profileAvatars]
+  );
+  const followingListItems = useMemo<ProfileListItemData[]>(
+    () =>
+      following.map((account) => toProfileListItem(account, profileAvatars)),
+    [following, profileAvatars]
+  );
 
   useEffect(
     () => () => {
@@ -163,8 +186,8 @@ export function ProfileScreen({
 
       if (!wasDeleted) {
         Alert.alert(
-          "Nao foi possivel excluir",
-          "Este video nao pertence a conta conectada."
+          "Não foi possível excluir",
+          "Este vídeo não pertence a conta conectada."
         );
         return;
       }
@@ -172,7 +195,7 @@ export function ProfileScreen({
       setVideoPendingDeletion(null);
     } catch {
       Alert.alert(
-        "Nao foi possivel excluir",
+        "Não foi possível excluir",
         "Tente novamente em alguns instantes."
       );
     } finally {
@@ -288,13 +311,13 @@ export function ProfileScreen({
                   {user.name}
                 </Text>
                 <Text style={styles.profileMeta}>
-                  {user.role === "Usuario" && user.profileCompleted
+                  {user.role === "Usuário" && user.profileCompleted
                     ? `${user.position} | ${user.city}`
                     : `${user.role} | ${user.email}`}
                 </Text>
               </View>
               <Pressable
-                accessibilityLabel="Abrir opcoes do perfil"
+                accessibilityLabel="Abrir opções do perfil"
                 accessibilityRole="button"
                 hitSlop={8}
                 onPress={() => setIsOptionsVisible(true)}
@@ -303,10 +326,10 @@ export function ProfileScreen({
                 <Menu color={colors.text} size={22} />
               </Pressable>
             </View>
-            {user.role === "Usuario" && user.bio ? (
+            {user.role === "Usuário" && user.bio ? (
               <Text style={styles.profileBio}>{user.bio}</Text>
             ) : null}
-            {user.role === "Usuario" && user.club ? (
+            {user.role === "Usuário" && user.club ? (
               <Text style={styles.profileClub}>{user.club}</Text>
             ) : null}
             <View style={styles.profileQuickStats}>
@@ -330,25 +353,37 @@ export function ProfileScreen({
               </View>
             </View>
             <View style={styles.profileSocialMetrics}>
-              <Text style={styles.profileSocialMetricText}>
-                <Text style={styles.profileSocialMetricValue}>
-                  {followersCount}
-                </Text>{" "}
-                {followersCount === 1 ? "seguidor" : "seguidores"}
-              </Text>
+              <Pressable
+                accessibilityLabel="Ver lista de seguidores"
+                accessibilityRole="button"
+                onPress={() => setIsFollowersVisible(true)}
+              >
+                <Text style={styles.profileSocialMetricText}>
+                  <Text style={styles.profileSocialMetricValue}>
+                    {followersCount}
+                  </Text>{" "}
+                  {followersCount === 1 ? "seguidor" : "seguidores"}
+                </Text>
+              </Pressable>
               <Text style={styles.profileSocialMetricDivider}>|</Text>
-              <Text style={styles.profileSocialMetricText}>
-                <Text style={styles.profileSocialMetricValue}>
-                  {followingCount}
-                </Text>{" "}
-                seguindo
-              </Text>
+              <Pressable
+                accessibilityLabel="Ver lista de perfis seguidos"
+                accessibilityRole="button"
+                onPress={() => setIsFollowingVisible(true)}
+              >
+                <Text style={styles.profileSocialMetricText}>
+                  <Text style={styles.profileSocialMetricValue}>
+                    {followingCount}
+                  </Text>{" "}
+                  seguindo
+                </Text>
+              </Pressable>
             </View>
           </View>
 
           <ProfileVideoGallery
-            emptyBody="Seus videos publicados aparecerao nesta galeria."
-            emptyTitle="Poste um video para mostra-lo aqui"
+            emptyBody="Seus vídeos publicados apareceráo nesta galeria."
+            emptyTitle="Poste um vídeo para mostra-lo aqui"
             onDeleteVideo={(video) => {
               const selectedVideo = publishedVideos.find(
                 (item) => item.id === video.id
@@ -379,7 +414,7 @@ export function ProfileScreen({
           setIsOptionsVisible(false);
           onSignOut();
         }}
-        showWallet={user.role === "Usuario"}
+        showWallet={user.role === "Usuário"}
         visible={isOptionsVisible}
       />
       <DeleteVideoModal
@@ -393,9 +428,42 @@ export function ProfileScreen({
         videoTitle={videoPendingDeletion?.videoTitle ?? ""}
         visible={Boolean(videoPendingDeletion)}
       />
+      <ProfileListModal
+        emptyBody="Quando alguem seguir seu perfil, ela aparecerá nesta lista."
+        emptyTitle="Você ainda não tem seguidores"
+        items={followerListItems}
+        onClose={() => setIsFollowersVisible(false)}
+        title="Seguidores"
+        visible={isFollowersVisible}
+      />
+      <ProfileListModal
+        emptyBody="Quando você seguir outros perfis, eles apareceráo nesta lista."
+        emptyTitle="Você ainda não segue perfis"
+        items={followingListItems}
+        onClose={() => setIsFollowingVisible(false)}
+        title="Seguindo"
+        visible={isFollowingVisible}
+      />
       {avatarPositionModal}
     </>
   );
+}
+
+function toProfileListItem(
+  account: AppUser,
+  profileAvatars: ProfileAvatarsByProfile
+): ProfileListItemData {
+  return {
+    avatar: profileAvatars[`profile-${account.id}`],
+    id: account.id,
+    name: account.name,
+    subtitle: account.profileCompleted
+      ? `${account.position} | ${account.city}`
+      : account.role === "Admin"
+        ? "Administrador NextStar"
+        : "Usuário NextStar",
+    username: account.username
+  };
 }
 
 function ProfileOptionsMenu({
@@ -423,7 +491,7 @@ function ProfileOptionsMenu({
     >
       <View style={styles.profileMenuModalRoot}>
         <Pressable
-          accessibilityLabel="Fechar opcoes do perfil"
+          accessibilityLabel="Fechar opções do perfil"
           accessibilityRole="button"
           onPress={onClose}
           style={styles.profileMenuBackdrop}
@@ -438,7 +506,7 @@ function ProfileOptionsMenu({
               style={styles.profileMenuItem}
             >
               <Settings color={colors.text} size={20} />
-              <Text style={styles.profileMenuItemText}>Configuracoes</Text>
+              <Text style={styles.profileMenuItemText}>Configurações</Text>
             </Pressable>
             {showWallet ? (
               <Pressable
@@ -505,7 +573,7 @@ function SettingsView({
     (item) => item.status === "Aprovado"
   ).length;
   const pending = accountSubmissions.filter(
-    (item) => item.status === "Em revisao"
+    (item) => item.status === "Em revisão"
   ).length;
   const fundProgress = fund
     ? Math.min(fund.fundedAmount / fund.goalAmount, 1)
@@ -525,7 +593,7 @@ function SettingsView({
 
         if (!permission.granted) {
           Alert.alert(
-            "Permissao necessaria",
+            "Permissão necessária",
             "Autorize o acesso as fotos para escolher uma imagem de perfil."
           );
           return;
@@ -559,7 +627,7 @@ function SettingsView({
       onRequestAvatarPosition();
     } catch {
       Alert.alert(
-        "Nao foi possivel abrir a galeria",
+        "Não foi possível abrir a galeria",
         "Tente novamente ou escolha outra imagem."
       );
     }
@@ -577,13 +645,13 @@ function SettingsView({
         >
           <ArrowLeft color={colors.text} size={20} />
         </Pressable>
-        <Text style={styles.profileSubviewTitle}>Configuracoes</Text>
+        <Text style={styles.profileSubviewTitle}>Configurações</Text>
         <View style={styles.profileSubviewSpacer} />
       </View>
 
-      {user.role === "Usuario" ? (
+      {user.role === "Usuário" ? (
         <View style={styles.settingsSection}>
-          <Text style={styles.settingsSectionTitle}>Perfil publico</Text>
+          <Text style={styles.settingsSectionTitle}>Perfil público</Text>
           <Pressable
             accessibilityLabel="Editar dados do perfil"
             accessibilityRole="button"
@@ -596,7 +664,7 @@ function SettingsView({
             <View style={styles.settingsRowBody}>
               <Text style={styles.settingsRowTitle}>Editar perfil</Text>
               <Text style={styles.settingsRowDescription}>
-                Nome, biografia, idade, posicao, cidade e clube ou projeto.
+                Nome, biografia, idade, posição, cidade e clube ou projeto.
               </Text>
             </View>
           </Pressable>
@@ -624,9 +692,9 @@ function SettingsView({
             )}
           </Pressable>
           <View style={styles.settingsAvatarBody}>
-            <Text style={styles.settingsRowTitle}>Imagem publica</Text>
+            <Text style={styles.settingsRowTitle}>Imagem pública</Text>
             <Text style={styles.settingsRowDescription}>
-              Exibida no Inicio, pesquisa, mensagens e no seu perfil.
+              Exibida no Início, pesquisa, mensagens e no seu perfil.
             </Text>
           </View>
         </View>
@@ -654,7 +722,7 @@ function SettingsView({
           <View style={styles.settingsRowBody}>
             <Text style={styles.settingsRowTitle}>Notificacoes</Text>
             <Text style={styles.settingsRowDescription}>
-              Avisos sobre videos, mensagens e investimentos.
+              Avisos sobre vídeos, mensagens e investimentos.
             </Text>
           </View>
           <Switch
@@ -669,9 +737,9 @@ function SettingsView({
             <Play color={colors.primary} size={19} />
           </View>
           <View style={styles.settingsRowBody}>
-            <Text style={styles.settingsRowTitle}>Reproducao automatica</Text>
+            <Text style={styles.settingsRowTitle}>Reprodução automática</Text>
             <Text style={styles.settingsRowDescription}>
-              Iniciar videos automaticamente na tela Inicio.
+              Iniciar videos automaticamente na tela Início.
             </Text>
           </View>
           <Switch
@@ -703,7 +771,7 @@ function SettingsView({
         </View>
       </View>
 
-      {user.role === "Usuario" ? (
+      {user.role === "Usuário" ? (
         <View style={styles.settingsSection}>
           <Text style={styles.settingsSectionTitle}>Conta NextStar</Text>
           <View style={styles.profileRowNoBorder}>
@@ -715,12 +783,12 @@ function SettingsView({
             <Text style={styles.profileValue}>{formatBRL(totalInvested)}</Text>
           </View>
           <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Videos enviados</Text>
+            <Text style={styles.profileLabel}>Vídeos enviados</Text>
             <Text style={styles.profileValue}>{accountSubmissions.length}</Text>
           </View>
           <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Status padrao</Text>
-            <Text style={styles.profileValue}>Publicacao direta (teste)</Text>
+            <Text style={styles.profileLabel}>Status padrão</Text>
+            <Text style={styles.profileValue}>Publicação direta (teste)</Text>
           </View>
         </View>
       ) : (
@@ -737,7 +805,7 @@ function SettingsView({
         </View>
       )}
 
-      {user.role === "Usuario" ? (
+      {user.role === "Usuário" ? (
         <View style={styles.settingsSection}>
           <View style={styles.fundTitleRow}>
             <Text style={styles.settingsSectionTitle}>
@@ -747,7 +815,7 @@ function SettingsView({
               <Text
                 style={[
                   styles.fundStatus,
-                  fund.status === "Concluida"
+                  fund.status === "Concluída"
                     ? styles.fundStatusComplete
                     : null
                 ]}
@@ -757,13 +825,13 @@ function SettingsView({
             ) : null}
           </View>
 
-          {fund?.status === "Concluida" ? (
+          {fund?.status === "Concluída" ? (
             <View style={styles.settingsFundComplete}>
               <Text style={styles.settingsFundCompleteTitle}>
-                Investimento concluido
+                Investimento concluído
               </Text>
               <Text style={styles.settingsFundCompleteBody}>
-                Sua meta foi atingida. Seu perfil esta em busca de contratantes.
+                Sua meta foi atingida. Seu perfil está em busca de contratantes.
               </Text>
             </View>
           ) : null}
@@ -787,19 +855,19 @@ function SettingsView({
                 />
               </View>
               <Text style={styles.fundCustodyNote}>
-                A bolsa fica sob custodia simulada do app. Voce acompanha a
-                captacao, mas nao pode sacar os recursos.
+                A bolsa fica sob custódia simulada do app. Você acompanha a
+                captação, mas não pode sacar os recursos.
               </Text>
             </>
           ) : (
             <>
               <Text style={styles.bodyText}>
-                Abra uma bolsa vinculada ao perfil publico para receber aportes
-                simulados de outros usuarios.
+                Abra uma bolsa vinculada ao perfil público para receber aportes
+                simulados de outros usuários.
               </Text>
               {!player ? (
                 <Text style={styles.validationText}>
-                  Publique um video para criar seu perfil publico antes de abrir
+                  Publique um vídeo para criar seu perfil público antes de abrir
                   a bolsa.
                 </Text>
               ) : null}
@@ -825,8 +893,8 @@ function SettingsView({
       <View style={styles.settingsSection}>
         <Text style={styles.settingsSectionTitle}>Ambiente demonstrativo</Text>
         <Text style={styles.bodyText}>
-          Cadastro, publicacao direta, aportes, KYC e distribuicao ainda sao
-          simulados. Nenhuma operacao possui validade financeira ou juridica.
+          Cadastro, publicação direta, aportes, KYC e distribuição ainda sao
+          simulados. Nenhuma operação possui validade financeira ou jurídica.
         </Text>
       </View>
     </ScrollView>
@@ -894,7 +962,7 @@ function OpenFundModal({
             </Pressable>
           </View>
 
-          <Text style={styles.inputLabel}>Meta de captacao</Text>
+          <Text style={styles.inputLabel}>Meta de captação</Text>
           <View style={styles.depositInputRow}>
             <Text style={styles.depositCurrencyPrefix}>R$</Text>
             <TextInput
@@ -907,7 +975,7 @@ function OpenFundModal({
             />
           </View>
 
-          <Text style={styles.openFundSecondLabel}>Aporte minimo</Text>
+          <Text style={styles.openFundSecondLabel}>Aporte mínimo</Text>
           <View style={styles.depositInputRow}>
             <Text style={styles.depositCurrencyPrefix}>R$</Text>
             <TextInput
@@ -922,14 +990,14 @@ function OpenFundModal({
 
           <View style={styles.openFundNotice}>
             <Text style={styles.openFundNoticeText}>
-              Simulacao sem dinheiro real. O atleta acompanha a meta, mas nao
+              Simulação sem dinheiro real. O atleta acompanha a meta, mas não
               pode sacar os recursos da bolsa.
             </Text>
           </View>
 
           {!canOpenFund ? (
             <Text style={styles.validationText}>
-              Meta entre R$ 1.000 e R$ 1.000.000; aporte minimo a partir de R$
+              Meta entre R$ 1.000 e R$ 1.000.000; aporte mínimo a partir de R$
               10 e menor que a meta.
             </Text>
           ) : null}

@@ -101,7 +101,7 @@ export function AccountSetupScreen({
             <Text style={styles.accountSetupEyebrow}>Primeiro acesso</Text>
             <Text style={styles.accountSetupTitle}>Configure seu perfil</Text>
             <Text style={styles.accountSetupSubtitle}>
-              Escolha sua identidade publica e complete seus dados de atleta.
+              Escolha sua identidade pública e complete seus dados de atleta.
             </Text>
           </View>
         )}
@@ -113,7 +113,7 @@ export function AccountSetupScreen({
           ]}
         >
           <View style={styles.accountSetupSectionHeader}>
-            <Text style={styles.settingsSectionTitle}>Perfil publico</Text>
+            <Text style={styles.settingsSectionTitle}>Perfil público</Text>
             <Text style={styles.accountSetupRequired}>Obrigatorio</Text>
           </View>
 
@@ -129,7 +129,7 @@ export function AccountSetupScreen({
           <LabeledInput
             autoCapitalize="none"
             autoCorrect={false}
-            label="Nome de usuario"
+            label="Nome de usuário"
             maxLength={30}
             onChangeText={(value) =>
               setUsername(
@@ -147,8 +147,8 @@ export function AccountSetupScreen({
             }
           >
             {cleanUsername.length >= 3 && !usernameAvailable
-              ? "Este nome de usuario ja esta em uso ou nao e valido."
-              : "Identidade unica usada no Inicio, pesquisa e mensagens."}
+              ? "Este nome de usuário já está em uso ou não é válido."
+              : "Identidade única usada no Início, pesquisa e mensagens."}
           </Text>
 
           <View

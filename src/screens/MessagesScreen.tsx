@@ -164,7 +164,7 @@ export function MessagesScreen({
                 ? "Sua conta"
                 : isFollowing
                   ? "Seguindo"
-                  : "Perfil nao seguido"}
+                  : "Perfil não seguido"}
             </Text>
           </View>
           {!isSelf ? (
@@ -204,7 +204,7 @@ export function MessagesScreen({
               </Text>
               <Text style={styles.messagesThreadEmptyBody}>
                 Siga {activeContact.name} para visualizar as mensagens recebidas
-                e responder com seguranca.
+                e responder com segurança.
               </Text>
               <Pressable
                 accessibilityRole="button"
@@ -228,9 +228,9 @@ export function MessagesScreen({
               <Text style={styles.messagesThreadEmptyBody}>
                 {hasConversationAccess
                   ? isSelf
-                    ? "Use esta conversa como um espaco privado para voce."
+                    ? "Use esta conversa como um espaço privado para você."
                     : "Inicie uma conversa diretamente com este perfil."
-                  : "Voce pode enviar uma mensagem inicial. Novas mensagens ficam liberadas quando o perfil for seguido."}
+                  : "Você pode enviar uma mensagem inicial. Novas mensagens ficam liberadas quando o perfil for seguido."}
               </Text>
             </View>
           ) : (
@@ -271,7 +271,7 @@ export function MessagesScreen({
                 Solicitacao enviada
               </Text>
               <Text style={styles.messagesRequestSentBody}>
-                A conversa completa sera liberada quando houver uma conexao por
+                A conversa completa será liberada quando houver uma conexão por
                 follow.
               </Text>
             </View>
@@ -289,7 +289,7 @@ export function MessagesScreen({
                 ? hasConversationAccess
                   ? "Escreva uma mensagem"
                   : "Enviar uma solicitacao"
-                : "Aguardando conexao por follow"
+                : "Aguardando conexão por follow"
             }
             placeholderTextColor={colors.muted}
             style={[
@@ -374,7 +374,7 @@ export function MessagesScreen({
       <View style={styles.discoveryHeader}>
         <Text style={styles.discoveryTitle}>Mensagens</Text>
         <Text style={styles.discoverySubtitle}>
-          Conversas organizadas de acordo com os perfis que voce segue.
+          Conversas organizadas de acordo com os perfis que você segue.
         </Text>
       </View>
 
@@ -385,7 +385,7 @@ export function MessagesScreen({
           </View>
           <Text style={styles.discoveryEmptyTitle}>Nenhuma conversa ainda</Text>
           <Text style={styles.discoveryEmptyBody}>
-            Encontre um perfil e use o botao de mensagem para iniciar uma
+            Encontre um perfil e use o botão de mensagem para iniciar uma
             conversa.
           </Text>
           <Pressable
@@ -422,7 +422,7 @@ export function MessagesScreen({
             <View>
               <Text style={styles.messagesSectionTitle}>Solicitacoes</Text>
               <Text style={styles.messagesSectionSubtitle}>
-                Perfis que voce nao segue
+                Perfis que você não segue
               </Text>
             </View>
             <Text style={styles.messagesSectionCount}>

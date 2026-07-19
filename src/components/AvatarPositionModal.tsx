@@ -195,7 +195,7 @@ export function AvatarPositionModal({
             <View>
               <Text style={styles.avatarPositionTitle}>Ajustar enquadramento</Text>
               <Text style={styles.avatarPositionSubtitle}>
-                Arraste o circulo sobre a foto
+                Arraste o círculo sobre a foto
               </Text>
             </View>
             <Pressable

@@ -12,7 +12,7 @@ import {
 
 const previewSize = { height: 280, width: 324 };
 
-test("exibe a foto inteira dentro da area de edicao", () => {
+test("exibe a foto inteira dentro da área de edição", () => {
   const geometry = getAvatarCropGeometry(
     50,
     50,
@@ -26,7 +26,7 @@ test("exibe a foto inteira dentro da area de edicao", () => {
   assert.ok(geometry.imageY > 0);
 });
 
-test("usa circulo equivalente ao recorte final do avatar", () => {
+test("usa círculo equivalente ao recorte final do avatar", () => {
   const geometry = getAvatarCropGeometry(
     50,
     50,
@@ -42,7 +42,7 @@ test("usa circulo equivalente ao recorte final do avatar", () => {
   );
 });
 
-test("aumenta o circulo ate tocar o menor lado da imagem", () => {
+test("aumenta o círculo até tocar o menor lado da imagem", () => {
   const geometry = getAvatarCropGeometry(
     50,
     50,
@@ -73,7 +73,7 @@ test("limita o menor recorte a trinta por cento", () => {
   );
 });
 
-test("mantem o circulo dentro dos limites da imagem", () => {
+test("mantém o círculo dentro dos limites da imagem", () => {
   const geometry = getAvatarCropGeometry(
     100,
     0,
@@ -106,7 +106,7 @@ test("mapeia toque no centro para foco central", () => {
   assert.ok(Math.abs(focus.focusY - 50) < 0.0001);
 });
 
-test("limita toque externo ao recorte possivel", () => {
+test("limita toque externo ao recorte possível", () => {
   const focus = getAvatarFocusFromCropPoint(
     1000,
     -1000,
