@@ -131,7 +131,7 @@ export function useSocialActions({
       name: ownPlayer?.name ?? user.name,
       subtitle: ownPlayer
         ? `${ownPlayer.position} | ${ownPlayer.city}`
-        : "Usuario NextStar",
+        : "Usuário NextStar",
       username: user.username
     };
 

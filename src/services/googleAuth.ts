@@ -38,13 +38,13 @@ function toGoogleIdentity(user: User): GoogleIdentity {
 
   if (!email) {
     throw new Error(
-      "A conta Google nao retornou um email. Use outra conta ou o login por email."
+      "A conta Google não retornou um email. Use outra conta ou o login por email."
     );
   }
 
   return {
     email,
-    name: user.displayName?.trim() || email.split("@")[0] || "Usuario",
+    name: user.displayName?.trim() || email.split("@")[0] || "Usuário",
     uid: user.uid,
     ...(user.photoURL ? { photoURL: user.photoURL } : {})
   };
@@ -57,7 +57,7 @@ export function assertGoogleAuthConfigured() {
     );
   }
 
-  // Na web o Firebase popup usa o Client ID do proprio projeto Firebase.
+  // Na web o Firebase popup usa o Client ID do próprio projeto Firebase.
   // No mobile o expo-auth-session ainda precisa do Web Client ID OAuth.
   if (Platform.OS !== "web" && !getGoogleClientIds().webClientId) {
     throw new GoogleAuthConfigurationError(
@@ -98,6 +98,6 @@ export async function signOutFromGoogle() {
   try {
     await signOut(getFirebaseAuth());
   } catch {
-    // Sessao local do app continua independente do Firebase.
+    // Sessão local do app continua independente do Firebase.
   }
 }

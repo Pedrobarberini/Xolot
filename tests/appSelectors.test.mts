@@ -12,6 +12,7 @@ import {
   selectPlayerByOwner,
   selectProfileAccount,
   selectProfileFollowers,
+  selectProfileFollowing,
   selectProfileFund,
   selectProfileId,
   selectProfileVideos,
@@ -26,7 +27,7 @@ import type {
 
 const demoPlayer: Player = {
   age: 18,
-  city: "Sao Paulo, SP",
+  city: "São Paulo, SP",
   club: "Projeto Demo",
   highlight: "Demo",
   id: "demo",
@@ -48,21 +49,29 @@ const completeUser: AppUser = {
   club: "Projeto Teste",
   email: "atleta@nextstar.local",
   id: "usuario-atleta",
-  kycStatus: "Nao iniciado",
+  kycStatus: "Não iniciado",
   name: "Atleta Completo",
   position: "Meia",
   profileCompleted: true,
-  role: "Usuario",
+  role: "Usuário",
   username: "atleta"
+};
+
+const otherCompleteUser: AppUser = {
+  ...completeUser,
+  email: "latéral@nextstar.local",
+  id: "usuario-lateral",
+  name: "Latéral Completo",
+  username: "latéral"
 };
 
 const approvedSubmission: VideoSubmission = {
   age: 18,
   athleteName: "Nome do Envio",
-  city: "Sao Paulo, SP",
+  city: "São Paulo, SP",
   club: "Clube do Envio",
   hasGuardianConsent: false,
-  highlight: "Texto da publicacao",
+  highlight: "Texto da publicação",
   id: "video-aprovado",
   position: "Ponta",
   status: "Aprovado",
@@ -72,14 +81,14 @@ const approvedSubmission: VideoSubmission = {
   videoTitle: "Melhores lances"
 };
 
-test("seleciona videos aprovados e aplica dados do perfil completo", () => {
+test("seleciona vídeos aprovados e aplica dados do perfil completo", () => {
   const players = selectApprovedSubmissionPlayers(
     [
       approvedSubmission,
       {
         ...approvedSubmission,
         id: "video-pendente",
-        status: "Em revisao"
+        status: "Em revisão"
       },
       {
         ...approvedSubmission,
@@ -97,7 +106,7 @@ test("seleciona videos aprovados e aplica dados do perfil completo", () => {
   assert.equal(players[0]?.position, completeUser.position);
 });
 
-test("usa demo somente quando nao existem players aprovados", () => {
+test("usa demo somente quando não existem players aprovados", () => {
   assert.deepEqual(selectAvailablePlayers([], demoPlayer), [demoPlayer]);
   assert.deepEqual(
     selectAvailablePlayers([{ ...demoPlayer, id: "real" }], demoPlayer).map(
@@ -122,7 +131,7 @@ test("prioriza perfis seguidos sem alterar a ordem relativa dos demais", () => {
   );
 });
 
-test("seleciona dados derivados de perfil, fundos e usuario atual", () => {
+test("seleciona dados derivados de perfil, fundos e usuário atual", () => {
   const player = {
     ...demoPlayer,
     id: "video-atleta",
@@ -142,7 +151,7 @@ test("seleciona dados derivados de perfil, fundos e usuario atual", () => {
   };
 
   assert.equal(
-    selectPendingReviews([{ ...approvedSubmission, status: "Em revisao" }]),
+    selectPendingReviews([{ ...approvedSubmission, status: "Em revisão" }]),
     1
   );
   assert.deepEqual(
@@ -172,6 +181,18 @@ test("seleciona dados derivados de perfil, fundos e usuario atual", () => {
       [completeUser]
     ),
     [completeUser]
+  );
+  assert.deepEqual(
+    selectProfileFollowing(
+      [
+        `profile-${otherCompleteUser.id}`,
+        player.profileId,
+        "profile-ausente",
+        player.profileId
+      ],
+      [completeUser, otherCompleteUser]
+    ),
+    [otherCompleteUser, completeUser]
   );
   assert.deepEqual(selectProfileVideos(player, [demoPlayer, player]), [player]);
   assert.equal(selectProfileFund(player, [fund]), fund);

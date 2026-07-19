@@ -98,16 +98,16 @@ export function createAppActions({
 
     if (!fund) {
       Alert.alert(
-        "Bolsa indisponivel",
-        "Este perfil ainda nao abriu uma bolsa de investimento."
+        "Bolsa indisponível",
+        "Este perfil ainda não abriu uma bolsa de investimento."
       );
       return;
     }
 
-    if (fund.status === "Concluida") {
+    if (fund.status === "Concluída") {
       Alert.alert(
-        "Bolsa concluida",
-        "A meta deste perfil ja foi atingida e novos aportes estao bloqueados."
+        "Bolsa concluída",
+        "A meta deste perfil já foi atingida e novos aportes estão bloqueados."
       );
       return;
     }
@@ -116,7 +116,7 @@ export function createAppActions({
 
     if (amount < fund.minimumContribution || amount > remainingAmount) {
       Alert.alert(
-        "Valor invalido",
+        "Valor inválido",
         `O aporte deve ficar entre ${formatBRL(fund.minimumContribution)} e ${formatBRL(remainingAmount)}.`
       );
       return;
@@ -125,7 +125,7 @@ export function createAppActions({
     if (amount > walletBalance) {
       Alert.alert(
         "Saldo insuficiente",
-        `Seu saldo disponivel e ${formatBRL(walletBalance)}. Abra a Carteira pelo menu do Perfil e deposite um valor simulado antes de criar a reserva.`
+        `Seu saldo disponível é ${formatBRL(walletBalance)}. Abra a Carteira pelo menu do Perfil e deposite um valor simulado antes de criar a reserva.`
       );
       return;
     }
@@ -156,7 +156,7 @@ export function createAppActions({
           ? {
               ...item,
               fundedAmount: nextFundedAmount,
-              status: isFundComplete ? "Concluida" : "Captando",
+              status: isFundComplete ? "Concluída" : "Captando",
               completedAt: isFundComplete
                 ? new Date().toISOString()
                 : item.completedAt
@@ -173,7 +173,7 @@ export function createAppActions({
     setSelectedPlayer(null);
     setTab("profile");
     Alert.alert(
-      isFundComplete ? "Bolsa concluida" : "Transferencia confirmada",
+      isFundComplete ? "Bolsa concluída" : "Transferência confirmada",
       isFundComplete
         ? "A meta do atleta foi atingida. O perfil agora aparece como em busca de contratantes."
         : `${formatBRL(amount)} foram transferidos para a bolsa de ${player.name}.`
@@ -197,7 +197,7 @@ export function createAppActions({
     minimumContribution: number
   ) {
     if (athleteFunds.some((item) => item.profileId === player.profileId)) {
-      Alert.alert("Bolsa ja existente", "Este perfil ja possui uma bolsa aberta.");
+      Alert.alert("Bolsa já existente", "Este perfil já possui uma bolsa aberta.");
       return;
     }
 

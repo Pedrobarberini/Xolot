@@ -172,7 +172,7 @@ export default function App() {
         "Perfil NextStar",
       subtitle: selectedProfilePlayer
         ? `${selectedProfilePlayer.position} | ${selectedProfilePlayer.city}`
-        : "Usuario NextStar",
+        : "Usuário NextStar",
       username:
         selectedProfileAccount?.username ?? selectedProfilePlayer?.username
     };
@@ -232,7 +232,7 @@ export default function App() {
     );
   }
 
-  if (user.role === "Usuario" && !user.profileCompleted) {
+  if (user.role === "Usuário" && !user.profileCompleted) {
     return (
       <AccountSetupGate
         accounts={registeredUsers}

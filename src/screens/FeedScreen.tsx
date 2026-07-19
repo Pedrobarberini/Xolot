@@ -722,7 +722,7 @@ function FeedReel({
                         <Text style={styles.feedCompactFundTitle}>
                           {fund.status === "Captando"
                             ? "Bolsa de investimento aberta"
-                            : "Bolsa de investimento concluida"}
+                            : "Bolsa de investimento concluída"}
                         </Text>
                         <View style={styles.feedCompactFundValues}>
                           <Text style={styles.feedCompactFundValue}>
@@ -743,7 +743,7 @@ function FeedReel({
                       </View>
                     ) : (
                       <Text style={styles.feedCompactFundEmpty}>
-                        Este perfil nao possui um investimento aberto.
+                        Este perfil não possui um investimento aberto.
                       </Text>
                     )}
                     <View style={styles.feedCompactExpandedActions}>
@@ -772,7 +772,7 @@ function FeedReel({
                         </Text>
                       </Pressable>
                       <Pressable
-                        accessibilityLabel="Recolher descricao"
+                        accessibilityLabel="Recolher descrição"
                         accessibilityRole="button"
                         hitSlop={8}
                         onPress={() => animateDescription(false)}
@@ -1013,12 +1013,12 @@ function FeedVideoPlayback(props: FeedVideoPlaybackProps) {
       <View style={[styles.feedVideoPlayback, styles.videoUnavailableState]}>
         <Text style={styles.videoUnavailableTitle}>
           {resolvedVideo.status === "loading"
-            ? "Carregando video..."
-            : "Video indisponivel"}
+            ? "Carregando vídeo..."
+            : "Video indisponível"}
         </Text>
         {resolvedVideo.status === "unavailable" ? (
           <Text style={styles.videoUnavailableBody}>
-            O arquivo temporario expirou. O atleta precisa reenviar este video.
+            O arquivo temporário expirou. O atleta precisa reenviar este vídeo.
           </Text>
         ) : null}
       </View>
@@ -1224,7 +1224,7 @@ function ResolvedFeedVideoPlayback({
 
   function openFullscreen() {
     videoViewRef.current?.enterFullscreen().catch(() => {
-      Alert.alert("Tela cheia indisponivel", "Tente abrir o video novamente.");
+      Alert.alert("Tela cheia indisponível", "Tente abrir o vídeo novamente.");
     });
   }
 
@@ -1241,7 +1241,7 @@ function ResolvedFeedVideoPlayback({
         surfaceType="textureView"
       />
       <Pressable
-        accessibilityLabel={isPlaying ? "Pausar video" : "Reproduzir video"}
+        accessibilityLabel={isPlaying ? "Pausar vídeo" : "Reproduzir vídeo"}
         accessibilityRole="button"
         onPress={togglePlayback}
         style={styles.feedVideoTapTarget}
@@ -1260,7 +1260,7 @@ function ResolvedFeedVideoPlayback({
       </Pressable>
       <View style={styles.feedVideoFloatingControls}>
         <Pressable
-          accessibilityLabel="Abrir video em tela cheia"
+          accessibilityLabel="Abrir vídeo em tela cheia"
           accessibilityRole="button"
           onPress={openFullscreen}
           style={styles.feedVideoControlButton}
@@ -1294,7 +1294,7 @@ function ResolvedFeedVideoPlayback({
                     { label: "Aumentar volume", name: "increment" },
                     { label: "Diminuir volume", name: "decrement" }
                   ]}
-                  accessibilityLabel="Volume do video"
+                  accessibilityLabel="Volume do vídeo"
                   accessibilityRole="adjustable"
                   accessibilityValue={{
                     max: 100,
@@ -1381,7 +1381,7 @@ function ResolvedFeedVideoPlayback({
             { label: "Avancar 5 segundos", name: "increment" },
             { label: "Voltar 5 segundos", name: "decrement" }
           ]}
-          accessibilityLabel="Posicao do video"
+          accessibilityLabel="Posição do vídeo"
           accessibilityRole="adjustable"
           accessibilityValue={{
             max: Math.max(0, Math.round(playbackDuration)),

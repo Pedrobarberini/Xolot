@@ -61,14 +61,14 @@ export function SubmitVideoScreen({
     user.profileCompleted ? null : "Complete os dados do perfil antes de enviar.",
     age >= 12
       ? null
-      : "Revise a idade no perfil. Envios sao aceitos a partir de 12 anos.",
+      : "Revise a idade no perfil. Envios são aceitos a partir de 12 anos.",
     draft.videoTitle.trim().length >= 4
       ? null
-      : "O titulo do video precisa ter pelo menos 4 caracteres.",
-    hasVideoSource ? null : "Selecione um video ou informe um link direto.",
+      : "O título do vídeo precisa ter pelo menos 4 caracteres.",
+    hasVideoSource ? null : "Selecione um vídeo ou informe um link direto.",
     draft.highlight.trim().length >= 4
       ? null
-      : "Escreva um texto para a publicacao com pelo menos 4 caracteres.",
+      : "Escreva um texto para a publicação com pelo menos 4 caracteres.",
     !needsGuardianConsent || draft.hasGuardianConsent
       ? null
       : "Confirme a autorizacao do responsavel legal."
@@ -132,7 +132,7 @@ export function SubmitVideoScreen({
 
       if (!permission.granted) {
         Alert.alert(
-          "Permissao necessaria",
+          "Permissão necessária",
           "Autorize o acesso aos videos para escolher um lance da galeria."
         );
         return;
@@ -152,7 +152,7 @@ export function SubmitVideoScreen({
       const fileName = asset.fileName || "video-selecionado.mp4";
 
       if (asset.type && asset.type !== "video") {
-        Alert.alert("Arquivo invalido", "Escolha um arquivo de video.");
+        Alert.alert("Arquivo inválido", "Escolha um arquivo de vídeo.");
         return;
       }
 
@@ -173,8 +173,8 @@ export function SubmitVideoScreen({
       setLastSubmittedId(null);
     } catch {
       Alert.alert(
-        "Nao foi possivel abrir a galeria",
-        "Tente novamente ou use um link direto para o arquivo de video."
+        "Não foi possível abrir a galeria",
+        "Tente novamente ou use um link direto para o arquivo de vídeo."
       );
     }
   }
@@ -228,8 +228,8 @@ export function SubmitVideoScreen({
       setDraft(emptySubmissionDraft);
     } catch {
       Alert.alert(
-        "Nao foi possivel salvar o video",
-        "O arquivo nao foi enviado. Verifique o espaco do navegador e tente novamente."
+        "Não foi possível salvar o video",
+        "O arquivo não foi enviado. Verifique o espaço do navegador e tente novamente."
       );
     } finally {
       setIsSubmitting(false);
@@ -246,9 +246,9 @@ export function SubmitVideoScreen({
       >
       <View style={styles.submitHero}>
         <Text style={styles.heroKicker}>Area do atleta</Text>
-        <Text style={styles.heroTitle}>Publique seu video.</Text>
+        <Text style={styles.heroTitle}>Publique seu vídeo.</Text>
         <Text style={styles.heroBody}>
-          Adicione seu melhor lance e ele aparecera imediatamente no Inicio e
+          Adicione seu melhor lance e ele aparecerá imediatamente no Início e
           no seu perfil durante esta fase de testes.
         </Text>
       </View>
@@ -261,13 +261,13 @@ export function SubmitVideoScreen({
       >
         <Text style={styles.sectionTitle}>Video</Text>
         <LabeledInput
-          label="Titulo do video"
+          label="Título do vídeo"
           onChangeText={(value) => updateDraft("videoTitle", value)}
           placeholder="Melhores lances"
           value={draft.videoTitle}
         />
         <Pressable
-          accessibilityLabel="Escolher video da galeria"
+          accessibilityLabel="Escolher vídeo da galeria"
           accessibilityRole="button"
           onPress={pickVideoFromLibrary}
           style={({ pressed }) => [
@@ -277,11 +277,11 @@ export function SubmitVideoScreen({
         >
           <Upload color={colors.primary} size={21} />
           <Text style={styles.videoPickerButtonText}>
-            Escolher video da galeria
+            Escolher vídeo da galeria
           </Text>
         </Pressable>
         <Text style={styles.videoPickerHint}>
-          Para o primeiro teste, prefira um MP4 vertical de ate 60 segundos.
+          Para o primeiro teste, prefira um MP4 vertical de até 60 segundos.
         </Text>
 
         {selectedVideo ? (
@@ -300,7 +300,7 @@ export function SubmitVideoScreen({
               </Text>
             </View>
             <Pressable
-              accessibilityLabel="Remover video selecionado"
+              accessibilityLabel="Remover vídeo selecionado"
               accessibilityRole="button"
               onPress={removeSelectedVideo}
               style={styles.removeVideoButton}
@@ -317,7 +317,7 @@ export function SubmitVideoScreen({
             </View>
             <LabeledInput
               autoCapitalize="none"
-              label="Link direto do video"
+              label="Link direto do vídeo"
               onChangeText={(value) => {
                 setSelectedVideo(null);
                 updateDraft("videoLink", value);
@@ -332,7 +332,7 @@ export function SubmitVideoScreen({
           <SubmissionVideoPreview uri={draft.videoLink.trim()} />
         ) : null}
         <LabeledInput
-          label="Texto da publicacao"
+          label="Texto da publicação"
           multiline
           onChangeText={(value) => updateDraft("highlight", value)}
           placeholder="Conte o que acontece no video"
@@ -386,7 +386,7 @@ export function SubmitVideoScreen({
         >
           <Send color={colors.onPrimary} size={19} />
           <Text style={styles.primaryButtonText}>
-            {isSubmitting ? "Publicando video..." : "Publicar video"}
+            {isSubmitting ? "Publicando vídeo..." : "Publicar vídeo"}
           </Text>
         </Pressable>
       </View>
@@ -421,7 +421,7 @@ export function SubmitVideoScreen({
             <View style={styles.submissionToastTextBlock}>
               <Text style={styles.submissionToastTitle}>Video publicado</Text>
               <Text style={styles.submissionToastBody}>
-                Ele ja esta disponivel no Inicio e no seu perfil.
+                Ele já está disponível no Início e no seu perfil.
               </Text>
             </View>
           </Animated.View>

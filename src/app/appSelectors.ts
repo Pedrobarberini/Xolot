@@ -65,7 +65,7 @@ export function selectOrderedFeedPlayers(
 }
 
 export function selectPendingReviews(submissions: VideoSubmission[]) {
-  return submissions.filter((submission) => submission.status === "Em revisao")
+  return submissions.filter((submission) => submission.status === "Em revisão")
     .length;
 }
 
@@ -124,6 +124,28 @@ export function selectProfileFollowers(
   const followerUserIds = new Set(followerUserIdsByProfile[profileId] ?? []);
 
   return registeredUsers.filter((account) => followerUserIds.has(account.id));
+}
+
+export function selectProfileFollowing(
+  followingProfileIds: string[],
+  registeredUsers: AppUser[]
+) {
+  const accountsByProfileId = new Map(
+    registeredUsers.map((account) => [`profile-${account.id}`, account])
+  );
+  const selectedAccounts: AppUser[] = [];
+  const selectedAccountIds = new Set<string>();
+
+  followingProfileIds.forEach((profileId) => {
+    const account = accountsByProfileId.get(profileId);
+
+    if (account && !selectedAccountIds.has(account.id)) {
+      selectedAccounts.push(account);
+      selectedAccountIds.add(account.id);
+    }
+  });
+
+  return selectedAccounts;
 }
 
 export function selectFundByOwner(

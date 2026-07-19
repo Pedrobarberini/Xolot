@@ -6,6 +6,7 @@ import {
   selectFundByOwner,
   selectPlayerByOwner,
   selectProfileFollowers,
+  selectProfileFollowing,
   selectProfileFund,
   selectUserSubmissions
 } from "./appSelectors";
@@ -217,7 +218,7 @@ export function AppRoutes({
                       : undefined
                   }
                   canInvest={Boolean(
-                    user.role === "Usuario" &&
+                    user.role === "Usuário" &&
                       selectedProfilePlayer &&
                       selectedProfilePlayer.ownerUserId !== user.id
                   )}
@@ -273,7 +274,7 @@ export function AppRoutes({
                 <Header
                   onSignOut={signOutSession}
                   pendingReviews={pendingReviews}
-                  showBalance={user.role === "Usuario" && tab === "profile"}
+                  showBalance={user.role === "Usuário" && tab === "profile"}
                   showSignOut={user.role === "Admin" && tab !== "profile"}
                   user={user}
                   walletBalance={walletBalance}
@@ -281,7 +282,7 @@ export function AppRoutes({
               ) : null}
               {tab === "feed" ? (
                 <FeedScreen
-                  balance={user.role === "Usuario" ? walletBalance : null}
+                  balance={user.role === "Usuário" ? walletBalance : null}
                   currentUserId={user.id}
                   focusPlayerId={feedFocusPlayerId}
                   followingProfileIds={followingProfileIds}
@@ -365,6 +366,10 @@ export function AppRoutes({
                     followers={selectProfileFollowers(
                       ownProfileId,
                       followerUserIdsByProfile,
+                      registeredUsers
+                    )}
+                    following={selectProfileFollowing(
+                      followingProfileIds,
                       registeredUsers
                     )}
                     fund={selectFundByOwner(athleteFunds, user.id)}

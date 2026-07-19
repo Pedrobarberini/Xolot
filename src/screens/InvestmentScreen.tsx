@@ -93,7 +93,7 @@ export function InvestmentScreen({
             <Text style={styles.fundStatus}>{fund.status}</Text>
           </View>
           <Text style={styles.bodyText}>
-            O aporte e vinculado ao perfil do atleta e fica sob custodia
+            O aporte e vinculado ao perfil do atleta e fica sob custódia
             simulada do NextStar.
           </Text>
 
@@ -125,12 +125,12 @@ export function InvestmentScreen({
               <Text style={styles.fundStatValue}>
                 {formatBRL(fund.minimumContribution)}
               </Text>
-              <Text style={styles.fundStatLabel}>aporte minimo</Text>
+              <Text style={styles.fundStatLabel}>aporte mínimo</Text>
             </View>
           </View>
 
           <Text style={styles.availableBalanceText}>
-            Saldo disponivel: {formatBRL(walletBalance)}
+            Saldo disponível: {formatBRL(walletBalance)}
           </Text>
           <View style={styles.inputRow}>
             <Text style={styles.currencyPrefix}>R$</Text>

@@ -21,14 +21,14 @@ const demoFund = {
   status: "Captando" as const
 };
 
-test("retorna o estado inicial quando nao existe valor persistido", () => {
+test("retorna o estado inicial quando não existe valor persistido", () => {
   const fallback = createDefaultLocalAppState([demoFund]);
 
   assert.deepEqual(parseLocalAppState(null, fallback), fallback);
-  assert.deepEqual(parseLocalAppState("json-invalido", fallback), fallback);
+  assert.deepEqual(parseLocalAppState("json-inválido", fallback), fallback);
 });
 
-test("migra estado sem versao e preserva dados validos", () => {
+test("migra estado sem versão e preserva dados válidos", () => {
   const fallback = createDefaultLocalAppState([demoFund]);
   const migrated = migrateLocalAppState(
     {
@@ -36,15 +36,15 @@ test("migra estado sem versao e preserva dados validos", () => {
         acceptedTerms: true,
         email: "teste@nextstar.local",
         id: "usuario-teste",
-        kycStatus: "Nao iniciado",
+        kycStatus: "Não iniciado",
         name: "Teste",
-        role: "Usuario"
+        role: "Usuário"
       },
       registeredUsers: [],
       submissions: [],
       walletBalances: {
         "usuario-teste": 350,
-        invalido: -10
+        inválido: -10
       }
     },
     fallback
@@ -70,18 +70,18 @@ test("preserva perfil completo e credencial sem expor senha em texto", () => {
         {
           acceptedTerms: true,
           age: 17,
-          bio: "Atleta focado em evolucao e oportunidades no futebol.",
-          city: "Sao Paulo, SP",
+          bio: "Atleta focado em evolução e oportunidades no futebol.",
+          city: "São Paulo, SP",
           club: "Projeto NextStar",
           email: "atleta@nextstar.local",
           id: "usuario-atleta@nextstar.local",
-          kycStatus: "Nao iniciado",
+          kycStatus: "Não iniciado",
           name: "Atleta NextStar",
           passwordHash: "hash-seguro",
-          passwordSalt: "salt-aleatorio",
+          passwordSalt: "salt-aleatório",
           position: "Ponta",
           profileCompleted: true,
-          role: "Usuario"
+          role: "Usuário"
         }
       ]
     },
@@ -89,13 +89,13 @@ test("preserva perfil completo e credencial sem expor senha em texto", () => {
   );
 
   assert.equal(migrated.registeredUsers[0]?.profileCompleted, true);
-  assert.equal(migrated.registeredUsers[0]?.bio, "Atleta focado em evolucao e oportunidades no futebol.");
+  assert.equal(migrated.registeredUsers[0]?.bio, "Atleta focado em evolução e oportunidades no futebol.");
   assert.equal(migrated.registeredUsers[0]?.passwordHash, "hash-seguro");
   assert.equal(migrated.registeredUsers[0]?.username, "atleta");
   assert.equal("password" in migrated.registeredUsers[0], false);
 });
 
-test("migra usernames repetidos para identificadores unicos", () => {
+test("migra usernames repetidos para identificadores únicos", () => {
   const migrated = migrateLocalAppState(
     {
       activeUser: null,
@@ -104,18 +104,18 @@ test("migra usernames repetidos para identificadores unicos", () => {
           acceptedTerms: true,
           email: "primeiro@nextstar.local",
           id: "usuario-primeiro",
-          kycStatus: "Nao iniciado",
+          kycStatus: "Não iniciado",
           name: "Pedro Barberini",
-          role: "Usuario",
+          role: "Usuário",
           username: "pedro"
         },
         {
           acceptedTerms: true,
           email: "segundo@nextstar.local",
           id: "usuario-segundo",
-          kycStatus: "Nao iniciado",
+          kycStatus: "Não iniciado",
           name: "Pedro Barberini",
-          role: "Usuario",
+          role: "Usuário",
           username: "Pedro"
         }
       ]
@@ -131,21 +131,21 @@ test("migra usernames repetidos para identificadores unicos", () => {
   assert.equal(migrated.registeredUsers[1]?.name, "Pedro Barberini");
 });
 
-test("serializacao e leitura preservam o estado completo", () => {
-  const state = {
+test("serialização e leitura preservam o estado completo", () => {
+  const staté = {
     ...createDefaultLocalAppState([demoFund]),
     walletBalances: { "usuario-teste": 1200 }
   };
-  const serialized = serializeLocalAppState(state);
+  const serialized = serializeLocalAppState(staté);
   const restored = parseLocalAppState(
     serialized,
     createDefaultLocalAppState()
   );
 
-  assert.deepEqual(restored, state);
+  assert.deepEqual(restored, staté);
 });
 
-test("repositorio salva, carrega e limpa o estado", async () => {
+test("repositório salva, carrega e limpa o estado", async () => {
   const memory = new Map<string, string>();
   const repository = createLocalAppStateRepository(
     {
@@ -159,16 +159,16 @@ test("repositorio salva, carrega e limpa o estado", async () => {
         memory.set(key, value);
       }
     },
-    "app-state-test"
+    "app-staté-test"
   );
   const fallback = createDefaultLocalAppState([demoFund]);
-  const state = {
+  const staté = {
     ...fallback,
     walletBalances: { "usuario-teste": 900 }
   };
 
-  await repository.save(state);
-  assert.deepEqual(await repository.load(fallback), state);
+  await repository.save(staté);
+  assert.deepEqual(await repository.load(fallback), staté);
 
   await repository.clear();
   assert.deepEqual(await repository.load(fallback), fallback);

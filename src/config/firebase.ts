@@ -42,7 +42,7 @@ export function isFirebaseConfigured() {
 export function getFirebaseApp(): FirebaseApp {
   if (!firebaseConfig) {
     throw new Error(
-      "Firebase nao configurado. Defina as variaveis EXPO_PUBLIC_FIREBASE_* no arquivo .env."
+      "Firebase não configurado. Defina as variaveis EXPO_PUBLIC_FIREBASE_* no arquivo .env."
     );
   }
 

@@ -1,62 +1,62 @@
 # NextStar
 
-Aplicativo mobile-first para descoberta e publicacao de videos de atletas de futebol.
+Aplicativo mobile-first para descoberta e publicação de vídeos de atletas de futebol.
 
 ## Estado atual
 
 - Interface React Native com Expo e TypeScript para Android, iOS e web.
 - Identidade visual clara em verde, branco e tons neutros.
-- Icone do app com o simbolo NextStar e splash animada com a marca completa.
-- Inicio com videos verticais 9:16, reproducao automatica, controle vertical de volume, tela cheia e ficha expansivel.
-- Logo fixa no feed e HUD contextual padronizado com voltar, marca e saldo nas paginas publicas.
-- Video demonstrativo real de 5 segundos enquanto nao houver publicacao de usuario.
+- Ícone do app com o símbolo NextStar e splash animada com a marca completa.
+- Início com vídeos verticais 9:16, reprodução automática, controle vertical de volume, tela cheia e ficha expansível.
+- Logo fixa no feed e HUD contextual padronizado com voltar, marca e saldo nas páginas públicas.
+- Vídeo demonstrativo real de 5 segundos enquanto não houver publicação de usuário.
 - Login por email e senha como tela inicial, com salt e hash persistidos no dispositivo.
-- Cadastro local simplificado para email, senha e aceite dos termos; novos cadastros sao sempre contas Usuario.
+- Cadastro local simplificado para email, senha e aceite dos termos; novos cadastros são sempre contas Usuário.
 - Login com Google via Firebase Auth (popup na web; OAuth + credential no mobile).
-- Primeiro acesso abre um modal obrigatorio para username, nome, biografia, idade, posicao, cidade e clube ou projeto.
-- Conta comum `Usuario` com Inicio, Envio, Pesquisar, Mensagens e Perfil no mesmo acesso.
-- Pesquisa por nome, posicao, cidade ou clube abre diretamente o perfil publico do atleta.
-- Perfis podem ser seguidos pelo Inicio ou pela pagina publica, com estado persistente e contagem social.
-- Videos de perfis seguidos recebem prioridade no Inicio sem ocultar os demais atletas.
-- Mensagens separa conversas liberadas de solicitacoes enviadas por perfis ainda nao seguidos.
-- Uma solicitacao inicial e permitida; mensagens recebidas e respostas sao liberadas ao seguir o perfil.
-- Paginas e subpaginas usam a mesma transicao suave de entrada, mantendo header e footer estaveis.
-- A descricao `Ver mais` expande e recolhe suavemente sobre o video.
-- Perfil possui menu de tres barras com Configuracoes, Carteira e Sair da conta.
-- Configuracoes oferece `Editar perfil` com o mesmo formulario usado no primeiro acesso.
-- Configuracoes permite escolher, enquadrar ou trocar a foto publica do perfil.
-- Tocar na propria foto abre uma HUD com a imagem inteira e um recorte circular arrastavel e redimensionavel de 30% a 100%; posicao e tamanho ficam persistidos no Inicio, Pesquisa, Mensagens, Perfil e pagina da bolsa.
-- Perfil principal funciona como vitrine, exibe a biografia e o clube informados, possui galeria de videos publicados e estado vazio para novas contas.
-- Configuracoes concentra preferencias, verificacao/KYC, dados da Conta NextStar e gestao da bolsa.
-- Bolsa simulada vinculada ao perfil do atleta, separada do video de apresentacao.
-- Perfil publico acessivel pelo feed, com todos os videos publicados do atleta e o estado da bolsa.
+- Primeiro acesso abre um modal obrigatório para username, nome, biografia, idade, posição, cidade e clube ou projeto.
+- Conta comum `Usuário` com Início, Envio, Pesquisar, Mensagens e Perfil no mesmo acesso.
+- Pesquisa por nome, posição, cidade ou clube abre diretamente o perfil público do atleta.
+- Perfis podem ser seguidos pelo Início ou pela página pública, com estado persistente e contagem social.
+- Vídeos de perfis seguidos recebem prioridade no Início sem ocultar os demais atletas.
+- Mensagens separa conversas liberadas de solicitações enviadas por perfis ainda não seguidos.
+- Uma solicitação inicial é permitida; mensagens recebidas e respostas são liberadas ao seguir o perfil.
+- Páginas e subpáginas usam a mesma transição suave de entrada, mantendo header e footer estáveis.
+- A descrição `Ver mais` expande e recolhe suavemente sobre o vídeo.
+- Perfil possui menu de três barras com Configurações, Carteira e Sair da conta.
+- Configurações oferece `Editar perfil` com o mesmo formulário usado no primeiro acesso.
+- Configurações permite escolher, enquadrar ou trocar a foto pública do perfil.
+- Tocar na própria foto abre uma HUD com a imagem inteira e um recorte circular arrastável e redimensionável de 30% a 100%; posição e tamanho ficam persistidos no Início, Pesquisa, Mensagens, Perfil e página da bolsa.
+- Perfil principal funciona como vitrine, exibe a biografia e o clube informados, possui galeria de vídeos publicados e estado vazio para novas contas.
+- Configurações concentra preferências, verificação/KYC, dados da Conta NextStar e gestão da bolsa.
+- Bolsa simulada vinculada ao perfil do atleta, separada do vídeo de apresentação.
+- Perfil público acessível pelo feed, com todos os vídeos publicados do atleta e o estado da bolsa.
 - Legenda expandida do feed mostra bolsa aberta, valores captados, meta e progresso real.
-- Envio por galeria ou link direto, com dados do atleta reutilizados do perfil, texto da publicacao, validacao e confirmacao animada.
-- Durante os testes, novos videos sao publicados diretamente no Inicio e no perfil, sem fila manual.
-- O dono pode excluir um video pela propria galeria; a publicacao sai imediatamente do Inicio e do perfil.
+- Envio por galeria ou link direto, com dados do atleta reutilizados do perfil, texto da publicação, validação e confirmação animada.
+- Durante os testes, novos vídeos são publicados diretamente no Início e no perfil, sem fila manual.
+- O dono pode excluir um vídeo pela própria galeria; a publicação sai imediatamente do Início e do perfil.
 - O campo `Objetivo do aporte` foi removido das postagens; a bolsa continua vinculada ao perfil do atleta.
-- A biografia permanece exclusiva do perfil e nao e copiada para as postagens.
-- Nome publico e `@username` sao identidades separadas: nomes podem se repetir, usernames e emails nao.
-- Nos perfis e no Inicio, o `@username` aparece como identidade principal e o nome do jogador como informacao secundaria.
-- A pesquisa encontra atletas pelo nome ou username, e mensagens para a propria conta dispensam follow.
-- Videos escolhidos no navegador ficam no IndexedDB e sobrevivem ao recarregamento local da pagina.
-- O Inicio pausa o video anterior assim que outro item se torna o mais visivel.
-- Videos reais publicados substituem o perfil demonstrativo.
-- Score, risco, metricas e valores financeiros so aparecem quando existe uma avaliacao explicita.
-- Saldo, depositos, aportes e bolsas permanecem simulados, sem pagamento, saque ou contrato real.
-- Carteira, acessada pelo menu do Perfil, mostra saldo, deposito, valor em reais e porcentagem da cota adquirida.
-- Usuarios, sessao, publicacoes, saldos, bolsas e investimentos usam repository local versionado.
-- O repository possui testes de fallback, migracao, serializacao e persistencia.
+- A biografia permanece exclusiva do perfil e não é copiada para as postagens.
+- Nome público e `@username` são identidades separadas: nomes podem se repetir, usernames e emails não.
+- Nos perfis e no Início, o `@username` aparece como identidade principal e o nome do jogador como informação secundária.
+- A pesquisa encontra atletas pelo nome ou username, e mensagens para a própria conta dispensam follow.
+- Vídeos escolhidos no navegador ficam no IndexedDB e sobrevivem ao recarregamento local da página.
+- O Início pausa o vídeo anterior assim que outro item se torna o mais visível.
+- Vídeos reais publicados substituem o perfil demonstrativo.
+- Score, risco, métricas e valores financeiros só aparecem quando existe uma avaliação explícita.
+- Saldo, depósitos, aportes e bolsas permanecem simulados, sem pagamento, saque ou contrato real.
+- Carteira, acessada pelo menu do Perfil, mostra saldo, depósito, valor em reais e porcentagem da cota adquirida.
+- Usuários, sessão, publicações, saldos, bolsas e investimentos usam repository local versionado.
+- O repository possui testes de fallback, migração, serialização e persistência.
 
 ## Teste online
 
-A versao web e publicada em:
+A versão web é publicada em:
 
 https://pedrobarberini.github.io/NextStar/
 
-Follows, contatos, mensagens, fotos, contas, credenciais locais, perfis, sessao, saldos, publicacoes, bolsas e investimentos ficam persistidos neste dispositivo. O registro e o arquivo local da postagem sobrevivem ao refresh no mesmo navegador; disponibilidade entre aparelhos depende de upload para storage remoto.
+Follows, contatos, mensagens, fotos, contas, credenciais locais, perfis, sessão, saldos, publicações, bolsas e investimentos ficam persistidos neste dispositivo. O registro e o arquivo local da postagem sobrevivem ao refresh no mesmo navegador; disponibilidade entre aparelhos depende de upload para storage remoto.
 
-A versao web e um PWA: no Chrome/Edge/Safari e possivel instalar o NextStar na tela inicial ou como aplicativo. O service worker faz cache dos assets para uso offline basico apos a primeira visita.
+A versão web é um PWA: no Chrome/Edge/Safari é possível instalar o NextStar na tela inicial ou como aplicativo. O service worker faz cache dos assets para uso offline básico após a primeira visita.
 
 ## Como rodar
 
@@ -68,11 +68,11 @@ cp .env.example .env
 pnpm start --tunnel
 ```
 
-O modo `--tunnel` permite abrir o projeto no Expo Go mesmo quando computador e celular nao estao na mesma rede local.
+O modo `--tunnel` permite abrir o projeto no Expo Go mesmo quando computador e celular não estão na mesma rede local.
 
 ### Login com Google (Firebase)
 
-O Firebase UI do React web nao e usado aqui. A integracao e:
+O Firebase UI do React web não é usado aqui. A integração é:
 
 - **Web / PWA:** Firebase Auth com `signInWithPopup` (Google).
 - **iOS / Android:** `expo-auth-session` obtém o ID token e o Firebase conclui com `signInWithCredential`.
@@ -81,12 +81,12 @@ O Firebase UI do React web nao e usado aqui. A integracao e:
 2. Em Project settings, copie as chaves do app web para o `.env` (`EXPO_PUBLIC_FIREBASE_*`).
 3. No Google Cloud Console vinculado ao Firebase, copie o **OAuth 2.0 Client ID** do tipo Web para `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`.
 4. Em Authentication > Settings > Authorized domains, inclua `localhost` e `pedrobarberini.github.io` (GitHub Pages).
-5. Reinicie o Expo apos alterar o `.env`.
-6. Para o GitHub Pages, cadastre as mesmas chaves como Secrets do repositorio (nomes iguais aos do `.env.example`). O workflow de deploy ja as injeta no `build:web`.
+5. Reinicie o Expo após alterar o `.env`.
+6. Para o GitHub Pages, cadastre as mesmas chaves como Secrets do repositório (nomes iguais aos do `.env.example`). O workflow de deploy já as injeta no `build:web`.
 
-Sem essas variaveis, o botao Google mostra o aviso de configuracao e o login por email/senha continua funcionando.
+Sem essas variáveis, o botão Google mostra o aviso de configuração e o login por email/senha continua funcionando.
 
-Para gerar a versao web usada pelo GitHub Pages:
+Para gerar a versão web usada pelo GitHub Pages:
 
 ```bash
 pnpm run build:web
@@ -100,57 +100,57 @@ pnpm test
 
 ## Arquitetura do frontend
 
-O `App.tsx` mantem somente estado compartilhado, composicao e roteamento local. O restante esta organizado em:
+O `App.tsx` mantém somente estado compartilhado, composição e roteamento local. O restante está organizado em:
 
-- `src/screens/`: telas de autenticacao, inicio, envio, pesquisa, mensagens, moderacao, carteira e perfil.
-- `src/components/`: shell visual, navegacao e componentes compartilhados.
+- `src/screens/`: telas de autenticação, início, envio, pesquisa, mensagens, moderação, carteira e perfil.
+- `src/components/`: shell visual, navegação e componentes compartilhados.
 - `src/actions/`: handlers de produto, formatadores e builders de dados.
-- `src/repositories/`: schema versionado e adaptador de persistencia do estado principal.
-- `src/services/`: persistencia local dos dominios social e de perfil.
-- `src/styles/`: estilos React Native extraidos do componente raiz.
+- `src/repositories/`: schema versionado e adaptador de persistência do estado principal.
+- `src/services/`: persistência local dos domínios social e de perfil.
+- `src/styles/`: estilos React Native extraídos do componente raiz.
 - `src/constants/` e `src/ui/`: constantes de layout, assets e tipos de interface.
 
-As proximas subdivisoes planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` e estilos por dominio, estao marcadas em `backlog.md`.
+As próximas subdivisões planejadas, como `VideoPlayer`, `VideoCard`, `AppToast` e estilos por domínio, estão marcadas em `backlog.md`.
 
 ## Fluxo principal de teste
 
 1. Na tela inicial de login, toque em `Cadastrar` e crie uma conta usando email e senha.
-2. Complete username, nome, biografia, idade, posicao, cidade e clube ou projeto no modal de primeiro acesso.
-3. Abra `Perfil > Configuracoes > Editar perfil`, altere um dado e confirme a atualizacao no Perfil.
-4. Publique um video e confirme o toast de sucesso no rodape.
-5. Abra o `Inicio` e o Perfil e confirme que o video apareceu imediatamente.
-6. Na galeria do proprio Perfil, toque na lixeira, confirme a exclusao e confira que o video saiu tambem do Inicio.
-7. Verifique que a postagem mostra apenas titulo e texto, sem `Objetivo do aporte`.
-8. Verifique que publicacoes sem avaliacao nao exibem score, risco, box de aviso ou valores inventados.
-9. Abra `Perfil`, toque no menu de tres barras e entre em `Carteira`.
+2. Complete username, nome, biografia, idade, posição, cidade e clube ou projeto no modal de primeiro acesso.
+3. Abra `Perfil > Configurações > Editar perfil`, altere um dado e confirme a atualização no Perfil.
+4. Publique um vídeo e confirme o toast de sucesso no rodapé.
+5. Abra o `Início` e o Perfil e confirme que o vídeo apareceu imediatamente.
+6. Na galeria do próprio Perfil, toque na lixeira, confirme a exclusão e confira que o vídeo saiu também do Início.
+7. Verifique que a postagem mostra apenas título e texto, sem `Objetivo do aporte`.
+8. Verifique que publicações sem avaliação não exibem score, risco, box de aviso ou valores inventados.
+9. Abra `Perfil`, toque no menu de três barras e entre em `Carteira`.
 10. Use `Depositar` para adicionar saldo simulado.
 11. Abra o perfil demonstrativo e transfira saldo para a bolsa do atleta.
-12. Toque no avatar ou no nome do autor para abrir o perfil e alternar entre os videos publicados.
-13. Pesquise uma conta pela aba `Pesquisar`; usuarios sem video tambem aparecem e abrem um perfil publico vazio.
-14. No perfil visitado, toque no icone de mensagem, escreva uma mensagem e confirme que ela aparece na conversa.
-15. Volte para a lista de conversas e reabra o historico criado durante a sessao.
-16. No perfil visitado, toque em um video para voltar ao reel correspondente ou use `Investir` para abrir a pagina da bolsa; use o `X` para retornar ao perfil.
-17. Perfis sem bolsa em captacao exibem a acao de investimento desabilitada.
-18. Ao abrir um video pela galeria, use a seta no Inicio para retornar ao mesmo perfil.
-19. Expanda a legenda do video e confira o estado e o progresso da bolsa abaixo das hashtags.
+12. Toque no avatar ou no nome do autor para abrir o perfil e alternar entre os vídeos publicados.
+13. Pesquise uma conta pela aba `Pesquisar`; usuários sem vídeo também aparecem e abrem um perfil público vazio.
+14. No perfil visitado, toque no ícone de mensagem, escreva uma mensagem e confirme que ela aparece na conversa.
+15. Volte para a lista de conversas e reabra o histórico criado durante a sessão.
+16. No perfil visitado, toque em um vídeo para voltar ao reel correspondente ou use `Investir` para abrir a página da bolsa; use o `X` para retornar ao perfil.
+17. Perfis sem bolsa em captação exibem a ação de investimento desabilitada.
+18. Ao abrir um vídeo pela galeria, use a seta no Início para retornar ao mesmo perfil.
+19. Expanda a legenda do vídeo e confira o estado e o progresso da bolsa abaixo das hashtags.
 20. Use `Investir` na legenda expandida e confirme que a bolsa do mesmo perfil foi aberta.
-21. Em Perfil > Configuracoes, escolha uma foto, arraste o circulo sobre a imagem, ajuste o tamanho entre 30% e 100% e confira a mesma composicao no Perfil, Inicio e Pesquisa.
+21. Em Perfil > Configurações, escolha uma foto, arraste o círculo sobre a imagem, ajuste o tamanho entre 30% e 100% e confira a mesma composição no Perfil, Início e Pesquisa.
 22. Confirme que o saldo diminui e que a Carteira mostra o valor e a porcentagem da cota comprada.
-23. Para testar como atleta, publique um video e abra uma bolsa pelo Perfil.
+23. Para testar como atleta, publique um vídeo e abra uma bolsa pelo Perfil.
 24. Complete a meta e confirme o aviso de busca por contratantes no Perfil do atleta.
-25. Recarregue a pagina e confirme que a sessao, perfil, saldo e postagens continuam disponiveis.
+25. Recarregue a página e confirme que a sessão, perfil, saldo e postagens continuam disponíveis.
 
-## Antes da abertura ao publico
+## Antes da abertura ao público
 
-- Implementar autenticacao e sessoes reais.
-- Persistir usuarios, videos e consentimentos em backend.
-- Armazenar midia em bucket privado com processamento e verificacao de formato.
-- Implementar moderacao automatica de video e texto, com fila humana somente para excecoes e recursos.
-- Adicionar trilha de auditoria, denuncia, bloqueio e politica de conteudo.
-- Aplicar LGPD, protecao de menores, termos e controles de acesso.
-- Validar juridicamente qualquer oferta, reserva ou distribuicao financeira.
+- Implementar autenticação e sessões reais.
+- Persistir usuários, vídeos e consentimentos em backend.
+- Armazenar mídia em bucket privado com processamento e verificação de formato.
+- Implementar moderação automática de vídeo e texto, com fila humana somente para exceções e recursos.
+- Adicionar trilha de auditoria, denúncia, bloqueio e política de conteúdo.
+- Aplicar LGPD, proteção de menores, termos e controles de acesso.
+- Validar juridicamente qualquer oferta, reserva ou distribuição financeira.
 - Definir enquadramento CVM da oferta e contratar plataforma autorizada ou outro parceiro regulado antes de captar dinheiro real.
-- Integrar instituicao financeira ou de pagamento autorizada para custodia e transferencia de recursos.
-- Adicionar monitoramento, testes automatizados e recuperacao de falhas.
+- Integrar instituição financeira ou de pagamento autorizada para custódia e transferência de recursos.
+- Adicionar monitoramento, testes automatizados e recuperação de falhas.
 
-O plano de evolucao esta em `docs/product-plan.md`. A origem do video demonstrativo esta documentada em `docs/third-party-assets.md`.
+O plano de evolução está em `docs/product-plan.md`. A origem do vídeo demonstrativo está documentada em `docs/third-party-assets.md`.

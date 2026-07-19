@@ -77,7 +77,7 @@ function normalizeAppUser(value: unknown): AppUser | null {
 
   const id = normalizeString(value.id);
   const email = normalizeString(value.email).toLowerCase();
-  const role = value.role === "Admin" ? "Admin" : "Usuario";
+  const role = value.role === "Admin" ? "Admin" : "Usuário";
 
   if (!id || !email.includes("@")) {
     return null;
@@ -127,7 +127,7 @@ function normalizeAppUser(value: unknown): AppUser | null {
     kycStatus:
       value.kycStatus === "Pendente" || value.kycStatus === "Aprovado"
         ? value.kycStatus
-        : "Nao iniciado",
+        : "Não iniciado",
     name:
       normalizeString(value.name) ||
       (role === "Admin" ? "Admin NextStar" : email.split("@")[0]),
@@ -143,6 +143,19 @@ function normalizeAppUser(value: unknown): AppUser | null {
       id
     )
   };
+}
+
+function normalizeAthleteFundStatus(value: unknown): AthleteFund["status"] {
+  return value === "Concluída" || value === "Concluida"
+    ? "Concluída"
+    : "Captando";
+}
+
+function normalizeAthleteFunds(value: unknown, fallback: AthleteFund[]) {
+  return normalizeArray(value, fallback).map((fund) => ({
+    ...fund,
+    status: normalizeAthleteFundStatus(fund.status)
+  }));
 }
 
 function normalizeUsers(value: unknown) {
@@ -199,7 +212,7 @@ export function migrateLocalAppState(
 
   return {
     activeUser,
-    athleteFunds: normalizeArray(value.athleteFunds, fallback.athleteFunds),
+    athleteFunds: normalizeAthleteFunds(value.athleteFunds, fallback.athleteFunds),
     investments: normalizeArray(value.investments, fallback.investments),
     registeredUsers:
       registeredUsers.length > 0 ? registeredUsers : fallback.registeredUsers,

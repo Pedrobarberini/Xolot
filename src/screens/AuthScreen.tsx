@@ -117,12 +117,12 @@ export function AuthScreen({
       email: identity.email,
       googleUid: identity.uid,
       id: accountId,
-      kycStatus: "Nao iniciado",
+      kycStatus: "Não iniciado",
       name: identity.name,
       ...(identity.photoURL ? { photoURL: identity.photoURL } : {}),
       position: "",
       profileCompleted: false,
-      role: "Usuario",
+      role: "Usuário",
       username: provisionalUsername
     });
   }
@@ -159,7 +159,7 @@ export function AuthScreen({
       const message =
         error instanceof Error
           ? error.message
-          : "Nao foi possivel autenticar com Google.";
+          : "Não foi possível autenticar com Google.";
       setErrorMessage(message);
     }
   }
@@ -178,12 +178,12 @@ export function AuthScreen({
       );
 
       if (mode === "create" && existingAccount) {
-        setErrorMessage("Ja existe uma conta com este email.");
+        setErrorMessage("Já existe uma conta com este email.");
         return;
       }
 
       if (mode === "login" && !existingAccount) {
-        setErrorMessage("Conta nao encontrada. Confira o email ou cadastre-se.");
+        setErrorMessage("Conta não encontrada. Confira o email ou cadastre-se.");
         return;
       }
 
@@ -236,16 +236,16 @@ export function AuthScreen({
         club: "",
         email: cleanEmail,
         id: accountId,
-        kycStatus: "Nao iniciado",
+        kycStatus: "Não iniciado",
         name: cleanEmail.split("@")[0],
         ...credential,
         position: "",
         profileCompleted: false,
-        role: "Usuario",
+        role: "Usuário",
         username: provisionalUsername
       });
     } catch {
-      setErrorMessage("Nao foi possivel autenticar agora. Tente novamente.");
+      setErrorMessage("Não foi possível autenticar agora. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -319,7 +319,7 @@ export function AuthScreen({
               setEmail(value);
               setErrorMessage("");
             }}
-            placeholder="voce@email.com"
+            placeholder="você@email.com"
             value={email}
           />
 
@@ -374,7 +374,7 @@ export function AuthScreen({
                 ) : null}
               </View>
               <Text style={styles.checkText}>
-                Aceito que este ambiente e demonstrativo, sem dinheiro real,
+                Aceito que este ambiente é demonstrativo, sem dinheiro real,
                 contrato real ou promessa de retorno.
               </Text>
             </Pressable>

@@ -44,7 +44,7 @@ export function SearchScreen({
       const uniquePlayers = Array.from(
         new Map(players.map((player) => [player.profileId, player])).values()
       );
-      const userAccounts = users.filter((account) => account.role === "Usuario");
+      const userAccounts = users.filter((account) => account.role === "Usuário");
       const userIds = new Set(userAccounts.map((account) => account.id));
       const registeredProfiles: SearchProfile[] = userAccounts.map((account) => {
         const player = uniquePlayers.find(
@@ -57,7 +57,7 @@ export function SearchScreen({
           ? `${account.position} | ${account.city}`
           : player
             ? `${player.position} | ${player.city}`
-            : "Usuario NextStar | Sem videos publicados";
+            : "Usuário NextStar | Sem vídeos publicados";
 
         return {
           fund,
@@ -127,7 +127,7 @@ export function SearchScreen({
       <View style={styles.discoveryHeader}>
         <Text style={styles.discoveryTitle}>Pesquisar perfis</Text>
         <Text style={styles.discoverySubtitle}>
-          Encontre atletas por nome, @usuario, posicao, cidade ou clube.
+          Encontre atletas por nome, @username, posição, cidade ou clube.
         </Text>
       </View>
 
@@ -137,7 +137,7 @@ export function SearchScreen({
           accessibilityLabel="Pesquisar perfis"
           autoCapitalize="none"
           onChangeText={setQuery}
-          placeholder="Nome, @usuario, posicao, cidade ou clube"
+          placeholder="Nome, @username, posição, cidade ou clube"
           placeholderTextColor={colors.muted}
           returnKeyType="search"
           style={styles.searchInput}
@@ -157,7 +157,7 @@ export function SearchScreen({
 
       <View style={styles.searchResultsHeader}>
         <Text style={styles.searchResultsTitle}>
-          {normalizedQuery ? "Resultados" : "Perfis disponiveis"}
+          {normalizedQuery ? "Resultados" : "Perfis disponíveis"}
         </Text>
         <Text style={styles.searchResultsCount}>{filteredProfiles.length}</Text>
       </View>
@@ -167,7 +167,7 @@ export function SearchScreen({
           <Search color={colors.muted} size={28} />
           <Text style={styles.discoveryEmptyTitle}>Nenhum perfil encontrado</Text>
           <Text style={styles.discoveryEmptyBody}>
-            Tente pesquisar com outro nome, cidade, posicao ou clube.
+            Tente pesquisar com outro nome, cidade, posição ou clube.
           </Text>
         </View>
       ) : (
@@ -229,9 +229,9 @@ export function SearchScreen({
                   {profile.fund
                     ? profile.fund.status === "Captando"
                       ? "Bolsa de investimento aberta"
-                      : "Meta de investimento concluida"
+                      : "Meta de investimento concluída"
                     : profile.player
-                      ? "Este perfil nao possui investimento aberto"
+                      ? "Este perfil não possui investimento aberto"
                       : "Perfil cadastrado"}
                 </Text>
               </View>

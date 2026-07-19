@@ -46,7 +46,7 @@ export function PortfolioScreen({
         ) : null}
         <View style={styles.summaryBand}>
           <View style={styles.summaryTopRow}>
-            <Text style={styles.summaryLabel}>Saldo disponivel</Text>
+            <Text style={styles.summaryLabel}>Saldo disponível</Text>
             <Pressable
               accessibilityRole="button"
               onPress={() => setIsDepositVisible(true)}
@@ -77,8 +77,8 @@ export function PortfolioScreen({
             </View>
           </View>
           <Text style={styles.summaryBody}>
-            Saldo, depositos e reservas sao simulacoes locais. Nenhuma cobranca
-            ou transferencia bancaria sera realizada.
+            Saldo, depósitos e reservas são simulacoes locais. Nenhuma cobranca
+            ou transferência bancária será realizada.
           </Text>
         </View>
 
@@ -88,7 +88,7 @@ export function PortfolioScreen({
               <Text style={styles.sectionTitle}>Custodia da bolsa</Text>
               <Text style={styles.bodyText}>
                 Cada aporte fica vinculado ao perfil do atleta. Nesta
-                simulacao, o atleta acompanha a captacao, mas nao possui opcao
+                simulação, o atleta acompanha a captação, mas não possui opção
                 de saque.
               </Text>
             </View>
@@ -99,7 +99,7 @@ export function PortfolioScreen({
               <View style={styles.emptyState}>
                 <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
                 <Text style={styles.emptyBody}>
-                  Deposite saldo simulado e abra um perfil na tela Inicio para
+                  Deposite saldo simulado e abra um perfil na tela Início para
                   criar uma reserva.
                 </Text>
               </View>
@@ -181,7 +181,7 @@ function DepositModal({
     >
       <View style={styles.depositModalRoot}>
         <Pressable
-          accessibilityLabel="Fechar deposito"
+          accessibilityLabel="Fechar depósito"
           onPress={closeModal}
           style={styles.depositModalBackdrop}
         />
@@ -206,7 +206,7 @@ function DepositModal({
           <Text style={styles.depositBalanceLabel}>Saldo atual</Text>
           <Text style={styles.depositBalanceValue}>{formatBRL(balance)}</Text>
 
-          <Text style={styles.inputLabel}>Valor do deposito</Text>
+          <Text style={styles.inputLabel}>Valor do depósito</Text>
           <View style={styles.depositInputRow}>
             <Text style={styles.depositCurrencyPrefix}>R$</Text>
             <TextInput
@@ -261,7 +261,7 @@ function DepositModal({
                 !canDeposit ? styles.primaryButtonDisabled : null
               ]}
             >
-              <Text style={styles.depositConfirmText}>Confirmar deposito</Text>
+              <Text style={styles.depositConfirmText}>Confirmar depósito</Text>
             </Pressable>
           </View>
         </View>

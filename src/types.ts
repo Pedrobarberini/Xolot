@@ -37,7 +37,7 @@ export type Player = {
   evaluation?: PlayerEvaluation;
 };
 
-export type AthleteFundStatus = "Captando" | "Concluida";
+export type AthleteFundStatus = "Captando" | "Concluída";
 
 export type AthleteFund = {
   id: string;
@@ -95,9 +95,9 @@ export type ProfileAvatar = {
 
 export type ProfileAvatarsByProfile = Record<string, ProfileAvatar>;
 
-export type UserRole = "Usuario" | "Admin";
+export type UserRole = "Usuário" | "Admin";
 
-export type KycStatus = "Nao iniciado" | "Pendente" | "Aprovado";
+export type KycStatus = "Não iniciado" | "Pendente" | "Aprovado";
 
 export type AccountProfile = {
   age: number | null;
@@ -127,7 +127,7 @@ export type AppUser = AccountProfile & {
 };
 
 export type VideoSubmissionStatus =
-  | "Em revisao"
+  | "Em revisão"
   | "Ajustes solicitados"
   | "Aprovado"
   | "Reprovado";

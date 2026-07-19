@@ -23,7 +23,7 @@ export function useGoogleSignIn(): UseGoogleSignInResult {
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     androidClientId: clientIds.androidClientId,
     iosClientId: clientIds.iosClientId,
-    // expo-auth-session exige string; sem Client ID o botao fica indisponivel.
+    // expo-auth-session exige string; sem Client ID o botão fica indisponível.
     webClientId: clientIds.webClientId || "missing-web-client-id.apps.googleusercontent.com"
   });
 
@@ -61,7 +61,7 @@ export function useGoogleSignIn(): UseGoogleSignInResult {
 
     if (response.type !== "success") {
       settleError(
-        new Error("Nao foi possivel concluir o login com Google. Tente novamente.")
+        new Error("Não foi possível concluir o login com Google. Tente novamente.")
       );
       return;
     }
@@ -70,7 +70,7 @@ export function useGoogleSignIn(): UseGoogleSignInResult {
 
     if (!idToken) {
       settleError(
-        new Error("O Google nao retornou um token valido. Verifique o Client ID.")
+        new Error("O Google não retornou um token válido. Verifique o Client ID.")
       );
       return;
     }
@@ -91,7 +91,7 @@ export function useGoogleSignIn(): UseGoogleSignInResult {
 
     if (!request) {
       throw new GoogleAuthConfigurationError(
-        "Login Google ainda nao esta pronto. Confira os Client IDs no .env e reinicie o Expo."
+        "Login Google ainda não está pronto. Confira os Client IDs no .env e reinicie o Expo."
       );
     }
 
