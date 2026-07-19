@@ -1,6 +1,6 @@
 # Backlog tecnico - NextStar
 
-Atualizado em 2026-07-16.
+Atualizado em 2026-07-18.
 
 Este backlog e escrito para desenvolvimento. Cada item deve virar issue/task no GitHub, Trello, Jira ou similar.
 
@@ -511,6 +511,32 @@ Criterios de aceite:
 - Contadores sociais usam a mesma fonte de dados do botao de follow.
 - Mensagens de perfis nao seguidos entram em Solicitacoes.
 - Seguir um contato move a solicitacao para Conversas e libera a thread.
+
+### Task FEATURE-044 - Lista paginada de seguidores
+
+Tipo: Frontend/Dados/UX
+
+Status: Concluido localmente em 2026-07-18. A lista continua limitada aos follows persistidos neste dispositivo ate existir sincronizacao no backend.
+
+Objetivo: permitir consultar quem segue o perfil sem sair da tela atual.
+
+Tasks:
+
+- [x] Derivar IDs de seguidores a partir da mesma relacao persistida usada pela contagem de follow.
+- [x] Tornar a metrica de seguidores do proprio perfil uma acao acessivel.
+- [x] Criar popup reutilizavel de listas de perfis com paginação incremental.
+- [x] Criar item reutilizavel de perfil com avatar, username, nome e dados publicos.
+- [x] Exibir fallback de carregamento com altura estavel ao abrir a lista.
+- [x] Tratar estado vazio sem trocar de tela.
+- [x] Cobrir a derivacao social e a selecao de contas com testes automatizados.
+
+Criterios de aceite:
+
+- A contagem e a lista mostram seguidores derivados da mesma fonte de dados.
+- Abrir e fechar a lista nao muda a rota nem remove o contexto do Perfil.
+- A primeira pagina exibe no maximo oito perfis e permite carregar as proximas paginas.
+- Avatares ausentes preservam o fallback por iniciais.
+- O popup pode receber qualquer colecao de perfis no futuro sem depender do Perfil.
 
 ### Task P1-011 - Foto de perfil e acesso direto ao investimento
 

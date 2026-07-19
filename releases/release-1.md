@@ -1173,3 +1173,25 @@ Criterios de aceite:
 - `src/styles/appStyles.ts` continua exportando `styles`.
 - Os modulos de estilo preservam literais de React Native para manter o typecheck estavel.
 - Typecheck e testes automatizados passam com Node 22.
+
+### Task FEATURE-044 - Lista paginada de seguidores
+
+Tipo: Frontend/Dados/UX
+
+Objetivo: permitir consultar quem segue o perfil sem sair da tela atual.
+
+Tasks:
+
+- [x] Derivar IDs de seguidores da relacao de follow persistida.
+- [x] Transformar a metrica de seguidores em acao acessivel no Perfil.
+- [x] Criar `ProfileListModal` reutilizavel, com paginação incremental e fallback de carregamento estavel.
+- [x] Criar `ProfileListItem` reutilizavel com avatar, username, nome e dados publicos.
+- [x] Preservar estado vazio e fallback por iniciais para avatares ausentes.
+- [x] Cobrir derivacao social e selecao de perfis com testes automatizados.
+
+Criterios de aceite:
+
+- A contagem e a lista usam a mesma fonte de dados social.
+- A lista abre como popup, sem alterar a rota do Perfil.
+- A primeira pagina exibe no maximo oito perfis e novas paginas sao carregadas por comando explicito.
+- Typecheck e testes automatizados passam com Node 22.

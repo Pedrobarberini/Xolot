@@ -116,6 +116,7 @@ export default function App() {
     currentMessageContacts,
     directMessages,
     followersByProfile,
+    followerUserIdsByProfile,
     followingProfileIds,
     followingProfileSet,
     ownProfileId,
@@ -258,6 +259,7 @@ export default function App() {
       feedFocusPlayerId={feedFocusPlayerId}
       focusFeedPlayer={focusFeedPlayer}
       followersByProfile={followersByProfile}
+      followerUserIdsByProfile={followerUserIdsByProfile}
       followingProfileIds={followingProfileIds}
       followingProfileSet={followingProfileSet}
       handleDeleteVideo={handleDeleteVideo}

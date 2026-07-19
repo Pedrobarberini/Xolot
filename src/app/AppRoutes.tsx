@@ -5,6 +5,7 @@ import {
   selectApprovedPlayerForSubmission,
   selectFundByOwner,
   selectPlayerByOwner,
+  selectProfileFollowers,
   selectProfileFund,
   selectUserSubmissions
 } from "./appSelectors";
@@ -48,6 +49,7 @@ type AppRoutesProps = {
   feedFocusPlayerId: string | null;
   focusFeedPlayer: (playerId: string) => void;
   followersByProfile: Record<string, number>;
+  followerUserIdsByProfile: Record<string, string[]>;
   followingProfileIds: string[];
   followingProfileSet: Set<string>;
   handleDeleteVideo: (submission: VideoSubmission) => Promise<boolean>;
@@ -126,6 +128,7 @@ export function AppRoutes({
   feedFocusPlayerId,
   focusFeedPlayer,
   followersByProfile,
+  followerUserIdsByProfile,
   followingProfileIds,
   followingProfileSet,
   handleDeleteVideo,
@@ -359,6 +362,11 @@ export function AppRoutes({
                       ownProfileId ? profileAvatars[ownProfileId] : undefined
                     }
                     balance={walletBalance}
+                    followers={selectProfileFollowers(
+                      ownProfileId,
+                      followerUserIdsByProfile,
+                      registeredUsers
+                    )}
                     fund={selectFundByOwner(athleteFunds, user.id)}
                     investments={currentUserInvestments}
                     followersCount={
@@ -386,6 +394,7 @@ export function AppRoutes({
                     onSignOut={signOutSession}
                     onUpdateProfile={handleUpdateProfile}
                     player={selectPlayerByOwner(availablePlayers, user.id)}
+                    profileAvatars={profileAvatars}
                     submissions={submissions}
                     user={user}
                   />

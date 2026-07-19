@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import {
   ArrowLeft,
@@ -27,6 +27,10 @@ import {
 import { AvatarPositionModal } from "../components/AvatarPositionModal";
 import { DeleteVideoModal } from "../components/DeleteVideoModal";
 import {
+  ProfileListModal,
+  type ProfileListItemData
+} from "../components/ProfileListModal";
+import {
   ProfileGalleryVideo,
   ProfileVideoGallery
 } from "../components/ProfileVideoGallery";
@@ -41,6 +45,7 @@ import {
   Investment,
   Player,
   ProfileAvatar,
+  ProfileAvatarsByProfile,
   VideoSubmission
 } from "../types";
 import { formatBRL } from "../utils/investment";
@@ -54,6 +59,7 @@ export function ProfileScreen({
   accounts,
   avatar,
   balance,
+  followers,
   followersCount,
   followingCount,
   fund,
@@ -66,12 +72,14 @@ export function ProfileScreen({
   onSignOut,
   onUpdateProfile,
   player,
+  profileAvatars,
   submissions,
   user
 }: {
   accounts: AppUser[];
   avatar?: ProfileAvatar;
   balance: number;
+  followers: AppUser[];
   followersCount: number;
   followingCount: number;
   fund?: AthleteFund;
@@ -88,10 +96,12 @@ export function ProfileScreen({
   onSignOut: () => void;
   onUpdateProfile: (profile: AccountProfile) => void;
   player?: Player;
+  profileAvatars: ProfileAvatarsByProfile;
   submissions: VideoSubmission[];
   user: AppUser;
 }) {
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
+  const [isFollowersVisible, setIsFollowersVisible] = useState(false);
   const [isAvatarPositionVisible, setIsAvatarPositionVisible] = useState(false);
   const [isDeletingVideo, setIsDeletingVideo] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
@@ -128,6 +138,21 @@ export function ProfileScreen({
   const profilePrimaryMetric =
     user.role === "Admin" ? String(pending) : String(mySubmissions.length);
   const profilePrimaryLabel = user.role === "Admin" ? "pendentes" : "envios";
+  const followerListItems = useMemo<ProfileListItemData[]>(
+    () =>
+      followers.map((follower) => ({
+        avatar: profileAvatars[`profile-${follower.id}`],
+        id: follower.id,
+        name: follower.name,
+        subtitle: follower.profileCompleted
+          ? `${follower.position} | ${follower.city}`
+          : follower.role === "Admin"
+            ? "Administrador NextStar"
+            : "Usuario NextStar",
+        username: follower.username
+      })),
+    [followers, profileAvatars]
+  );
 
   useEffect(
     () => () => {
@@ -330,12 +355,18 @@ export function ProfileScreen({
               </View>
             </View>
             <View style={styles.profileSocialMetrics}>
-              <Text style={styles.profileSocialMetricText}>
-                <Text style={styles.profileSocialMetricValue}>
-                  {followersCount}
-                </Text>{" "}
-                {followersCount === 1 ? "seguidor" : "seguidores"}
-              </Text>
+              <Pressable
+                accessibilityLabel="Ver lista de seguidores"
+                accessibilityRole="button"
+                onPress={() => setIsFollowersVisible(true)}
+              >
+                <Text style={styles.profileSocialMetricText}>
+                  <Text style={styles.profileSocialMetricValue}>
+                    {followersCount}
+                  </Text>{" "}
+                  {followersCount === 1 ? "seguidor" : "seguidores"}
+                </Text>
+              </Pressable>
               <Text style={styles.profileSocialMetricDivider}>|</Text>
               <Text style={styles.profileSocialMetricText}>
                 <Text style={styles.profileSocialMetricValue}>
@@ -392,6 +423,14 @@ export function ProfileScreen({
         onConfirm={confirmVideoDeletion}
         videoTitle={videoPendingDeletion?.videoTitle ?? ""}
         visible={Boolean(videoPendingDeletion)}
+      />
+      <ProfileListModal
+        emptyBody="Quando alguem seguir seu perfil, ela aparecera nesta lista."
+        emptyTitle="Voce ainda nao tem seguidores"
+        items={followerListItems}
+        onClose={() => setIsFollowersVisible(false)}
+        title="Seguidores"
+        visible={isFollowersVisible}
       />
       {avatarPositionModal}
     </>

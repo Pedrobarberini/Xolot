@@ -112,6 +112,20 @@ export function selectProfileFund(
     : undefined;
 }
 
+export function selectProfileFollowers(
+  profileId: string | null | undefined,
+  followerUserIdsByProfile: Record<string, string[]>,
+  registeredUsers: AppUser[]
+) {
+  if (!profileId) {
+    return [];
+  }
+
+  const followerUserIds = new Set(followerUserIdsByProfile[profileId] ?? []);
+
+  return registeredUsers.filter((account) => followerUserIds.has(account.id));
+}
+
 export function selectFundByOwner(
   athleteFunds: AthleteFund[],
   ownerUserId: string

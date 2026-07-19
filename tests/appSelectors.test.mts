@@ -11,6 +11,7 @@ import {
   selectPendingReviews,
   selectPlayerByOwner,
   selectProfileAccount,
+  selectProfileFollowers,
   selectProfileFund,
   selectProfileId,
   selectProfileVideos,
@@ -164,6 +165,14 @@ test("seleciona dados derivados de perfil, fundos e usuario atual", () => {
     ["investment-1"]
   );
   assert.equal(selectProfileAccount(null, player, [completeUser])?.id, completeUser.id);
+  assert.deepEqual(
+    selectProfileFollowers(
+      player.profileId,
+      { [player.profileId]: [completeUser.id, "usuario-ausente"] },
+      [completeUser]
+    ),
+    [completeUser]
+  );
   assert.deepEqual(selectProfileVideos(player, [demoPlayer, player]), [player]);
   assert.equal(selectProfileFund(player, [fund]), fund);
   assert.equal(selectFundByOwner([fund], completeUser.id), fund);
