@@ -890,13 +890,6 @@ function SettingsView({
         </View>
       ) : null}
 
-      <View style={styles.settingsSection}>
-        <Text style={styles.settingsSectionTitle}>Ambiente demonstrativo</Text>
-        <Text style={styles.bodyText}>
-          Cadastro, publicação direta, aportes, KYC e distribuição ainda sao
-          simulados. Nenhuma operação possui validade financeira ou jurídica.
-        </Text>
-      </View>
     </ScrollView>
   );
 }

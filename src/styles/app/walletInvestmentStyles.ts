@@ -1,10 +1,4 @@
 import { StyleSheet } from "react-native";
-import {
-  DETAIL_CONTENT_PADDING,
-  TAB_BAR_CONTENT_PADDING,
-  TAB_BAR_SAFE_PADDING,
-  USE_CENTERED_WEB_LAYOUT
-} from "../../constants/layout";
 import { colors } from "../../theme";
 
 export const walletInvestmentStyles = {
@@ -224,11 +218,15 @@ export const walletInvestmentStyles = {
     marginTop: 3,
     textTransform: "uppercase"
   },
-  summaryBody: {
-    color: colors.muted,
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 8
+  walletInfoButton: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 40,
+    justifyContent: "center",
+    width: 40
   },
   depositModalRoot: {
     alignItems: "center",
@@ -253,6 +251,59 @@ export const walletInvestmentStyles = {
     shadowOpacity: 0.2,
     shadowRadius: 18,
     width: "100%"
+  },
+  financialInfoDialog: {
+    maxWidth: 460
+  },
+  financialInfoList: {
+    marginTop: 16
+  },
+  financialInfoItem: {
+    alignItems: "flex-start",
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 11,
+    paddingVertical: 13
+  },
+  financialInfoItemIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 6,
+    height: 36,
+    justifyContent: "center",
+    width: 36
+  },
+  financialInfoItemBody: {
+    flex: 1,
+    minWidth: 0
+  },
+  financialInfoItemTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  financialInfoItemText: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 3
+  },
+  financialInfoNotice: {
+    alignItems: "flex-start",
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 9,
+    padding: 11
+  },
+  financialInfoNoticeText: {
+    color: colors.muted,
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 16
   },
   depositDialogHeader: {
     alignItems: "flex-start",
@@ -427,15 +478,6 @@ export const walletInvestmentStyles = {
     borderWidth: 1,
     marginTop: 12,
     padding: 14
-  },
-  portfolioDesktopGrid: {
-    flexDirection: "row",
-    gap: 14,
-    marginTop: 14
-  },
-  portfolioDesktopColumn: {
-    flex: 1,
-    minWidth: 0
   },
   portfolioItemHeader: {
     alignItems: "flex-start",

@@ -669,6 +669,26 @@ Criterios de aceite:
 - Erros importantes chegam para o responsável técnico.
 - E possível saber se usuários estão conseguindo enviar vídeos.
 
+### Task P2-005 - Centralizar informacoes financeiras da Carteira
+
+Tipo: Frontend/UX/Financeiro
+
+Status: Concluido em 2026-07-20.
+
+Tasks:
+
+- [x] Remover o card `Ambiente demonstrativo` das Configuracoes.
+- [x] Remover o card permanente de custodia da Carteira.
+- [x] Adicionar icone de informacao no cabecalho da Carteira.
+- [x] Reunir em uma HUD as regras atuais de transacao, custodia, saque e rendimento.
+- [x] Permitir fechar a HUD pelo botao ou por qualquer area externa.
+
+Criterios de aceite:
+
+- A Carteira prioriza saldo, deposito e reservas sem textos longos permanentes.
+- As informacoes financeiras continuam acessiveis em um unico ponto.
+- A interface nao apresenta promessa de rendimento ou saque indisponivel como funcionalidade ativa.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

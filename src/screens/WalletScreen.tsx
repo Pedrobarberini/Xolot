@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { ArrowLeft, CircleDollarSign, X } from "lucide-react-native";
-import { Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from "react-native";
-import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
+import { ArrowLeft, CircleDollarSign, Info, X } from "lucide-react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { FinancialInfoModal } from "../components/FinancialInfoModal";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { Investment } from "../types";
@@ -18,9 +18,8 @@ export function PortfolioScreen({
   onBack?: () => void;
   onDeposit: (amount: number) => void;
 }) {
-  const { width } = useWindowDimensions();
   const [isDepositVisible, setIsDepositVisible] = useState(false);
-  const isWide = !USE_CENTERED_WEB_LAYOUT && width >= 840;
+  const [isInfoVisible, setIsInfoVisible] = useState(false);
   const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const supportedAthletes = new Set(
     investments.map((investment) => investment.profileId)
@@ -41,7 +40,18 @@ export function PortfolioScreen({
               <ArrowLeft color={colors.text} size={20} />
             </Pressable>
             <Text style={styles.profileSubviewTitle}>Carteira</Text>
-            <View style={styles.profileSubviewSpacer} />
+            <Pressable
+              accessibilityLabel="Informações sobre transações, saque e rendimento"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => setIsInfoVisible(true)}
+              style={({ pressed }) => [
+                styles.walletInfoButton,
+                pressed ? styles.buttonPressed : null
+              ]}
+            >
+              <Info color={colors.primary} size={20} strokeWidth={2.2} />
+            </Pressable>
           </View>
         ) : null}
         <View style={styles.summaryBand}>
@@ -76,67 +86,48 @@ export function PortfolioScreen({
               <Text style={styles.summaryInsightLabel}>atletas</Text>
             </View>
           </View>
-          <Text style={styles.summaryBody}>
-            Saldo, depósitos e reservas são simulacoes locais. Nenhuma cobranca
-            ou transferência bancária será realizada.
-          </Text>
         </View>
 
-        <View style={isWide ? styles.portfolioDesktopGrid : null}>
-          <View style={isWide ? styles.portfolioDesktopColumn : null}>
-            <View style={styles.infoPanel}>
-              <Text style={styles.sectionTitle}>Custodia da bolsa</Text>
-              <Text style={styles.bodyText}>
-                Cada aporte fica vinculado ao perfil do atleta. Nesta
-                simulação, o atleta acompanha a captação, mas não possui opção
-                de saque.
-              </Text>
-            </View>
+        {investments.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
+            <Text style={styles.emptyBody}>
+              Deposite saldo simulado e abra um perfil na tela Início para
+              criar uma reserva.
+            </Text>
           </View>
-
-          <View style={isWide ? styles.portfolioDesktopColumn : null}>
-            {investments.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
-                <Text style={styles.emptyBody}>
-                  Deposite saldo simulado e abra um perfil na tela Início para
-                  criar uma reserva.
-                </Text>
+        ) : (
+          investments.map((investment) => (
+            <View key={investment.id} style={styles.portfolioItemBlock}>
+              <View style={styles.portfolioItemHeader}>
+                <View style={styles.submissionTextBlock}>
+                  <Text style={styles.portfolioName}>
+                    {investment.playerName}
+                  </Text>
+                  <Text style={styles.portfolioMeta}>{investment.status}</Text>
+                </View>
+                <View style={styles.portfolioNumbers}>
+                  <Text style={styles.portfolioAmount}>
+                    {formatBRL(investment.amount)}
+                  </Text>
+                  <Text style={styles.portfolioShare}>
+                    Cota {formatPercent(investment.sharePercent)}
+                  </Text>
+                </View>
               </View>
-            ) : (
-              investments.map((investment) => {
-                return (
-                  <View key={investment.id} style={styles.portfolioItemBlock}>
-                    <View style={styles.portfolioItemHeader}>
-                      <View style={styles.submissionTextBlock}>
-                        <Text style={styles.portfolioName}>
-                          {investment.playerName}
-                        </Text>
-                        <Text style={styles.portfolioMeta}>
-                          {investment.status}
-                        </Text>
-                      </View>
-                      <View style={styles.portfolioNumbers}>
-                        <Text style={styles.portfolioAmount}>
-                          {formatBRL(investment.amount)}
-                        </Text>
-                        <Text style={styles.portfolioShare}>
-                          Cota {formatPercent(investment.sharePercent)}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                );
-              })
-            )}
-          </View>
-        </View>
+            </View>
+          ))
+        )}
       </ScrollView>
       <DepositModal
         balance={balance}
         onClose={() => setIsDepositVisible(false)}
         onConfirm={onDeposit}
         visible={isDepositVisible}
+      />
+      <FinancialInfoModal
+        onClose={() => setIsInfoVisible(false)}
+        visible={isInfoVisible}
       />
     </>
   );
