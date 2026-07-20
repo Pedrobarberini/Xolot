@@ -5,6 +5,7 @@ import {
 } from "../services/socialStorage";
 import {
   AppUser,
+  ConversationPreferencesByUser,
   DirectMessage,
   FollowingByUser,
   MessageContact,
@@ -12,6 +13,13 @@ import {
   Player
 } from "../types";
 import { buildFollowerUserIdsByProfile } from "../utils/profileFollowers";
+import {
+  EMPTY_CONVERSATION_PREFERENCES,
+  filterMessagesAfterConversationDeletion,
+  sortContactsByPinned,
+  toggleConversationId,
+  togglePinnedConversation
+} from "../utils/conversations";
 
 function upsertMessageContact(
   contacts: MessageContact[],
@@ -32,6 +40,8 @@ export function useSocialActions({
   user: AppUser | null;
 }) {
   const [followingByUser, setFollowingByUser] = useState<FollowingByUser>({});
+  const [conversationPreferencesByUser, setConversationPreferencesByUser] =
+    useState<ConversationPreferencesByUser>({});
   const [messageContactsByUser, setMessageContactsByUser] =
     useState<MessageContactsByUser>({});
   const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
@@ -46,6 +56,9 @@ export function useSocialActions({
       }
 
       setDirectMessages(socialState.directMessages);
+      setConversationPreferencesByUser(
+        socialState.conversationPreferencesByUser
+      );
       setFollowingByUser(socialState.followingByUser);
       setMessageContactsByUser(socialState.messageContactsByUser);
       setIsSocialStateLoaded(true);
@@ -62,11 +75,13 @@ export function useSocialActions({
     }
 
     saveSocialState({
+      conversationPreferencesByUser,
       directMessages,
       followingByUser,
       messageContactsByUser
     }).catch(() => undefined);
   }, [
+    conversationPreferencesByUser,
     directMessages,
     followingByUser,
     isSocialStateLoaded,
@@ -96,9 +111,28 @@ export function useSocialActions({
     () => buildFollowerUserIdsByProfile(followingByUser),
     [followingByUser]
   );
-  const currentMessageContacts = user
-    ? messageContactsByUser[user.id] ?? []
-    : [];
+  const currentConversationPreferences = user
+    ? conversationPreferencesByUser[user.id] ?? EMPTY_CONVERSATION_PREFERENCES
+    : EMPTY_CONVERSATION_PREFERENCES;
+  const currentMessageContacts = useMemo(
+    () =>
+      sortContactsByPinned(
+        user ? messageContactsByUser[user.id] ?? [] : [],
+        currentConversationPreferences.pinnedContactIds
+      ),
+    [currentConversationPreferences.pinnedContactIds, messageContactsByUser, user]
+  );
+  const currentDirectMessages = useMemo(
+    () =>
+      user
+        ? filterMessagesAfterConversationDeletion(
+            directMessages,
+            user.id,
+            currentConversationPreferences.deletedAtByContactId
+          )
+        : [],
+    [currentConversationPreferences.deletedAtByContactId, directMessages, user]
+  );
   const ownPlayer = user
     ? players.find((player) => player.ownerUserId === user.id)
     : undefined;
@@ -155,6 +189,83 @@ export function useSocialActions({
     }));
   }
 
+  function deleteConversation(contactId: string) {
+    if (!user) {
+      return;
+    }
+
+    setMessageContactsByUser((current) => ({
+      ...current,
+      [user.id]: (current[user.id] ?? []).filter(
+        (contact) => contact.id !== contactId
+      )
+    }));
+    setConversationPreferencesByUser((current) => {
+      const preferences =
+        current[user.id] ?? EMPTY_CONVERSATION_PREFERENCES;
+
+      return {
+        ...current,
+        [user.id]: {
+          deletedAtByContactId: {
+            ...preferences.deletedAtByContactId,
+            [contactId]: new Date().toISOString()
+          },
+          mutedContactIds: preferences.mutedContactIds.filter(
+            (id) => id !== contactId
+          ),
+          pinnedContactIds: preferences.pinnedContactIds.filter(
+            (id) => id !== contactId
+          )
+        }
+      };
+    });
+  }
+
+  function toggleMuteConversation(contactId: string) {
+    if (!user) {
+      return;
+    }
+
+    setConversationPreferencesByUser((current) => {
+      const preferences =
+        current[user.id] ?? EMPTY_CONVERSATION_PREFERENCES;
+
+      return {
+        ...current,
+        [user.id]: {
+          ...preferences,
+          mutedContactIds: toggleConversationId(
+            preferences.mutedContactIds,
+            contactId
+          )
+        }
+      };
+    });
+  }
+
+  function togglePinConversation(contactId: string) {
+    if (!user) {
+      return;
+    }
+
+    setConversationPreferencesByUser((current) => {
+      const preferences =
+        current[user.id] ?? EMPTY_CONVERSATION_PREFERENCES;
+
+      return {
+        ...current,
+        [user.id]: {
+          ...preferences,
+          pinnedContactIds: togglePinnedConversation(
+            preferences.pinnedContactIds,
+            contactId
+          )
+        }
+      };
+    });
+  }
+
   function toggleFollowProfile(profileId: string) {
     if (!user || profileId === ownProfileId) {
       return;
@@ -176,13 +287,18 @@ export function useSocialActions({
   return {
     addMessageContact,
     currentMessageContacts,
-    directMessages,
+    deleteConversation,
+    directMessages: currentDirectMessages,
     followersByProfile,
     followerUserIdsByProfile,
     followingProfileIds,
     followingProfileSet,
     ownProfileId,
+    mutedContactIds: currentConversationPreferences.mutedContactIds,
+    pinnedContactIds: currentConversationPreferences.pinnedContactIds,
     sendDirectMessage,
-    toggleFollowProfile
+    toggleFollowProfile,
+    toggleMuteConversation,
+    togglePinConversation
   };
 }

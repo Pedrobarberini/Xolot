@@ -84,6 +84,17 @@ export type FollowingByUser = Record<string, string[]>;
 
 export type MessageContactsByUser = Record<string, MessageContact[]>;
 
+export type ConversationPreferences = {
+  deletedAtByContactId: Record<string, string>;
+  mutedContactIds: string[];
+  pinnedContactIds: string[];
+};
+
+export type ConversationPreferencesByUser = Record<
+  string,
+  ConversationPreferences
+>;
+
 export type ProfileAvatar = {
   cropScale: number;
   focusX: number;

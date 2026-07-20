@@ -1,20 +1,24 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
+  BellOff,
   LockKeyhole,
   MessageCircle,
+  Pin,
   Search,
   Send,
   UserCheck,
   UserPlus
 } from "lucide-react-native";
 import {
+  Alert,
   Pressable,
   ScrollView,
   Text,
   TextInput,
   View
 } from "react-native";
+import { ConversationActionsModal } from "../components/ConversationActionsModal";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
@@ -24,6 +28,7 @@ import {
   ProfileAvatarsByProfile
 } from "../types";
 import { canExchangeDirectMessages } from "../utils/socialAccess";
+import { MAX_PINNED_CONVERSATIONS } from "../utils/conversations";
 
 function getInitials(name: string) {
   return name
@@ -54,10 +59,15 @@ export function MessagesScreen({
   currentUserId,
   followingProfileIds,
   messages,
+  mutedContactIds,
+  onDeleteConversation,
   onFindProfiles,
   onSelectContact,
   onSendMessage,
   onToggleFollow,
+  onToggleMute,
+  onTogglePin,
+  pinnedContactIds,
   profileAvatars
 }: {
   activeContactId: string | null;
@@ -65,16 +75,33 @@ export function MessagesScreen({
   currentUserId: string;
   followingProfileIds: string[];
   messages: DirectMessage[];
+  mutedContactIds: string[];
+  onDeleteConversation: (contactId: string) => void;
   onFindProfiles: () => void;
   onSelectContact: (contactId: string | null) => void;
   onSendMessage: (contactId: string, body: string) => void;
   onToggleFollow: (profileId: string) => void;
+  onToggleMute: (contactId: string) => void;
+  onTogglePin: (contactId: string) => void;
+  pinnedContactIds: string[];
   profileAvatars: ProfileAvatarsByProfile;
 }) {
   const [draft, setDraft] = useState("");
+  const [actionContact, setActionContact] = useState<MessageContact | null>(
+    null
+  );
+  const longPressedContactId = useRef<string | null>(null);
   const followingSet = useMemo(
     () => new Set(followingProfileIds),
     [followingProfileIds]
+  );
+  const mutedContactSet = useMemo(
+    () => new Set(mutedContactIds),
+    [mutedContactIds]
+  );
+  const pinnedContactSet = useMemo(
+    () => new Set(pinnedContactIds),
+    [pinnedContactIds]
   );
   const activeContact = contacts.find(
     (contact) => contact.id === activeContactId
@@ -329,13 +356,28 @@ export function MessagesScreen({
     const hasHiddenIncomingMessage = conversationMessages.some(
       (message) => message.senderUserId === contact.id
     );
+    const isMuted = mutedContactSet.has(contact.id);
+    const isPinned = pinnedContactSet.has(contact.id);
 
     return (
       <Pressable
         accessibilityLabel={`Abrir conversa com ${contact.name}`}
+        accessibilityHint="Toque e segure para abrir as opções da conversa"
         accessibilityRole="button"
+        delayLongPress={450}
         key={contact.id}
-        onPress={() => onSelectContact(contact.id)}
+        onLongPress={() => {
+          longPressedContactId.current = contact.id;
+          setActionContact(contact);
+        }}
+        onPress={() => {
+          if (longPressedContactId.current === contact.id) {
+            longPressedContactId.current = null;
+            return;
+          }
+
+          onSelectContact(contact.id);
+        }}
         style={({ pressed }) => [
           styles.messagesContactCard,
           pressed ? styles.buttonPressed : null
@@ -360,17 +402,22 @@ export function MessagesScreen({
               : lastMessage?.body ?? contact.subtitle}
           </Text>
         </View>
-        {isRequest ? (
-          <View style={styles.messagesRequestPill}>
-            <Text style={styles.messagesRequestPillText}>Solicitacao</Text>
-          </View>
-        ) : null}
+        <View style={styles.messagesContactIndicators}>
+          {isPinned ? <Pin color={colors.primary} size={15} /> : null}
+          {isMuted ? <BellOff color={colors.muted} size={15} /> : null}
+          {isRequest ? (
+            <View style={styles.messagesRequestPill}>
+              <Text style={styles.messagesRequestPillText}>Solicitacao</Text>
+            </View>
+          ) : null}
+        </View>
       </Pressable>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.messagesContent}>
+    <>
+      <ScrollView contentContainerStyle={styles.messagesContent}>
       <View style={styles.discoveryHeader}>
         <Text style={styles.discoveryTitle}>Mensagens</Text>
         <Text style={styles.discoverySubtitle}>
@@ -440,6 +487,68 @@ export function MessagesScreen({
           )}
         </>
       )}
-    </ScrollView>
+      </ScrollView>
+      <ConversationActionsModal
+        contact={actionContact}
+        isMuted={Boolean(
+          actionContact && mutedContactSet.has(actionContact.id)
+        )}
+        isPinned={Boolean(
+          actionContact && pinnedContactSet.has(actionContact.id)
+        )}
+        onClose={() => {
+          longPressedContactId.current = null;
+          setActionContact(null);
+        }}
+        onDelete={() => {
+          if (!actionContact) {
+            return;
+          }
+
+          const contact = actionContact;
+
+          Alert.alert(
+            "Apagar conversa?",
+            `O histórico com ${contact.name} será removido somente para você.`,
+            [
+              { style: "cancel", text: "Cancelar" },
+              {
+                onPress: () => {
+                  onDeleteConversation(contact.id);
+                  if (activeContactId === contact.id) {
+                    onSelectContact(null);
+                  }
+                },
+                style: "destructive",
+                text: "Apagar"
+              }
+            ]
+          );
+        }}
+        onToggleMute={() => {
+          if (actionContact) {
+            onToggleMute(actionContact.id);
+          }
+        }}
+        onTogglePin={() => {
+          if (!actionContact) {
+            return false;
+          }
+
+          const isPinned = pinnedContactSet.has(actionContact.id);
+
+          if (!isPinned && pinnedContactIds.length >= MAX_PINNED_CONVERSATIONS) {
+            Alert.alert(
+              "Limite de conversas fixadas",
+              "Desafixe uma conversa antes de fixar outra. O limite é de 3 conversas."
+            );
+            return false;
+          }
+
+          onTogglePin(actionContact.id);
+          return true;
+        }}
+      />
+    </>
   );
 }

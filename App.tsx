@@ -114,14 +114,19 @@ export default function App() {
   const {
     addMessageContact,
     currentMessageContacts,
+    deleteConversation,
     directMessages,
     followersByProfile,
     followerUserIdsByProfile,
     followingProfileIds,
     followingProfileSet,
     ownProfileId,
+    mutedContactIds,
+    pinnedContactIds,
     sendDirectMessage,
-    toggleFollowProfile
+    toggleFollowProfile,
+    toggleMuteConversation,
+    togglePinConversation
   } = useSocialActions({ players: availablePlayers, user });
   const orderedFeedPlayers = useMemo(
     () => selectOrderedFeedPlayers(availablePlayers, followingProfileSet),
@@ -255,6 +260,7 @@ export default function App() {
       clearSelectedProfile={clearSelectedProfile}
       closeInvestment={closeInvestment}
       currentMessageContacts={currentMessageContacts}
+      deleteConversation={deleteConversation}
       currentUserInvestments={currentUserInvestments}
       directMessages={directMessages}
       feedFocusPlayerId={feedFocusPlayerId}
@@ -284,6 +290,8 @@ export default function App() {
       orderedFeedPlayers={orderedFeedPlayers}
       ownProfileId={ownProfileId}
       pendingReviews={pendingReviews}
+      mutedContactIds={mutedContactIds}
+      pinnedContactIds={pinnedContactIds}
       profileAvatars={profileAvatars}
       registeredUsers={registeredUsers}
       reelReturnTarget={reelReturnTarget}
@@ -300,6 +308,8 @@ export default function App() {
       submissions={submissions}
       tab={tab}
       toggleFollowProfile={toggleFollowProfile}
+      toggleMuteConversation={toggleMuteConversation}
+      togglePinConversation={togglePinConversation}
       user={user}
       walletBalance={walletBalance}
     />

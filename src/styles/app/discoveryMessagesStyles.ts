@@ -465,6 +465,11 @@ export const discoveryMessagesStyles = {
     fontSize: 12,
     marginTop: 3
   },
+  messagesContactIndicators: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 7
+  },
   messagesRequestPill: {
     backgroundColor: colors.primarySoft,
     borderColor: colors.border,
@@ -476,6 +481,81 @@ export const discoveryMessagesStyles = {
   messagesRequestPillText: {
     color: colors.primary,
     fontSize: 9,
+    fontWeight: "900"
+  },
+  conversationActionsRoot: {
+    flex: 1,
+    justifyContent: "flex-end",
+    padding: 16
+  },
+  conversationActionsBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(5, 18, 12, 0.52)"
+  },
+  conversationActionsDialog: {
+    alignSelf: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    elevation: 18,
+    maxWidth: 520,
+    paddingHorizontal: 16,
+    shadowColor: "#000000",
+    shadowOffset: { height: 8, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    width: "100%"
+  },
+  conversationActionsHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    minHeight: 68
+  },
+  conversationActionsTitleBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  conversationActionsTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: "900"
+  },
+  conversationActionsSubtitle: {
+    color: colors.muted,
+    fontSize: 12,
+    marginTop: 2
+  },
+  conversationActionsClose: {
+    alignItems: "center",
+    height: 40,
+    justifyContent: "center",
+    width: 40
+  },
+  conversationActionRow: {
+    alignItems: "center",
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 54,
+    paddingHorizontal: 4
+  },
+  conversationActionText: {
+    color: colors.text,
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "800"
+  },
+  conversationActionDanger: {
+    marginBottom: 6
+  },
+  conversationActionDangerText: {
+    color: colors.danger,
+    flex: 1,
+    fontSize: 14,
     fontWeight: "900"
   }
 } as const;

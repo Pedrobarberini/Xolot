@@ -463,6 +463,12 @@ Tasks:
 - [x] Separar Conversas de Solicitações de perfis não seguidos.
 - [x] Ocultar mensagens recebidas de perfis não seguidos até o follow.
 - [x] Permitir somente uma mensagem inicial como solicitação.
+- [x] Abrir ações da conversa por toque longo no card.
+- [x] Permitir fixar até três conversas no topo da lista.
+- [x] Permitir silenciar notificações por conversa.
+- [x] Permitir apagar a conversa somente para o usuário atual.
+- [x] Fazer uma conversa apagada reaparecer quando chegar uma nova mensagem.
+- [x] Persistir fixação, silêncio e corte do histórico por conta.
 - [x] Padronizar seta, logo e saldo no HUD das páginas de perfil e investimento.
 - [ ] Persistir conversas e mensagens no backend.
 - [ ] Entregar mensagens em tempo real entre contas autenticadas.
@@ -478,6 +484,9 @@ Criterios de aceite:
 - Sair da conta não deixa o histórico de uma conta visível para outra.
 - Perfis seguidos aparecem em Conversas e perfis não seguidos aparecem em Solicitações.
 - Uma mensagem recebida por solicitação só fica visível depois que o destinatário segue o remetente.
+- Toque longo oferece as ações Fixar, Silenciar notificações e Apagar conversa.
+- No máximo três conversas permanecem fixadas e são exibidas antes das demais.
+- Apagar uma conversa não remove o histórico armazenado para o outro participante.
 - A versão pública não trata estado local como entrega real ao destinatário.
 - Backend, moderação e privacidade devem estar prontos antes de liberar mensagens para o público.
 

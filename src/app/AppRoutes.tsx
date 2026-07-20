@@ -45,6 +45,7 @@ type AppRoutesProps = {
   clearSelectedProfile: () => void;
   closeInvestment: () => void;
   currentMessageContacts: MessageContact[];
+  deleteConversation: (contactId: string) => void;
   currentUserInvestments: Investment[];
   directMessages: DirectMessage[];
   feedFocusPlayerId: string | null;
@@ -94,6 +95,8 @@ type AppRoutesProps = {
   orderedFeedPlayers: Player[];
   ownProfileId?: string | null;
   pendingReviews: number;
+  mutedContactIds: string[];
+  pinnedContactIds: string[];
   profileAvatars: ProfileAvatarsByProfile;
   registeredUsers: AppUser[];
   reelReturnTarget: unknown;
@@ -113,6 +116,8 @@ type AppRoutesProps = {
   submissions: VideoSubmission[];
   tab: Tab;
   toggleFollowProfile: (profileId: string) => void;
+  toggleMuteConversation: (contactId: string) => void;
+  togglePinConversation: (contactId: string) => void;
   user: AppUser;
   walletBalance: number;
 };
@@ -125,6 +130,7 @@ export function AppRoutes({
   clearSelectedProfile,
   closeInvestment,
   currentMessageContacts,
+  deleteConversation,
   currentUserInvestments,
   directMessages,
   feedFocusPlayerId,
@@ -154,6 +160,8 @@ export function AppRoutes({
   orderedFeedPlayers,
   ownProfileId,
   pendingReviews,
+  mutedContactIds,
+  pinnedContactIds,
   profileAvatars,
   registeredUsers,
   reelReturnTarget,
@@ -170,6 +178,8 @@ export function AppRoutes({
   submissions,
   tab,
   toggleFollowProfile,
+  toggleMuteConversation,
+  togglePinConversation,
   user,
   walletBalance
 }: AppRoutesProps) {
@@ -330,12 +340,17 @@ export function AppRoutes({
                     currentUserId={user.id}
                     followingProfileIds={followingProfileIds}
                     messages={directMessages}
+                    mutedContactIds={mutedContactIds}
+                    onDeleteConversation={deleteConversation}
                     onFindProfiles={() => openTab("search")}
                     onSelectContact={setActiveMessageContactId}
                     onSendMessage={sendDirectMessage}
                     onToggleFollow={(profileId) =>
                       toggleFollowProfile(profileId)
                     }
+                    onToggleMute={toggleMuteConversation}
+                    onTogglePin={togglePinConversation}
+                    pinnedContactIds={pinnedContactIds}
                     profileAvatars={profileAvatars}
                   />
                 </ScreenFrame>
