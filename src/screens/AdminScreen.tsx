@@ -64,7 +64,11 @@ export function AdminScreen({
               </View>
 
               {submission.videoLink ? (
-                <SubmissionVideoPreview compact uri={submission.videoLink} />
+                <SubmissionVideoPreview
+                  compact
+                  mediaType={submission.mediaType}
+                  uri={submission.videoLink}
+                />
               ) : null}
               <Text style={styles.submissionBody}>{submission.highlight}</Text>
               <Text style={styles.adminFinePrint}>

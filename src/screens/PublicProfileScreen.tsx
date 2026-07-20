@@ -79,6 +79,7 @@ export function PublicProfileScreen({
         : "Investimento indisponível";
   const galleryVideos: ProfileGalleryVideo[] = videos.map((video) => ({
     id: video.id,
+    mediaType: video.mediaType ?? "video",
     title: video.videoTitle,
     uri: video.videoUri
   }));
@@ -173,7 +174,7 @@ export function PublicProfileScreen({
           <View style={styles.profileQuickStats}>
             <View style={styles.profileQuickItem}>
               <Text style={styles.profileQuickValue}>{videos.length}</Text>
-              <Text style={styles.profileQuickLabel}>videos</Text>
+              <Text style={styles.profileQuickLabel}>publicações</Text>
             </View>
             <View style={styles.profileQuickItem}>
               <Text style={styles.profileQuickValue}>
@@ -226,8 +227,8 @@ export function PublicProfileScreen({
         </View>
 
         <ProfileVideoGallery
-          emptyBody="Este usuário ainda não possui vídeos publicados para mostrar no perfil."
-          emptyTitle="Nenhum vídeo publicado"
+          emptyBody="Este usuário ainda não possui fotos ou vídeos publicados para mostrar no perfil."
+          emptyTitle="Nenhuma publicação"
           onOpenVideo={(video) => {
             const selectedVideo = videos.find((item) => item.id === video.id);
 

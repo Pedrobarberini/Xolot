@@ -768,6 +768,34 @@ Criterios de aceite:
 - O modal permanece utilizavel em celulares com telas baixas.
 - A tela Envio inicia com titulo e descricao sem card ao redor.
 
+### Task P2-009 - Criar envio em duas etapas com camera e galeria
+
+Tipo: Frontend/UX/Midia
+
+Status: Concluido em 2026-07-20.
+
+Tasks:
+
+- [x] Transformar a primeira etapa do Envio em uma camera traseira em tela cheia.
+- [x] Solicitar permissao de camera com estado alternativo quando indisponivel.
+- [x] Adicionar obturador para capturar fotos diretamente no app.
+- [x] Exibir no canto inferior esquerdo a ultima midia usada no NextStar.
+- [x] Abrir a galeria ao tocar na miniatura e aceitar fotos ou videos.
+- [x] Substituir a camera pela previa da midia selecionada.
+- [x] Mover titulo, texto, tags e marcacoes para uma segunda etapa.
+- [x] Persistir fotos e videos no armazenamento local do navegador.
+- [x] Exibir publicacoes com foto no Inicio e nas galerias de perfil.
+- [x] Manter videos anteriores compativeis com o novo formato.
+- [x] Cobrir normalizacao de tags, marcacoes e conversao de fotos com testes.
+
+Criterios de aceite:
+
+- A aba Envio abre diretamente na camera traseira acima do footer.
+- O usuario pode capturar uma foto ou selecionar foto/video da galeria.
+- A midia selecionada ocupa a area da camera antes de avancar.
+- Os dados textuais sao preenchidos somente na segunda etapa.
+- Fotos nao exibem controles de reproducao e continuam visiveis apos recarregar a pagina.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

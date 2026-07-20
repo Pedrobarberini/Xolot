@@ -106,6 +106,29 @@ test("seleciona vídeos aprovados e aplica dados do perfil completo", () => {
   assert.equal(players[0]?.name, completeUser.name);
   assert.equal(players[0]?.username, completeUser.username);
   assert.equal(players[0]?.position, completeUser.position);
+  assert.equal(players[0]?.mediaType, "video");
+  assert.deepEqual(players[0]?.tags, ["Novo", "Publicado"]);
+});
+
+test("preserva tipo, tags e marcacoes de uma publicacao com foto", () => {
+  const [player] = selectApprovedSubmissionPlayers(
+    [
+      {
+        ...approvedSubmission,
+        id: "foto-aprovada",
+        mediaType: "image",
+        mentions: ["projeto.nextstar"],
+        tags: ["Treino", "Base"],
+        videoLink: "https://nextstar.test/foto.jpg"
+      }
+    ],
+    [completeUser]
+  );
+
+  assert.equal(player?.mediaType, "image");
+  assert.equal(player?.hasAudio, false);
+  assert.deepEqual(player?.tags, ["Treino", "Base"]);
+  assert.deepEqual(player?.mentions, ["projeto.nextstar"]);
 });
 
 test("usa demo somente quando não existem players aprovados", () => {

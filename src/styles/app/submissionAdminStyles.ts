@@ -11,6 +11,202 @@ export const submissionAdminStyles = {
   submitScreen: {
     flex: 1
   },
+  submissionCaptureScreen: {
+    backgroundColor: "#000000",
+    flex: 1,
+    minHeight: 0
+  },
+  submissionCameraViewport: {
+    backgroundColor: "#000000",
+    flex: 1,
+    minHeight: 0,
+    overflow: "hidden",
+    position: "relative"
+  },
+  submissionCameraPreview: {
+    ...StyleSheet.absoluteFillObject
+  },
+  submissionMediaPreviewFill: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#000000",
+    overflow: "hidden"
+  },
+  submissionCameraPermission: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    backgroundColor: "#101613",
+    justifyContent: "center",
+    paddingHorizontal: 32
+  },
+  submissionCameraPermissionIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    height: 56,
+    justifyContent: "center",
+    width: 56
+  },
+  submissionCameraPermissionTitle: {
+    color: colors.onPrimary,
+    fontSize: 20,
+    fontWeight: "900",
+    marginTop: 16
+  },
+  submissionCameraPermissionBody: {
+    color: "#D5DDD8",
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 7,
+    maxWidth: 340,
+    textAlign: "center"
+  },
+  submissionCameraPermissionButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    marginTop: 20,
+    minHeight: 46,
+    paddingHorizontal: 18
+  },
+  submissionCameraPermissionButtonText: {
+    color: colors.onPrimary,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  submissionCameraTopShade: {
+    backgroundColor: "rgba(0, 0, 0, 0.36)",
+    height: 104,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0
+  },
+  submissionCameraTopBar: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    left: 0,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    position: "absolute",
+    right: 0,
+    top: 0
+  },
+  submissionCameraBrand: {
+    color: colors.onPrimary,
+    fontSize: 18,
+    fontWeight: "900"
+  },
+  submissionCameraBottomShade: {
+    backgroundColor: "rgba(0, 0, 0, 0.46)",
+    bottom: 0,
+    height: 132,
+    left: 0,
+    position: "absolute",
+    right: 0
+  },
+  submissionCameraControls: {
+    alignItems: "center",
+    bottom: 22,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    left: 22,
+    position: "absolute",
+    right: 22
+  },
+  submissionCameraIconButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(15, 21, 18, 0.68)",
+    borderColor: "rgba(255, 255, 255, 0.42)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: "center",
+    width: 48
+  },
+  submissionCameraControlSpacer: {
+    height: 52,
+    width: 52
+  },
+  submissionGalleryButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(15, 21, 18, 0.68)",
+    borderColor: colors.onPrimary,
+    borderRadius: 8,
+    borderWidth: 2,
+    height: 52,
+    justifyContent: "center",
+    overflow: "hidden",
+    width: 52
+  },
+  submissionGalleryThumbnail: {
+    height: "100%",
+    width: "100%"
+  },
+  submissionShutterOuter: {
+    alignItems: "center",
+    borderColor: colors.onPrimary,
+    borderRadius: 999,
+    borderWidth: 4,
+    height: 74,
+    justifyContent: "center",
+    width: 74
+  },
+  submissionShutterInner: {
+    backgroundColor: colors.onPrimary,
+    borderRadius: 999,
+    height: 58,
+    width: 58
+  },
+  submissionShutterDisabled: {
+    opacity: 0.42
+  },
+  submissionContinueButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderColor: colors.onPrimary,
+    borderRadius: 999,
+    borderWidth: 3,
+    height: 68,
+    justifyContent: "center",
+    width: 68
+  },
+  submissionDetailsHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 2
+  },
+  submissionDetailsBackButton: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    height: 42,
+    justifyContent: "center",
+    width: 42
+  },
+  submissionDetailsTitleBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  submissionDetailsPreview: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 18,
+    padding: 12
+  },
+  submissionDetailsMediaMeta: {
+    alignSelf: "stretch",
+    marginTop: 10
+  },
   adminHero: {
     backgroundColor: colors.surface,
     borderColor: colors.border,

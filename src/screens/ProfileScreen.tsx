@@ -131,6 +131,7 @@ export function ProfileScreen({
   );
   const galleryVideos: ProfileGalleryVideo[] = publishedVideos.map((video) => ({
     id: video.id,
+    mediaType: video.mediaType ?? "video",
     title: video.videoTitle,
     uri: video.videoLink
   }));
@@ -399,8 +400,8 @@ export function ProfileScreen({
           </View>
 
           <ProfileVideoGallery
-            emptyBody="Seus vídeos publicados apareceráo nesta galeria."
-            emptyTitle="Poste um vídeo para mostra-lo aqui"
+            emptyBody="Suas fotos e vídeos publicados aparecerão nesta galeria."
+            emptyTitle="Publique uma mídia para mostrá-la aqui"
             onDeleteVideo={(video) => {
               const selectedVideo = publishedVideos.find(
                 (item) => item.id === video.id

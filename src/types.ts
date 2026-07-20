@@ -1,5 +1,7 @@
 export type RiskLevel = "Baixo" | "Moderado" | "Alto";
 
+export type SubmissionMediaType = "image" | "video";
+
 export type PlayerMetric = {
   label: string;
   value: string;
@@ -30,10 +32,12 @@ export type Player = {
   videoTitle: string;
   videoLength: string;
   videoUri: string | number;
+  mediaType?: SubmissionMediaType;
   hasAudio?: boolean;
   isDemo?: boolean;
   highlight: string;
   tags: string[];
+  mentions?: string[];
   evaluation?: PlayerEvaluation;
 };
 
@@ -153,10 +157,13 @@ export type VideoSubmission = {
   club: string;
   videoTitle: string;
   videoLink: string;
+  mediaType?: SubmissionMediaType;
   videoDurationMs?: number;
   videoFileName?: string;
   videoFileSize?: number;
   highlight: string;
+  tags?: string[];
+  mentions?: string[];
   hasGuardianConsent: boolean;
   status: VideoSubmissionStatus;
   submittedAt: string;

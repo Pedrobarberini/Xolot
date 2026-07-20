@@ -639,14 +639,26 @@ function FeedReel({
                 <View style={styles.feedTagRow}>
                   {player.tags.slice(0, 3).map((tag) => (
                     <Text
-                      key={tag}
+                      key={`tag-${tag}`}
                       numberOfLines={1}
                       style={[
                         styles.feedTag,
                         { borderColor: palette.border, color: palette.text }
                       ]}
                     >
-                      {tag}
+                      #{tag}
+                    </Text>
+                  ))}
+                  {player.mentions?.slice(0, 2).map((mention) => (
+                    <Text
+                      key={`mention-${mention}`}
+                      numberOfLines={1}
+                      style={[
+                        styles.feedTag,
+                        { borderColor: palette.border, color: palette.text }
+                      ]}
+                    >
+                      @{mention}
                     </Text>
                   ))}
                 </View>
@@ -713,6 +725,18 @@ function FeedReel({
                         {player.tags.slice(0, 4).map((tag) => (
                           <Text key={tag} style={styles.feedCompactHashtag}>
                             #{tag}
+                          </Text>
+                        ))}
+                      </View>
+                    ) : null}
+                    {player.mentions && player.mentions.length > 0 ? (
+                      <View style={styles.feedCompactHashtagRow}>
+                        {player.mentions.slice(0, 4).map((mention) => (
+                          <Text
+                            key={mention}
+                            style={styles.feedCompactHashtag}
+                          >
+                            @{mention}
                           </Text>
                         ))}
                       </View>
@@ -963,17 +987,21 @@ function FeedVideoBox({
         { backgroundColor: palette.media, borderColor: palette.border }
       ]}
     >
-      <FeedVideoPlayback
-        accent={palette.accent}
-        caption={player.videoTitle}
-        durationLabel={player.videoLength}
-        hasAudio={player.hasAudio !== false}
-        isActive={isActive}
-        isWide={isWide}
-        onAccent={palette.onAccent}
-        trackColor={palette.progressTrack}
-        uri={player.videoUri}
-      />
+      {player.mediaType === "image" ? (
+        <FeedImagePlayback uri={player.videoUri} />
+      ) : (
+        <FeedVideoPlayback
+          accent={palette.accent}
+          caption={player.videoTitle}
+          durationLabel={player.videoLength}
+          hasAudio={player.hasAudio !== false}
+          isActive={isActive}
+          isWide={isWide}
+          onAccent={palette.onAccent}
+          trackColor={palette.progressTrack}
+          uri={player.videoUri}
+        />
+      )}
 
       {evaluation && fundingProgressLabel ? (
         <View style={styles.feedVideoActionRail}>
@@ -989,6 +1017,42 @@ function FeedVideoBox({
           </View>
         </View>
       ) : null}
+    </View>
+  );
+}
+
+function FeedImagePlayback({ uri }: { uri: string | number }) {
+  const resolvedImage = useResolvedVideoSource(uri);
+
+  if (!resolvedImage.source) {
+    return (
+      <View style={[styles.feedVideoPlayback, styles.videoUnavailableState]}>
+        <Text style={styles.videoUnavailableTitle}>
+          {resolvedImage.status === "loading"
+            ? "Carregando foto..."
+            : "Foto indisponível"}
+        </Text>
+        {resolvedImage.status === "unavailable" ? (
+          <Text style={styles.videoUnavailableBody}>
+            O arquivo temporário expirou. Publique esta foto novamente.
+          </Text>
+        ) : null}
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.feedVideoPlayback}>
+      <Image
+        accessibilityLabel="Foto da publicação"
+        resizeMode="cover"
+        source={
+          typeof resolvedImage.source === "number"
+            ? resolvedImage.source
+            : { uri: resolvedImage.source }
+        }
+        style={styles.feedVideoMedia}
+      />
     </View>
   );
 }

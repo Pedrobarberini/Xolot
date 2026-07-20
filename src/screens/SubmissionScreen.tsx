@@ -1,38 +1,52 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { Check, Send, Upload, X } from "lucide-react-native";
-import { Alert, Animated, Easing, Keyboard, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
-import { formatVideoDuration, formatVideoFileSize, getVideoTitleFromFileName } from "../actions/appActions";
+import { ArrowLeft, Check, Send } from "lucide-react-native";
+import {
+  Alert,
+  Animated,
+  Easing,
+  Keyboard,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  useWindowDimensions,
+  View
+} from "react-native";
+import {
+  formatVideoFileSize,
+  getVideoTitleFromFileName
+} from "../actions/appActions";
 import { LabeledInput } from "../components/Navigation";
-import { SubmissionVideoPreview } from "../components/SubmissionComponents";
+import {
+  SelectedSubmissionMedia,
+  SubmissionMediaStage
+} from "../components/SubmissionMediaStage";
+import { SubmissionMediaPreview } from "../components/SubmissionComponents";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { persistPickedVideo } from "../services/videoStorage";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, VideoSubmission } from "../types";
 import { DIRECT_PUBLICATION_STATUS } from "../utils/publication";
+import { parseSubmissionTokens } from "../utils/submissionMetadata";
+
+type SubmissionStep = "details" | "media";
 
 type SubmissionDraft = {
-  videoTitle: string;
-  videoLink: string;
-  highlight: string;
   hasGuardianConsent: boolean;
-};
-
-type SelectedVideoMeta = {
-  durationMs?: number;
-  file?: File;
-  fileName: string;
-  fileSize?: number;
-  mimeType?: string;
-  uri: string;
+  highlight: string;
+  mentionsText: string;
+  tagsText: string;
+  title: string;
 };
 
 const emptySubmissionDraft: SubmissionDraft = {
-  videoTitle: "",
-  videoLink: "",
+  hasGuardianConsent: false,
   highlight: "",
-  hasGuardianConsent: false
+  mentionsText: "",
+  tagsText: "",
+  title: ""
 };
 
 export function SubmitVideoScreen({
@@ -45,47 +59,49 @@ export function SubmitVideoScreen({
   const { width } = useWindowDimensions();
   const isCompact = USE_CENTERED_WEB_LAYOUT || width < 520;
   const [draft, setDraft] = useState<SubmissionDraft>(emptySubmissionDraft);
-  const [selectedVideo, setSelectedVideo] = useState<SelectedVideoMeta | null>(
-    null
-  );
+  const [selectedMedia, setSelectedMedia] =
+    useState<SelectedSubmissionMedia | null>(null);
+  const [lastMedia, setLastMedia] =
+    useState<SelectedSubmissionMedia | null>(null);
+  const [step, setStep] = useState<SubmissionStep>("media");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSubmittedId, setLastSubmittedId] = useState<string | null>(null);
   const submissionToastProgress = useRef(new Animated.Value(0)).current;
   const age = user.age ?? 0;
   const needsGuardianConsent = age > 0 && age < 18;
-  const hasRemoteVideoLink = /^https?:\/\/\S+$/i.test(draft.videoLink.trim());
-  const hasVideoSource = selectedVideo !== null || hasRemoteVideoLink;
+  const tags = parseSubmissionTokens(draft.tagsText, "#");
+  const mentions = parseSubmissionTokens(draft.mentionsText, "@");
   const submissionIssues = [
     user.profileCompleted ? null : "Complete os dados do perfil antes de enviar.",
     age >= 12
       ? null
       : "Revise a idade no perfil. Envios são aceitos a partir de 12 anos.",
-    draft.videoTitle.trim().length >= 4
+    selectedMedia ? null : "Escolha ou capture uma foto ou vídeo.",
+    draft.title.trim().length >= 4
       ? null
-      : "O título do vídeo precisa ter pelo menos 4 caracteres.",
-    hasVideoSource ? null : "Selecione um vídeo ou informe um link direto.",
+      : "O título precisa ter pelo menos 4 caracteres.",
     draft.highlight.trim().length >= 4
       ? null
       : "Escreva um texto para a publicação com pelo menos 4 caracteres.",
     !needsGuardianConsent || draft.hasGuardianConsent
       ? null
-      : "Confirme a autorizacao do responsavel legal."
+      : "Confirme a autorização do responsável legal."
   ].filter((issue): issue is string => Boolean(issue));
   const canSubmit = submissionIssues.length === 0 && !isSubmitting;
 
   useEffect(() => {
-    const selectedUri = selectedVideo?.uri;
+    const retainedUri = lastMedia?.uri;
 
     return () => {
       if (
         Platform.OS === "web" &&
-        selectedUri?.startsWith("blob:") &&
+        retainedUri?.startsWith("blob:") &&
         typeof URL !== "undefined"
       ) {
-        URL.revokeObjectURL(selectedUri);
+        URL.revokeObjectURL(retainedUri);
       }
     };
-  }, [selectedVideo?.uri]);
+  }, [lastMedia?.uri]);
 
   useEffect(() => {
     if (!lastSubmittedId) {
@@ -120,25 +136,42 @@ export function SubmitVideoScreen({
     return () => toastAnimation.stop();
   }, [lastSubmittedId, submissionToastProgress]);
 
-  function updateDraft(field: keyof SubmissionDraft, value: string | boolean) {
+  function updateDraft(
+    field: keyof SubmissionDraft,
+    value: string | boolean
+  ) {
     setDraft((current) => ({ ...current, [field]: value }));
   }
 
-  async function pickVideoFromLibrary() {
+  function selectMedia(media: SelectedSubmissionMedia) {
+    setSelectedMedia(media);
+    setLastMedia(media);
+    setDraft((current) => ({
+      ...current,
+      title:
+        current.title.trim() ||
+        (media.mediaType === "image"
+          ? "Meu lance"
+          : getVideoTitleFromFileName(media.fileName))
+    }));
+    setLastSubmittedId(null);
+  }
+
+  async function pickMediaFromLibrary() {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (!permission.granted) {
         Alert.alert(
           "Permissão necessária",
-          "Autorize o acesso aos videos para escolher um lance da galeria."
+          "Autorize o acesso à galeria para escolher uma foto ou vídeo."
         );
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
         allowsEditing: false,
-        mediaTypes: ["videos"],
+        mediaTypes: ["images", "videos"],
         quality: 1
       });
 
@@ -147,87 +180,79 @@ export function SubmitVideoScreen({
       }
 
       const asset = result.assets[0];
-      const fileName = asset.fileName || "video-selecionado.mp4";
+      const mediaType = asset.type === "video" ? "video" : "image";
+      const fallbackName =
+        mediaType === "video"
+          ? "video-selecionado.mp4"
+          : "foto-selecionada.jpg";
 
-      if (asset.type && asset.type !== "video") {
-        Alert.alert("Arquivo inválido", "Escolha um arquivo de vídeo.");
-        return;
-      }
-
-      setSelectedVideo({
-        durationMs: asset.duration ?? undefined,
+      selectMedia({
+        durationMs:
+          mediaType === "video" ? asset.duration ?? undefined : undefined,
         file: asset.file,
-        fileName,
+        fileName: asset.fileName || fallbackName,
         fileSize: asset.fileSize,
+        height: asset.height,
+        mediaType,
         mimeType: asset.mimeType,
-        uri: asset.uri
+        uri: asset.uri,
+        width: asset.width
       });
-      setDraft((current) => ({
-        ...current,
-        videoLink: asset.uri,
-        videoTitle:
-          current.videoTitle.trim() || getVideoTitleFromFileName(fileName)
-      }));
-      setLastSubmittedId(null);
     } catch {
       Alert.alert(
         "Não foi possível abrir a galeria",
-        "Tente novamente ou use um link direto para o arquivo de vídeo."
+        "Tente novamente em alguns instantes."
       );
     }
   }
 
-  function removeSelectedVideo() {
-    setSelectedVideo(null);
-    updateDraft("videoLink", "");
-  }
-
   async function submitDraft() {
-    if (!canSubmit) {
+    if (!canSubmit || !selectedMedia) {
       return;
     }
 
-    const id = `video-${Date.now()}`;
-
+    const id = `media-${Date.now()}`;
     setIsSubmitting(true);
 
     try {
-      const videoLink = selectedVideo
-        ? await persistPickedVideo(id, {
-            file: selectedVideo.file,
-            fileName: selectedVideo.fileName,
-            mimeType: selectedVideo.mimeType,
-            uri: selectedVideo.uri
-          })
-        : draft.videoLink.trim();
+      const mediaLink = await persistPickedVideo(id, {
+        file: selectedMedia.file,
+        fileName: selectedMedia.fileName,
+        mimeType: selectedMedia.mimeType,
+        uri: selectedMedia.uri
+      });
 
       onSubmit({
-        id,
-        userId: user.id,
-        athleteName: user.name,
         age,
+        approvedAt: new Date().toISOString(),
+        athleteName: user.name,
         city: user.city,
-        position: user.position,
         club: user.club,
-        videoTitle: draft.videoTitle.trim(),
-        videoLink,
-        videoDurationMs: selectedVideo?.durationMs,
-        videoFileName: selectedVideo?.fileName,
-        videoFileSize: selectedVideo?.fileSize,
-        highlight: draft.highlight.trim(),
         hasGuardianConsent: draft.hasGuardianConsent,
+        highlight: draft.highlight.trim(),
+        id,
+        mediaType: selectedMedia.mediaType,
+        mentions,
+        position: user.position,
         status: DIRECT_PUBLICATION_STATUS,
         submittedAt: new Date().toISOString(),
-        approvedAt: new Date().toISOString()
+        tags,
+        userId: user.id,
+        videoDurationMs: selectedMedia.durationMs,
+        videoFileName: selectedMedia.fileName,
+        videoFileSize: selectedMedia.fileSize,
+        videoLink: mediaLink,
+        videoTitle: draft.title.trim()
       });
       Keyboard.dismiss();
       setLastSubmittedId(id);
-      setSelectedVideo(null);
+      setSelectedMedia(null);
       setDraft(emptySubmissionDraft);
+      setStep("media");
     } catch {
       Alert.alert(
-        "Não foi possível salvar o video",
-        "O arquivo não foi enviado. Verifique o espaço do navegador e tente novamente."
+        "Não foi possível salvar a publicação",
+        "A mídia não foi salva. Verifique o espaço do navegador e tente novamente."
       );
     } finally {
       setIsSubmitting(false);
@@ -236,158 +261,160 @@ export function SubmitVideoScreen({
 
   return (
     <View style={styles.submitScreen}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.screenContent,
-          isCompact ? styles.screenContentCompact : null
-        ]}
-      >
-      <View style={styles.discoveryHeader}>
-        <Text style={styles.discoveryTitle}>Publique seu vídeo</Text>
-        <Text style={styles.discoverySubtitle}>
-          Adicione seu melhor lance e ele aparecerá imediatamente no Início e
-          no seu perfil durante esta fase de testes.
-        </Text>
-      </View>
-
-      <View
-        style={[
-          styles.infoPanel,
-          isCompact ? styles.submitInfoPanelCompact : null
-        ]}
-      >
-        <Text style={styles.sectionTitle}>Video</Text>
-        <LabeledInput
-          label="Título do vídeo"
-          onChangeText={(value) => updateDraft("videoTitle", value)}
-          placeholder="Melhores lances"
-          value={draft.videoTitle}
+      {step === "media" ? (
+        <SubmissionMediaStage
+          lastMedia={lastMedia}
+          onCapture={selectMedia}
+          onClear={() => setSelectedMedia(null)}
+          onContinue={() => {
+            if (selectedMedia) {
+              setStep("details");
+            }
+          }}
+          onOpenGallery={pickMediaFromLibrary}
+          selectedMedia={selectedMedia}
         />
-        <Pressable
-          accessibilityLabel="Escolher vídeo da galeria"
-          accessibilityRole="button"
-          onPress={pickVideoFromLibrary}
-          style={({ pressed }) => [
-            styles.videoPickerButton,
-            pressed ? styles.feedReelButtonPressed : null
+      ) : (
+        <ScrollView
+          contentContainerStyle={[
+            styles.screenContent,
+            isCompact ? styles.screenContentCompact : null
           ]}
+          keyboardShouldPersistTaps="handled"
         >
-          <Upload color={colors.primary} size={21} />
-          <Text style={styles.videoPickerButtonText}>
-            Escolher vídeo da galeria
-          </Text>
-        </Pressable>
-        <Text style={styles.videoPickerHint}>
-          Para o primeiro teste, prefira um MP4 vertical de até 60 segundos.
-        </Text>
-
-        {selectedVideo ? (
-          <View style={styles.selectedVideoPanel}>
-            <View style={styles.selectedVideoTextBlock}>
-              <Text numberOfLines={1} style={styles.selectedVideoName}>
-                {selectedVideo.fileName}
-              </Text>
-              <Text style={styles.selectedVideoMeta}>
-                {[
-                  formatVideoDuration(selectedVideo.durationMs),
-                  formatVideoFileSize(selectedVideo.fileSize)
-                ]
-                  .filter(Boolean)
-                  .join(" | ") || "Video pronto para visualizar"}
-              </Text>
-            </View>
+          <View style={styles.submissionDetailsHeader}>
             <Pressable
-              accessibilityLabel="Remover vídeo selecionado"
+              accessibilityLabel="Voltar para a mídia"
               accessibilityRole="button"
-              onPress={removeSelectedVideo}
-              style={styles.removeVideoButton}
+              onPress={() => setStep("media")}
+              style={styles.submissionDetailsBackButton}
             >
-              <X color={colors.danger} size={19} />
+              <ArrowLeft color={colors.text} size={21} />
             </Pressable>
-          </View>
-        ) : (
-          <>
-            <View style={styles.videoSourceDivider}>
-              <View style={styles.videoSourceDividerLine} />
-              <Text style={styles.videoSourceDividerText}>ou</Text>
-              <View style={styles.videoSourceDividerLine} />
+            <View style={styles.submissionDetailsTitleBlock}>
+              <Text style={styles.discoveryTitle}>Nova publicação</Text>
+              <Text style={styles.discoverySubtitle}>
+                Adicione as informações que acompanharão sua mídia.
+              </Text>
             </View>
+          </View>
+
+          {selectedMedia ? (
+            <View style={styles.submissionDetailsPreview}>
+              <SubmissionMediaPreview
+                allowEphemeralBrowserUri
+                compact
+                mediaType={selectedMedia.mediaType}
+                uri={selectedMedia.uri}
+              />
+              <View style={styles.submissionDetailsMediaMeta}>
+                <Text numberOfLines={1} style={styles.selectedVideoName}>
+                  {selectedMedia.fileName}
+                </Text>
+                <Text style={styles.selectedVideoMeta}>
+                  {[
+                    selectedMedia.mediaType === "image" ? "Foto" : "Vídeo",
+                    formatVideoFileSize(selectedMedia.fileSize)
+                  ]
+                    .filter(Boolean)
+                    .join(" | ")}
+                </Text>
+              </View>
+            </View>
+          ) : null}
+
+          <View
+            style={[
+              styles.infoPanel,
+              isCompact ? styles.submitInfoPanelCompact : null
+            ]}
+          >
+            <Text style={styles.sectionTitle}>Detalhes</Text>
+            <LabeledInput
+              label="Título"
+              onChangeText={(value) => updateDraft("title", value)}
+              placeholder="Meu melhor lance"
+              value={draft.title}
+            />
+            <LabeledInput
+              label="Texto da publicação"
+              multiline
+              onChangeText={(value) => updateDraft("highlight", value)}
+              placeholder="Conte o que acontece nesta publicação"
+              value={draft.highlight}
+            />
             <LabeledInput
               autoCapitalize="none"
-              label="Link direto do vídeo"
-              onChangeText={(value) => {
-                setSelectedVideo(null);
-                updateDraft("videoLink", value);
-              }}
-              placeholder="https://.../video.mp4"
-              value={draft.videoLink}
+              label="Tags"
+              onChangeText={(value) => updateDraft("tagsText", value)}
+              placeholder="#treino #futebol #oportunidade"
+              value={draft.tagsText}
             />
-          </>
-        )}
+            <LabeledInput
+              autoCapitalize="none"
+              label="Marcações"
+              onChangeText={(value) => updateDraft("mentionsText", value)}
+              placeholder="@clube @projeto"
+              value={draft.mentionsText}
+            />
 
-        {hasVideoSource ? (
-          <SubmissionVideoPreview uri={draft.videoLink.trim()} />
-        ) : null}
-        <LabeledInput
-          label="Texto da publicação"
-          multiline
-          onChangeText={(value) => updateDraft("highlight", value)}
-          placeholder="Conte o que acontece no video"
-          value={draft.highlight}
-        />
+            {needsGuardianConsent ? (
+              <Pressable
+                onPress={() =>
+                  updateDraft(
+                    "hasGuardianConsent",
+                    !draft.hasGuardianConsent
+                  )
+                }
+                style={styles.checkRow}
+              >
+                <View
+                  style={[
+                    styles.checkBox,
+                    draft.hasGuardianConsent ? styles.checkBoxActive : null
+                  ]}
+                >
+                  {draft.hasGuardianConsent ? (
+                    <Check color={colors.onPrimary} size={17} strokeWidth={3} />
+                  ) : null}
+                </View>
+                <Text style={styles.checkText}>
+                  Confirmo que o responsável legal autorizou a publicação.
+                </Text>
+              </Pressable>
+            ) : null}
 
-        {needsGuardianConsent ? (
-          <Pressable
-            onPress={() =>
-              updateDraft("hasGuardianConsent", !draft.hasGuardianConsent)
-            }
-            style={styles.checkRow}
-          >
-            <View
+            {submissionIssues.length > 0 ? (
+              <View style={styles.submissionValidationPanel}>
+                <Text style={styles.submissionValidationTitle}>
+                  Revise antes de publicar:
+                </Text>
+                {submissionIssues.map((issue) => (
+                  <View key={issue} style={styles.submissionValidationRow}>
+                    <Text style={styles.submissionValidationMarker}>-</Text>
+                    <Text style={styles.submissionValidationText}>{issue}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+
+            <Pressable
+              accessibilityRole="button"
+              disabled={!canSubmit}
+              onPress={submitDraft}
               style={[
-                styles.checkBox,
-                draft.hasGuardianConsent ? styles.checkBoxActive : null
+                styles.primaryButton,
+                !canSubmit ? styles.primaryButtonDisabled : null
               ]}
             >
-              {draft.hasGuardianConsent ? (
-                <Check color={colors.onPrimary} size={17} strokeWidth={3} />
-              ) : null}
-            </View>
-            <Text style={styles.checkText}>
-              Confirmo que o responsavel legal autorizou o envio.
-            </Text>
-          </Pressable>
-        ) : null}
-
-        {submissionIssues.length > 0 ? (
-          <View style={styles.submissionValidationPanel}>
-            <Text style={styles.submissionValidationTitle}>
-              Revise antes de enviar:
-            </Text>
-            {submissionIssues.map((issue) => (
-              <View key={issue} style={styles.submissionValidationRow}>
-                <Text style={styles.submissionValidationMarker}>-</Text>
-                <Text style={styles.submissionValidationText}>{issue}</Text>
-              </View>
-            ))}
+              <Send color={colors.onPrimary} size={19} />
+              <Text style={styles.primaryButtonText}>
+                {isSubmitting ? "Publicando..." : "Publicar"}
+              </Text>
+            </Pressable>
           </View>
-        ) : null}
-
-        <Pressable
-          disabled={!canSubmit}
-          onPress={submitDraft}
-          style={[
-            styles.primaryButton,
-            !canSubmit ? styles.primaryButtonDisabled : null
-          ]}
-        >
-          <Send color={colors.onPrimary} size={19} />
-          <Text style={styles.primaryButtonText}>
-            {isSubmitting ? "Publicando vídeo..." : "Publicar vídeo"}
-          </Text>
-        </Pressable>
-      </View>
-      </ScrollView>
+        </ScrollView>
+      )}
 
       {lastSubmittedId ? (
         <View pointerEvents="none" style={styles.submissionToastLayer}>
@@ -414,9 +441,9 @@ export function SubmitVideoScreen({
               <Check color={colors.primary} size={19} strokeWidth={3} />
             </View>
             <View style={styles.submissionToastTextBlock}>
-              <Text style={styles.submissionToastTitle}>Video publicado</Text>
+              <Text style={styles.submissionToastTitle}>Publicação enviada</Text>
               <Text style={styles.submissionToastBody}>
-                Ele já está disponível no Início e no seu perfil.
+                Ela já está disponível no Início e no seu perfil.
               </Text>
             </View>
           </Animated.View>

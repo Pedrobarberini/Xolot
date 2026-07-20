@@ -29,9 +29,14 @@ export function buildPlayerFromSubmission(submission: VideoSubmission): Player {
     videoTitle: submission.videoTitle,
     videoLength: formatVideoDuration(submission.videoDurationMs) ?? "",
     videoUri: submission.videoLink,
-    hasAudio: true,
+    mediaType: submission.mediaType ?? "video",
+    hasAudio: (submission.mediaType ?? "video") === "video",
     highlight: submission.highlight,
-    tags: ["Novo", "Publicado"]
+    tags:
+      submission.tags && submission.tags.length > 0
+        ? submission.tags
+        : ["Novo", "Publicado"],
+    mentions: submission.mentions ?? []
   };
 }
 
