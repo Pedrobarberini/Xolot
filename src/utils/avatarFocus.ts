@@ -30,6 +30,35 @@ export function normalizeAvatarCropScale(value: number) {
   return clamp(value, MIN_AVATAR_CROP_SCALE, MAX_AVATAR_CROP_SCALE);
 }
 
+export function getAvatarCropScaleFromPinch(
+  initialScale: number,
+  initialDistance: number,
+  currentDistance: number
+) {
+  if (initialDistance <= 0 || currentDistance <= 0) {
+    return normalizeAvatarCropScale(initialScale);
+  }
+
+  return normalizeAvatarCropScale(
+    initialScale * (currentDistance / initialDistance)
+  );
+}
+
+export function getAvatarPinchDistance(
+  touches: ReadonlyArray<{ pageX: number; pageY: number }>
+) {
+  if (touches.length < 2) {
+    return null;
+  }
+
+  const [firstTouch, secondTouch] = touches;
+
+  return Math.hypot(
+    secondTouch.pageX - firstTouch.pageX,
+    secondTouch.pageY - firstTouch.pageY
+  );
+}
+
 export function getAvatarCropScaleFromTrackPosition(
   positionX: number,
   trackWidth: number

@@ -4,7 +4,7 @@ import { Check, Send, Upload, X } from "lucide-react-native";
 import { Alert, Animated, Easing, Keyboard, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { formatVideoDuration, formatVideoFileSize, getVideoTitleFromFileName } from "../actions/appActions";
 import { LabeledInput } from "../components/Navigation";
-import { SubmissionList, SubmissionVideoPreview } from "../components/SubmissionComponents";
+import { SubmissionVideoPreview } from "../components/SubmissionComponents";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { persistPickedVideo } from "../services/videoStorage";
 import { styles } from "../styles/appStyles";
@@ -37,11 +37,9 @@ const emptySubmissionDraft: SubmissionDraft = {
 
 export function SubmitVideoScreen({
   onSubmit,
-  submissions,
   user
 }: {
   onSubmit: (submission: VideoSubmission) => void;
-  submissions: VideoSubmission[];
   user: AppUser;
 }) {
   const { width } = useWindowDimensions();
@@ -244,10 +242,9 @@ export function SubmitVideoScreen({
           isCompact ? styles.screenContentCompact : null
         ]}
       >
-      <View style={styles.submitHero}>
-        <Text style={styles.heroKicker}>Area do atleta</Text>
-        <Text style={styles.heroTitle}>Publique seu vídeo.</Text>
-        <Text style={styles.heroBody}>
+      <View style={styles.discoveryHeader}>
+        <Text style={styles.discoveryTitle}>Publique seu vídeo</Text>
+        <Text style={styles.discoverySubtitle}>
           Adicione seu melhor lance e ele aparecerá imediatamente no Início e
           no seu perfil durante esta fase de testes.
         </Text>
@@ -390,8 +387,6 @@ export function SubmitVideoScreen({
           </Text>
         </Pressable>
       </View>
-
-        <SubmissionList submissions={submissions} />
       </ScrollView>
 
       {lastSubmittedId ? (

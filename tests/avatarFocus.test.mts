@@ -5,6 +5,7 @@ import {
   MAX_AVATAR_CROP_SCALE,
   MIN_AVATAR_CROP_SCALE,
   getAvatarCropGeometry,
+  getAvatarCropScaleFromPinch,
   getAvatarCropScaleFromTrackPosition,
   getAvatarCropTrackPosition,
   getAvatarFocusFromCropPoint
@@ -127,4 +128,11 @@ test("mapeia slider entre trinta e cem por cento", () => {
         ((DEFAULT_AVATAR_CROP_SCALE - 0.3) / 0.7) * 200
     ) < 0.0001
   );
+});
+
+test("redimensiona o círculo com gesto de pinça dentro dos limites", () => {
+  assert.equal(getAvatarCropScaleFromPinch(0.5, 100, 150), 0.75);
+  assert.equal(getAvatarCropScaleFromPinch(0.5, 100, 20), 0.3);
+  assert.equal(getAvatarCropScaleFromPinch(0.8, 100, 200), 1);
+  assert.equal(getAvatarCropScaleFromPinch(0.7, 0, 150), 0.7);
 });

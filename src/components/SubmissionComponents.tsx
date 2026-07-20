@@ -3,7 +3,7 @@ import { VideoView, useVideoPlayer } from "expo-video";
 import { Text, View } from "react-native";
 import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { styles } from "../styles/appStyles";
-import { VideoSubmission, VideoSubmissionStatus } from "../types";
+import { VideoSubmissionStatus } from "../types";
 
 export function SubmissionVideoPreview({
   compact = false,
@@ -61,43 +61,6 @@ function VideoUnavailableState({ isLoading }: { isLoading: boolean }) {
           Este arquivo era temporário. Envie o vídeo novamente.
         </Text>
       ) : null}
-    </View>
-  );
-}
-
-export function SubmissionList({
-  submissions
-}: {
-  submissions: VideoSubmission[];
-}) {
-  return (
-    <View style={styles.infoPanel}>
-      <Text style={styles.sectionTitle}>Minhas publicações</Text>
-      {submissions.length === 0 ? (
-        <Text style={styles.bodyText}>
-          Nenhum vídeo publicado por esta conta ainda.
-        </Text>
-      ) : (
-        submissions.map((submission) => (
-          <View key={submission.id} style={styles.submissionItem}>
-            <View style={styles.submissionTopRow}>
-              <View style={styles.submissionTextBlock}>
-                <Text style={styles.submissionTitle}>
-                  {submission.videoTitle}
-                </Text>
-                <Text style={styles.submissionMeta}>
-                  {submission.position} | {submission.city}
-                </Text>
-              </View>
-              <StatusPill status={submission.status} />
-            </View>
-            <Text style={styles.submissionBody}>{submission.highlight}</Text>
-            {submission.reviewNote ? (
-              <Text style={styles.reviewNote}>{submission.reviewNote}</Text>
-            ) : null}
-          </View>
-        ))
-      )}
     </View>
   );
 }

@@ -1,6 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Minus, Plus, X } from "lucide-react-native";
-import { Image, Modal, PanResponder, Pressable, Text, View } from "react-native";
+import {
+  Image,
+  Modal,
+  PanResponder,
+  Pressable,
+  Text,
+  useWindowDimensions,
+  View
+} from "react-native";
 import { Circle, Defs, Mask, Rect, Svg } from "react-native-svg";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
@@ -12,9 +20,11 @@ import {
   MAX_AVATAR_CROP_SCALE,
   MIN_AVATAR_CROP_SCALE,
   getAvatarCropGeometry,
+  getAvatarCropScaleFromPinch,
   getAvatarCropScaleFromTrackPosition,
   getAvatarCropTrackPosition,
   getAvatarFocusFromCropPoint,
+  getAvatarPinchDistance,
   normalizeAvatarCropScale
 } from "../utils/avatarFocus";
 
@@ -41,6 +51,7 @@ export function AvatarPositionModal({
   onSave: (avatar: ProfileAvatar) => void;
   visible: boolean;
 }) {
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const [focusX, setFocusX] = useState(50);
   const [focusY, setFocusY] = useState(50);
   const [cropScale, setCropScale] = useState(DEFAULT_AVATAR_CROP_SCALE);
@@ -56,6 +67,14 @@ export function AvatarPositionModal({
   const sourceSizeRef = useRef(sourceSize);
   const cropScaleRef = useRef(cropScale);
   const cropTrackWidthRef = useRef(cropTrackWidth);
+  const pinchStartDistanceRef = useRef<number | null>(null);
+  const pinchStartScaleRef = useRef(cropScale);
+  const isCompact = windowWidth < 420 || windowHeight < 700;
+  const previewHeight = Math.min(
+    280,
+    Math.max(180, windowHeight - 340),
+    Math.max(180, windowWidth - (isCompact ? 48 : 76))
+  );
 
   const updateCropScale = useCallback((nextCropScale: number) => {
     const normalizedScale = normalizeAvatarCropScale(nextCropScale);
@@ -93,20 +112,63 @@ export function AvatarPositionModal({
     () =>
       PanResponder.create({
         onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: (event) =>
+        onMoveShouldSetPanResponderCapture: () => true,
+        onPanResponderGrant: (event) => {
+          const pinchDistance = getAvatarPinchDistance(
+            event.nativeEvent.touches
+          );
+
+          if (pinchDistance !== null) {
+            pinchStartDistanceRef.current = pinchDistance;
+            pinchStartScaleRef.current = cropScaleRef.current;
+            return;
+          }
+
           updateFocusFromPoint(
             event.nativeEvent.locationX,
             event.nativeEvent.locationY
-          ),
-        onPanResponderMove: (event) =>
+          );
+        },
+        onPanResponderMove: (event) => {
+          const pinchDistance = getAvatarPinchDistance(
+            event.nativeEvent.touches
+          );
+
+          if (pinchDistance !== null) {
+            if (pinchStartDistanceRef.current === null) {
+              pinchStartDistanceRef.current = pinchDistance;
+              pinchStartScaleRef.current = cropScaleRef.current;
+              return;
+            }
+
+            updateCropScale(
+              getAvatarCropScaleFromPinch(
+                pinchStartScaleRef.current,
+                pinchStartDistanceRef.current,
+                pinchDistance
+              )
+            );
+            return;
+          }
+
+          pinchStartDistanceRef.current = null;
           updateFocusFromPoint(
             event.nativeEvent.locationX,
             event.nativeEvent.locationY
-          ),
+          );
+        },
+        onPanResponderRelease: () => {
+          pinchStartDistanceRef.current = null;
+        },
+        onPanResponderTerminate: () => {
+          pinchStartDistanceRef.current = null;
+        },
         onPanResponderTerminationRequest: () => false,
-        onStartShouldSetPanResponder: () => true
+        onShouldBlockNativeResponder: () => true,
+        onStartShouldSetPanResponder: () => true,
+        onStartShouldSetPanResponderCapture: () => true
       }),
-    [updateFocusFromPoint]
+    [updateCropScale, updateFocusFromPoint]
   );
 
   const cropScalePanResponder = useMemo(
@@ -190,12 +252,18 @@ export function AvatarPositionModal({
           onPress={onClose}
           style={styles.avatarPositionBackdrop}
         />
-        <View accessibilityViewIsModal style={styles.avatarPositionDialog}>
+        <View
+          accessibilityViewIsModal
+          style={[
+            styles.avatarPositionDialog,
+            isCompact ? styles.avatarPositionDialogCompact : null
+          ]}
+        >
           <View style={styles.avatarPositionHeader}>
-            <View>
+            <View style={styles.avatarPositionHeaderText}>
               <Text style={styles.avatarPositionTitle}>Ajustar enquadramento</Text>
               <Text style={styles.avatarPositionSubtitle}>
-                Arraste o círculo sobre a foto
+                Arraste para posicionar e use dois dedos para redimensionar
               </Text>
             </View>
             <Pressable
@@ -224,7 +292,7 @@ export function AvatarPositionModal({
               previewSizeRef.current = nextSize;
               setPreviewSize(nextSize);
             }}
-            style={styles.avatarPositionPreview}
+            style={[styles.avatarPositionPreview, { height: previewHeight }]}
             {...focusPanResponder.panHandlers}
           >
             <Image

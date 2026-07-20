@@ -11,14 +11,6 @@ export const submissionAdminStyles = {
   submitScreen: {
     flex: 1
   },
-  submitHero: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 16,
-    padding: 18
-  },
   adminHero: {
     backgroundColor: colors.surface,
     borderColor: colors.border,

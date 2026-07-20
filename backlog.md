@@ -746,6 +746,28 @@ Criterios de aceite:
 - Nome do perfil, status, valor e porcentagem da cota continuam visiveis.
 - A lista permanece legivel em telas pequenas.
 
+### Task P2-008 - Melhorar enquadramento da foto e cabecalho de envio
+
+Tipo: Frontend/UX/Mobile
+
+Status: Concluido em 2026-07-20.
+
+Tasks:
+
+- [x] Impedir que o gesto sobre a foto amplie a pagina no navegador mobile.
+- [x] Permitir redimensionar o circulo de recorte com gesto de pinca.
+- [x] Manter o limite do recorte entre 30% e 100%.
+- [x] Adaptar a altura da previa para telas menores.
+- [x] Remover o card introdutorio da tela Envio.
+- [x] Remover o card Minhas publicacoes da tela Envio.
+- [x] Exibir Publique seu video como cabecalho simples acima do formulario.
+
+Criterios de aceite:
+
+- Arrastar move o circulo e usar dois dedos altera seu tamanho sem ampliar a pagina.
+- O modal permanece utilizavel em celulares com telas baixas.
+- A tela Envio inicia com titulo e descricao sem card ao redor.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

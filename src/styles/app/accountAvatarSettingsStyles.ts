@@ -247,10 +247,17 @@ export const accountAvatarSettingsStyles = {
     shadowRadius: 18,
     width: "100%"
   },
+  avatarPositionDialogCompact: {
+    padding: 14
+  },
   avatarPositionHeader: {
     alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between"
+  },
+  avatarPositionHeaderText: {
+    flex: 1,
+    paddingRight: 8
   },
   avatarPositionTitle: {
     color: colors.text,
@@ -279,6 +286,7 @@ export const accountAvatarSettingsStyles = {
     marginTop: 20,
     overflow: "hidden",
     position: "relative",
+    touchAction: "none",
     width: "100%"
   },
   avatarPositionFullImage: {

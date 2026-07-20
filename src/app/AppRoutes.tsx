@@ -379,7 +379,6 @@ export function AppRoutes({
                 <ScreenFrame key="submit">
                   <SubmitVideoScreen
                     onSubmit={handleSubmitVideo}
-                    submissions={selectUserSubmissions(submissions, user.id)}
                     user={user}
                   />
                 </ScreenFrame>
