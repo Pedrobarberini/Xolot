@@ -190,7 +190,8 @@ export default function App() {
     handleReviewSubmission,
     handleSignOut,
     handleSubmitVideo,
-    handleUpdateProfile
+    handleUpdateProfile,
+    handleWithdraw
   } = createAppActions({
     athleteFunds,
     registeredUsers,
@@ -269,6 +270,7 @@ export default function App() {
       handleReviewSubmission={handleReviewSubmission}
       handleSubmitVideo={handleSubmitVideo}
       handleUpdateProfile={handleUpdateProfile}
+      handleWithdraw={handleWithdraw}
       investmentFund={investmentFund}
       investmentPlayer={investmentPlayer}
       isBrandLaunchVisible={isBrandLaunchVisible}

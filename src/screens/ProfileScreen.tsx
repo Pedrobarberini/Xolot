@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   Bell,
   Camera,
-  CircleDollarSign,
   LogOut,
   Menu,
   Play,
@@ -48,7 +47,6 @@ import {
   ProfileAvatarsByProfile,
   VideoSubmission
 } from "../types";
-import { formatBRL } from "../utils/investment";
 import { DEFAULT_AVATAR_CROP_SCALE } from "../utils/avatarFocus";
 import { AccountSetupScreen } from "./AccountSetupScreen";
 import { PortfolioScreen } from "./WalletScreen";
@@ -72,6 +70,7 @@ export function ProfileScreen({
   onOpenVideo,
   onSignOut,
   onUpdateProfile,
+  onWithdraw,
   player,
   profileAvatars,
   submissions,
@@ -97,6 +96,7 @@ export function ProfileScreen({
   onOpenVideo: (video: VideoSubmission) => void;
   onSignOut: () => void;
   onUpdateProfile: (profile: AccountProfile) => void;
+  onWithdraw: (amount: number) => void;
   player?: Player;
   profileAvatars: ProfileAvatarsByProfile;
   submissions: VideoSubmission[];
@@ -217,37 +217,18 @@ export function ProfileScreen({
 
   if (profileView === "wallet") {
     return (
-      <ScreenTransition key="wallet" style={styles.profileViewScene}>
-        <PortfolioScreen
-          balance={balance}
-          investments={investments}
-          onBack={() => setProfileView("overview")}
-          onDeposit={onDeposit}
-        />
-      </ScreenTransition>
-    );
-  }
-
-  if (profileView === "settings") {
-    return (
       <>
-        <ScreenTransition key="settings" style={styles.profileViewScene}>
-          <SettingsView
-            accountSubmissions={accountSubmissions}
-            autoplayEnabled={autoplayEnabled}
-            avatar={avatar}
+        <ScreenTransition key="wallet" style={styles.profileViewScene}>
+          <PortfolioScreen
+            balance={balance}
             fund={fund}
             investments={investments}
-            notificationsEnabled={notificationsEnabled}
             onBack={() => setProfileView("overview")}
-            onChangeAvatar={onChangeAvatar}
-            onChangeAutoplay={setAutoplayEnabled}
-            onChangeNotifications={setNotificationsEnabled}
+            onDeposit={onDeposit}
             onRequestOpenFund={() => setIsFundModalVisible(true)}
-            onRequestAvatarPosition={() => setIsAvatarPositionVisible(true)}
-            onOpenEditProfile={() => setProfileView("edit-profile")}
+            onWithdraw={onWithdraw}
             player={player}
-            user={user}
+            submissionsCount={accountSubmissions.length}
           />
         </ScreenTransition>
         {player ? (
@@ -261,6 +242,28 @@ export function ProfileScreen({
             visible={isFundModalVisible}
           />
         ) : null}
+      </>
+    );
+  }
+
+  if (profileView === "settings") {
+    return (
+      <>
+        <ScreenTransition key="settings" style={styles.profileViewScene}>
+          <SettingsView
+            accountSubmissions={accountSubmissions}
+            autoplayEnabled={autoplayEnabled}
+            avatar={avatar}
+            notificationsEnabled={notificationsEnabled}
+            onBack={() => setProfileView("overview")}
+            onChangeAvatar={onChangeAvatar}
+            onChangeAutoplay={setAutoplayEnabled}
+            onChangeNotifications={setNotificationsEnabled}
+            onRequestAvatarPosition={() => setIsAvatarPositionVisible(true)}
+            onOpenEditProfile={() => setProfileView("edit-profile")}
+            user={user}
+          />
+        </ScreenTransition>
         {avatarPositionModal}
       </>
     );
@@ -539,8 +542,6 @@ function SettingsView({
   accountSubmissions,
   autoplayEnabled,
   avatar,
-  fund,
-  investments,
   notificationsEnabled,
   onBack,
   onChangeAvatar,
@@ -548,15 +549,11 @@ function SettingsView({
   onChangeNotifications,
   onRequestAvatarPosition,
   onOpenEditProfile,
-  onRequestOpenFund,
-  player,
   user
 }: {
   accountSubmissions: VideoSubmission[];
   autoplayEnabled: boolean;
   avatar?: ProfileAvatar;
-  fund?: AthleteFund;
-  investments: Investment[];
   notificationsEnabled: boolean;
   onBack: () => void;
   onChangeAvatar: (avatar: ProfileAvatar | null) => void;
@@ -564,20 +561,14 @@ function SettingsView({
   onChangeNotifications: (value: boolean) => void;
   onRequestAvatarPosition: () => void;
   onOpenEditProfile: () => void;
-  onRequestOpenFund: () => void;
-  player?: Player;
   user: AppUser;
 }) {
-  const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
   const approved = accountSubmissions.filter(
     (item) => item.status === "Aprovado"
   ).length;
   const pending = accountSubmissions.filter(
     (item) => item.status === "Em revisão"
   ).length;
-  const fundProgress = fund
-    ? Math.min(fund.fundedAmount / fund.goalAmount, 1)
-    : 0;
   const profileInitials = user.name
     .split(" ")
     .slice(0, 2)
@@ -771,27 +762,7 @@ function SettingsView({
         </View>
       </View>
 
-      {user.role === "Usuário" ? (
-        <View style={styles.settingsSection}>
-          <Text style={styles.settingsSectionTitle}>Conta NextStar</Text>
-          <View style={styles.profileRowNoBorder}>
-            <Text style={styles.profileLabel}>Reservas simuladas</Text>
-            <Text style={styles.profileValue}>{investments.length}</Text>
-          </View>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Total</Text>
-            <Text style={styles.profileValue}>{formatBRL(totalInvested)}</Text>
-          </View>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Vídeos enviados</Text>
-            <Text style={styles.profileValue}>{accountSubmissions.length}</Text>
-          </View>
-          <View style={styles.profileRow}>
-            <Text style={styles.profileLabel}>Status padrão</Text>
-            <Text style={styles.profileValue}>Publicação direta (teste)</Text>
-          </View>
-        </View>
-      ) : (
+      {user.role === "Admin" ? (
         <View style={styles.settingsSection}>
           <Text style={styles.settingsSectionTitle}>Conta administrativa</Text>
           <View style={styles.profileRowNoBorder}>
@@ -802,91 +773,6 @@ function SettingsView({
             <Text style={styles.profileLabel}>Publicados</Text>
             <Text style={styles.profileValue}>{approved}</Text>
           </View>
-        </View>
-      )}
-
-      {user.role === "Usuário" ? (
-        <View style={styles.settingsSection}>
-          <View style={styles.fundTitleRow}>
-            <Text style={styles.settingsSectionTitle}>
-              Bolsa de investimento
-            </Text>
-            {fund ? (
-              <Text
-                style={[
-                  styles.fundStatus,
-                  fund.status === "Concluída"
-                    ? styles.fundStatusComplete
-                    : null
-                ]}
-              >
-                {fund.status}
-              </Text>
-            ) : null}
-          </View>
-
-          {fund?.status === "Concluída" ? (
-            <View style={styles.settingsFundComplete}>
-              <Text style={styles.settingsFundCompleteTitle}>
-                Investimento concluído
-              </Text>
-              <Text style={styles.settingsFundCompleteBody}>
-                Sua meta foi atingida. Seu perfil está em busca de contratantes.
-              </Text>
-            </View>
-          ) : null}
-
-          {fund ? (
-            <>
-              <View style={styles.fundProgressHeader}>
-                <Text style={styles.fundProgressValue}>
-                  {formatBRL(fund.fundedAmount)} captados
-                </Text>
-                <Text style={styles.fundProgressGoal}>
-                  Meta {formatBRL(fund.goalAmount)}
-                </Text>
-              </View>
-              <View style={styles.fundProgressTrack}>
-                <View
-                  style={[
-                    styles.fundProgressFill,
-                    { width: `${fundProgress * 100}%` }
-                  ]}
-                />
-              </View>
-              <Text style={styles.fundCustodyNote}>
-                A bolsa fica sob custódia simulada do app. Você acompanha a
-                captação, mas não pode sacar os recursos.
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.bodyText}>
-                Abra uma bolsa vinculada ao perfil público para receber aportes
-                simulados de outros usuários.
-              </Text>
-              {!player ? (
-                <Text style={styles.validationText}>
-                  Publique um vídeo para criar seu perfil público antes de abrir
-                  a bolsa.
-                </Text>
-              ) : null}
-              <Pressable
-                accessibilityRole="button"
-                disabled={!player}
-                onPress={onRequestOpenFund}
-                style={[
-                  styles.primaryButton,
-                  !player ? styles.primaryButtonDisabled : null
-                ]}
-              >
-                <CircleDollarSign color={colors.onPrimary} size={18} />
-                <Text style={styles.primaryButtonText}>
-                  Abrir bolsa de investimento
-                </Text>
-              </Pressable>
-            </>
-          )}
         </View>
       ) : null}
 

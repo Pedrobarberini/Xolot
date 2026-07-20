@@ -155,6 +155,7 @@ export const walletInvestmentStyles = {
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
+    marginBottom: 12,
     padding: 18
   },
   summaryTopRow: {
@@ -167,6 +168,7 @@ export const walletInvestmentStyles = {
     alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: 6,
+    flex: 1,
     flexDirection: "row",
     gap: 7,
     justifyContent: "center",
@@ -191,32 +193,31 @@ export const walletInvestmentStyles = {
     letterSpacing: 0,
     marginTop: 6
   },
-  summaryInsightStrip: {
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
+  walletActionRow: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 14,
-    paddingHorizontal: 10,
-    paddingVertical: 10
+    gap: 9,
+    marginTop: 16
   },
-  summaryInsightItem: {
+  withdrawButton: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.borderStrong,
+    borderRadius: 6,
+    borderWidth: 1,
     flex: 1,
-    minWidth: 0
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 40,
+    paddingHorizontal: 13
   },
-  summaryInsightValue: {
-    color: colors.primary,
-    fontSize: 14,
+  withdrawButtonText: {
+    color: colors.text,
+    fontSize: 13,
     fontWeight: "900"
   },
-  summaryInsightLabel: {
-    color: colors.muted,
-    fontSize: 9,
-    fontWeight: "900",
-    marginTop: 3,
-    textTransform: "uppercase"
+  walletActionButtonDisabled: {
+    opacity: 0.42
   },
   walletInfoButton: {
     alignItems: "center",

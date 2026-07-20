@@ -76,6 +76,7 @@ type AppRoutesProps = {
     position: string;
     username: string;
   }) => void;
+  handleWithdraw: (amount: number) => void;
   investmentFund?: AthleteFund;
   investmentPlayer: Player | null;
   isBrandLaunchVisible: boolean;
@@ -139,6 +140,7 @@ export function AppRoutes({
   handleReviewSubmission,
   handleSubmitVideo,
   handleUpdateProfile,
+  handleWithdraw,
   investmentFund,
   investmentPlayer,
   isBrandLaunchVisible,
@@ -398,6 +400,7 @@ export function AppRoutes({
                     }}
                     onSignOut={signOutSession}
                     onUpdateProfile={handleUpdateProfile}
+                    onWithdraw={handleWithdraw}
                     player={selectPlayerByOwner(availablePlayers, user.id)}
                     profileAvatars={profileAvatars}
                     submissions={submissions}

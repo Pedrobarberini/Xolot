@@ -689,6 +689,29 @@ Criterios de aceite:
 - As informacoes financeiras continuam acessiveis em um unico ponto.
 - A interface nao apresenta promessa de rendimento ou saque indisponivel como funcionalidade ativa.
 
+### Task P2-006 - Mover dados financeiros para a Carteira e adicionar saque
+
+Tipo: Frontend/UX/Financeiro
+
+Status: Concluido em 2026-07-20.
+
+Tasks:
+
+- [x] Remover os cards `Conta NextStar` e `Bolsa de investimento` das Configuracoes.
+- [x] Exibir os dois cards dentro da Carteira.
+- [x] Manter abertura e acompanhamento da bolsa pela Carteira.
+- [x] Adicionar acao de saque ao lado do deposito.
+- [x] Validar valor minimo, saldo disponivel e impedir saldo negativo.
+- [x] Persistir o novo saldo depois do saque simulado.
+- [x] Atualizar a HUD financeira para diferenciar saldo sacavel e valor aportado.
+- [x] Cobrir deposito e saque com testes unitarios.
+
+Criterios de aceite:
+
+- Configuracoes exibe apenas preferencias e dados da conta.
+- Carteira centraliza saldo, movimentacoes, reservas e bolsa do atleta.
+- Saque nunca ultrapassa o saldo disponivel nem retira aportes ja confirmados.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

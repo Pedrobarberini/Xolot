@@ -1,29 +1,54 @@
 import React, { useState } from "react";
-import { ArrowLeft, CircleDollarSign, Info, X } from "lucide-react-native";
+import {
+  ArrowLeft,
+  BanknoteArrowDown,
+  CircleDollarSign,
+  Info,
+  X
+} from "lucide-react-native";
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { FinancialInfoModal } from "../components/FinancialInfoModal";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import { Investment } from "../types";
+import { AthleteFund, Investment, Player } from "../types";
 import { formatBRL, formatPercent } from "../utils/investment";
+import {
+  MAX_WALLET_DEPOSIT_AMOUNT,
+  MIN_WALLET_OPERATION_AMOUNT,
+  isValidDepositAmount,
+  isValidWithdrawalAmount
+} from "../utils/wallet";
+
+type WalletOperation = "deposit" | "withdraw";
 
 export function PortfolioScreen({
   balance,
+  fund,
   investments,
   onBack,
-  onDeposit
+  onDeposit,
+  onRequestOpenFund,
+  onWithdraw,
+  player,
+  submissionsCount
 }: {
   balance: number;
+  fund?: AthleteFund;
   investments: Investment[];
   onBack?: () => void;
   onDeposit: (amount: number) => void;
+  onRequestOpenFund: () => void;
+  onWithdraw: (amount: number) => void;
+  player?: Player;
+  submissionsCount: number;
 }) {
-  const [isDepositVisible, setIsDepositVisible] = useState(false);
+  const [activeOperation, setActiveOperation] =
+    useState<WalletOperation | null>(null);
   const [isInfoVisible, setIsInfoVisible] = useState(false);
   const totalInvested = investments.reduce((sum, item) => sum + item.amount, 0);
-  const supportedAthletes = new Set(
-    investments.map((investment) => investment.profileId)
-  ).size;
+  const fundProgress = fund
+    ? Math.min(fund.fundedAmount / fund.goalAmount, 1)
+    : 0;
 
   return (
     <>
@@ -57,9 +82,13 @@ export function PortfolioScreen({
         <View style={styles.summaryBand}>
           <View style={styles.summaryTopRow}>
             <Text style={styles.summaryLabel}>Saldo disponível</Text>
+          </View>
+          <Text style={styles.summaryValue}>{formatBRL(balance)}</Text>
+          <View style={styles.walletActionRow}>
             <Pressable
+              accessibilityLabel="Depositar saldo"
               accessibilityRole="button"
-              onPress={() => setIsDepositVisible(true)}
+              onPress={() => setActiveOperation("deposit")}
               style={({ pressed }) => [
                 styles.depositButton,
                 pressed ? styles.buttonPressed : null
@@ -68,24 +97,122 @@ export function PortfolioScreen({
               <CircleDollarSign color={colors.onPrimary} size={18} />
               <Text style={styles.depositButtonText}>Depositar</Text>
             </Pressable>
+            <Pressable
+              accessibilityLabel="Sacar saldo"
+              accessibilityRole="button"
+              disabled={balance < MIN_WALLET_OPERATION_AMOUNT}
+              onPress={() => setActiveOperation("withdraw")}
+              style={({ pressed }) => [
+                styles.withdrawButton,
+                balance < MIN_WALLET_OPERATION_AMOUNT
+                  ? styles.walletActionButtonDisabled
+                  : null,
+                pressed ? styles.buttonPressed : null
+              ]}
+            >
+              <BanknoteArrowDown color={colors.text} size={18} />
+              <Text style={styles.withdrawButtonText}>Sacar</Text>
+            </Pressable>
           </View>
-          <Text style={styles.summaryValue}>{formatBRL(balance)}</Text>
-          <View style={styles.summaryInsightStrip}>
-            <View style={styles.summaryInsightItem}>
-              <Text style={styles.summaryInsightValue}>
-                {formatBRL(totalInvested)}
+        </View>
+
+        <View style={styles.settingsSection}>
+          <Text style={styles.settingsSectionTitle}>Conta NextStar</Text>
+          <View style={styles.profileRowNoBorder}>
+            <Text style={styles.profileLabel}>Reservas simuladas</Text>
+            <Text style={styles.profileValue}>{investments.length}</Text>
+          </View>
+          <View style={styles.profileRow}>
+            <Text style={styles.profileLabel}>Total</Text>
+            <Text style={styles.profileValue}>{formatBRL(totalInvested)}</Text>
+          </View>
+          <View style={styles.profileRow}>
+            <Text style={styles.profileLabel}>Vídeos enviados</Text>
+            <Text style={styles.profileValue}>{submissionsCount}</Text>
+          </View>
+          <View style={styles.profileRow}>
+            <Text style={styles.profileLabel}>Status padrão</Text>
+            <Text style={styles.profileValue}>Publicação direta (teste)</Text>
+          </View>
+        </View>
+
+        <View style={styles.settingsSection}>
+          <View style={styles.fundTitleRow}>
+            <Text style={styles.settingsSectionTitle}>
+              Bolsa de investimento
+            </Text>
+            {fund ? (
+              <Text
+                style={[
+                  styles.fundStatus,
+                  fund.status === "Concluída"
+                    ? styles.fundStatusComplete
+                    : null
+                ]}
+              >
+                {fund.status}
               </Text>
-              <Text style={styles.summaryInsightLabel}>reservado</Text>
-            </View>
-            <View style={styles.summaryInsightItem}>
-              <Text style={styles.summaryInsightValue}>{investments.length}</Text>
-              <Text style={styles.summaryInsightLabel}>reservas</Text>
-            </View>
-            <View style={styles.summaryInsightItem}>
-              <Text style={styles.summaryInsightValue}>{supportedAthletes}</Text>
-              <Text style={styles.summaryInsightLabel}>atletas</Text>
-            </View>
+            ) : null}
           </View>
+
+          {fund?.status === "Concluída" ? (
+            <View style={styles.settingsFundComplete}>
+              <Text style={styles.settingsFundCompleteTitle}>
+                Investimento concluído
+              </Text>
+              <Text style={styles.settingsFundCompleteBody}>
+                Sua meta foi atingida. Seu perfil está em busca de contratantes.
+              </Text>
+            </View>
+          ) : null}
+
+          {fund ? (
+            <>
+              <View style={styles.fundProgressHeader}>
+                <Text style={styles.fundProgressValue}>
+                  {formatBRL(fund.fundedAmount)} captados
+                </Text>
+                <Text style={styles.fundProgressGoal}>
+                  Meta {formatBRL(fund.goalAmount)}
+                </Text>
+              </View>
+              <View style={styles.fundProgressTrack}>
+                <View
+                  style={[
+                    styles.fundProgressFill,
+                    { width: `${fundProgress * 100}%` }
+                  ]}
+                />
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={styles.bodyText}>
+                Abra uma bolsa vinculada ao perfil público para receber aportes
+                simulados de outros usuários.
+              </Text>
+              {!player ? (
+                <Text style={styles.validationText}>
+                  Publique um vídeo para criar seu perfil público antes de abrir
+                  a bolsa.
+                </Text>
+              ) : null}
+              <Pressable
+                accessibilityRole="button"
+                disabled={!player}
+                onPress={onRequestOpenFund}
+                style={[
+                  styles.primaryButton,
+                  !player ? styles.primaryButtonDisabled : null
+                ]}
+              >
+                <CircleDollarSign color={colors.onPrimary} size={18} />
+                <Text style={styles.primaryButtonText}>
+                  Abrir bolsa de investimento
+                </Text>
+              </Pressable>
+            </>
+          )}
         </View>
 
         {investments.length === 0 ? (
@@ -119,11 +246,19 @@ export function PortfolioScreen({
           ))
         )}
       </ScrollView>
-      <DepositModal
+      <WalletOperationModal
         balance={balance}
-        onClose={() => setIsDepositVisible(false)}
-        onConfirm={onDeposit}
-        visible={isDepositVisible}
+        onClose={() => setActiveOperation(null)}
+        onConfirm={(amount) => {
+          if (activeOperation === "withdraw") {
+            onWithdraw(amount);
+            return;
+          }
+
+          onDeposit(amount);
+        }}
+        operation={activeOperation ?? "deposit"}
+        visible={activeOperation !== null}
       />
       <FinancialInfoModal
         onClose={() => setIsInfoVisible(false)}
@@ -133,28 +268,33 @@ export function PortfolioScreen({
   );
 }
 
-function DepositModal({
+function WalletOperationModal({
   balance,
   onClose,
   onConfirm,
+  operation,
   visible
 }: {
   balance: number;
   onClose: () => void;
   onConfirm: (amount: number) => void;
+  operation: WalletOperation;
   visible: boolean;
 }) {
   const [amountText, setAmountText] = useState("");
   const amount = Number(amountText.replace(/\D/g, "")) || 0;
-  const canDeposit = amount >= 10 && amount <= 100000;
+  const isDeposit = operation === "deposit";
+  const canConfirm = isDeposit
+    ? isValidDepositAmount(amount)
+    : isValidWithdrawalAmount(balance, amount);
 
   function closeModal() {
     setAmountText("");
     onClose();
   }
 
-  function confirmDeposit() {
-    if (!canDeposit) {
+  function confirmOperation() {
+    if (!canConfirm) {
       return;
     }
 
@@ -172,16 +312,20 @@ function DepositModal({
     >
       <View style={styles.depositModalRoot}>
         <Pressable
-          accessibilityLabel="Fechar depósito"
+          accessibilityLabel={isDeposit ? "Fechar depósito" : "Fechar saque"}
           onPress={closeModal}
           style={styles.depositModalBackdrop}
         />
         <View accessibilityViewIsModal style={styles.depositDialog}>
           <View style={styles.depositDialogHeader}>
             <View style={styles.depositDialogTitleBlock}>
-              <Text style={styles.depositDialogTitle}>Depositar saldo</Text>
+              <Text style={styles.depositDialogTitle}>
+                {isDeposit ? "Depositar saldo" : "Sacar saldo"}
+              </Text>
               <Text style={styles.depositDialogSubtitle}>
-                Operacao demonstrativa, sem cobranca real.
+                {isDeposit
+                  ? "Adição simulada, sem cobrança bancária."
+                  : "Retirada simulada do saldo disponível, sem transferência bancária."}
               </Text>
             </View>
             <Pressable
@@ -197,7 +341,9 @@ function DepositModal({
           <Text style={styles.depositBalanceLabel}>Saldo atual</Text>
           <Text style={styles.depositBalanceValue}>{formatBRL(balance)}</Text>
 
-          <Text style={styles.inputLabel}>Valor do depósito</Text>
+          <Text style={styles.inputLabel}>
+            {isDeposit ? "Valor do depósito" : "Valor do saque"}
+          </Text>
           <View style={styles.depositInputRow}>
             <Text style={styles.depositCurrencyPrefix}>R$</Text>
             <TextInput
@@ -215,11 +361,15 @@ function DepositModal({
           <View style={styles.depositPresetRow}>
             {[50, 100, 250, 500].map((preset) => (
               <Pressable
+                disabled={!isDeposit && preset > balance}
                 key={preset}
                 onPress={() => setAmountText(String(preset))}
                 style={[
                   styles.depositPresetButton,
-                  amount === preset ? styles.depositPresetButtonActive : null
+                  amount === preset ? styles.depositPresetButtonActive : null,
+                  !isDeposit && preset > balance
+                    ? styles.walletActionButtonDisabled
+                    : null
                 ]}
               >
                 <Text
@@ -234,9 +384,11 @@ function DepositModal({
             ))}
           </View>
 
-          {amount > 0 && !canDeposit ? (
+          {amount > 0 && !canConfirm ? (
             <Text style={styles.validationText}>
-              Informe um valor entre R$ 10 e R$ 100.000.
+              {isDeposit
+                ? `Informe um valor entre ${formatBRL(MIN_WALLET_OPERATION_AMOUNT)} e ${formatBRL(MAX_WALLET_DEPOSIT_AMOUNT)}.`
+                : `Informe um valor entre ${formatBRL(MIN_WALLET_OPERATION_AMOUNT)} e ${formatBRL(balance)}.`}
             </Text>
           ) : null}
 
@@ -245,14 +397,16 @@ function DepositModal({
               <Text style={styles.depositCancelText}>Cancelar</Text>
             </Pressable>
             <Pressable
-              disabled={!canDeposit}
-              onPress={confirmDeposit}
+              disabled={!canConfirm}
+              onPress={confirmOperation}
               style={[
                 styles.depositConfirmButton,
-                !canDeposit ? styles.primaryButtonDisabled : null
+                !canConfirm ? styles.primaryButtonDisabled : null
               ]}
             >
-              <Text style={styles.depositConfirmText}>Confirmar depósito</Text>
+              <Text style={styles.depositConfirmText}>
+                {isDeposit ? "Confirmar depósito" : "Confirmar saque"}
+              </Text>
             </Pressable>
           </View>
         </View>

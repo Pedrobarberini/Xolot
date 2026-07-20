@@ -13,13 +13,13 @@ import { colors } from "../theme";
 const FINANCIAL_TOPICS = [
   {
     body:
-      "Depósitos e aportes registram movimentações dentro da plataforma. No ambiente atual, nenhum valor é enviado ou recebido por uma conta bancária.",
+      "Depósitos e saques alteram o saldo disponível dentro da plataforma. No ambiente atual, nenhuma cobrança ou transferência bancária é realizada.",
     icon: ArrowLeftRight,
     title: "Transações"
   },
   {
     body:
-      "O aporte fica vinculado ao perfil do atleta. O atleta acompanha a captação, mas o saque permanece indisponível enquanto não houver operação financeira e regras contratuais aprovadas.",
+      "O saldo disponível pode ser sacado. Valores já aportados ficam vinculados à bolsa do atleta e não retornam para a Carteira pelo saque.",
     icon: LockKeyhole,
     title: "Custódia e saque"
   },

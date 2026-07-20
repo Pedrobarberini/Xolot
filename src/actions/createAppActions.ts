@@ -13,6 +13,10 @@ import { Tab } from "../ui/types";
 import { formatBRL } from "../utils/investment";
 import { deleteStoredVideo } from "../services/videoStorage";
 import { removeOwnedVideoSubmission } from "../utils/videoSubmission";
+import {
+  calculateBalanceAfterWithdrawal,
+  isValidWithdrawalAmount
+} from "../utils/wallet";
 
 type CreateAppActionsOptions = {
   athleteFunds: AthleteFund[];
@@ -191,6 +195,20 @@ export function createAppActions({
     }));
   }
 
+  function handleWithdraw(amount: number) {
+    if (!user || !isValidWithdrawalAmount(walletBalance, amount)) {
+      return;
+    }
+
+    setWalletBalances((current) => ({
+      ...current,
+      [user.id]: calculateBalanceAfterWithdrawal(
+        current[user.id] ?? 0,
+        amount
+      )
+    }));
+  }
+
   function handleOpenFund(
     player: Player,
     goalAmount: number,
@@ -267,6 +285,7 @@ export function createAppActions({
     handleReviewSubmission,
     handleSignOut,
     handleSubmitVideo,
-    handleUpdateProfile
+    handleUpdateProfile,
+    handleWithdraw
   };
 }
