@@ -2,6 +2,8 @@ import React from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
 import {
+  isOwnAccountProfile,
+  isOwnPlayerProfile,
   selectApprovedPlayerForSubmission,
   selectFundByOwner,
   selectPlayerByOwner,
@@ -183,6 +185,24 @@ export function AppRoutes({
   user,
   walletBalance
 }: AppRoutesProps) {
+  const openAccountProfile = (account: AppUser) => {
+    if (isOwnAccountProfile(account, user.id)) {
+      openTab("profile");
+      return;
+    }
+
+    openUserProfile(account);
+  };
+
+  const openAthleteProfile = (player: Player) => {
+    if (isOwnPlayerProfile(player, user.id, ownProfileId)) {
+      openTab("profile");
+      return;
+    }
+
+    openPlayerProfile(player);
+  };
+
   return (
     <View style={styles.appRoot}>
       <SafeAreaView style={styles.safeArea}>
@@ -302,7 +322,7 @@ export function AppRoutes({
                   onBackToProfile={
                     reelReturnTarget ? returnToReelOrigin : undefined
                   }
-                  onOpenPlayer={openPlayerProfile}
+                  onOpenPlayer={openAthleteProfile}
                   onOpenInvestment={(player) => {
                     const fund = selectProfileFund(player, athleteFunds);
 
@@ -322,8 +342,8 @@ export function AppRoutes({
                 <ScreenFrame key="search">
                   <SearchScreen
                     funds={athleteFunds}
-                    onOpenPlayer={openPlayerProfile}
-                    onOpenUser={openUserProfile}
+                    onOpenPlayer={openAthleteProfile}
+                    onOpenUser={openAccountProfile}
                     players={availablePlayers}
                     profileAvatars={profileAvatars}
                     users={registeredUsers}
@@ -397,6 +417,7 @@ export function AppRoutes({
                     followingCount={followingProfileIds.length}
                     onDeleteVideo={handleDeleteVideo}
                     onOpenFund={handleOpenFund}
+                    onOpenProfile={openAccountProfile}
                     onOpenVideo={(submission) => {
                       const reelPlayer = selectApprovedPlayerForSubmission(
                         approvedSubmissionPlayers,

@@ -66,6 +66,9 @@ export const styles = StyleSheet.create({
     minHeight: 68,
     paddingVertical: 10
   },
+  itemPressed: {
+    backgroundColor: colors.surfaceMuted
+  },
   itemLast: {
     borderBottomWidth: 0
   },

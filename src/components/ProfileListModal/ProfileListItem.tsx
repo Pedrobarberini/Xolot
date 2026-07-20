@@ -1,14 +1,16 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { ProfileAvatarImage } from "../ProfileAvatarImage";
 import { styles } from "./ProfileListModal.styles";
 import type { ProfileListItemData } from "./ProfileListModal.types";
 
 export function ProfileListItem({
   isLast,
+  onPress,
   profile
 }: {
   isLast: boolean;
+  onPress: () => void;
   profile: ProfileListItemData;
 }) {
   const initials = profile.name
@@ -19,7 +21,16 @@ export function ProfileListItem({
     .toUpperCase();
 
   return (
-    <View style={[styles.item, isLast ? styles.itemLast : null]}>
+    <Pressable
+      accessibilityLabel={`Abrir perfil de ${profile.name}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.item,
+        isLast ? styles.itemLast : null,
+        pressed ? styles.itemPressed : null
+      ]}
+    >
       <View style={styles.avatar}>
         {profile.avatar ? (
           <ProfileAvatarImage avatar={profile.avatar} />
@@ -40,6 +51,6 @@ export function ProfileListItem({
           {profile.subtitle}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }

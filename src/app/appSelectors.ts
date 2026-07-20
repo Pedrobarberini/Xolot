@@ -172,6 +172,21 @@ export function selectProfileId(
     (selectedAccount ? `profile-${selectedAccount.id}` : undefined);
 }
 
+export function isOwnAccountProfile(account: AppUser, currentUserId: string) {
+  return account.id === currentUserId;
+}
+
+export function isOwnPlayerProfile(
+  player: Player,
+  currentUserId: string,
+  ownProfileId?: string | null
+) {
+  return (
+    player.ownerUserId === currentUserId ||
+    Boolean(ownProfileId && player.profileId === ownProfileId)
+  );
+}
+
 export function selectPlayerByOwner(
   players: Player[],
   ownerUserId: string

@@ -467,6 +467,7 @@ Tasks:
 - [x] Permitir fixar até três conversas no topo da lista.
 - [x] Permitir silenciar notificações por conversa.
 - [x] Permitir apagar a conversa somente para o usuário atual.
+- [x] Substituir a confirmação nativa incompatível com web por uma confirmação própria no HUD.
 - [x] Fazer uma conversa apagada reaparecer quando chegar uma nova mensagem.
 - [x] Persistir fixação, silêncio e corte do histórico por conta.
 - [x] Padronizar seta, logo e saldo no HUD das páginas de perfil e investimento.
@@ -487,6 +488,7 @@ Criterios de aceite:
 - Toque longo oferece as ações Fixar, Silenciar notificações e Apagar conversa.
 - No máximo três conversas permanecem fixadas e são exibidas antes das demais.
 - Apagar uma conversa não remove o histórico armazenado para o outro participante.
+- Confirmar `Apagar conversa` remove a conversa no navegador, Android e Expo.
 - A versão pública não trata estado local como entrega real ao destinatário.
 - Backend, moderação e privacidade devem estar prontos antes de liberar mensagens para o público.
 
@@ -511,10 +513,13 @@ Tasks:
 - [x] Persistir follows, contatos e mensagens com AsyncStorage.
 - [x] Separar estado e ações sociais em `src/actions/useSocialActions.ts`.
 - [x] Separar persistência em `src/services/socialStorage.ts`.
+- [x] Abrir o perfil correspondente ao tocar em seguidores ou perfis seguidos.
+- [x] Direcionar a própria conta para a aba Perfil em vez da visualização pública.
 
 Criterios de aceite:
 
 - Seguir no Início atualiza imediatamente o perfil público e vice-versa.
+- Tocar na própria conta pela pesquisa, Início ou listas sociais abre o perfil próprio.
 - O estado continua salvo depois de fechar e abrir o app.
 - Vídeos de perfis seguidos aparecem primeiro sem remover outros vídeos.
 - Contadores sociais usam a mesma fonte de dados do botão de follow.

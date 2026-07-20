@@ -557,5 +557,72 @@ export const discoveryMessagesStyles = {
     flex: 1,
     fontSize: 14,
     fontWeight: "900"
+  },
+  conversationDeleteConfirmation: {
+    alignItems: "center",
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    paddingBottom: 16,
+    paddingTop: 18
+  },
+  conversationDeleteIcon: {
+    alignItems: "center",
+    backgroundColor: colors.dangerSoft,
+    borderRadius: 999,
+    height: 44,
+    justifyContent: "center",
+    width: 44
+  },
+  conversationDeleteTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 12,
+    textAlign: "center"
+  },
+  conversationDeleteBody: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 6,
+    maxWidth: 360,
+    textAlign: "center"
+  },
+  conversationDeleteActions: {
+    flexDirection: "row",
+    gap: 9,
+    marginTop: 18,
+    width: "100%"
+  },
+  conversationDeleteCancelButton: {
+    alignItems: "center",
+    borderColor: colors.borderStrong,
+    borderRadius: 6,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 46,
+    paddingHorizontal: 12
+  },
+  conversationDeleteCancelText: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  conversationDeleteConfirmButton: {
+    alignItems: "center",
+    backgroundColor: colors.danger,
+    borderRadius: 6,
+    flex: 1.4,
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 46,
+    paddingHorizontal: 12
+  },
+  conversationDeleteConfirmText: {
+    color: colors.onPrimary,
+    fontSize: 13,
+    fontWeight: "900"
   }
 } as const;

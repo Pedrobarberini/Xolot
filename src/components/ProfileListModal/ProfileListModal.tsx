@@ -14,6 +14,7 @@ export function ProfileListModal({
   emptyTitle,
   items,
   onClose,
+  onSelectItem,
   pageSize = DEFAULT_PAGE_SIZE,
   title,
   visible
@@ -22,6 +23,7 @@ export function ProfileListModal({
   emptyTitle: string;
   items: ProfileListItemData[];
   onClose: () => void;
+  onSelectItem: (profile: ProfileListItemData) => void;
   pageSize?: number;
   title: string;
   visible: boolean;
@@ -94,6 +96,7 @@ export function ProfileListModal({
                   <ProfileListItem
                     isLast={index === visibleItems.length - 1}
                     key={profile.id}
+                    onPress={() => onSelectItem(profile)}
                     profile={profile}
                   />
                 ))}

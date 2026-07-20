@@ -506,24 +506,11 @@ export function MessagesScreen({
           }
 
           const contact = actionContact;
+          onDeleteConversation(contact.id);
 
-          Alert.alert(
-            "Apagar conversa?",
-            `O histórico com ${contact.name} será removido somente para você.`,
-            [
-              { style: "cancel", text: "Cancelar" },
-              {
-                onPress: () => {
-                  onDeleteConversation(contact.id);
-                  if (activeContactId === contact.id) {
-                    onSelectContact(null);
-                  }
-                },
-                style: "destructive",
-                text: "Apagar"
-              }
-            ]
-          );
+          if (activeContactId === contact.id) {
+            onSelectContact(null);
+          }
         }}
         onToggleMute={() => {
           if (actionContact) {

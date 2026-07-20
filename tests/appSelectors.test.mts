@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  isOwnAccountProfile,
+  isOwnPlayerProfile,
   selectApprovedSubmissionPlayers,
   selectApprovedPlayerForSubmission,
   selectAvailablePlayers,
@@ -128,6 +130,41 @@ test("prioriza perfis seguidos sem alterar a ordem relativa dos demais", () => {
       (player) => player.id
     ),
     ["c", "a", "b"]
+  );
+});
+
+test("identifica a própria conta e o próprio perfil de atleta", () => {
+  const ownPlayer = {
+    ...demoPlayer,
+    ownerUserId: completeUser.id,
+    profileId: `profile-${completeUser.id}`
+  };
+
+  assert.equal(isOwnAccountProfile(completeUser, completeUser.id), true);
+  assert.equal(isOwnAccountProfile(otherCompleteUser, completeUser.id), false);
+  assert.equal(
+    isOwnPlayerProfile(ownPlayer, completeUser.id, ownPlayer.profileId),
+    true
+  );
+  assert.equal(
+    isOwnPlayerProfile(
+      { ...ownPlayer, ownerUserId: otherCompleteUser.id },
+      completeUser.id,
+      ownPlayer.profileId
+    ),
+    true
+  );
+  assert.equal(
+    isOwnPlayerProfile(
+      {
+        ...ownPlayer,
+        ownerUserId: otherCompleteUser.id,
+        profileId: `profile-${otherCompleteUser.id}`
+      },
+      completeUser.id,
+      ownPlayer.profileId
+    ),
+    false
   );
 });
 

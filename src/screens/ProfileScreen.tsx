@@ -67,6 +67,7 @@ export function ProfileScreen({
   onDeleteVideo,
   onDeposit,
   onOpenFund,
+  onOpenProfile,
   onOpenVideo,
   onSignOut,
   onUpdateProfile,
@@ -93,6 +94,7 @@ export function ProfileScreen({
     goalAmount: number,
     minimumContribution: number
   ) => void;
+  onOpenProfile: (account: AppUser) => void;
   onOpenVideo: (video: VideoSubmission) => void;
   onSignOut: () => void;
   onUpdateProfile: (profile: AccountProfile) => void;
@@ -244,6 +246,18 @@ export function ProfileScreen({
         ) : null}
       </>
     );
+  }
+
+  function openListedProfile(accountId: string) {
+    const account = accounts.find((item) => item.id === accountId);
+
+    if (!account) {
+      return;
+    }
+
+    setIsFollowersVisible(false);
+    setIsFollowingVisible(false);
+    onOpenProfile(account);
   }
 
   if (profileView === "settings") {
@@ -436,6 +450,7 @@ export function ProfileScreen({
         emptyTitle="Você ainda não tem seguidores"
         items={followerListItems}
         onClose={() => setIsFollowersVisible(false)}
+        onSelectItem={(profile) => openListedProfile(profile.id)}
         title="Seguidores"
         visible={isFollowersVisible}
       />
@@ -444,6 +459,7 @@ export function ProfileScreen({
         emptyTitle="Você ainda não segue perfis"
         items={followingListItems}
         onClose={() => setIsFollowingVisible(false)}
+        onSelectItem={(profile) => openListedProfile(profile.id)}
         title="Seguindo"
         visible={isFollowingVisible}
       />
