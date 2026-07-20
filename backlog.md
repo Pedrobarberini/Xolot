@@ -721,6 +721,26 @@ Criterios de aceite:
 - Carteira centraliza saldo, movimentacoes, reservas e bolsa do atleta.
 - Saque nunca ultrapassa o saldo disponivel nem retira aportes ja confirmados.
 
+### Task P2-007 - Organizar historico de investimentos em lista
+
+Tipo: Frontend/UX/Financeiro
+
+Status: Concluido em 2026-07-20.
+
+Tasks:
+
+- [x] Agrupar o historico de investimentos em uma unica secao.
+- [x] Exibir cada investimento como uma linha da lista.
+- [x] Separar os investimentos com divisores discretos.
+- [x] Mostrar a quantidade de investimentos no cabecalho da secao.
+- [x] Manter o estado vazio dentro do bloco de historico.
+
+Criterios de aceite:
+
+- O historico nao apresenta um card independente para cada investimento.
+- Nome do perfil, status, valor e porcentagem da cota continuam visiveis.
+- A lista permanece legivel em telas pequenas.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

@@ -215,36 +215,55 @@ export function PortfolioScreen({
           )}
         </View>
 
-        {investments.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
-            <Text style={styles.emptyBody}>
-              Deposite saldo simulado e abra um perfil na tela Início para
-              criar uma reserva.
+        <View style={styles.portfolioHistoryBlock}>
+          <View style={styles.portfolioHistoryHeader}>
+            <Text style={styles.portfolioHistoryTitle}>
+              Histórico de investimentos
+            </Text>
+            <Text style={styles.portfolioHistoryCount}>
+              {investments.length}
             </Text>
           </View>
-        ) : (
-          investments.map((investment) => (
-            <View key={investment.id} style={styles.portfolioItemBlock}>
-              <View style={styles.portfolioItemHeader}>
-                <View style={styles.submissionTextBlock}>
-                  <Text style={styles.portfolioName}>
-                    {investment.playerName}
-                  </Text>
-                  <Text style={styles.portfolioMeta}>{investment.status}</Text>
-                </View>
-                <View style={styles.portfolioNumbers}>
-                  <Text style={styles.portfolioAmount}>
-                    {formatBRL(investment.amount)}
-                  </Text>
-                  <Text style={styles.portfolioShare}>
-                    Cota {formatPercent(investment.sharePercent)}
-                  </Text>
+
+          {investments.length === 0 ? (
+            <View style={styles.portfolioHistoryEmpty}>
+              <Text style={styles.emptyTitle}>Nenhuma reserva ainda</Text>
+              <Text style={styles.emptyBody}>
+                Deposite saldo simulado e abra um perfil na tela Início para
+                criar uma reserva.
+              </Text>
+            </View>
+          ) : (
+            investments.map((investment, index) => (
+              <View
+                key={investment.id}
+                style={[
+                  styles.portfolioListItem,
+                  index > 0 ? styles.portfolioListItemDivider : null
+                ]}
+              >
+                <View style={styles.portfolioItemHeader}>
+                  <View style={styles.submissionTextBlock}>
+                    <Text style={styles.portfolioName}>
+                      {investment.playerName}
+                    </Text>
+                    <Text style={styles.portfolioMeta}>
+                      {investment.status}
+                    </Text>
+                  </View>
+                  <View style={styles.portfolioNumbers}>
+                    <Text style={styles.portfolioAmount}>
+                      {formatBRL(investment.amount)}
+                    </Text>
+                    <Text style={styles.portfolioShare}>
+                      Cota {formatPercent(investment.sharePercent)}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          ))
-        )}
+            ))
+          )}
+        </View>
       </ScrollView>
       <WalletOperationModal
         balance={balance}

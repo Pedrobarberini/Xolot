@@ -472,13 +472,43 @@ export const walletInvestmentStyles = {
     lineHeight: 20,
     marginTop: 6
   },
-  portfolioItemBlock: {
+  portfolioHistoryBlock: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
-    marginTop: 12,
-    padding: 14
+    marginTop: 16,
+    overflow: "hidden"
+  },
+  portfolioHistoryHeader: {
+    alignItems: "center",
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 15
+  },
+  portfolioHistoryTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "900"
+  },
+  portfolioHistoryCount: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: "800"
+  },
+  portfolioHistoryEmpty: {
+    padding: 16
+  },
+  portfolioListItem: {
+    marginHorizontal: 16,
+    paddingVertical: 14
+  },
+  portfolioListItemDivider: {
+    borderTopColor: colors.border,
+    borderTopWidth: 1
   },
   portfolioItemHeader: {
     alignItems: "flex-start",
