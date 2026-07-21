@@ -57,7 +57,7 @@ export function SearchScreen({
           ? `${account.position} | ${account.city}`
           : player
             ? `${player.position} | ${player.city}`
-            : "Usuário NextStar | Sem vídeos publicados";
+            : "Usuário Xolot | Sem vídeos publicados";
 
         return {
           fund,

@@ -8,7 +8,8 @@ import {
   SocialSelectionsByUser
 } from "../types";
 
-const SOCIAL_STORAGE_KEY = "@nextstar/social-state-v1";
+const SOCIAL_STORAGE_KEY = "@xolot/social-state-v1";
+const LEGACY_SOCIAL_STORAGE_KEY = "@nextstar/social-state-v1";
 
 export type SocialState = {
   blockedProfileIdsByUser: SocialSelectionsByUser;
@@ -96,7 +97,9 @@ function normalizeSelectionsByUser(value: unknown): SocialSelectionsByUser {
 
 export async function loadSocialState(): Promise<SocialState> {
   try {
-    const storedState = await AsyncStorage.getItem(SOCIAL_STORAGE_KEY);
+    const currentState = await AsyncStorage.getItem(SOCIAL_STORAGE_KEY);
+    const storedState =
+      currentState ?? await AsyncStorage.getItem(LEGACY_SOCIAL_STORAGE_KEY);
 
     if (!storedState) {
       return emptySocialState;
@@ -104,7 +107,7 @@ export async function loadSocialState(): Promise<SocialState> {
 
     const parsedState = JSON.parse(storedState) as Partial<SocialState>;
 
-    return {
+    const normalizedState = {
       blockedProfileIdsByUser: normalizeSelectionsByUser(
         parsedState.blockedProfileIdsByUser
       ),
@@ -149,6 +152,15 @@ export async function loadSocialState(): Promise<SocialState> {
         parsedState.viewedPlayerIdsByUser
       )
     };
+
+    if (!currentState) {
+      await AsyncStorage.setItem(
+        SOCIAL_STORAGE_KEY,
+        JSON.stringify(normalizedState)
+      );
+    }
+
+    return normalizedState;
   } catch {
     return emptySocialState;
   }

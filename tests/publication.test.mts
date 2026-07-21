@@ -17,7 +17,7 @@ const pendingSubmission = {
   status: "Em revisão" as const,
   submittedAt: "2026-07-16T20:00:00.000Z",
   userId: "usuario-teste",
-  videoLink: "https://nextstar.test/video.mp4",
+  videoLink: "https://xolot.test/video.mp4",
   videoTitle: "Melhores lances"
 };
 

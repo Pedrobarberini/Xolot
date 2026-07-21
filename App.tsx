@@ -229,10 +229,10 @@ export default function App() {
       name:
         selectedProfilePlayer?.name ??
         selectedProfileAccount?.name ??
-        "Perfil NextStar",
+        "Perfil Xolot",
       subtitle: selectedProfilePlayer
         ? `${selectedProfilePlayer.position} | ${selectedProfilePlayer.city}`
-        : "Usuário NextStar",
+        : "Usuário Xolot",
       username:
         selectedProfileAccount?.username ?? selectedProfilePlayer?.username
     };

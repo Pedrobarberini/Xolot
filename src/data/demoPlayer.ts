@@ -4,7 +4,7 @@ export const demoPlayer: Player = {
   id: "nextstar-demo-profile",
   profileId: "nextstar-demo-profile",
   name: "Perfil demonstrativo",
-  username: "nextstar.demo",
+  username: "xolot.demo",
   age: 18,
   city: "São Paulo, SP",
   position: "Ponta",

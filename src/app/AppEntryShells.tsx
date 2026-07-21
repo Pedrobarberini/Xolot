@@ -1,7 +1,7 @@
 import React from "react";
 import { Image, SafeAreaView, StatusBar, View } from "react-native";
 import { BrandLaunchScreen, ScreenBackdrop } from "../components/AppShell";
-import { NEXTSTAR_WORDMARK } from "../constants/assets";
+import { XOLOT_WORDMARK } from "../constants/assets";
 import { AccountSetupModal } from "../screens/AccountSetupScreen";
 import { AuthScreen } from "../screens/AuthScreen";
 import { styles } from "../styles/appStyles";
@@ -87,9 +87,9 @@ export function AccountSetupGate({
         <ScreenBackdrop />
         <View style={styles.accountSetupModalBrand}>
           <Image
-            accessibilityLabel="Logo NextStar"
+            accessibilityLabel="Logo Xolot"
             resizeMode="contain"
-            source={NEXTSTAR_WORDMARK}
+            source={XOLOT_WORDMARK}
             style={styles.accountSetupModalBrandLogo}
           />
         </View>

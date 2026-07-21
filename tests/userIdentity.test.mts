@@ -31,27 +31,27 @@ test("gera usernames únicos sem bloquear nomes públicos iguais", () => {
 
 test("bloqueia email ou username duplicado sem comparar nome público", () => {
   const accounts = [
-    { email: "pedro@nextstar.com", username: "pedrobarberini" }
+    { email: "pedro@xolot.com", username: "pedrobarberini" }
   ];
 
   assert.equal(
-    getAccountIdentityConflict(accounts, "PEDRO@nextstar.com", "outro.user"),
+    getAccountIdentityConflict(accounts, "PEDRO@xolot.com", "outro.user"),
     "email"
   );
   assert.equal(
-    getAccountIdentityConflict(accounts, "outro@nextstar.com", "PedroBarberini"),
+    getAccountIdentityConflict(accounts, "outro@xolot.com", "PedroBarberini"),
     "username"
   );
   assert.equal(
-    getAccountIdentityConflict(accounts, "outro@nextstar.com", "outro.user"),
+    getAccountIdentityConflict(accounts, "outro@xolot.com", "outro.user"),
     null
   );
 });
 
 test("valida disponibilidade do username ao configurar o perfil", () => {
   const accounts = [
-    { id: "user-1", email: "um@nextstar.com", username: "jogador.um" },
-    { id: "user-2", email: "dois@nextstar.com", username: "jogador.dois" }
+    { id: "user-1", email: "um@xolot.com", username: "jogador.um" },
+    { id: "user-2", email: "dois@xolot.com", username: "jogador.dois" }
   ];
 
   assert.equal(

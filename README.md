@@ -1,4 +1,4 @@
-# NextStar
+# Xolot
 
 Aplicativo mobile-first para descoberta e publicação de vídeos de atletas de futebol.
 
@@ -6,7 +6,7 @@ Aplicativo mobile-first para descoberta e publicação de vídeos de atletas de 
 
 - Interface React Native com Expo e TypeScript para Android, iOS e web.
 - Identidade visual clara em verde, branco e tons neutros.
-- Ícone do app com o símbolo NextStar e splash animada com a marca completa.
+- Ícone do app com o símbolo Xolot e splash animada com a marca completa.
 - Início com vídeos verticais 9:16, reprodução automática, controle vertical de volume, tela cheia e ficha expansível.
 - Logo fixa no feed e HUD contextual padronizado com voltar, marca e saldo nas páginas públicas.
 - Vídeo demonstrativo real de 5 segundos enquanto não houver publicação de usuário.
@@ -27,7 +27,7 @@ Aplicativo mobile-first para descoberta e publicação de vídeos de atletas de 
 - Configurações permite escolher, enquadrar ou trocar a foto pública do perfil.
 - Tocar na própria foto abre uma HUD com a imagem inteira e um recorte circular arrastável e redimensionável de 30% a 100%; posição e tamanho ficam persistidos no Início, Pesquisa, Mensagens, Perfil e página da bolsa.
 - Perfil principal funciona como vitrine, exibe a biografia e o clube informados, possui galeria de vídeos publicados e estado vazio para novas contas.
-- Configurações concentra preferências, verificação/KYC, dados da Conta NextStar e gestão da bolsa.
+- Configurações concentra preferências, verificação/KYC, dados da Conta Xolot e gestão da bolsa.
 - Bolsa simulada vinculada ao perfil do atleta, separada do vídeo de apresentação.
 - Perfil público acessível pelo feed, com todos os vídeos publicados do atleta e o estado da bolsa.
 - Legenda expandida do feed mostra bolsa aberta, valores captados, meta e progresso real.
@@ -56,7 +56,7 @@ https://pedrobarberini.github.io/NextStar/
 
 Follows, contatos, mensagens, fotos, contas, credenciais locais, perfis, sessão, saldos, publicações, bolsas e investimentos ficam persistidos neste dispositivo. O registro e o arquivo local da postagem sobrevivem ao refresh no mesmo navegador; disponibilidade entre aparelhos depende de upload para storage remoto.
 
-A versão web é um PWA: no Chrome/Edge/Safari é possível instalar o NextStar na tela inicial ou como aplicativo. O service worker faz cache dos assets para uso offline básico após a primeira visita.
+A versão web é um PWA: no Chrome/Edge/Safari é possível instalar o Xolot na tela inicial ou como aplicativo. O service worker faz cache dos assets para uso offline básico após a primeira visita.
 
 ## Como rodar
 

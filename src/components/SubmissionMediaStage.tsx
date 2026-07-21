@@ -197,7 +197,7 @@ export function SubmissionMediaStage({
       }
 
       onCapture({
-        fileName: `nextstar-${Date.now()}.jpg`,
+        fileName: `xolot-${Date.now()}.jpg`,
         height: photo.height,
         mediaType: "image",
         mimeType: "image/jpeg",
@@ -271,7 +271,7 @@ export function SubmissionMediaStage({
               Date.now() - startedAt,
               MAX_RECORDING_DURATION_MS
             ),
-            fileName: `nextstar-${Date.now()}.mp4`,
+            fileName: `xolot-${Date.now()}.mp4`,
             mediaType: "video",
             mimeType: "video/mp4",
             uri: result.uri

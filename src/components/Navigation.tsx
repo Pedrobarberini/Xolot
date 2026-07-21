@@ -10,7 +10,7 @@ import {
   UserRound
 } from "lucide-react-native";
 import { Image, Pressable, Text, TextInput, useWindowDimensions, View } from "react-native";
-import { NEXTSTAR_SYMBOL } from "../constants/assets";
+import { XOLOT_SYMBOL } from "../constants/assets";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
@@ -50,16 +50,16 @@ export function Header({
         ]}
       >
         <Image
-          accessibilityLabel="Logo NextStar"
+          accessibilityLabel="Logo Xolot"
           resizeMode="contain"
-          source={NEXTSTAR_SYMBOL}
+          source={XOLOT_SYMBOL}
           style={[
             styles.headerLogo,
             isCompact ? styles.headerLogoCompact : null
           ]}
         />
         <View style={styles.headerTitleBlock}>
-          <Text style={styles.brand}>NextStar</Text>
+          <Text style={styles.brand}>Xolot</Text>
           <Text numberOfLines={1} style={styles.headerSubtitle}>
             {user.role} | @{user.username}
           </Text>
@@ -141,9 +141,9 @@ export function DetailHud({
           <ArrowLeft color={colors.text} size={21} strokeWidth={2.1} />
         </Pressable>
         <Image
-          accessibilityLabel="Logo NextStar"
+          accessibilityLabel="Logo Xolot"
           resizeMode="contain"
-          source={NEXTSTAR_SYMBOL}
+          source={XOLOT_SYMBOL}
           style={styles.detailHudLogo}
         />
       </View>

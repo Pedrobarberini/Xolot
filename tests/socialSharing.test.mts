@@ -12,7 +12,7 @@ const user: AppUser = {
   bio: "Perfil completo usado pelo teste de compartilhamento.",
   city: "Sao Paulo, SP",
   club: "Projeto Teste",
-  email: "jogador@nextstar.test",
+  email: "jogador@xolot.test",
   id: "user-a",
   kycStatus: "Não iniciado",
   name: "Jogador A",

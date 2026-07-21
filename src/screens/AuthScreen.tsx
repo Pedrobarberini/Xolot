@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { ScreenBackdrop, ScreenTransition } from "../components/AppShell";
 import { LabeledInput } from "../components/Navigation";
-import { NEXTSTAR_WORDMARK } from "../constants/assets";
+import { XOLOT_WORDMARK } from "../constants/assets";
 import { useGoogleSignIn } from "../hooks/useGoogleSignIn";
 import {
   createPasswordCredential,
@@ -274,9 +274,9 @@ export function AuthScreen({
             </View>
           </View>
           <Image
-            accessibilityLabel="Logo NextStar"
+            accessibilityLabel="Logo Xolot"
             resizeMode="contain"
-            source={NEXTSTAR_WORDMARK}
+            source={XOLOT_WORDMARK}
             style={[styles.authLogo, isCompact ? styles.authLogoCompact : null]}
           />
           <Text style={styles.authEyebrow}>Descubra. Avalie. Conecte.</Text>

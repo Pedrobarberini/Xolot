@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { AccessibilityInfo, Animated, Easing, View } from "react-native";
-import { NEXTSTAR_WORDMARK } from "../constants/assets";
+import { XOLOT_WORDMARK } from "../constants/assets";
 import { styles } from "../styles/appStyles";
 
 export function BrandLaunchScreen({ onFinish }: { onFinish: () => void }) {
@@ -58,13 +58,13 @@ export function BrandLaunchScreen({ onFinish }: { onFinish: () => void }) {
 
   return (
     <Animated.View
-      accessibilityLabel="Carregando NextStar"
+      accessibilityLabel="Carregando Xolot"
       accessibilityRole="progressbar"
       style={[styles.brandLaunch, { opacity }]}
     >
       <Animated.Image
         resizeMode="contain"
-        source={NEXTSTAR_WORDMARK}
+        source={XOLOT_WORDMARK}
         style={[styles.brandLaunchLogo, { transform: [{ scale }] }]}
       />
     </Animated.View>

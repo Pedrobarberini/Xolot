@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 const distDir = join(process.cwd(), "dist");
 const editableExtensions = new Set([".html", ".js", ".css"]);
-const pageShellStyle = `    <style id="nextstar-page-shell">
+const pageShellStyle = `    <style id="xolot-page-shell">
       html,
       body,
       #root {
@@ -17,13 +17,13 @@ const pageShellStyle = `    <style id="nextstar-page-shell">
         overscroll-behavior: none;
       }
 
-      #nextstar-feed-scroll {
+      #xolot-feed-scroll {
         overscroll-behavior-y: contain;
         scroll-behavior: smooth;
         scroll-snap-type: y mandatory;
       }
 
-      [id^="nextstar-feed-section-"] {
+      [id^="xolot-feed-section-"] {
         scroll-snap-align: start;
         scroll-snap-stop: always;
       }
@@ -40,11 +40,11 @@ const pageShellStyle = `    <style id="nextstar-page-shell">
 const pwaHeadTags = `    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="NextStar" />
+    <meta name="apple-mobile-web-app-title" content="Xolot" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />`;
 
-const serviceWorkerScript = `    <script id="nextstar-pwa-register">
+const serviceWorkerScript = `    <script id="xolot-pwa-register">
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
           navigator.serviceWorker.register("./sw.js").catch(function () {
@@ -83,7 +83,7 @@ function walk(dir) {
       .replace(/(["'=])\/sw\.js/g, "$1./sw.js");
 
     if (getExtension(path) === ".html") {
-      if (!updated.includes("nextstar-page-shell")) {
+      if (!updated.includes("xolot-page-shell")) {
         updated = updated
           .replace('<html lang="en">', '<html lang="pt-BR">')
           .replace(/<\/head>/i, `${pageShellStyle}\n  </head>`);
@@ -93,7 +93,7 @@ function walk(dir) {
         updated = updated.replace(/<\/head>/i, `${pwaHeadTags}\n  </head>`);
       }
 
-      if (!updated.includes("nextstar-pwa-register")) {
+      if (!updated.includes("xolot-pwa-register")) {
         updated = updated.replace(/<\/body>/i, `${serviceWorkerScript}\n  </body>`);
       }
     }

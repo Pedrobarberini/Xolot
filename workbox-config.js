@@ -17,7 +17,7 @@ module.exports = {
       urlPattern: ({ request }) => request.destination === "video",
       handler: "CacheFirst",
       options: {
-        cacheName: "nextstar-videos",
+        cacheName: "xolot-videos",
         expiration: {
           maxEntries: 8,
           maxAgeSeconds: 60 * 60 * 24 * 7
@@ -32,7 +32,7 @@ module.exports = {
         request.destination === "style",
       handler: "StaleWhileRevalidate",
       options: {
-        cacheName: "nextstar-assets",
+        cacheName: "xolot-assets",
         expiration: {
           maxEntries: 64,
           maxAgeSeconds: 60 * 60 * 24 * 30

@@ -4,7 +4,8 @@ import {
   getLocalVideoStorageKey
 } from "../utils/videoMediaReference";
 
-const VIDEO_DATABASE_NAME = "nextstar-media";
+const VIDEO_DATABASE_NAME = "xolot-media";
+const LEGACY_VIDEO_DATABASE_NAME = "nextstar-media";
 const VIDEO_DATABASE_VERSION = 1;
 const VIDEO_STORE_NAME = "videos";
 
@@ -22,7 +23,7 @@ type StoredVideo = {
   mimeType: string;
 };
 
-function openVideoDatabase() {
+function openVideoDatabase(databaseName = VIDEO_DATABASE_NAME) {
   return new Promise<IDBDatabase>((resolve, reject) => {
     if (typeof indexedDB === "undefined") {
       reject(new Error("IndexedDB is unavailable."));
@@ -30,7 +31,7 @@ function openVideoDatabase() {
     }
 
     const request = indexedDB.open(
-      VIDEO_DATABASE_NAME,
+      databaseName,
       VIDEO_DATABASE_VERSION
     );
 
@@ -107,23 +108,33 @@ export async function loadStoredVideo(reference: string) {
     return null;
   }
 
-  const database = await openVideoDatabase();
+  const databaseNames = [VIDEO_DATABASE_NAME, LEGACY_VIDEO_DATABASE_NAME];
 
-  try {
-    return await new Promise<Blob | null>((resolve, reject) => {
-      const transaction = database.transaction(VIDEO_STORE_NAME, "readonly");
-      const request = transaction.objectStore(VIDEO_STORE_NAME).get(storageKey);
+  for (const databaseName of databaseNames) {
+    const database = await openVideoDatabase(databaseName);
 
-      request.onerror = () =>
-        reject(request.error ?? new Error("Stored video could not be read."));
-      request.onsuccess = () => {
-        const record = request.result as StoredVideo | undefined;
-        resolve(record?.blob instanceof Blob ? record.blob : null);
-      };
-    });
-  } finally {
-    database.close();
+    try {
+      const blob = await new Promise<Blob | null>((resolve, reject) => {
+        const transaction = database.transaction(VIDEO_STORE_NAME, "readonly");
+        const request = transaction.objectStore(VIDEO_STORE_NAME).get(storageKey);
+
+        request.onerror = () =>
+          reject(request.error ?? new Error("Stored video could not be read."));
+        request.onsuccess = () => {
+          const record = request.result as StoredVideo | undefined;
+          resolve(record?.blob instanceof Blob ? record.blob : null);
+        };
+      });
+
+      if (blob) {
+        return blob;
+      }
+    } finally {
+      database.close();
+    }
   }
+
+  return null;
 }
 
 export async function deleteStoredVideo(reference: string) {
@@ -133,21 +144,23 @@ export async function deleteStoredVideo(reference: string) {
     return false;
   }
 
-  const database = await openVideoDatabase();
+  for (const databaseName of [VIDEO_DATABASE_NAME, LEGACY_VIDEO_DATABASE_NAME]) {
+    const database = await openVideoDatabase(databaseName);
 
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const transaction = database.transaction(VIDEO_STORE_NAME, "readwrite");
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const transaction = database.transaction(VIDEO_STORE_NAME, "readwrite");
 
-      transaction.onabort = () =>
-        reject(transaction.error ?? new Error("Video deletion was aborted."));
-      transaction.onerror = () =>
-        reject(transaction.error ?? new Error("Video deletion failed."));
-      transaction.oncomplete = () => resolve();
-      transaction.objectStore(VIDEO_STORE_NAME).delete(storageKey);
-    });
-  } finally {
-    database.close();
+        transaction.onabort = () =>
+          reject(transaction.error ?? new Error("Video deletion was aborted."));
+        transaction.onerror = () =>
+          reject(transaction.error ?? new Error("Video deletion failed."));
+        transaction.oncomplete = () => resolve();
+        transaction.objectStore(VIDEO_STORE_NAME).delete(storageKey);
+      });
+    } finally {
+      database.close();
+    }
   }
 
   return true;

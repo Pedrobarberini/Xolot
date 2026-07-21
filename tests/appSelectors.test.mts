@@ -50,7 +50,7 @@ const completeUser: AppUser = {
   bio: "Atleta completo para teste dos seletores.",
   city: "Rio de Janeiro, RJ",
   club: "Projeto Teste",
-  email: "atleta@nextstar.local",
+  email: "atleta@xolot.local",
   id: "usuario-atleta",
   kycStatus: "Não iniciado",
   name: "Atleta Completo",
@@ -62,7 +62,7 @@ const completeUser: AppUser = {
 
 const otherCompleteUser: AppUser = {
   ...completeUser,
-  email: "latéral@nextstar.local",
+  email: "latéral@xolot.local",
   id: "usuario-lateral",
   name: "Latéral Completo",
   username: "latéral"
@@ -80,7 +80,7 @@ const approvedSubmission: VideoSubmission = {
   status: "Aprovado",
   submittedAt: "2026-07-18T12:00:00.000Z",
   userId: completeUser.id,
-  videoLink: "https://nextstar.test/video.mp4",
+  videoLink: "https://xolot.test/video.mp4",
   videoTitle: "Melhores lances"
 };
 
@@ -118,9 +118,9 @@ test("preserva tipo, tags e marcacoes de uma publicacao com foto", () => {
         ...approvedSubmission,
         id: "foto-aprovada",
         mediaType: "image",
-        mentions: ["projeto.nextstar"],
+        mentions: ["projeto.xolot"],
         tags: ["Treino", "Base"],
-        videoLink: "https://nextstar.test/foto.jpg"
+        videoLink: "https://xolot.test/foto.jpg"
       }
     ],
     [completeUser]
@@ -129,7 +129,7 @@ test("preserva tipo, tags e marcacoes de uma publicacao com foto", () => {
   assert.equal(player?.mediaType, "image");
   assert.equal(player?.hasAudio, false);
   assert.deepEqual(player?.tags, ["Treino", "Base"]);
-  assert.deepEqual(player?.mentions, ["projeto.nextstar"]);
+  assert.deepEqual(player?.mentions, ["projeto.xolot"]);
 });
 
 test("usa demo somente quando não existem players aprovados", () => {

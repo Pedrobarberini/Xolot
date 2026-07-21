@@ -130,7 +130,7 @@ function normalizeAppUser(value: unknown): AppUser | null {
         : "Não iniciado",
     name:
       normalizeString(value.name) ||
-      (role === "Admin" ? "Admin NextStar" : email.split("@")[0]),
+      (role === "Admin" ? "Admin Xolot" : email.split("@")[0]),
     ...(passwordHash && passwordSalt
       ? { passwordHash, passwordSalt }
       : {}),

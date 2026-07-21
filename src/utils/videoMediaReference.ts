@@ -1,4 +1,5 @@
-const LOCAL_VIDEO_REFERENCE_PREFIX = "nextstar-video:";
+const LOCAL_VIDEO_REFERENCE_PREFIX = "xolot-video:";
+const LEGACY_LOCAL_VIDEO_REFERENCE_PREFIX = "nextstar-video:";
 
 export function createLocalVideoReference(storageKey: string) {
   const normalizedKey = storageKey.trim();
@@ -11,11 +12,17 @@ export function createLocalVideoReference(storageKey: string) {
 }
 
 export function getLocalVideoStorageKey(reference: string) {
-  if (!reference.startsWith(LOCAL_VIDEO_REFERENCE_PREFIX)) {
+  const prefix = reference.startsWith(LOCAL_VIDEO_REFERENCE_PREFIX)
+    ? LOCAL_VIDEO_REFERENCE_PREFIX
+    : reference.startsWith(LEGACY_LOCAL_VIDEO_REFERENCE_PREFIX)
+      ? LEGACY_LOCAL_VIDEO_REFERENCE_PREFIX
+      : null;
+
+  if (!prefix) {
     return null;
   }
 
-  const encodedKey = reference.slice(LOCAL_VIDEO_REFERENCE_PREFIX.length);
+  const encodedKey = reference.slice(prefix.length);
 
   if (!encodedKey) {
     return null;

@@ -3,7 +3,7 @@ import type { Player, VideoSubmission } from "../types.ts";
 import type { CardPalette } from "../ui/types.ts";
 
 const CARD_PALETTE: CardPalette = {
-  name: "NextStar",
+  name: "Xolot",
   card: colors.surface,
   media: colors.media,
   border: colors.border,

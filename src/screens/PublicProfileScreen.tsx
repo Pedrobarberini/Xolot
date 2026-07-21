@@ -68,7 +68,7 @@ export function PublicProfileScreen({
   viewCountsByPlayer: Record<string, number>;
   walletBalance: number;
 }) {
-  const profileName = account?.name ?? player?.name ?? "Perfil NextStar";
+  const profileName = account?.name ?? player?.name ?? "Perfil Xolot";
   const profileUsername = account?.username ?? player?.username;
   const initials = profileName
     .split(" ")
@@ -80,7 +80,7 @@ export function PublicProfileScreen({
     ? `${account.position} | ${account.city}`
     : player
       ? `${player.position} | ${player.city}`
-      : "Usuário NextStar | Sem vídeos publicados";
+      : "Usuário Xolot | Sem vídeos publicados";
   const profileBio = account?.bio ?? "";
   const profileClub = account?.club ?? player?.club ?? "";
   const fundProgress = fund

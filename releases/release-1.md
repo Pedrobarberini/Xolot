@@ -2,7 +2,7 @@
 
 Entregue em 2026-07-14.
 
-Primeira release do protótipo NextStar: conta unificada, feed vertical, carteira simulada, bolsa por perfil e refinamentos de UI mobile/web.
+Primeira release do protótipo Xolot: conta unificada, feed vertical, carteira simulada, bolsa por perfil e refinamentos de UI mobile/web.
 
 ## Tasks entregues
 
@@ -332,7 +332,7 @@ Objetivo: simplificar o topo do feed e oferecer ajuste de volume compacto junto 
 Tasks:
 
 - [x] Remover o texto `Radar` ao lado do símbolo da marca.
-- [x] Manter o símbolo NextStar sobreposto ao vídeo.
+- [x] Manter o símbolo Xolot sobreposto ao vídeo.
 - [x] Posicionar o botão de volume abaixo do botão de tela cheia.
 - [x] Abrir uma barra vertical curta ao tocar no volume.
 - [x] Permitir ajuste de `0%` a `100%` por toque e arraste.
@@ -356,7 +356,7 @@ Objetivo: manter os principais controles de orientação acessiveis durante a ro
 
 Tasks:
 
-- [x] Mover o símbolo NextStar para uma camada fixa do `FeedScreen`.
+- [x] Mover o símbolo Xolot para uma camada fixa do `FeedScreen`.
 - [x] Remover a repeticao da marca dentro de cada item do feed.
 - [x] Transformar o botão de voltar do perfil público em overlay fixo.
 - [x] Reservar espaço no topo do conteúdo para o botão não cobrir informações.
@@ -486,7 +486,7 @@ Objetivo: separar conteúdo público de configurações da conta e priorizar os 
 
 Tasks:
 
-- [x] Remover Verificação e Conta NextStar da tela principal do Perfil.
+- [x] Remover Verificação e Conta Xolot da tela principal do Perfil.
 - [x] Mover email, identidade, termos e status KYC para Configurações.
 - [x] Mover reservas, total investido, quantidade de envios e moderação para Configurações.
 - [x] Mover abertura, progresso e conclusão da bolsa de investimento para Configurações.

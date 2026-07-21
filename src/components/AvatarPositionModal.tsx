@@ -31,7 +31,7 @@ import {
 const DEFAULT_PREVIEW_SIZE = { height: 280, width: 324 };
 const DEFAULT_CROP_TRACK_WIDTH = 180;
 const CROP_SCALE_STEP = 0.05;
-const CROP_MASK_ID = "nextstar-avatar-crop-mask";
+const CROP_MASK_ID = "xolot-avatar-crop-mask";
 
 function getStoredSourceSize(avatar: ProfileAvatar): AvatarSourceSize {
   return {

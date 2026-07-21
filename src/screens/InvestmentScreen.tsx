@@ -94,7 +94,7 @@ export function InvestmentScreen({
           </View>
           <Text style={styles.bodyText}>
             O aporte e vinculado ao perfil do atleta e fica sob custódia
-            simulada do NextStar.
+            simulada do Xolot.
           </Text>
 
           <View style={styles.fundProgressHeader}>

@@ -509,8 +509,8 @@ function toProfileListItem(
     subtitle: account.profileCompleted
       ? `${account.position} | ${account.city}`
       : account.role === "Admin"
-        ? "Administrador NextStar"
-        : "Usuário NextStar",
+        ? "Administrador Xolot"
+        : "Usuário Xolot",
     username: account.username
   };
 }

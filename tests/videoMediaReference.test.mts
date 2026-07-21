@@ -15,6 +15,13 @@ test("cria e recupera uma referência local de vídeo", () => {
   );
 });
 
+test("mantém compatibilidade com referências da marca anterior", () => {
+  assert.equal(
+    getLocalVideoStorageKey("nextstar-video:video-legado"),
+    "video-legado"
+  );
+});
+
 test("ignora links remotos e referências locais inválidas", () => {
   assert.equal(getLocalVideoStorageKey("https://cdn.test/vídeo.mp4"), null);
   assert.equal(getLocalVideoStorageKey("nextstar-video:"), null);
@@ -22,6 +29,6 @@ test("ignora links remotos e referências locais inválidas", () => {
 });
 
 test("identifica URL temporária criada pelo navegador", () => {
-  assert.equal(isEphemeralBrowserVideoUri("blob:https://nextstar.test/123"), true);
-  assert.equal(isEphemeralBrowserVideoUri("https://nextstar.test/video.mp4"), false);
+  assert.equal(isEphemeralBrowserVideoUri("blob:https://xolot.test/123"), true);
+  assert.equal(isEphemeralBrowserVideoUri("https://xolot.test/video.mp4"), false);
 });

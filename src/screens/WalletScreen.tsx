@@ -117,7 +117,7 @@ export function PortfolioScreen({
         </View>
 
         <View style={styles.settingsSection}>
-          <Text style={styles.settingsSectionTitle}>Conta NextStar</Text>
+          <Text style={styles.settingsSectionTitle}>Conta Xolot</Text>
           <View style={styles.profileRowNoBorder}>
             <Text style={styles.profileLabel}>Reservas simuladas</Text>
             <Text style={styles.profileValue}>{investments.length}</Text>

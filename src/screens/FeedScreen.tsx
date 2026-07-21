@@ -28,7 +28,7 @@ import { FeedPostOptionsModal } from "../components/FeedPostOptionsModal";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import { SharePostModal } from "../components/SharePostModal";
 import { VideoVolumeControl } from "../components/VideoVolumeControl";
-import { NEXTSTAR_SYMBOL } from "../constants/assets";
+import { XOLOT_SYMBOL } from "../constants/assets";
 import { FEED_TEXT_LIMIT_COMPACT, FEED_TEXT_LIMIT_WIDE, USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
@@ -231,7 +231,7 @@ export function FeedScreen({
       <ScrollView
         bounces={false}
         decelerationRate="normal"
-        nativeID="nextstar-feed-scroll"
+        nativeID="xolot-feed-scroll"
         ref={feedScrollRef}
         onScroll={(event) => {
           activateFeedIndex(
@@ -275,7 +275,7 @@ export function FeedScreen({
           <View
             collapsable={false}
             key={player.id}
-            nativeID={`nextstar-feed-section-${index}`}
+            nativeID={`xolot-feed-section-${index}`}
             onLayout={(event) => {
               sectionOffsetsRef.current[index] = event.nativeEvent.layout.y;
             }}
@@ -315,9 +315,9 @@ export function FeedScreen({
         ) : null}
         <View pointerEvents="none" style={styles.feedBrandSlot}>
           <Image
-            accessibilityLabel="NextStar"
+            accessibilityLabel="Xolot"
             resizeMode="contain"
-            source={NEXTSTAR_SYMBOL}
+            source={XOLOT_SYMBOL}
             style={styles.feedReelBrandMark}
           />
         </View>

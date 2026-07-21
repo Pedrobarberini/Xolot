@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-NextStar aproxima atletas em desenvolvimento de pessoas e organizações que avaliam talento esportivo. O produto deve provar três pontos antes de qualquer camada financeira real: descoberta por vídeo, confiança na identidade do atleta e moderação consistente.
+Xolot aproxima atletas em desenvolvimento de pessoas e organizações que avaliam talento esportivo. O produto deve provar três pontos antes de qualquer camada financeira real: descoberta por vídeo, confiança na identidade do atleta e moderação consistente.
 
 ## Etapa atual: experiencia validavel
 

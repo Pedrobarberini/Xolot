@@ -8,7 +8,7 @@ function createSubmission(id: string, userId: string): VideoSubmission {
     age: 18,
     athleteName: `Atleta ${userId}`,
     city: "São Paulo, SP",
-    club: "Projeto NextStar",
+    club: "Projeto Xolot",
     guardianConsent: true,
     highlight: "Texto da publicação",
     id,
@@ -16,7 +16,7 @@ function createSubmission(id: string, userId: string): VideoSubmission {
     status: "Aprovado",
     submittedAt: "2026-07-16T00:00:00.000Z",
     userId,
-    videoLink: `nextstar-video:${id}`,
+    videoLink: `xolot-video:${id}`,
     videoTitle: `Video ${id}`
   };
 }

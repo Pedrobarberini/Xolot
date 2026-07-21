@@ -52,13 +52,13 @@ export function selectShareContacts({
 
     contactsById.set(contactId, {
       id: contactId,
-      name: account?.name ?? player?.name ?? "Perfil NextStar",
+      name: account?.name ?? player?.name ?? "Perfil Xolot",
       profileId,
       subtitle: account?.profileCompleted
         ? `${account.position} | ${account.city}`
         : player
           ? `${player.position} | ${player.city}`
-          : "Usuário NextStar",
+          : "Usuário Xolot",
       username: account?.username ?? player?.username
     });
   });

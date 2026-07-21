@@ -1,4 +1,4 @@
-# Technical Debt - NextStar
+# Technical Debt - Xolot
 
 Documento de dívida técnica do estado atual do repositório, atualizado em 2026-07-18.
 

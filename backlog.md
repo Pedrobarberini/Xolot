@@ -1,4 +1,4 @@
-# Backlog técnico - NextStar
+# Backlog técnico - Xolot
 
 Atualizado em 2026-07-18.
 
@@ -432,7 +432,7 @@ Tasks:
 - [x] Permitir editar dados do próprio perfil.
 - [x] Criar estado de perfil sem vídeos com orientação para publicar.
 - [x] Manter no Perfil apenas identidade resumida e conteúdo publicado.
-- [x] Mover verificação, KYC, Conta NextStar e bolsa para Configurações.
+- [x] Mover verificação, KYC, Conta Xolot e bolsa para Configurações.
 - [ ] Criar link compartilhavel do perfil na web.
 
 Criterios de aceite:
@@ -711,7 +711,7 @@ Status: Concluido em 2026-07-20.
 
 Tasks:
 
-- [x] Remover os cards `Conta NextStar` e `Bolsa de investimento` das Configuracoes.
+- [x] Remover os cards `Conta Xolot` e `Bolsa de investimento` das Configuracoes.
 - [x] Exibir os dois cards dentro da Carteira.
 - [x] Manter abertura e acompanhamento da bolsa pela Carteira.
 - [x] Adicionar acao de saque ao lado do deposito.
@@ -779,7 +779,7 @@ Tasks:
 - [x] Transformar a primeira etapa do Envio em uma camera traseira em tela cheia.
 - [x] Solicitar permissao de camera com estado alternativo quando indisponivel.
 - [x] Adicionar obturador para capturar fotos diretamente no app.
-- [x] Exibir no canto inferior esquerdo a ultima midia usada no NextStar.
+- [x] Exibir no canto inferior esquerdo a ultima midia usada no Xolot.
 - [x] Abrir a galeria ao tocar na miniatura e aceitar fotos ou videos.
 - [x] Substituir a camera pela previa da midia selecionada.
 - [x] Mover titulo, texto, tags e marcacoes para uma segunda etapa.
@@ -999,6 +999,31 @@ Critérios de aceite:
 Observação técnica:
 
 - As métricas são agregadas no estado local atual. A sincronização global entre dispositivos depende do backend previsto nas tarefas P0-003 e P0-004.
+
+### Task P2-018 - Aplicar a nova identidade Xolot
+
+Tipo: Branding/Frontend/Configuracao/Migracao local
+
+Status: Concluido em 2026-07-21.
+
+Tasks:
+
+- [x] Substituir a marca visivel Xolot em cabecalhos, login, splash e feed.
+- [x] Criar assinatura, simbolo transparente e icone de aplicativo a partir da nova logo.
+- [x] Atualizar nome, slug, scheme, favicon, PWA e permissoes do Expo.
+- [x] Atualizar documentacao tecnica e dados demonstrativos para Xolot.
+- [x] Atualizar os nomes dos novos arquivos capturados e caches web.
+- [x] Migrar estado, avatares e dados sociais das chaves locais legadas.
+- [x] Aceitar referencias de videos legadas e gravar novas referencias como Xolot.
+- [x] Atualizar os testes automatizados para a nova identidade.
+
+Criterios de aceite:
+
+- Nenhuma tela do aplicativo exibe a marca anterior.
+- O simbolo Xolot permanece legivel no cabecalho e sobre o video.
+- Login e carregamento exibem a assinatura completa Xolot.
+- Instalacao PWA e configuracao nativa usam o novo nome e os novos icones.
+- Dados criados antes da troca continuam disponiveis no mesmo dispositivo.
 
 ## P3 - Financeiro futuro
 

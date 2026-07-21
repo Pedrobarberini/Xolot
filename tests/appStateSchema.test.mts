@@ -34,7 +34,7 @@ test("migra estado sem versão e preserva dados válidos", () => {
     {
       activeUser: {
         acceptedTerms: true,
-        email: "teste@nextstar.local",
+        email: "teste@xolot.local",
         id: "usuario-teste",
         kycStatus: "Não iniciado",
         name: "Teste",
@@ -72,11 +72,11 @@ test("preserva perfil completo e credencial sem expor senha em texto", () => {
           age: 17,
           bio: "Atleta focado em evolução e oportunidades no futebol.",
           city: "São Paulo, SP",
-          club: "Projeto NextStar",
-          email: "atleta@nextstar.local",
-          id: "usuario-atleta@nextstar.local",
+          club: "Projeto Xolot",
+          email: "atleta@xolot.local",
+          id: "usuario-atleta@xolot.local",
           kycStatus: "Não iniciado",
-          name: "Atleta NextStar",
+          name: "Atleta Xolot",
           passwordHash: "hash-seguro",
           passwordSalt: "salt-aleatório",
           position: "Ponta",
@@ -102,7 +102,7 @@ test("migra usernames repetidos para identificadores únicos", () => {
       registeredUsers: [
         {
           acceptedTerms: true,
-          email: "primeiro@nextstar.local",
+          email: "primeiro@xolot.local",
           id: "usuario-primeiro",
           kycStatus: "Não iniciado",
           name: "Pedro Barberini",
@@ -111,7 +111,7 @@ test("migra usernames repetidos para identificadores únicos", () => {
         },
         {
           acceptedTerms: true,
-          email: "segundo@nextstar.local",
+          email: "segundo@xolot.local",
           id: "usuario-segundo",
           kycStatus: "Não iniciado",
           name: "Pedro Barberini",
