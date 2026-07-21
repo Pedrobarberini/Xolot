@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useEvent } from "expo";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { Image, Text, View } from "react-native";
+import { Play } from "lucide-react-native";
+import { Image, PanResponder, Pressable, Text, View } from "react-native";
+import { getPointerLocationX } from "../actions/appActions";
 import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { styles } from "../styles/appStyles";
+import { colors } from "../theme";
 import { SubmissionMediaType, VideoSubmissionStatus } from "../types";
+import { VideoVolumeControl } from "./VideoVolumeControl";
 
 export function SubmissionMediaPreview({
   allowEphemeralBrowserUri,
@@ -42,7 +47,7 @@ export function SubmissionMediaPreview({
             style={styles.submissionVideoPreviewMedia}
           />
         ) : (
-          <SubmissionVideoPlayer uri={resolvedVideo.source} />
+          <SubmissionVideoPlayer fill={fill} uri={resolvedVideo.source} />
         )
       ) : (
         <MediaUnavailableState
@@ -64,21 +69,231 @@ export function SubmissionVideoPreview(props: {
   return <SubmissionMediaPreview {...props} />;
 }
 
-function SubmissionVideoPlayer({ uri }: { uri: string | number }) {
+function SubmissionVideoPlayer({
+  fill,
+  uri
+}: {
+  fill: boolean;
+  uri: string | number;
+}) {
+  const [playbackTime, setPlaybackTime] = useState(0);
+  const [seekTrackWidth, setSeekTrackWidth] = useState(0);
+  const [volume, setVolume] = useState(0);
   const previewPlayer = useVideoPlayer(uri, (player) => {
     player.loop = true;
+    player.muted = true;
+    player.timeUpdateEventInterval = 0.1;
   });
+  const { isPlaying } = useEvent(previewPlayer, "playingChange", {
+    isPlaying: previewPlayer.playing
+  });
+  const { status: playerStatus } = useEvent(previewPlayer, "statusChange", {
+    status: previewPlayer.status
+  });
+  const { muted } = useEvent(previewPlayer, "mutedChange", {
+    muted: previewPlayer.muted
+  });
+  const { currentTime } = useEvent(previewPlayer, "timeUpdate", {
+    bufferedPosition: previewPlayer.bufferedPosition,
+    currentLiveTimestamp: null,
+    currentOffsetFromLive: null,
+    currentTime: previewPlayer.currentTime
+  });
+  const playbackDuration =
+    playerStatus === "readyToPlay" &&
+    Number.isFinite(previewPlayer.duration) &&
+    previewPlayer.duration > 0
+      ? previewPlayer.duration
+      : 0;
+  const safeCurrentTime = Number.isFinite(playbackTime)
+    ? Math.min(Math.max(playbackTime, 0), playbackDuration || playbackTime)
+    : 0;
+  const playbackProgress =
+    playbackDuration > 0 ? safeCurrentTime / playbackDuration : 0;
+  const thumbOffset =
+    seekTrackWidth > 12
+      ? Math.min(
+          Math.max(playbackProgress * seekTrackWidth, 6),
+          seekTrackWidth - 6
+        )
+      : 0;
+  const playerRef = useRef(previewPlayer);
+  const durationRef = useRef(playbackDuration);
+  const seekTrackWidthRef = useRef(seekTrackWidth);
+  const seekToTimeRef = useRef<(targetTime: number) => void>(() => undefined);
+  const seekToOffsetRef = useRef<(offsetX: number) => void>(() => undefined);
+
+  playerRef.current = previewPlayer;
+  durationRef.current = playbackDuration;
+  seekTrackWidthRef.current = seekTrackWidth;
+  seekToTimeRef.current = (targetTime: number) => {
+    const duration = durationRef.current;
+
+    if (duration <= 0) {
+      return;
+    }
+
+    const nextTime = Math.min(Math.max(targetTime, 0), duration);
+    setPlaybackTime(nextTime);
+    playerRef.current.currentTime = nextTime;
+  };
+  seekToOffsetRef.current = (offsetX: number) => {
+    const width = seekTrackWidthRef.current;
+    const duration = durationRef.current;
+
+    if (width <= 0 || duration <= 0) {
+      return;
+    }
+
+    const progress = Math.min(Math.max(offsetX / width, 0), 1);
+    seekToTimeRef.current(progress * duration);
+  };
+
+  const seekPanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: (event) => {
+        const locationX = getPointerLocationX(event.nativeEvent);
+
+        if (locationX !== null) {
+          seekToOffsetRef.current(locationX);
+        }
+      },
+      onPanResponderMove: (event) => {
+        const locationX = getPointerLocationX(event.nativeEvent);
+
+        if (locationX !== null) {
+          seekToOffsetRef.current(locationX);
+        }
+      },
+      onPanResponderTerminationRequest: () => false,
+      onShouldBlockNativeResponder: () => true,
+      onStartShouldSetPanResponder: () => false
+    })
+  ).current;
+
+  useEffect(() => {
+    if (Number.isFinite(currentTime)) {
+      setPlaybackTime(currentTime);
+    }
+  }, [currentTime]);
+
+  useEffect(() => () => previewPlayer.pause(), [previewPlayer]);
+
+  function togglePlayback() {
+    if (isPlaying) {
+      previewPlayer.pause();
+      return;
+    }
+
+    previewPlayer.play();
+  }
 
   return (
-    <VideoView
-      allowsFullscreen
-      contentFit="contain"
-      nativeControls
-      player={previewPlayer}
-      playsInline
-      style={styles.submissionVideoPreviewMedia}
-      surfaceType="textureView"
-    />
+    <View style={styles.submissionVideoPlayer}>
+      <VideoView
+        contentFit="contain"
+        nativeControls={false}
+        player={previewPlayer}
+        playsInline
+        style={styles.submissionVideoPreviewMedia}
+        surfaceType="textureView"
+      />
+      <Pressable
+        accessibilityLabel={isPlaying ? "Pausar vídeo" : "Reproduzir vídeo"}
+        accessibilityRole="button"
+        onPress={togglePlayback}
+        style={styles.submissionVideoTapTarget}
+      >
+        {!isPlaying ? (
+          <View style={styles.submissionVideoPlayButton}>
+            <Play color={colors.onPrimary} fill={colors.onPrimary} size={24} />
+          </View>
+        ) : null}
+      </Pressable>
+      <View
+        style={[
+          styles.submissionVideoFloatingControls,
+          fill ? styles.submissionVideoFloatingControlsFill : null
+        ]}
+      >
+        <VideoVolumeControl
+          muted={muted}
+          onChange={(targetVolume) => {
+            const nextVolume = Math.min(Math.max(targetVolume, 0), 1);
+
+            setVolume(nextVolume);
+            previewPlayer.volume = nextVolume;
+            previewPlayer.muted = nextVolume <= 0;
+          }}
+          volume={volume}
+        />
+      </View>
+      <View
+        onLayout={(event) => {
+          const nextWidth = event.nativeEvent.layout.width;
+
+          seekTrackWidthRef.current = nextWidth;
+          setSeekTrackWidth(nextWidth);
+        }}
+        style={[
+          styles.submissionVideoSeekControl,
+          fill ? styles.submissionVideoSeekControlFill : null
+        ]}
+        {...seekPanResponder.panHandlers}
+      >
+        <Pressable
+          accessibilityActions={[
+            { label: "Avançar 5 segundos", name: "increment" },
+            { label: "Voltar 5 segundos", name: "decrement" }
+          ]}
+          accessibilityLabel="Posição do vídeo"
+          accessibilityRole="adjustable"
+          accessibilityValue={{
+            max: Math.max(0, Math.round(playbackDuration)),
+            min: 0,
+            now: Math.max(0, Math.round(safeCurrentTime))
+          }}
+          onAccessibilityAction={(event) => {
+            if (event.nativeEvent.actionName === "increment") {
+              seekToTimeRef.current(safeCurrentTime + 5);
+            }
+
+            if (event.nativeEvent.actionName === "decrement") {
+              seekToTimeRef.current(safeCurrentTime - 5);
+            }
+          }}
+          onPress={(event) => {
+            const locationX = getPointerLocationX(event.nativeEvent);
+
+            if (locationX !== null) {
+              seekToOffsetRef.current(locationX);
+            }
+          }}
+          style={styles.submissionVideoSeekPressable}
+        >
+          <View
+            pointerEvents="none"
+            style={styles.submissionVideoScrubberTrack}
+          >
+            <View
+              style={[
+                styles.submissionVideoScrubberFill,
+                { width: `${playbackProgress * 100}%` }
+              ]}
+            />
+          </View>
+          <View
+            pointerEvents="none"
+            style={[
+              styles.submissionVideoScrubberThumb,
+              { left: thumbOffset }
+            ]}
+          />
+        </Pressable>
+      </View>
+    </View>
   );
 }
 

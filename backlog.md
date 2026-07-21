@@ -866,6 +866,32 @@ Criterios de aceite:
 - O usuario consegue sair da camera sem depender do footer principal.
 - A camera frontal ou traseira selecionada e remontada antes da captura.
 
+### Task P2-013 - Corrigir controles do video selecionado no Envio
+
+Tipo: Bugfix/Frontend/Midia
+
+Status: Concluido em 2026-07-21.
+
+Tasks:
+
+- [x] Remover os controles nativos de video do navegador no preview do Envio.
+- [x] Remover os atalhos de volume, tela cheia e menu de tres pontos.
+- [x] Reintroduzir somente o volume com o mesmo visual usado no Inicio.
+- [x] Compartilhar o controle de volume entre Inicio e Envio.
+- [x] Corrigir o gesto para arrastar continuamente a bolinha branca do volume.
+- [x] Adicionar controle proprio de reproducao por toque sobre o video.
+- [x] Adicionar barra de progresso que aceita toque e arraste.
+- [x] Posicionar a barra acima da faixa preta de acoes no preview em tela cheia.
+- [x] Manter o mesmo player customizado nos previews compactos.
+
+Criterios de aceite:
+
+- Nenhum controle nativo fica cortado ou inacessivel no celular.
+- O volume abre em uma barra vertical e responde tanto ao toque quanto ao arraste.
+- Tocar no video alterna entre reproduzir e pausar.
+- O usuario consegue avancar ou retroceder tocando ou arrastando a barra.
+- No Envio, a barra nao disputa espaco com os botoes inferiores.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

@@ -3,18 +3,18 @@ import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { ArrowLeft, Expand, Play, UserCheck, UserPlus, UserRound, Volume2, VolumeX } from "lucide-react-native";
+import { ArrowLeft, Expand, Play, UserCheck, UserPlus, UserRound } from "lucide-react-native";
 import { Alert, Animated, Easing, Image, PanResponder, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import {
   formatPlaybackTime,
   getCardPalette,
   getPointerLocationX,
-  getPointerLocationY,
   getScoreColor
 } from "../actions/appActions";
 import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { BalanceLine } from "../components/Navigation";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
+import { VideoVolumeControl } from "../components/VideoVolumeControl";
 import { NEXTSTAR_SYMBOL } from "../constants/assets";
 import { FEED_TEXT_LIMIT_COMPACT, FEED_TEXT_LIMIT_WIDE, USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
@@ -1106,9 +1106,7 @@ function ResolvedFeedVideoPlayback({
   const videoViewRef = useRef<VideoView | null>(null);
   const [playbackTime, setPlaybackTime] = useState(0);
   const [seekTrackWidth, setSeekTrackWidth] = useState(0);
-  const [isVolumeControlVisible, setIsVolumeControlVisible] = useState(false);
   const [volume, setVolume] = useState(0);
-  const [volumeTrackHeight, setVolumeTrackHeight] = useState(0);
   const videoPlayer = useVideoPlayer(uri, (player) => {
     player.loop = true;
     player.muted = true;
@@ -1142,7 +1140,6 @@ function ResolvedFeedVideoPlayback({
     playbackDuration > 0 ? safeCurrentTime / playbackDuration : 0;
   const totalTimeLabel =
     durationLabel || formatPlaybackTime(Math.ceil(playbackDuration));
-  const effectiveVolume = muted ? 0 : volume;
   const thumbOffset =
     seekTrackWidth > 12
       ? Math.min(
@@ -1153,18 +1150,12 @@ function ResolvedFeedVideoPlayback({
   const videoPlayerRef = useRef(videoPlayer);
   const playbackDurationRef = useRef(playbackDuration);
   const seekTrackWidthRef = useRef(seekTrackWidth);
-  const volumeTrackHeightRef = useRef(volumeTrackHeight);
   const seekToTimeRef = useRef<(targetTime: number) => number>(() => 0);
   const seekToOffsetRef = useRef<(offsetX: number) => number>(() => 0);
-  const setVolumeRef = useRef<(targetVolume: number) => void>(() => undefined);
-  const setVolumeFromOffsetRef = useRef<(offsetY: number) => void>(
-    () => undefined
-  );
 
   videoPlayerRef.current = videoPlayer;
   playbackDurationRef.current = playbackDuration;
   seekTrackWidthRef.current = seekTrackWidth;
-  volumeTrackHeightRef.current = volumeTrackHeight;
   seekToTimeRef.current = (targetTime: number) => {
     const duration = playbackDurationRef.current;
 
@@ -1188,23 +1179,6 @@ function ResolvedFeedVideoPlayback({
     const progress = Math.min(Math.max(offsetX / width, 0), 1);
     return seekToTimeRef.current(progress * duration);
   };
-  setVolumeRef.current = (targetVolume: number) => {
-    const nextVolume = Math.min(Math.max(targetVolume, 0), 1);
-
-    setVolume(nextVolume);
-    videoPlayerRef.current.volume = nextVolume;
-    videoPlayerRef.current.muted = nextVolume <= 0;
-  };
-  setVolumeFromOffsetRef.current = (offsetY: number) => {
-    const height = volumeTrackHeightRef.current;
-
-    if (height <= 0) {
-      return;
-    }
-
-    setVolumeRef.current(1 - Math.min(Math.max(offsetY / height, 0), 1));
-  };
-
   const seekPanResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
@@ -1228,38 +1202,6 @@ function ResolvedFeedVideoPlayback({
       onStartShouldSetPanResponder: () => false
     })
   ).current;
-  const volumePanResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponderCapture: () => true,
-      onPanResponderGrant: (event) => {
-        const locationY = getPointerLocationY(event.nativeEvent);
-
-        if (locationY !== null) {
-          setVolumeFromOffsetRef.current(locationY);
-        }
-      },
-      onPanResponderMove: (event) => {
-        const locationY = getPointerLocationY(event.nativeEvent);
-
-        if (locationY !== null) {
-          setVolumeFromOffsetRef.current(locationY);
-        }
-      },
-      onPanResponderTerminationRequest: () => false,
-      onShouldBlockNativeResponder: () => true,
-      onStartShouldSetPanResponder: () => false
-    })
-  ).current;
-
-  const volumeThumbOffset =
-    volumeTrackHeight > 10
-      ? Math.min(
-          Math.max(effectiveVolume * volumeTrackHeight - 5, 0),
-          volumeTrackHeight - 10
-        )
-      : 0;
-
   useEffect(() => {
     if (Number.isFinite(currentTime)) {
       setPlaybackTime(currentTime);
@@ -1271,7 +1213,6 @@ function ResolvedFeedVideoPlayback({
       videoPlayer.play();
     } else {
       videoPlayer.pause();
-      setIsVolumeControlVisible(false);
     }
 
     return () => videoPlayer.pause();
@@ -1332,87 +1273,18 @@ function ResolvedFeedVideoPlayback({
           <Expand color="#FFFFFF" size={20} />
         </Pressable>
         {hasAudio ? (
-          <View style={styles.feedVideoVolumeControl}>
-            <Pressable
-              accessibilityLabel={
-                isVolumeControlVisible
-                  ? "Fechar controle de volume"
-                  : "Abrir controle de volume"
-              }
-              accessibilityRole="button"
-              onPress={() =>
-                setIsVolumeControlVisible((current) => !current)
-              }
-              style={styles.feedVideoControlButton}
-            >
-              {muted || effectiveVolume === 0 ? (
-                <VolumeX color="#FFFFFF" size={20} />
-              ) : (
-                <Volume2 color="#FFFFFF" size={20} />
-              )}
-            </Pressable>
-            {isVolumeControlVisible ? (
-              <View style={styles.feedVideoVolumeSlider}>
-                <Pressable
-                  accessibilityActions={[
-                    { label: "Aumentar volume", name: "increment" },
-                    { label: "Diminuir volume", name: "decrement" }
-                  ]}
-                  accessibilityLabel="Volume do vídeo"
-                  accessibilityRole="adjustable"
-                  accessibilityValue={{
-                    max: 100,
-                    min: 0,
-                    now: Math.round(effectiveVolume * 100),
-                    text: `${Math.round(effectiveVolume * 100)}%`
-                  }}
-                  onAccessibilityAction={(event) => {
-                    if (event.nativeEvent.actionName === "increment") {
-                      setVolumeRef.current(effectiveVolume + 0.1);
-                    }
+          <VideoVolumeControl
+            active={isActive}
+            muted={muted}
+            onChange={(targetVolume) => {
+              const nextVolume = Math.min(Math.max(targetVolume, 0), 1);
 
-                    if (event.nativeEvent.actionName === "decrement") {
-                      setVolumeRef.current(effectiveVolume - 0.1);
-                    }
-                  }}
-                  onLayout={(event) => {
-                    const nextHeight = event.nativeEvent.layout.height;
-
-                    volumeTrackHeightRef.current = nextHeight;
-                    setVolumeTrackHeight(nextHeight);
-                  }}
-                  onPress={(event) => {
-                    const locationY = getPointerLocationY(event.nativeEvent);
-
-                    if (locationY !== null) {
-                      setVolumeFromOffsetRef.current(locationY);
-                    }
-                  }}
-                  style={styles.feedVideoVolumePressable}
-                  {...volumePanResponder.panHandlers}
-                >
-                  <View
-                    pointerEvents="none"
-                    style={styles.feedVideoVolumeTrack}
-                  >
-                    <View
-                      style={[
-                        styles.feedVideoVolumeFill,
-                        { height: `${effectiveVolume * 100}%` }
-                      ]}
-                    />
-                  </View>
-                  <View
-                    pointerEvents="none"
-                    style={[
-                      styles.feedVideoVolumeThumb,
-                      { bottom: volumeThumbOffset }
-                    ]}
-                  />
-                </Pressable>
-              </View>
-            ) : null}
-          </View>
+              setVolume(nextVolume);
+              videoPlayer.volume = nextVolume;
+              videoPlayer.muted = nextVolume <= 0;
+            }}
+            volume={volume}
+          />
         ) : null}
       </View>
       {isWide ? (

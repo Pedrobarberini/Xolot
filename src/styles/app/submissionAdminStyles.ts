@@ -394,6 +394,74 @@ export const submissionAdminStyles = {
     height: "100%",
     width: "100%"
   },
+  submissionVideoPlayer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#000000"
+  },
+  submissionVideoTapTarget: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1
+  },
+  submissionVideoPlayButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderColor: "rgba(255, 255, 255, 0.78)",
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 58,
+    justifyContent: "center",
+    width: 58
+  },
+  submissionVideoFloatingControls: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    zIndex: 5
+  },
+  submissionVideoFloatingControlsFill: {
+    top: 76
+  },
+  submissionVideoSeekControl: {
+    bottom: 12,
+    height: 28,
+    justifyContent: "center",
+    left: 12,
+    position: "absolute",
+    right: 12,
+    zIndex: 4
+  },
+  submissionVideoSeekControlFill: {
+    bottom: 124
+  },
+  submissionVideoSeekPressable: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center"
+  },
+  submissionVideoScrubberTrack: {
+    backgroundColor: "rgba(255, 255, 255, 0.62)",
+    borderRadius: 999,
+    height: 4,
+    overflow: "hidden",
+    width: "100%"
+  },
+  submissionVideoScrubberFill: {
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    height: "100%"
+  },
+  submissionVideoScrubberThumb: {
+    backgroundColor: colors.onPrimary,
+    borderColor: "rgba(5, 5, 3, 0.28)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 12,
+    position: "absolute",
+    top: 8,
+    transform: [{ translateX: -6 }],
+    width: 12
+  },
   inputRow: {
     alignItems: "center",
     backgroundColor: colors.surface,
