@@ -824,6 +824,26 @@ Criterios de aceite:
 - Nenhuma gravacao ultrapassa dois minutos.
 - O quadrado da galeria representa visualmente a ultima foto ou video selecionado.
 
+### Task P2-011 - Corrigir gravacao da camera no navegador
+
+Tipo: Bugfix/Frontend/Midia
+
+Status: Concluido em 2026-07-20.
+
+Tasks:
+
+- [x] Identificar por que os modos Foto e Video nao iniciavam a gravacao web.
+- [x] Mover o identificador da camera para um elemento preservado pelo React Native Web.
+- [x] Permitir que o MediaRecorder encontre o elemento de video e seu MediaStream.
+- [x] Localizar como fallback qualquer video que possua um MediaStream ativo.
+- [x] Manter o mesmo fluxo de arquivo e persistencia usado pela galeria.
+
+Criterios de aceite:
+
+- Segurar o obturador no modo Foto inicia a gravacao no navegador.
+- Tocar no obturador no modo Video inicia e encerra a gravacao.
+- A gravacao concluida aparece como midia selecionada antes da publicacao.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

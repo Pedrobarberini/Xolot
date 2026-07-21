@@ -31,6 +31,19 @@ export function getWebVideoFileExtension(mimeType: string) {
   return mimeType.toLowerCase().includes("mp4") ? "mp4" : "webm";
 }
 
+export function getFirstLiveVideoTrack(source: unknown) {
+  if (
+    !source ||
+    typeof (source as { getVideoTracks?: unknown }).getVideoTracks !==
+      "function"
+  ) {
+    return null;
+  }
+
+  const tracks = (source as MediaStream).getVideoTracks();
+  return tracks.find((track) => track.readyState !== "ended") ?? null;
+}
+
 export async function startWebCameraRecording({
   cameraTestId,
   maxDurationMs
@@ -46,15 +59,22 @@ export async function startWebCameraRecording({
     throw new Error("A gravação de vídeo não é suportada neste navegador.");
   }
 
-  const cameraRoot = document.querySelector(
-    `[data-testid="${cameraTestId}"]`
-  );
-  const preview =
+  const cameraRoot =
+    document.getElementById(cameraTestId) ??
+    document.querySelector(`[data-testid="${cameraTestId}"]`);
+  const scopedPreview =
     cameraRoot instanceof HTMLVideoElement
       ? cameraRoot
       : (cameraRoot?.querySelector("video") as HTMLVideoElement | null);
+  const previewCandidates = [
+    scopedPreview,
+    ...Array.from(document.querySelectorAll("video"))
+  ].filter((candidate): candidate is HTMLVideoElement => Boolean(candidate));
+  const preview = previewCandidates.find((candidate) =>
+    getFirstLiveVideoTrack(candidate.srcObject)
+  );
   const previewStream = preview?.srcObject as MediaStream | null;
-  const previewVideoTrack = previewStream?.getVideoTracks()[0];
+  const previewVideoTrack = getFirstLiveVideoTrack(previewStream);
 
   if (!previewVideoTrack) {
     throw new Error("A câmera ainda não está pronta para gravar.");

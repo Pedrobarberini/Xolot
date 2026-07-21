@@ -353,7 +353,11 @@ export function SubmissionMediaStage({
 
   return (
     <View style={styles.submissionCaptureScreen}>
-      <View style={styles.submissionCameraViewport}>
+      <View
+        nativeID={CAMERA_TEST_ID}
+        style={styles.submissionCameraViewport}
+        testID={CAMERA_TEST_ID}
+      >
         {selectedMedia ? (
           <SubmissionMediaPreview
             fill
@@ -369,7 +373,6 @@ export function SubmissionMediaStage({
             onCameraReady={handleCameraReady}
             ref={cameraRef}
             style={styles.submissionCameraPreview}
-            testID={CAMERA_TEST_ID}
           />
         ) : (
           <View style={styles.submissionCameraPermission}>
