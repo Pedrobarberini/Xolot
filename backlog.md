@@ -963,6 +963,43 @@ Critérios de aceite:
 - O destinatário consegue tocar no cartão recebido para abrir a publicação correta.
 - Ao sair da publicação compartilhada, o usuário retorna à mesma conversa.
 
+### Task P2-017 - Adicionar curtidas, visualizações e preferências do Início
+
+Tipo: Frontend/UX/Social/Dados locais
+
+Status: Concluído em 2026-07-21.
+
+Tasks:
+
+- [x] Persistir curtidas únicas por conta e permitir removê-las.
+- [x] Persistir visualizações únicas depois que o post permanece ativo no Início.
+- [x] Agregar as contagens de curtidas e visualizações por publicação.
+- [x] Alterar as métricas do Perfil para Envios, Posts e Curtidas.
+- [x] Exibir visualizações somente nas miniaturas das galerias de perfil.
+- [x] Adicionar coração, compartilhamento e menu de três pontos na lateral do post.
+- [x] Preencher o coração em vermelho quando a publicação estiver curtida.
+- [x] Reutilizar o compartilhamento por Mensagens diretamente no Início.
+- [x] Permitir bloquear e desbloquear o perfil vinculado à publicação.
+- [x] Permitir registrar interesse por categoria e priorizar conteúdo semelhante.
+- [x] Permitir ocultar ou restaurar posts da mesma categoria.
+- [x] Preservar a abertura direta de conteúdo bloqueado ou silenciado pelo Perfil.
+- [x] Ignorar tags genéricas ao identificar a categoria de uma publicação.
+- [x] Exibir um estado vazio quando todas as publicações forem filtradas.
+- [x] Cobrir agregação, categorias, filtros e prioridade com testes automatizados.
+
+Critérios de aceite:
+
+- Cada conta pode curtir uma publicação apenas uma vez e desfazer a curtida.
+- Uma visualização é registrada após 800 ms com a publicação ativa.
+- A galeria do Perfil mostra olho e contagem no canto inferior direito.
+- O Início mantém os três controles laterais acessíveis sem cobrir a descrição.
+- Preferências continuam disponíveis após fechar e abrir o app no mesmo dispositivo.
+- O conteúdo aberto diretamente pode restaurar bloqueios ou categorias silenciadas.
+
+Observação técnica:
+
+- As métricas são agregadas no estado local atual. A sincronização global entre dispositivos depende do backend previsto nas tarefas P0-003 e P0-004.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

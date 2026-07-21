@@ -97,6 +97,8 @@ export type FollowingByUser = Record<string, string[]>;
 
 export type HiddenPlayerIdsByUser = Record<string, string[]>;
 
+export type SocialSelectionsByUser = Record<string, string[]>;
+
 export type MessageContactsByUser = Record<string, MessageContact[]>;
 
 export type ConversationPreferences = {

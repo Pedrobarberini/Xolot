@@ -46,6 +46,34 @@ export const feedStyles = {
     backgroundColor: colors.background,
     flex: 1
   },
+  feedEmptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32
+  },
+  feedEmptyStateIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 999,
+    height: 54,
+    justifyContent: "center",
+    width: 54
+  },
+  feedEmptyStateTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 14,
+    textAlign: "center"
+  },
+  feedEmptyStateBody: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 5,
+    maxWidth: 300,
+    textAlign: "center"
+  },
   feedReel: {
     alignSelf: "stretch",
     width: "100%"
@@ -377,6 +405,43 @@ export const feedStyles = {
     fontWeight: "900",
     marginTop: 1
   },
+  feedSocialActionRail: {
+    alignItems: "center",
+    bottom: 132,
+    gap: 13,
+    position: "absolute",
+    right: 10,
+    zIndex: 6
+  },
+  feedSocialActionRailWide: {
+    bottom: 96,
+    right: 16
+  },
+  feedSocialAction: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 44,
+    minWidth: 44
+  },
+  feedSocialActionIcon: {
+    alignItems: "center",
+    backgroundColor: "rgba(5, 10, 7, 0.66)",
+    borderColor: "rgba(255, 255, 255, 0.28)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 42,
+    justifyContent: "center",
+    width: 42
+  },
+  feedSocialActionCount: {
+    color: colors.onPrimary,
+    fontSize: 11,
+    fontWeight: "900",
+    marginTop: 3,
+    textShadowColor: "rgba(0, 0, 0, 0.88)",
+    textShadowOffset: { height: 1, width: 0 },
+    textShadowRadius: 3
+  },
   feedVideoCaptionStrip: {
     alignItems: "flex-end",
     backgroundColor: "rgba(5, 5, 3, 0.68)",
@@ -493,9 +558,20 @@ export const feedStyles = {
     padding: 0,
     paddingBottom: 10,
     paddingHorizontal: 18,
+    paddingRight: 72,
     paddingTop: 14,
     right: 0,
     shadowOpacity: 0
+  },
+  feedPreferenceTextBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  feedPreferenceHint: {
+    color: colors.muted,
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 2
   },
   feedCompactBackdropAnimation: {
     ...StyleSheet.absoluteFillObject

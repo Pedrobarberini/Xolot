@@ -43,6 +43,7 @@ export function PublicProfileScreen({
   shareContacts,
   showFollow,
   videos,
+  viewCountsByPlayer,
   walletBalance
 }: {
   account?: AppUser;
@@ -64,6 +65,7 @@ export function PublicProfileScreen({
   shareContacts: MessageContact[];
   showFollow: boolean;
   videos: Player[];
+  viewCountsByPlayer: Record<string, number>;
   walletBalance: number;
 }) {
   const profileName = account?.name ?? player?.name ?? "Perfil NextStar";
@@ -266,6 +268,7 @@ export function PublicProfileScreen({
           }}
           profileAvatars={profileAvatars}
           shareContacts={shareContacts}
+          viewCountsByVideo={viewCountsByPlayer}
           videos={galleryVideos}
         />
       </ScrollView>

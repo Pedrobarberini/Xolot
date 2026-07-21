@@ -350,7 +350,23 @@ export const profileStyles = {
     left: 8,
     lineHeight: 14,
     position: "absolute",
+    right: 48
+  },
+  profileGalleryViewCount: {
+    alignItems: "center",
+    bottom: 8,
+    flexDirection: "row",
+    gap: 3,
+    position: "absolute",
     right: 8
+  },
+  profileGalleryViewCountText: {
+    color: colors.onPrimary,
+    fontSize: 10,
+    fontWeight: "900",
+    textShadowColor: "rgba(0, 0, 0, 0.82)",
+    textShadowOffset: { height: 1, width: 0 },
+    textShadowRadius: 2
   },
   videoActionsRoot: {
     flex: 1,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { ImageIcon, Images, MoreVertical, Play } from "lucide-react-native";
+import { Eye, ImageIcon, Images, MoreVertical, Play } from "lucide-react-native";
 import { Image, Pressable, Text, View } from "react-native";
 import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { styles } from "../styles/appStyles";
@@ -31,6 +31,7 @@ export function ProfileVideoGallery({
   onOpenVideo,
   profileAvatars = {},
   shareContacts = [],
+  viewCountsByVideo = {},
   videos
 }: {
   emptyBody: string;
@@ -45,6 +46,7 @@ export function ProfileVideoGallery({
   onOpenVideo: (video: ProfileGalleryVideo) => void;
   profileAvatars?: ProfileAvatarsByProfile;
   shareContacts?: MessageContact[];
+  viewCountsByVideo?: Record<string, number>;
   videos: ProfileGalleryVideo[];
 }) {
   const [actionVideo, setActionVideo] =
@@ -109,6 +111,12 @@ export function ProfileVideoGallery({
                 <Text numberOfLines={2} style={styles.profileGalleryCardTitle}>
                   {video.title}
                 </Text>
+                <View style={styles.profileGalleryViewCount}>
+                  <Eye color={colors.onPrimary} size={13} strokeWidth={2.2} />
+                  <Text style={styles.profileGalleryViewCountText}>
+                    {viewCountsByVideo[video.id] ?? 0}
+                  </Text>
+                </View>
               </Pressable>
               {hasVideoActions ? (
                 <Pressable

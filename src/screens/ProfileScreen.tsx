@@ -65,6 +65,7 @@ export function ProfileScreen({
   fund,
   hiddenPlayerIds,
   investments,
+  likeCountsByPlayer,
   onChangeAvatar,
   onDeleteVideo,
   onDeposit,
@@ -80,7 +81,8 @@ export function ProfileScreen({
   profileAvatars,
   shareContacts,
   submissions,
-  user
+  user,
+  viewCountsByPlayer
 }: {
   accounts: AppUser[];
   avatar?: ProfileAvatar;
@@ -92,6 +94,7 @@ export function ProfileScreen({
   fund?: AthleteFund;
   hiddenPlayerIds: Set<string>;
   investments: Investment[];
+  likeCountsByPlayer: Record<string, number>;
   onChangeAvatar: (avatar: ProfileAvatar | null) => void;
   onDeleteVideo: (video: VideoSubmission) => Promise<boolean>;
   onDeposit: (amount: number) => void;
@@ -115,6 +118,7 @@ export function ProfileScreen({
   shareContacts: MessageContact[];
   submissions: VideoSubmission[];
   user: AppUser;
+  viewCountsByPlayer: Record<string, number>;
 }) {
   const [isFundModalVisible, setIsFundModalVisible] = useState(false);
   const [isFollowersVisible, setIsFollowersVisible] = useState(false);
@@ -132,12 +136,6 @@ export function ProfileScreen({
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
   const mySubmissions = submissions.filter((item) => item.userId === user.id);
   const accountSubmissions = user.role === "Admin" ? submissions : mySubmissions;
-  const approved = accountSubmissions.filter(
-    (item) => item.status === "Aprovado"
-  ).length;
-  const pending = accountSubmissions.filter(
-    (item) => item.status === "Em revisão"
-  ).length;
   const publishedVideos = mySubmissions.filter(
     (item) => item.status === "Aprovado" && item.videoLink.trim().length > 0
   );
@@ -148,15 +146,17 @@ export function ProfileScreen({
     title: video.videoTitle,
     uri: video.videoLink
   }));
+  const totalProfileLikes = galleryVideos.reduce(
+    (total, video) => total + (likeCountsByPlayer[video.id] ?? 0),
+    0
+  );
   const profileInitials = user.name
     .split(" ")
     .slice(0, 2)
     .map((part) => part[0])
     .join("")
     .toUpperCase();
-  const profilePrimaryMetric =
-    user.role === "Admin" ? String(pending) : String(mySubmissions.length);
-  const profilePrimaryLabel = user.role === "Admin" ? "pendentes" : "envios";
+  const profilePrimaryMetric = String(accountSubmissions.length);
   const followerListItems = useMemo<ProfileListItemData[]>(
     () =>
       followers.map((follower) => toProfileListItem(follower, profileAvatars)),
@@ -368,19 +368,19 @@ export function ProfileScreen({
                 <Text style={styles.profileQuickValue}>
                   {profilePrimaryMetric}
                 </Text>
-                <Text style={styles.profileQuickLabel}>
-                  {profilePrimaryLabel}
-                </Text>
-              </View>
-              <View style={styles.profileQuickItem}>
-                <Text style={styles.profileQuickValue}>{approved}</Text>
-                <Text style={styles.profileQuickLabel}>publicados</Text>
+                <Text style={styles.profileQuickLabel}>envios</Text>
               </View>
               <View style={styles.profileQuickItem}>
                 <Text style={styles.profileQuickValue}>
                   {publishedVideos.length}
                 </Text>
-                <Text style={styles.profileQuickLabel}>publicados</Text>
+                <Text style={styles.profileQuickLabel}>posts</Text>
+              </View>
+              <View style={styles.profileQuickItem}>
+                <Text style={styles.profileQuickValue}>
+                  {totalProfileLikes}
+                </Text>
+                <Text style={styles.profileQuickLabel}>curtidas</Text>
               </View>
             </View>
             <View style={styles.profileSocialMetrics}>
@@ -448,6 +448,7 @@ export function ProfileScreen({
             }}
             profileAvatars={profileAvatars}
             shareContacts={shareContacts}
+            viewCountsByVideo={viewCountsByPlayer}
             videos={galleryVideos}
           />
         </ScrollView>

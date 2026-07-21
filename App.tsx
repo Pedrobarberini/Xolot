@@ -115,6 +115,7 @@ export default function App() {
   const { profileAvatars, setProfileAvatar } = useProfileActions();
   const {
     addMessageContact,
+    blockedProfileIdSet,
     currentMessageContacts,
     deleteConversation,
     directMessages,
@@ -123,28 +124,51 @@ export default function App() {
     followingProfileIds,
     followingProfileSet,
     hiddenPlayerIdSet,
+    interestedContentKeySet,
+    likedPlayerIdSet,
+    likeCountsByPlayer,
+    mutedContentKeySet,
     ownProfileId,
     mutedContactIds,
     pinnedContactIds,
+    recordPlayerView,
     sendDirectMessage,
     sendSharedPost,
     setPlayerHidden,
+    toggleBlockedProfile,
     toggleFollowProfile,
+    toggleInterestedContent,
+    toggleLikePlayer,
     toggleMuteConversation,
-    togglePinConversation
+    toggleMutedContent,
+    togglePinConversation,
+    viewCountsByPlayer
   } = useSocialActions({ players: availablePlayers, user });
   const visibleFeedPlayers = useMemo(
     () =>
       selectVisibleFeedPlayers(
         availablePlayers,
         hiddenPlayerIdSet,
-        feedFocusPlayerId
+        feedFocusPlayerId,
+        blockedProfileIdSet,
+        mutedContentKeySet
       ),
-    [availablePlayers, feedFocusPlayerId, hiddenPlayerIdSet]
+    [
+      availablePlayers,
+      blockedProfileIdSet,
+      feedFocusPlayerId,
+      hiddenPlayerIdSet,
+      mutedContentKeySet
+    ]
   );
   const orderedFeedPlayers = useMemo(
-    () => selectOrderedFeedPlayers(visibleFeedPlayers, followingProfileSet),
-    [followingProfileSet, visibleFeedPlayers]
+    () =>
+      selectOrderedFeedPlayers(
+        visibleFeedPlayers,
+        followingProfileSet,
+        interestedContentKeySet
+      ),
+    [followingProfileSet, interestedContentKeySet, visibleFeedPlayers]
   );
   const shareContacts = useMemo(
     () =>
@@ -288,6 +312,7 @@ export default function App() {
       approvedSubmissionPlayers={approvedSubmissionPlayers}
       athleteFunds={athleteFunds}
       availablePlayers={availablePlayers}
+      blockedProfileIdSet={blockedProfileIdSet}
       clearSelectedProfile={clearSelectedProfile}
       closeInvestment={closeInvestment}
       currentMessageContacts={currentMessageContacts}
@@ -301,6 +326,7 @@ export default function App() {
       followingProfileIds={followingProfileIds}
       followingProfileSet={followingProfileSet}
       hiddenPlayerIdSet={hiddenPlayerIdSet}
+      interestedContentKeySet={interestedContentKeySet}
       handleDeleteVideo={handleDeleteVideo}
       handleDeposit={handleDeposit}
       handleInvest={handleInvest}
@@ -312,6 +338,9 @@ export default function App() {
       investmentFund={investmentFund}
       investmentPlayer={investmentPlayer}
       isBrandLaunchVisible={isBrandLaunchVisible}
+      likedPlayerIdSet={likedPlayerIdSet}
+      likeCountsByPlayer={likeCountsByPlayer}
+      mutedContentKeySet={mutedContentKeySet}
       onBrandLaunchFinish={() => setIsBrandLaunchVisible(false)}
       onOpenMessagesForSelectedProfile={openMessagesForSelectedProfile}
       openInvestment={openInvestment}
@@ -325,6 +354,7 @@ export default function App() {
       mutedContactIds={mutedContactIds}
       pinnedContactIds={pinnedContactIds}
       profileAvatars={profileAvatars}
+      recordPlayerView={recordPlayerView}
       registeredUsers={registeredUsers}
       reelReturnTarget={reelReturnTarget}
       returnToReelOrigin={returnToReelOrigin}
@@ -342,10 +372,15 @@ export default function App() {
       signOutSession={signOutSession}
       submissions={submissions}
       tab={tab}
+      toggleBlockedProfile={toggleBlockedProfile}
       toggleFollowProfile={toggleFollowProfile}
+      toggleInterestedContent={toggleInterestedContent}
+      toggleLikePlayer={toggleLikePlayer}
       toggleMuteConversation={toggleMuteConversation}
+      toggleMutedContent={toggleMutedContent}
       togglePinConversation={togglePinConversation}
       user={user}
+      viewCountsByPlayer={viewCountsByPlayer}
       walletBalance={walletBalance}
     />
   );

@@ -3,7 +3,18 @@ import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { ArrowLeft, Expand, Play, UserCheck, UserPlus, UserRound } from "lucide-react-native";
+import {
+  ArrowLeft,
+  Expand,
+  Heart,
+  MoreVertical,
+  Play,
+  Share2,
+  SlidersHorizontal,
+  UserCheck,
+  UserPlus,
+  UserRound
+} from "lucide-react-native";
 import { Alert, Animated, Easing, Image, PanResponder, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import {
   formatPlaybackTime,
@@ -13,7 +24,9 @@ import {
 } from "../actions/appActions";
 import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { BalanceLine } from "../components/Navigation";
+import { FeedPostOptionsModal } from "../components/FeedPostOptionsModal";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
+import { SharePostModal } from "../components/SharePostModal";
 import { VideoVolumeControl } from "../components/VideoVolumeControl";
 import { NEXTSTAR_SYMBOL } from "../constants/assets";
 import { FEED_TEXT_LIMIT_COMPACT, FEED_TEXT_LIMIT_WIDE, USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
@@ -21,43 +34,74 @@ import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import {
   AthleteFund,
+  MessageContact,
   Player,
   ProfileAvatar,
   ProfileAvatarsByProfile
 } from "../types";
 import { CardPalette } from "../ui/types";
 import { formatBRL, formatPercent } from "../utils/investment";
+import {
+  getPlayerContentKey,
+  getPlayerContentLabel
+} from "../utils/feedEngagement";
 
 export function FeedScreen({
   backLabel = "Voltar ao perfil",
   balance,
+  blockedProfileIds,
   currentUserId,
   focusPlayerId,
   followingProfileIds,
   funds,
+  interestedContentKeys,
+  likedPlayerIds,
+  likeCountsByPlayer,
+  mutedContentKeys,
   onBackToProfile,
   onOpenInvestment,
   onOpenPlayer,
+  onRecordView,
+  onShare,
+  onToggleBlockProfile,
   onToggleFollow,
+  onToggleInterest,
+  onToggleLike,
+  onToggleMutedContent,
   players: feedPlayers,
-  profileAvatars
+  profileAvatars,
+  shareContacts
 }: {
   backLabel?: string;
   balance: number | null;
+  blockedProfileIds: Set<string>;
   currentUserId: string;
   focusPlayerId?: string | null;
   followingProfileIds: string[];
   funds: AthleteFund[];
+  interestedContentKeys: Set<string>;
+  likedPlayerIds: Set<string>;
+  likeCountsByPlayer: Record<string, number>;
+  mutedContentKeys: Set<string>;
   onBackToProfile?: () => void;
   onOpenInvestment: (player: Player) => void;
   onOpenPlayer: (player: Player) => void;
+  onRecordView: (playerId: string) => void;
+  onShare: (player: Player, contact: MessageContact) => void;
+  onToggleBlockProfile: (player: Player) => void;
   onToggleFollow: (player: Player) => void;
+  onToggleInterest: (player: Player) => void;
+  onToggleLike: (player: Player) => void;
+  onToggleMutedContent: (contentKey: string) => void;
   players: Player[];
   profileAvatars: ProfileAvatarsByProfile;
+  shareContacts: MessageContact[];
 }) {
   const { height } = useWindowDimensions();
   const [feedHeight, setFeedHeight] = useState(0);
   const [activeFeedIndex, setActiveFeedIndex] = useState(0);
+  const [preferencePlayer, setPreferencePlayer] = useState<Player | null>(null);
+  const [sharePlayer, setSharePlayer] = useState<Player | null>(null);
   const feedScrollRef = useRef<ScrollView | null>(null);
   const activeFeedIndexRef = useRef(0);
   const gestureStartIndexRef = useRef(0);
@@ -66,6 +110,19 @@ export function FeedScreen({
   const sectionOffsetsRef = useRef<Record<number, number>>({});
   const pageHeight = feedHeight || height;
   const lastFeedIndex = Math.max(feedPlayers.length - 1, 0);
+  const activePlayerId = feedPlayers[activeFeedIndex]?.id;
+
+  useEffect(() => {
+    if (!activePlayerId) {
+      return undefined;
+    }
+
+    const viewTimer = setTimeout(() => {
+      onRecordView(activePlayerId);
+    }, 800);
+
+    return () => clearTimeout(viewTimer);
+  }, [activePlayerId, onRecordView]);
 
   function activateFeedIndex(index: number) {
     const safeIndex = Math.min(Math.max(index, 0), lastFeedIndex);
@@ -202,7 +259,19 @@ export function FeedScreen({
         showsVerticalScrollIndicator={false}
         style={styles.feedPager}
       >
-        {feedPlayers.map((player, index) => (
+        {feedPlayers.length === 0 ? (
+          <View style={[styles.feedEmptyState, { height: pageHeight }]}>
+            <View style={styles.feedEmptyStateIcon}>
+              <SlidersHorizontal color={colors.primary} size={26} />
+            </View>
+            <Text style={styles.feedEmptyStateTitle}>
+              Nenhuma publicação disponível
+            </Text>
+            <Text style={styles.feedEmptyStateBody}>
+              Suas preferências ocultaram os posts atuais do Início.
+            </Text>
+          </View>
+        ) : feedPlayers.map((player, index) => (
           <View
             collapsable={false}
             key={player.id}
@@ -217,8 +286,13 @@ export function FeedScreen({
               fund={funds.find((item) => item.profileId === player.profileId)}
               isFollowing={followingProfileIds.includes(player.profileId)}
               isActive={index === activeFeedIndex}
+              isLiked={likedPlayerIds.has(player.id)}
+              likeCount={likeCountsByPlayer[player.id] ?? 0}
               onInvest={() => onOpenInvestment(player)}
+              onMore={() => setPreferencePlayer(player)}
               onOpen={() => onOpenPlayer(player)}
+              onShare={() => setSharePlayer(player)}
+              onToggleLike={() => onToggleLike(player)}
               onToggleFollow={() => onToggleFollow(player)}
               palette={getCardPalette(index)}
               player={player}
@@ -249,6 +323,63 @@ export function FeedScreen({
         </View>
       </View>
       {balance !== null ? <BalanceLine balance={balance} overlay /> : null}
+      <FeedPostOptionsModal
+        blocked={Boolean(
+          preferencePlayer &&
+            blockedProfileIds.has(preferencePlayer.profileId)
+        )}
+        canBlock={Boolean(
+          preferencePlayer &&
+            preferencePlayer.ownerUserId !== currentUserId &&
+            preferencePlayer.profileId !== `profile-${currentUserId}`
+        )}
+        contentLabel={
+          preferencePlayer
+            ? getPlayerContentLabel(preferencePlayer)
+            : "esta publicação"
+        }
+        interested={Boolean(
+          preferencePlayer &&
+            interestedContentKeys.has(getPlayerContentKey(preferencePlayer))
+        )}
+        muted={Boolean(
+          preferencePlayer &&
+            mutedContentKeys.has(getPlayerContentKey(preferencePlayer))
+        )}
+        onClose={() => setPreferencePlayer(null)}
+        onToggleBlock={() => {
+          if (preferencePlayer) {
+            onToggleBlockProfile(preferencePlayer);
+          }
+          setPreferencePlayer(null);
+        }}
+        onToggleInterest={() => {
+          if (preferencePlayer) {
+            onToggleInterest(preferencePlayer);
+          }
+          setPreferencePlayer(null);
+        }}
+        onToggleMuted={() => {
+          if (preferencePlayer) {
+            onToggleMutedContent(getPlayerContentKey(preferencePlayer));
+          }
+          setPreferencePlayer(null);
+        }}
+        visible={Boolean(preferencePlayer)}
+      />
+      <SharePostModal
+        contacts={shareContacts}
+        onClose={() => setSharePlayer(null)}
+        onShare={(contact) => {
+          if (sharePlayer) {
+            onShare(sharePlayer, contact);
+          }
+        }}
+        profileAvatars={profileAvatars}
+        videoId={sharePlayer?.id ?? ""}
+        videoTitle={sharePlayer?.videoTitle ?? ""}
+        visible={Boolean(sharePlayer)}
+      />
     </View>
   );
 }
@@ -259,8 +390,13 @@ function FeedReel({
   fund,
   isFollowing,
   isActive,
+  isLiked,
+  likeCount,
   onInvest,
+  onMore,
   onOpen,
+  onShare,
+  onToggleLike,
   onToggleFollow,
   palette,
   player,
@@ -271,8 +407,13 @@ function FeedReel({
   fund?: AthleteFund;
   isFollowing: boolean;
   isActive: boolean;
+  isLiked: boolean;
+  likeCount: number;
   onInvest: () => void;
+  onMore: () => void;
   onOpen: () => void;
+  onShare: () => void;
+  onToggleLike: () => void;
   onToggleFollow: () => void;
   palette: CardPalette;
   player: Player;
@@ -414,6 +555,61 @@ function FeedReel({
             player={player}
             scoreColor={scoreColor}
           />
+
+          <View
+            style={[
+              styles.feedSocialActionRail,
+              isWide ? styles.feedSocialActionRailWide : null
+            ]}
+          >
+            <Pressable
+              accessibilityLabel={
+                isLiked
+                  ? `Remover curtida de ${player.videoTitle}`
+                  : `Curtir ${player.videoTitle}`
+              }
+              accessibilityRole="button"
+              hitSlop={5}
+              onPress={onToggleLike}
+              style={styles.feedSocialAction}
+            >
+              <View style={styles.feedSocialActionIcon}>
+                <Heart
+                  color={isLiked ? colors.like : colors.onPrimary}
+                  fill={isLiked ? colors.like : "transparent"}
+                  size={25}
+                  strokeWidth={2.2}
+                />
+              </View>
+              <Text style={styles.feedSocialActionCount}>{likeCount}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityLabel={`Compartilhar ${player.videoTitle}`}
+              accessibilityRole="button"
+              hitSlop={5}
+              onPress={onShare}
+              style={styles.feedSocialAction}
+            >
+              <View style={styles.feedSocialActionIcon}>
+                <Share2 color={colors.onPrimary} size={24} strokeWidth={2.2} />
+              </View>
+            </Pressable>
+            <Pressable
+              accessibilityLabel={`Mais opções de ${player.videoTitle}`}
+              accessibilityRole="button"
+              hitSlop={5}
+              onPress={onMore}
+              style={styles.feedSocialAction}
+            >
+              <View style={styles.feedSocialActionIcon}>
+                <MoreVertical
+                  color={colors.onPrimary}
+                  size={25}
+                  strokeWidth={2.3}
+                />
+              </View>
+            </Pressable>
+          </View>
 
           {!isWide && evaluation ? (
             <View style={styles.feedReelHeaderOverlay}>
@@ -1005,7 +1201,7 @@ function FeedVideoBox({
         />
       )}
 
-      {evaluation && fundingProgressLabel ? (
+      {isWide && evaluation && fundingProgressLabel ? (
         <View style={styles.feedVideoActionRail}>
           <View style={styles.feedVideoActionButton}>
             <Text style={[styles.feedVideoActionValue, { color: scoreColor }]}>

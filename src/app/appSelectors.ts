@@ -6,6 +6,7 @@ import type {
   Player,
   VideoSubmission
 } from "../types.ts";
+import { getPlayerContentKey } from "../utils/feedEngagement.ts";
 
 export function selectApprovedSubmissionPlayers(
   submissions: VideoSubmission[],
@@ -50,7 +51,8 @@ export function selectAvailablePlayers(
 
 export function selectOrderedFeedPlayers(
   availablePlayers: Player[],
-  followingProfileSet: Set<string>
+  followingProfileSet: Set<string>,
+  interestedContentKeySet = new Set<string>()
 ) {
   return availablePlayers
     .map((player, index) => ({ index, player }))
@@ -58,8 +60,15 @@ export function selectOrderedFeedPlayers(
       const followDifference =
         Number(followingProfileSet.has(right.player.profileId)) -
         Number(followingProfileSet.has(left.player.profileId));
+      const interestDifference =
+        Number(
+          interestedContentKeySet.has(getPlayerContentKey(right.player))
+        ) -
+        Number(
+          interestedContentKeySet.has(getPlayerContentKey(left.player))
+        );
 
-      return followDifference || left.index - right.index;
+      return followDifference || interestDifference || left.index - right.index;
     })
     .map(({ player }) => player);
 }
@@ -175,11 +184,22 @@ export function selectProfileId(
 export function selectVisibleFeedPlayers(
   availablePlayers: Player[],
   hiddenPlayerIdSet: Set<string>,
-  focusPlayerId?: string | null
+  focusPlayerId?: string | null,
+  blockedProfileIdSet = new Set<string>(),
+  mutedContentKeySet = new Set<string>()
 ) {
   return availablePlayers.filter(
-    (player) =>
-      !hiddenPlayerIdSet.has(player.id) || player.id === focusPlayerId
+    (player) => {
+      if (player.id === focusPlayerId) {
+        return true;
+      }
+
+      return (
+        !hiddenPlayerIdSet.has(player.id) &&
+        !blockedProfileIdSet.has(player.profileId) &&
+        !mutedContentKeySet.has(getPlayerContentKey(player))
+      );
+    }
   );
 }
 

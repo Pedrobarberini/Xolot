@@ -4,25 +4,36 @@ import {
   DirectMessage,
   FollowingByUser,
   HiddenPlayerIdsByUser,
-  MessageContactsByUser
+  MessageContactsByUser,
+  SocialSelectionsByUser
 } from "../types";
 
 const SOCIAL_STORAGE_KEY = "@nextstar/social-state-v1";
 
 export type SocialState = {
+  blockedProfileIdsByUser: SocialSelectionsByUser;
   conversationPreferencesByUser: ConversationPreferencesByUser;
   directMessages: DirectMessage[];
   followingByUser: FollowingByUser;
   hiddenPlayerIdsByUser: HiddenPlayerIdsByUser;
+  interestedContentKeysByUser: SocialSelectionsByUser;
+  likedPlayerIdsByUser: SocialSelectionsByUser;
   messageContactsByUser: MessageContactsByUser;
+  mutedContentKeysByUser: SocialSelectionsByUser;
+  viewedPlayerIdsByUser: SocialSelectionsByUser;
 };
 
 export const emptySocialState: SocialState = {
+  blockedProfileIdsByUser: {},
   conversationPreferencesByUser: {},
   directMessages: [],
   followingByUser: {},
   hiddenPlayerIdsByUser: {},
-  messageContactsByUser: {}
+  interestedContentKeysByUser: {},
+  likedPlayerIdsByUser: {},
+  messageContactsByUser: {},
+  mutedContentKeysByUser: {},
+  viewedPlayerIdsByUser: {}
 };
 
 function normalizeStringArray(value: unknown) {
@@ -70,6 +81,19 @@ function normalizeConversationPreferences(
   );
 }
 
+function normalizeSelectionsByUser(value: unknown): SocialSelectionsByUser {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([userId, selections]) => [
+      userId,
+      normalizeStringArray(selections)
+    ])
+  );
+}
+
 export async function loadSocialState(): Promise<SocialState> {
   try {
     const storedState = await AsyncStorage.getItem(SOCIAL_STORAGE_KEY);
@@ -81,6 +105,9 @@ export async function loadSocialState(): Promise<SocialState> {
     const parsedState = JSON.parse(storedState) as Partial<SocialState>;
 
     return {
+      blockedProfileIdsByUser: normalizeSelectionsByUser(
+        parsedState.blockedProfileIdsByUser
+      ),
       conversationPreferencesByUser: normalizeConversationPreferences(
         parsedState.conversationPreferencesByUser
       ),
@@ -104,11 +131,23 @@ export async function loadSocialState(): Promise<SocialState> {
               )
             )
           : {},
+      interestedContentKeysByUser: normalizeSelectionsByUser(
+        parsedState.interestedContentKeysByUser
+      ),
+      likedPlayerIdsByUser: normalizeSelectionsByUser(
+        parsedState.likedPlayerIdsByUser
+      ),
       messageContactsByUser:
         parsedState.messageContactsByUser &&
         typeof parsedState.messageContactsByUser === "object"
           ? parsedState.messageContactsByUser
-          : {}
+          : {},
+      mutedContentKeysByUser: normalizeSelectionsByUser(
+        parsedState.mutedContentKeysByUser
+      ),
+      viewedPlayerIdsByUser: normalizeSelectionsByUser(
+        parsedState.viewedPlayerIdsByUser
+      )
     };
   } catch {
     return emptySocialState;

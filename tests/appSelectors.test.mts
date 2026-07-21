@@ -157,6 +157,23 @@ test("prioriza perfis seguidos sem alterar a ordem relativa dos demais", () => {
   );
 });
 
+test("prioriza interesse depois dos perfis seguidos", () => {
+  const players = [
+    { ...demoPlayer, id: "a", profileId: "profile-a", tags: ["Passe"] },
+    { ...demoPlayer, id: "b", profileId: "profile-b", tags: ["Defesa"] },
+    { ...demoPlayer, id: "c", profileId: "profile-c", tags: ["Passe"] }
+  ];
+
+  assert.deepEqual(
+    selectOrderedFeedPlayers(
+      players,
+      new Set(["profile-b"]),
+      new Set(["tag:passe"])
+    ).map((player) => player.id),
+    ["b", "a", "c"]
+  );
+});
+
 test("oculta players do Inicio e preserva o player aberto diretamente", () => {
   const players = [
     { ...demoPlayer, id: "a" },
@@ -176,6 +193,37 @@ test("oculta players do Inicio e preserva o player aberto diretamente", () => {
       (player) => player.id
     ),
     ["a", "c"]
+  );
+});
+
+test("filtra perfil bloqueado e tipo silenciado preservando abertura direta", () => {
+  const players = [
+    { ...demoPlayer, id: "a", profileId: "profile-a", tags: ["Passe"] },
+    { ...demoPlayer, id: "b", profileId: "profile-b", tags: ["Defesa"] },
+    { ...demoPlayer, id: "c", profileId: "profile-c", tags: ["Passe"] }
+  ];
+  const blockedProfiles = new Set(["profile-b"]);
+  const mutedContent = new Set(["tag:passe"]);
+
+  assert.deepEqual(
+    selectVisibleFeedPlayers(
+      players,
+      new Set(),
+      null,
+      blockedProfiles,
+      mutedContent
+    ),
+    []
+  );
+  assert.deepEqual(
+    selectVisibleFeedPlayers(
+      players,
+      new Set(),
+      "b",
+      blockedProfiles,
+      mutedContent
+    ).map((player) => player.id),
+    ["b"]
   );
 });
 

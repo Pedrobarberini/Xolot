@@ -8,6 +8,7 @@ export const colors = {
   dangerSoft: "#FCEBED",
   info: "#2563EB",
   infoSoft: "#EAF1FF",
+  like: "#F0445A",
   media: "#050A07",
   muted: "#607066",
   onAccent: "#142118",

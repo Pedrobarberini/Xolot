@@ -39,12 +39,14 @@ import type {
 } from "../types";
 import type { Tab } from "../ui/types";
 import type { ReelReturnTarget } from "./useAppNavigation";
+import { getPlayerContentKey } from "../utils/feedEngagement";
 
 type AppRoutesProps = {
   activeMessageContactId: string | null;
   approvedSubmissionPlayers: Player[];
   athleteFunds: AthleteFund[];
   availablePlayers: Player[];
+  blockedProfileIdSet: Set<string>;
   clearSelectedProfile: () => void;
   closeInvestment: () => void;
   currentMessageContacts: MessageContact[];
@@ -58,6 +60,7 @@ type AppRoutesProps = {
   followingProfileIds: string[];
   followingProfileSet: Set<string>;
   hiddenPlayerIdSet: Set<string>;
+  interestedContentKeySet: Set<string>;
   handleDeleteVideo: (submission: VideoSubmission) => Promise<boolean>;
   handleDeposit: (amount: number) => void;
   handleInvest: (player: Player, amount: number) => void;
@@ -85,6 +88,8 @@ type AppRoutesProps = {
   investmentFund?: AthleteFund;
   investmentPlayer: Player | null;
   isBrandLaunchVisible: boolean;
+  likedPlayerIdSet: Set<string>;
+  likeCountsByPlayer: Record<string, number>;
   onBrandLaunchFinish: () => void;
   onOpenMessagesForSelectedProfile: () => void;
   openInvestment: (player: Player) => void;
@@ -96,8 +101,10 @@ type AppRoutesProps = {
   ownProfileId?: string | null;
   pendingReviews: number;
   mutedContactIds: string[];
+  mutedContentKeySet: Set<string>;
   pinnedContactIds: string[];
   profileAvatars: ProfileAvatarsByProfile;
+  recordPlayerView: (playerId: string) => void;
   registeredUsers: AppUser[];
   reelReturnTarget: ReelReturnTarget | null;
   returnToReelOrigin: () => void;
@@ -119,9 +126,14 @@ type AppRoutesProps = {
   submissions: VideoSubmission[];
   tab: Tab;
   toggleFollowProfile: (profileId: string) => void;
+  toggleBlockedProfile: (profileId: string) => void;
+  toggleInterestedContent: (contentKey: string) => void;
+  toggleLikePlayer: (playerId: string) => void;
   toggleMuteConversation: (contactId: string) => void;
+  toggleMutedContent: (contentKey: string) => void;
   togglePinConversation: (contactId: string) => void;
   user: AppUser;
+  viewCountsByPlayer: Record<string, number>;
   walletBalance: number;
 };
 
@@ -130,6 +142,7 @@ export function AppRoutes({
   approvedSubmissionPlayers,
   athleteFunds,
   availablePlayers,
+  blockedProfileIdSet,
   clearSelectedProfile,
   closeInvestment,
   currentMessageContacts,
@@ -143,6 +156,7 @@ export function AppRoutes({
   followingProfileIds,
   followingProfileSet,
   hiddenPlayerIdSet,
+  interestedContentKeySet,
   handleDeleteVideo,
   handleDeposit,
   handleInvest,
@@ -154,6 +168,8 @@ export function AppRoutes({
   investmentFund,
   investmentPlayer,
   isBrandLaunchVisible,
+  likedPlayerIdSet,
+  likeCountsByPlayer,
   onBrandLaunchFinish,
   onOpenMessagesForSelectedProfile,
   openInvestment,
@@ -165,8 +181,10 @@ export function AppRoutes({
   ownProfileId,
   pendingReviews,
   mutedContactIds,
+  mutedContentKeySet,
   pinnedContactIds,
   profileAvatars,
+  recordPlayerView,
   registeredUsers,
   reelReturnTarget,
   returnToReelOrigin,
@@ -185,9 +203,14 @@ export function AppRoutes({
   submissions,
   tab,
   toggleFollowProfile,
+  toggleBlockedProfile,
+  toggleInterestedContent,
+  toggleLikePlayer,
   toggleMuteConversation,
+  toggleMutedContent,
   togglePinConversation,
   user,
+  viewCountsByPlayer,
   walletBalance
 }: AppRoutesProps) {
   const openAccountProfile = (account: AppUser) => {
@@ -303,6 +326,7 @@ export function AppRoutes({
                     selectedProfileId && selectedProfileId !== ownProfileId
                   )}
                   videos={selectedProfileVideos}
+                  viewCountsByPlayer={viewCountsByPlayer}
                   walletBalance={walletBalance}
                 />
               </ScreenFrame>
@@ -332,14 +356,23 @@ export function AppRoutes({
                       : "Voltar ao perfil"
                   }
                   balance={user.role === "Usuário" ? walletBalance : null}
+                  blockedProfileIds={blockedProfileIdSet}
                   currentUserId={user.id}
                   focusPlayerId={feedFocusPlayerId}
                   followingProfileIds={followingProfileIds}
                   funds={athleteFunds}
+                  interestedContentKeys={interestedContentKeySet}
+                  likedPlayerIds={likedPlayerIdSet}
+                  likeCountsByPlayer={likeCountsByPlayer}
+                  mutedContentKeys={mutedContentKeySet}
                   onBackToProfile={
                     reelReturnTarget ? returnToReelOrigin : undefined
                   }
                   onOpenPlayer={openAthleteProfile}
+                  onRecordView={recordPlayerView}
+                  onShare={(player, contact) =>
+                    sendSharedPost(contact, player)
+                  }
                   onOpenInvestment={(player) => {
                     const fund = selectProfileFund(player, athleteFunds);
 
@@ -351,8 +384,18 @@ export function AppRoutes({
                     focusFeedPlayer(player.id);
                     toggleFollowProfile(player.profileId);
                   }}
+                  onToggleBlockProfile={(player) =>
+                    toggleBlockedProfile(player.profileId)
+                  }
+                  onToggleInterest={(player) => {
+                    focusFeedPlayer(player.id);
+                    toggleInterestedContent(getPlayerContentKey(player));
+                  }}
+                  onToggleLike={(player) => toggleLikePlayer(player.id)}
+                  onToggleMutedContent={toggleMutedContent}
                   players={orderedFeedPlayers}
                   profileAvatars={profileAvatars}
+                  shareContacts={shareContacts}
                 />
               ) : null}
               {tab === "search" ? (
@@ -446,6 +489,7 @@ export function AppRoutes({
                     }
                     followingCount={followingProfileIds.length}
                     hiddenPlayerIds={hiddenPlayerIdSet}
+                    likeCountsByPlayer={likeCountsByPlayer}
                     onDeleteVideo={handleDeleteVideo}
                     onOpenFund={handleOpenFund}
                     onOpenProfile={openAccountProfile}
@@ -484,6 +528,7 @@ export function AppRoutes({
                     shareContacts={shareContacts}
                     submissions={submissions}
                     user={user}
+                    viewCountsByPlayer={viewCountsByPlayer}
                   />
                 </ScreenFrame>
               ) : null}

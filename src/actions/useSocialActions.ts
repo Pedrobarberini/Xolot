@@ -11,7 +11,8 @@ import {
   HiddenPlayerIdsByUser,
   MessageContact,
   MessageContactsByUser,
-  Player
+  Player,
+  SocialSelectionsByUser
 } from "../types";
 import { buildFollowerUserIdsByProfile } from "../utils/profileFollowers";
 import {
@@ -22,6 +23,10 @@ import {
   togglePinnedConversation
 } from "../utils/conversations";
 import { createSharedPostReference } from "../utils/socialSharing";
+import {
+  countSelectionsByPlayer,
+  toggleSelection
+} from "../utils/feedEngagement";
 
 function upsertMessageContact(
   contacts: MessageContact[],
@@ -48,6 +53,16 @@ export function useSocialActions({
     useState<MessageContactsByUser>({});
   const [hiddenPlayerIdsByUser, setHiddenPlayerIdsByUser] =
     useState<HiddenPlayerIdsByUser>({});
+  const [blockedProfileIdsByUser, setBlockedProfileIdsByUser] =
+    useState<SocialSelectionsByUser>({});
+  const [interestedContentKeysByUser, setInterestedContentKeysByUser] =
+    useState<SocialSelectionsByUser>({});
+  const [likedPlayerIdsByUser, setLikedPlayerIdsByUser] =
+    useState<SocialSelectionsByUser>({});
+  const [mutedContentKeysByUser, setMutedContentKeysByUser] =
+    useState<SocialSelectionsByUser>({});
+  const [viewedPlayerIdsByUser, setViewedPlayerIdsByUser] =
+    useState<SocialSelectionsByUser>({});
   const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
   const [isSocialStateLoaded, setIsSocialStateLoaded] = useState(false);
 
@@ -60,12 +75,19 @@ export function useSocialActions({
       }
 
       setDirectMessages(socialState.directMessages);
+      setBlockedProfileIdsByUser(socialState.blockedProfileIdsByUser);
       setConversationPreferencesByUser(
         socialState.conversationPreferencesByUser
       );
       setFollowingByUser(socialState.followingByUser);
       setHiddenPlayerIdsByUser(socialState.hiddenPlayerIdsByUser);
+      setInterestedContentKeysByUser(
+        socialState.interestedContentKeysByUser
+      );
+      setLikedPlayerIdsByUser(socialState.likedPlayerIdsByUser);
       setMessageContactsByUser(socialState.messageContactsByUser);
+      setMutedContentKeysByUser(socialState.mutedContentKeysByUser);
+      setViewedPlayerIdsByUser(socialState.viewedPlayerIdsByUser);
       setIsSocialStateLoaded(true);
     });
 
@@ -80,19 +102,29 @@ export function useSocialActions({
     }
 
     saveSocialState({
+      blockedProfileIdsByUser,
       conversationPreferencesByUser,
       directMessages,
       followingByUser,
       hiddenPlayerIdsByUser,
-      messageContactsByUser
+      interestedContentKeysByUser,
+      likedPlayerIdsByUser,
+      messageContactsByUser,
+      mutedContentKeysByUser,
+      viewedPlayerIdsByUser
     }).catch(() => undefined);
   }, [
+    blockedProfileIdsByUser,
     conversationPreferencesByUser,
     directMessages,
     followingByUser,
     hiddenPlayerIdsByUser,
+    interestedContentKeysByUser,
     isSocialStateLoaded,
-    messageContactsByUser
+    likedPlayerIdsByUser,
+    messageContactsByUser,
+    mutedContentKeysByUser,
+    viewedPlayerIdsByUser
   ]);
 
   const followingProfileIds = useMemo(
@@ -136,6 +168,46 @@ export function useSocialActions({
   const hiddenPlayerIdSet = useMemo(
     () => new Set(hiddenPlayerIds),
     [hiddenPlayerIds]
+  );
+  const blockedProfileIds = useMemo(
+    () => (user ? blockedProfileIdsByUser[user.id] ?? [] : []),
+    [blockedProfileIdsByUser, user]
+  );
+  const blockedProfileIdSet = useMemo(
+    () => new Set(blockedProfileIds),
+    [blockedProfileIds]
+  );
+  const interestedContentKeys = useMemo(
+    () => (user ? interestedContentKeysByUser[user.id] ?? [] : []),
+    [interestedContentKeysByUser, user]
+  );
+  const interestedContentKeySet = useMemo(
+    () => new Set(interestedContentKeys),
+    [interestedContentKeys]
+  );
+  const likedPlayerIds = useMemo(
+    () => (user ? likedPlayerIdsByUser[user.id] ?? [] : []),
+    [likedPlayerIdsByUser, user]
+  );
+  const likedPlayerIdSet = useMemo(
+    () => new Set(likedPlayerIds),
+    [likedPlayerIds]
+  );
+  const mutedContentKeys = useMemo(
+    () => (user ? mutedContentKeysByUser[user.id] ?? [] : []),
+    [mutedContentKeysByUser, user]
+  );
+  const mutedContentKeySet = useMemo(
+    () => new Set(mutedContentKeys),
+    [mutedContentKeys]
+  );
+  const likeCountsByPlayer = useMemo(
+    () => countSelectionsByPlayer(likedPlayerIdsByUser),
+    [likedPlayerIdsByUser]
+  );
+  const viewCountsByPlayer = useMemo(
+    () => countSelectionsByPlayer(viewedPlayerIdsByUser),
+    [viewedPlayerIdsByUser]
   );
   const currentDirectMessages = useMemo(
     () =>
@@ -339,8 +411,72 @@ export function useSocialActions({
     });
   }
 
+  function toggleLikePlayer(playerId: string) {
+    if (!user) {
+      return;
+    }
+
+    setLikedPlayerIdsByUser((current) => ({
+      ...current,
+      [user.id]: toggleSelection(current[user.id] ?? [], playerId)
+    }));
+  }
+
+  function recordPlayerView(playerId: string) {
+    if (!user) {
+      return;
+    }
+
+    setViewedPlayerIdsByUser((current) => {
+      const currentPlayerIds = current[user.id] ?? [];
+
+      if (currentPlayerIds.includes(playerId)) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [user.id]: [...currentPlayerIds, playerId]
+      };
+    });
+  }
+
+  function toggleBlockedProfile(profileId: string) {
+    if (!user || profileId === ownProfileId) {
+      return;
+    }
+
+    setBlockedProfileIdsByUser((current) => ({
+      ...current,
+      [user.id]: toggleSelection(current[user.id] ?? [], profileId)
+    }));
+  }
+
+  function toggleInterestedContent(contentKey: string) {
+    if (!user) {
+      return;
+    }
+
+    setInterestedContentKeysByUser((current) => ({
+      ...current,
+      [user.id]: toggleSelection(current[user.id] ?? [], contentKey)
+    }));
+  }
+
+  function toggleMutedContent(contentKey: string) {
+    if (!user) {
+      return;
+    }
+
+    setMutedContentKeysByUser((current) => ({
+      ...current,
+      [user.id]: toggleSelection(current[user.id] ?? [], contentKey)
+    }));
+  }
+
   return {
     addMessageContact,
+    blockedProfileIdSet,
     currentMessageContacts,
     deleteConversation,
     directMessages: currentDirectMessages,
@@ -350,14 +486,24 @@ export function useSocialActions({
     followingProfileSet,
     hiddenPlayerIds,
     hiddenPlayerIdSet,
+    interestedContentKeySet,
+    likedPlayerIdSet,
+    likeCountsByPlayer,
+    mutedContentKeySet,
     ownProfileId,
     mutedContactIds: currentConversationPreferences.mutedContactIds,
     pinnedContactIds: currentConversationPreferences.pinnedContactIds,
+    recordPlayerView,
     sendDirectMessage,
     sendSharedPost,
     setPlayerHidden,
+    toggleBlockedProfile,
     toggleFollowProfile,
+    toggleInterestedContent,
+    toggleLikePlayer,
     toggleMuteConversation,
-    togglePinConversation
+    toggleMutedContent,
+    togglePinConversation,
+    viewCountsByPlayer
   };
 }
