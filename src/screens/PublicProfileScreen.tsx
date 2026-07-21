@@ -14,7 +14,14 @@ import {
 } from "../components/ProfileVideoGallery";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import { AppUser, AthleteFund, Player, ProfileAvatar } from "../types";
+import {
+  AppUser,
+  AthleteFund,
+  MessageContact,
+  Player,
+  ProfileAvatar,
+  ProfileAvatarsByProfile
+} from "../types";
 
 export function PublicProfileScreen({
   account,
@@ -22,13 +29,18 @@ export function PublicProfileScreen({
   canInvest,
   fund,
   followersCount,
+  hiddenPlayerIds,
   isFollowing,
   onBack,
   onInvest,
   onMessage,
   onOpenVideo,
+  onSetVideoHidden,
+  onShareVideo,
   onToggleFollow,
   player,
+  profileAvatars,
+  shareContacts,
   showFollow,
   videos,
   walletBalance
@@ -38,13 +50,18 @@ export function PublicProfileScreen({
   canInvest: boolean;
   fund?: AthleteFund;
   followersCount: number;
+  hiddenPlayerIds: Set<string>;
   isFollowing: boolean;
   onBack: () => void;
   onInvest: () => void;
   onMessage: () => void;
   onOpenVideo: (player: Player) => void;
+  onSetVideoHidden: (playerId: string, hidden: boolean) => void;
+  onShareVideo: (player: Player, contact: MessageContact) => void;
   onToggleFollow: () => void;
   player?: Player;
+  profileAvatars: ProfileAvatarsByProfile;
+  shareContacts: MessageContact[];
   showFollow: boolean;
   videos: Player[];
   walletBalance: number;
@@ -229,6 +246,7 @@ export function PublicProfileScreen({
         <ProfileVideoGallery
           emptyBody="Este usuário ainda não possui fotos ou vídeos publicados para mostrar no perfil."
           emptyTitle="Nenhuma publicação"
+          hiddenVideoIds={hiddenPlayerIds}
           onOpenVideo={(video) => {
             const selectedVideo = videos.find((item) => item.id === video.id);
 
@@ -236,6 +254,18 @@ export function PublicProfileScreen({
               onOpenVideo(selectedVideo);
             }
           }}
+          onSetVideoHidden={(video, hidden) =>
+            onSetVideoHidden(video.id, hidden)
+          }
+          onShareVideo={(video, contact) => {
+            const selectedVideo = videos.find((item) => item.id === video.id);
+
+            if (selectedVideo) {
+              onShareVideo(selectedVideo, contact);
+            }
+          }}
+          profileAvatars={profileAvatars}
+          shareContacts={shareContacts}
           videos={galleryVideos}
         />
       </ScrollView>

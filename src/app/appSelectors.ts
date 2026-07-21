@@ -172,6 +172,17 @@ export function selectProfileId(
     (selectedAccount ? `profile-${selectedAccount.id}` : undefined);
 }
 
+export function selectVisibleFeedPlayers(
+  availablePlayers: Player[],
+  hiddenPlayerIdSet: Set<string>,
+  focusPlayerId?: string | null
+) {
+  return availablePlayers.filter(
+    (player) =>
+      !hiddenPlayerIdSet.has(player.id) || player.id === focusPlayerId
+  );
+}
+
 export function isOwnAccountProfile(account: AppUser, currentUserId: string) {
   return account.id === currentUserId;
 }

@@ -326,13 +326,15 @@ export const profileStyles = {
     top: 8,
     width: 30
   },
-  profileGalleryPlayBadgeWithDelete: {
+  profileGalleryPlayBadgeWithMenu: {
     right: 44
   },
-  profileGalleryDeleteButton: {
+  profileGalleryMenuButton: {
     alignItems: "center",
-    backgroundColor: "rgba(196, 61, 77, 0.92)",
+    backgroundColor: "rgba(5, 10, 7, 0.68)",
+    borderColor: "rgba(255, 255, 255, 0.44)",
     borderRadius: 999,
+    borderWidth: 1,
     height: 30,
     justifyContent: "center",
     position: "absolute",
@@ -349,6 +351,185 @@ export const profileStyles = {
     lineHeight: 14,
     position: "absolute",
     right: 8
+  },
+  videoActionsRoot: {
+    flex: 1,
+    justifyContent: "flex-end"
+  },
+  videoActionsBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(5, 18, 12, 0.54)"
+  },
+  videoActionsSheet: {
+    alignSelf: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderWidth: 1,
+    maxWidth: 520,
+    paddingBottom: 18,
+    paddingHorizontal: 16,
+    width: "100%"
+  },
+  sharePostSheet: {
+    alignSelf: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderWidth: 1,
+    maxHeight: "78%",
+    maxWidth: 520,
+    paddingBottom: 18,
+    paddingHorizontal: 16,
+    width: "100%"
+  },
+  videoActionsHeader: {
+    alignItems: "center",
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 66
+  },
+  videoActionsHeaderIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 999,
+    height: 38,
+    justifyContent: "center",
+    width: 38
+  },
+  videoActionsTitleBlock: {
+    flex: 1,
+    minWidth: 0
+  },
+  videoActionsTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: "900"
+  },
+  videoActionsSubtitle: {
+    color: colors.muted,
+    fontSize: 11,
+    marginTop: 2
+  },
+  videoActionsClose: {
+    alignItems: "center",
+    height: 38,
+    justifyContent: "center",
+    width: 38
+  },
+  videoActionRow: {
+    alignItems: "center",
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 54,
+    paddingHorizontal: 4
+  },
+  videoActionText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "800"
+  },
+  videoActionDanger: {
+    borderBottomWidth: 0
+  },
+  videoActionDangerText: {
+    color: colors.danger,
+    fontSize: 14,
+    fontWeight: "900"
+  },
+  sharePostContactScroll: {
+    maxHeight: 360
+  },
+  sharePostContactList: {
+    paddingVertical: 4
+  },
+  sharePostContactRow: {
+    alignItems: "center",
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 62,
+    paddingVertical: 8
+  },
+  sharePostAvatar: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    height: 42,
+    justifyContent: "center",
+    overflow: "hidden",
+    width: 42
+  },
+  sharePostAvatarText: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: "900"
+  },
+  sharePostContactIdentity: {
+    flex: 1,
+    minWidth: 0
+  },
+  sharePostContactName: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  sharePostContactMeta: {
+    color: colors.muted,
+    fontSize: 11,
+    marginTop: 2
+  },
+  sharePostSendButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    height: 36,
+    justifyContent: "center",
+    width: 36
+  },
+  sharePostSendButtonDone: {
+    backgroundColor: colors.primarySoft
+  },
+  sharePostEmpty: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 180,
+    paddingHorizontal: 24
+  },
+  sharePostEmptyTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "900",
+    marginTop: 10
+  },
+  sharePostEmptyBody: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 4,
+    textAlign: "center"
+  },
+  sharePostDoneButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    justifyContent: "center",
+    marginTop: 14,
+    minHeight: 44
+  },
+  sharePostDoneButtonText: {
+    color: colors.onPrimary,
+    fontSize: 13,
+    fontWeight: "900"
   },
   deleteVideoDialog: {
     backgroundColor: colors.surface,

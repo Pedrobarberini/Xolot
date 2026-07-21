@@ -8,6 +8,7 @@ import {
   ConversationPreferencesByUser,
   DirectMessage,
   FollowingByUser,
+  HiddenPlayerIdsByUser,
   MessageContact,
   MessageContactsByUser,
   Player
@@ -20,6 +21,7 @@ import {
   toggleConversationId,
   togglePinnedConversation
 } from "../utils/conversations";
+import { createSharedPostReference } from "../utils/socialSharing";
 
 function upsertMessageContact(
   contacts: MessageContact[],
@@ -44,6 +46,8 @@ export function useSocialActions({
     useState<ConversationPreferencesByUser>({});
   const [messageContactsByUser, setMessageContactsByUser] =
     useState<MessageContactsByUser>({});
+  const [hiddenPlayerIdsByUser, setHiddenPlayerIdsByUser] =
+    useState<HiddenPlayerIdsByUser>({});
   const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
   const [isSocialStateLoaded, setIsSocialStateLoaded] = useState(false);
 
@@ -60,6 +64,7 @@ export function useSocialActions({
         socialState.conversationPreferencesByUser
       );
       setFollowingByUser(socialState.followingByUser);
+      setHiddenPlayerIdsByUser(socialState.hiddenPlayerIdsByUser);
       setMessageContactsByUser(socialState.messageContactsByUser);
       setIsSocialStateLoaded(true);
     });
@@ -78,12 +83,14 @@ export function useSocialActions({
       conversationPreferencesByUser,
       directMessages,
       followingByUser,
+      hiddenPlayerIdsByUser,
       messageContactsByUser
     }).catch(() => undefined);
   }, [
     conversationPreferencesByUser,
     directMessages,
     followingByUser,
+    hiddenPlayerIdsByUser,
     isSocialStateLoaded,
     messageContactsByUser
   ]);
@@ -122,6 +129,14 @@ export function useSocialActions({
       ),
     [currentConversationPreferences.pinnedContactIds, messageContactsByUser, user]
   );
+  const hiddenPlayerIds = useMemo(
+    () => (user ? hiddenPlayerIdsByUser[user.id] ?? [] : []),
+    [hiddenPlayerIdsByUser, user]
+  );
+  const hiddenPlayerIdSet = useMemo(
+    () => new Set(hiddenPlayerIds),
+    [hiddenPlayerIds]
+  );
   const currentDirectMessages = useMemo(
     () =>
       user
@@ -151,11 +166,14 @@ export function useSocialActions({
     }));
   }
 
-  function sendDirectMessage(contactId: string, body: string) {
+  function sendMessageToContact(
+    contact: MessageContact,
+    body: string,
+    sharedPost?: DirectMessage["sharedPost"]
+  ) {
     const trimmedBody = body.trim();
-    const contact = currentMessageContacts.find((item) => item.id === contactId);
 
-    if (!user || !contact || !trimmedBody) {
+    if (!user || !trimmedBody) {
       return;
     }
 
@@ -176,7 +194,8 @@ export function useSocialActions({
         createdAt: new Date().toISOString(),
         id: `message-${Date.now()}-${current.length}`,
         recipientUserId: contact.id,
-        senderUserId: user.id
+        senderUserId: user.id,
+        ...(sharedPost ? { sharedPost } : {})
       }
     ]);
     setMessageContactsByUser((current) => ({
@@ -187,6 +206,24 @@ export function useSocialActions({
         reciprocalContact
       )
     }));
+  }
+
+  function sendDirectMessage(contactId: string, body: string) {
+    const contact = currentMessageContacts.find((item) => item.id === contactId);
+
+    if (!contact) {
+      return;
+    }
+
+    sendMessageToContact(contact, body);
+  }
+
+  function sendSharedPost(contact: MessageContact, player: Player) {
+    sendMessageToContact(
+      contact,
+      "Compartilhou uma publicação",
+      createSharedPostReference(player)
+    );
   }
 
   function deleteConversation(contactId: string) {
@@ -284,6 +321,24 @@ export function useSocialActions({
     });
   }
 
+  function setPlayerHidden(playerId: string, hidden: boolean) {
+    if (!user) {
+      return;
+    }
+
+    setHiddenPlayerIdsByUser((current) => {
+      const currentPlayerIds = current[user.id] ?? [];
+      const nextPlayerIds = hidden
+        ? [...new Set([...currentPlayerIds, playerId])]
+        : currentPlayerIds.filter((item) => item !== playerId);
+
+      return {
+        ...current,
+        [user.id]: nextPlayerIds
+      };
+    });
+  }
+
   return {
     addMessageContact,
     currentMessageContacts,
@@ -293,10 +348,14 @@ export function useSocialActions({
     followerUserIdsByProfile,
     followingProfileIds,
     followingProfileSet,
+    hiddenPlayerIds,
+    hiddenPlayerIdSet,
     ownProfileId,
     mutedContactIds: currentConversationPreferences.mutedContactIds,
     pinnedContactIds: currentConversationPreferences.pinnedContactIds,
     sendDirectMessage,
+    sendSharedPost,
+    setPlayerHidden,
     toggleFollowProfile,
     toggleMuteConversation,
     togglePinConversation

@@ -29,6 +29,7 @@ import { CardPalette } from "../ui/types";
 import { formatBRL, formatPercent } from "../utils/investment";
 
 export function FeedScreen({
+  backLabel = "Voltar ao perfil",
   balance,
   currentUserId,
   focusPlayerId,
@@ -41,6 +42,7 @@ export function FeedScreen({
   players: feedPlayers,
   profileAvatars
 }: {
+  backLabel?: string;
   balance: number | null;
   currentUserId: string;
   focusPlayerId?: string | null;
@@ -228,7 +230,7 @@ export function FeedScreen({
       <View style={styles.feedTopNavigation}>
         {onBackToProfile ? (
           <Pressable
-            accessibilityLabel="Voltar ao perfil"
+            accessibilityLabel={backLabel}
             accessibilityRole="button"
             hitSlop={6}
             onPress={onBackToProfile}

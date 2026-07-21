@@ -372,6 +372,59 @@ export const discoveryMessagesStyles = {
   messageBubbleTextMine: {
     color: colors.onPrimary
   },
+  sharedPostMessage: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    maxWidth: "86%",
+    minHeight: 66,
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    width: 310
+  },
+  sharedPostMessageMine: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary
+  },
+  sharedPostMessageUnavailable: {
+    opacity: 0.62
+  },
+  sharedPostMessageIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    height: 40,
+    justifyContent: "center",
+    width: 40
+  },
+  sharedPostMessageIconMine: {
+    backgroundColor: colors.surface
+  },
+  sharedPostMessageIdentity: {
+    flex: 1,
+    minWidth: 0
+  },
+  sharedPostMessageTitle: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "900",
+    lineHeight: 17
+  },
+  sharedPostMessageTitleMine: {
+    color: colors.onPrimary
+  },
+  sharedPostMessageMeta: {
+    color: colors.muted,
+    fontSize: 11,
+    marginTop: 3
+  },
+  sharedPostMessageMetaMine: {
+    color: "rgba(255, 255, 255, 0.76)"
+  },
   messageComposer: {
     alignItems: "flex-end",
     backgroundColor: colors.surface,

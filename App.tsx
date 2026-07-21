@@ -20,7 +20,8 @@ import {
   selectProfileAccount,
   selectProfileFund,
   selectProfileId,
-  selectProfileVideos
+  selectProfileVideos,
+  selectVisibleFeedPlayers
 } from "./src/app/appSelectors";
 import { useAppNavigation } from "./src/app/useAppNavigation";
 import { useExpoBoot } from "./src/app/useExpoBoot";
@@ -29,6 +30,7 @@ import {
   AthleteFund,
   MessageContact
 } from "./src/types";
+import { selectShareContacts } from "./src/utils/socialSharing";
 
 const INITIAL_ATHLETE_FUNDS: AthleteFund[] = [
   {
@@ -120,17 +122,46 @@ export default function App() {
     followerUserIdsByProfile,
     followingProfileIds,
     followingProfileSet,
+    hiddenPlayerIdSet,
     ownProfileId,
     mutedContactIds,
     pinnedContactIds,
     sendDirectMessage,
+    sendSharedPost,
+    setPlayerHidden,
     toggleFollowProfile,
     toggleMuteConversation,
     togglePinConversation
   } = useSocialActions({ players: availablePlayers, user });
+  const visibleFeedPlayers = useMemo(
+    () =>
+      selectVisibleFeedPlayers(
+        availablePlayers,
+        hiddenPlayerIdSet,
+        feedFocusPlayerId
+      ),
+    [availablePlayers, feedFocusPlayerId, hiddenPlayerIdSet]
+  );
   const orderedFeedPlayers = useMemo(
-    () => selectOrderedFeedPlayers(availablePlayers, followingProfileSet),
-    [availablePlayers, followingProfileSet]
+    () => selectOrderedFeedPlayers(visibleFeedPlayers, followingProfileSet),
+    [followingProfileSet, visibleFeedPlayers]
+  );
+  const shareContacts = useMemo(
+    () =>
+      selectShareContacts({
+        contacts: currentMessageContacts,
+        currentUserId: user?.id ?? "",
+        followingProfileIds,
+        players: availablePlayers,
+        users: registeredUsers
+      }),
+    [
+      availablePlayers,
+      currentMessageContacts,
+      followingProfileIds,
+      registeredUsers,
+      user?.id
+    ]
   );
 
   const pendingReviews = selectPendingReviews(submissions);
@@ -269,6 +300,7 @@ export default function App() {
       followerUserIdsByProfile={followerUserIdsByProfile}
       followingProfileIds={followingProfileIds}
       followingProfileSet={followingProfileSet}
+      hiddenPlayerIdSet={hiddenPlayerIdSet}
       handleDeleteVideo={handleDeleteVideo}
       handleDeposit={handleDeposit}
       handleInvest={handleInvest}
@@ -302,8 +334,11 @@ export default function App() {
       selectedProfilePlayer={selectedProfilePlayer}
       selectedProfileVideos={selectedProfileVideos}
       sendDirectMessage={sendDirectMessage}
+      sendSharedPost={sendSharedPost}
+      setPlayerHidden={setPlayerHidden}
       setActiveMessageContactId={setActiveMessageContactId}
       setProfileAvatar={setProfileAvatar}
+      shareContacts={shareContacts}
       signOutSession={signOutSession}
       submissions={submissions}
       tab={tab}

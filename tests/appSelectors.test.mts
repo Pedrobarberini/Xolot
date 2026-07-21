@@ -18,7 +18,8 @@ import {
   selectProfileFund,
   selectProfileId,
   selectProfileVideos,
-  selectUserSubmissions
+  selectUserSubmissions,
+  selectVisibleFeedPlayers
 } from "../src/app/appSelectors.ts";
 import type {
   AppUser,
@@ -153,6 +154,28 @@ test("prioriza perfis seguidos sem alterar a ordem relativa dos demais", () => {
       (player) => player.id
     ),
     ["c", "a", "b"]
+  );
+});
+
+test("oculta players do Inicio e preserva o player aberto diretamente", () => {
+  const players = [
+    { ...demoPlayer, id: "a" },
+    { ...demoPlayer, id: "b" },
+    { ...demoPlayer, id: "c" }
+  ];
+  const hiddenPlayerIds = new Set(["b", "c"]);
+
+  assert.deepEqual(
+    selectVisibleFeedPlayers(players, hiddenPlayerIds).map(
+      (player) => player.id
+    ),
+    ["a"]
+  );
+  assert.deepEqual(
+    selectVisibleFeedPlayers(players, hiddenPlayerIds, "c").map(
+      (player) => player.id
+    ),
+    ["a", "c"]
   );
 });
 

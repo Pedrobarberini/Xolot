@@ -42,6 +42,7 @@ import {
   AppUser,
   AthleteFund,
   Investment,
+  MessageContact,
   Player,
   ProfileAvatar,
   ProfileAvatarsByProfile,
@@ -62,6 +63,7 @@ export function ProfileScreen({
   following,
   followingCount,
   fund,
+  hiddenPlayerIds,
   investments,
   onChangeAvatar,
   onDeleteVideo,
@@ -69,11 +71,14 @@ export function ProfileScreen({
   onOpenFund,
   onOpenProfile,
   onOpenVideo,
+  onSetVideoHidden,
+  onShareVideo,
   onSignOut,
   onUpdateProfile,
   onWithdraw,
   player,
   profileAvatars,
+  shareContacts,
   submissions,
   user
 }: {
@@ -85,6 +90,7 @@ export function ProfileScreen({
   following: AppUser[];
   followingCount: number;
   fund?: AthleteFund;
+  hiddenPlayerIds: Set<string>;
   investments: Investment[];
   onChangeAvatar: (avatar: ProfileAvatar | null) => void;
   onDeleteVideo: (video: VideoSubmission) => Promise<boolean>;
@@ -96,11 +102,17 @@ export function ProfileScreen({
   ) => void;
   onOpenProfile: (account: AppUser) => void;
   onOpenVideo: (video: VideoSubmission) => void;
+  onSetVideoHidden: (playerId: string, hidden: boolean) => void;
+  onShareVideo: (
+    video: VideoSubmission,
+    contact: MessageContact
+  ) => void;
   onSignOut: () => void;
   onUpdateProfile: (profile: AccountProfile) => void;
   onWithdraw: (amount: number) => void;
   player?: Player;
   profileAvatars: ProfileAvatarsByProfile;
+  shareContacts: MessageContact[];
   submissions: VideoSubmission[];
   user: AppUser;
 }) {
@@ -130,8 +142,9 @@ export function ProfileScreen({
     (item) => item.status === "Aprovado" && item.videoLink.trim().length > 0
   );
   const galleryVideos: ProfileGalleryVideo[] = publishedVideos.map((video) => ({
-    id: video.id,
+    id: `approved-${video.id}`,
     mediaType: video.mediaType ?? "video",
+    sourceId: video.id,
     title: video.videoTitle,
     uri: video.videoLink
   }));
@@ -402,9 +415,10 @@ export function ProfileScreen({
           <ProfileVideoGallery
             emptyBody="Suas fotos e vídeos publicados aparecerão nesta galeria."
             emptyTitle="Publique uma mídia para mostrá-la aqui"
+            hiddenVideoIds={hiddenPlayerIds}
             onDeleteVideo={(video) => {
               const selectedVideo = publishedVideos.find(
-                (item) => item.id === video.id
+                (item) => item.id === video.sourceId
               );
 
               if (selectedVideo) {
@@ -413,13 +427,27 @@ export function ProfileScreen({
             }}
             onOpenVideo={(video) => {
               const selectedVideo = publishedVideos.find(
-                (item) => item.id === video.id
+                (item) => item.id === video.sourceId
               );
 
               if (selectedVideo) {
                 onOpenVideo(selectedVideo);
               }
             }}
+            onSetVideoHidden={(video, hidden) =>
+              onSetVideoHidden(video.id, hidden)
+            }
+            onShareVideo={(video, contact) => {
+              const selectedVideo = publishedVideos.find(
+                (item) => item.id === video.sourceId
+              );
+
+              if (selectedVideo) {
+                onShareVideo(selectedVideo, contact);
+              }
+            }}
+            profileAvatars={profileAvatars}
+            shareContacts={shareContacts}
             videos={galleryVideos}
           />
         </ScrollView>

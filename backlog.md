@@ -935,6 +935,34 @@ Criterios de aceite:
 - Videos usam o primeiro quadro como miniatura, sem iniciar a reproducao.
 - A camera ocupa toda a area inferior sem uma faixa preta decorativa.
 
+### Task P2-016 - Adicionar ações e compartilhamento às publicações
+
+Tipo: Frontend/UX/Social
+
+Status: Concluído em 2026-07-21.
+
+Tasks:
+
+- [x] Substituir o botão isolado de exclusão pelo menu vertical de três pontos.
+- [x] Disponibilizar as ações de compartilhar, ocultar e excluir para o autor.
+- [x] Limitar a exclusão ao autor da publicação e manter a confirmação existente.
+- [x] Permitir ocultar uma publicação do Início sem removê-la da galeria do perfil.
+- [x] Persistir as publicações ocultas por usuário e permitir exibi-las novamente.
+- [x] Listar no compartilhamento perfis seguidos e contatos com conversa existente.
+- [x] Evitar contatos duplicados e impedir o compartilhamento com a própria conta.
+- [x] Enviar a publicação como uma referência estruturada dentro da conversa.
+- [x] Exibir a publicação compartilhada como cartão clicável em Mensagens.
+- [x] Abrir o vídeo compartilhado no Início e permitir voltar à conversa de origem.
+- [x] Cobrir seleção de contatos e filtragem de publicações ocultas com testes.
+
+Critérios de aceite:
+
+- Cada item da galeria possui um único menu de ações no canto superior direito.
+- Ocultar remove a publicação somente do Início e a opção muda para Mostrar no Início.
+- Compartilhar apresenta apenas perfis seguidos ou contatos já conhecidos.
+- O destinatário consegue tocar no cartão recebido para abrir a publicação correta.
+- Ao sair da publicação compartilhada, o usuário retorna à mesma conversa.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

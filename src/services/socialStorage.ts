@@ -3,6 +3,7 @@ import {
   ConversationPreferencesByUser,
   DirectMessage,
   FollowingByUser,
+  HiddenPlayerIdsByUser,
   MessageContactsByUser
 } from "../types";
 
@@ -12,6 +13,7 @@ export type SocialState = {
   conversationPreferencesByUser: ConversationPreferencesByUser;
   directMessages: DirectMessage[];
   followingByUser: FollowingByUser;
+  hiddenPlayerIdsByUser: HiddenPlayerIdsByUser;
   messageContactsByUser: MessageContactsByUser;
 };
 
@@ -19,6 +21,7 @@ export const emptySocialState: SocialState = {
   conversationPreferencesByUser: {},
   directMessages: [],
   followingByUser: {},
+  hiddenPlayerIdsByUser: {},
   messageContactsByUser: {}
 };
 
@@ -88,6 +91,18 @@ export async function loadSocialState(): Promise<SocialState> {
         parsedState.followingByUser &&
         typeof parsedState.followingByUser === "object"
           ? parsedState.followingByUser
+          : {},
+      hiddenPlayerIdsByUser:
+        parsedState.hiddenPlayerIdsByUser &&
+        typeof parsedState.hiddenPlayerIdsByUser === "object"
+          ? Object.fromEntries(
+              Object.entries(parsedState.hiddenPlayerIdsByUser).map(
+                ([userId, playerIds]) => [
+                  userId,
+                  normalizeStringArray(playerIds)
+                ]
+              )
+            )
           : {},
       messageContactsByUser:
         parsedState.messageContactsByUser &&

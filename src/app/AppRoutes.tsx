@@ -38,6 +38,7 @@ import type {
   VideoSubmissionStatus
 } from "../types";
 import type { Tab } from "../ui/types";
+import type { ReelReturnTarget } from "./useAppNavigation";
 
 type AppRoutesProps = {
   activeMessageContactId: string | null;
@@ -56,6 +57,7 @@ type AppRoutesProps = {
   followerUserIdsByProfile: Record<string, string[]>;
   followingProfileIds: string[];
   followingProfileSet: Set<string>;
+  hiddenPlayerIdSet: Set<string>;
   handleDeleteVideo: (submission: VideoSubmission) => Promise<boolean>;
   handleDeposit: (amount: number) => void;
   handleInvest: (player: Player, amount: number) => void;
@@ -87,11 +89,7 @@ type AppRoutesProps = {
   onOpenMessagesForSelectedProfile: () => void;
   openInvestment: (player: Player) => void;
   openPlayerProfile: (player: Player) => void;
-  openReel: (player: Player, returnTarget?: { type: "own-profile" } | {
-    account?: AppUser;
-    player: Player;
-    type: "public-profile";
-  } | null) => void;
+  openReel: (player: Player, returnTarget?: ReelReturnTarget | null) => void;
   openTab: (tab: Tab) => void;
   openUserProfile: (account: AppUser) => void;
   orderedFeedPlayers: Player[];
@@ -101,7 +99,7 @@ type AppRoutesProps = {
   pinnedContactIds: string[];
   profileAvatars: ProfileAvatarsByProfile;
   registeredUsers: AppUser[];
-  reelReturnTarget: unknown;
+  reelReturnTarget: ReelReturnTarget | null;
   returnToReelOrigin: () => void;
   selectedProfileAccount?: AppUser;
   selectedProfileFund?: AthleteFund;
@@ -109,11 +107,14 @@ type AppRoutesProps = {
   selectedProfilePlayer?: Player;
   selectedProfileVideos: Player[];
   sendDirectMessage: (contactId: string, body: string) => void;
+  sendSharedPost: (contact: MessageContact, player: Player) => void;
+  setPlayerHidden: (playerId: string, hidden: boolean) => void;
   setActiveMessageContactId: Dispatch<SetStateAction<string | null>>;
   setProfileAvatar: (
     profileId: string,
     avatar: ProfileAvatar | null
   ) => void;
+  shareContacts: MessageContact[];
   signOutSession: () => void;
   submissions: VideoSubmission[];
   tab: Tab;
@@ -141,6 +142,7 @@ export function AppRoutes({
   followerUserIdsByProfile,
   followingProfileIds,
   followingProfileSet,
+  hiddenPlayerIdSet,
   handleDeleteVideo,
   handleDeposit,
   handleInvest,
@@ -174,8 +176,11 @@ export function AppRoutes({
   selectedProfilePlayer,
   selectedProfileVideos,
   sendDirectMessage,
+  sendSharedPost,
+  setPlayerHidden,
   setActiveMessageContactId,
   setProfileAvatar,
+  shareContacts,
   signOutSession,
   submissions,
   tab,
@@ -260,6 +265,7 @@ export function AppRoutes({
                       ? followersByProfile[selectedProfileId] ?? 0
                       : 0
                   }
+                  hiddenPlayerIds={hiddenPlayerIdSet}
                   isFollowing={Boolean(
                     selectedProfileId &&
                       followingProfileSet.has(selectedProfileId)
@@ -286,7 +292,13 @@ export function AppRoutes({
                       type: "public-profile"
                     })
                   }
+                  onSetVideoHidden={setPlayerHidden}
+                  onShareVideo={(player, contact) =>
+                    sendSharedPost(contact, player)
+                  }
                   player={selectedProfilePlayer}
+                  profileAvatars={profileAvatars}
+                  shareContacts={shareContacts}
                   showFollow={Boolean(
                     selectedProfileId && selectedProfileId !== ownProfileId
                   )}
@@ -314,6 +326,11 @@ export function AppRoutes({
               ) : null}
               {tab === "feed" ? (
                 <FeedScreen
+                  backLabel={
+                    reelReturnTarget?.type === "messages"
+                      ? "Voltar para mensagens"
+                      : "Voltar ao perfil"
+                  }
                   balance={user.role === "Usuário" ? walletBalance : null}
                   currentUserId={user.id}
                   focusPlayerId={feedFocusPlayerId}
@@ -363,6 +380,18 @@ export function AppRoutes({
                     mutedContactIds={mutedContactIds}
                     onDeleteConversation={deleteConversation}
                     onFindProfiles={() => openTab("search")}
+                    onOpenSharedPost={(playerId) => {
+                      const sharedPlayer = availablePlayers.find(
+                        (player) => player.id === playerId
+                      );
+
+                      if (sharedPlayer && activeMessageContactId) {
+                        openReel(sharedPlayer, {
+                          contactId: activeMessageContactId,
+                          type: "messages"
+                        });
+                      }
+                    }}
                     onSelectContact={setActiveMessageContactId}
                     onSendMessage={sendDirectMessage}
                     onToggleFollow={(profileId) =>
@@ -371,6 +400,7 @@ export function AppRoutes({
                     onToggleMute={toggleMuteConversation}
                     onTogglePin={togglePinConversation}
                     pinnedContactIds={pinnedContactIds}
+                    players={availablePlayers}
                     profileAvatars={profileAvatars}
                   />
                 </ScreenFrame>
@@ -415,6 +445,7 @@ export function AppRoutes({
                       ownProfileId ? followersByProfile[ownProfileId] ?? 0 : 0
                     }
                     followingCount={followingProfileIds.length}
+                    hiddenPlayerIds={hiddenPlayerIdSet}
                     onDeleteVideo={handleDeleteVideo}
                     onOpenFund={handleOpenFund}
                     onOpenProfile={openAccountProfile}
@@ -428,6 +459,17 @@ export function AppRoutes({
                         openReel(reelPlayer, { type: "own-profile" });
                       }
                     }}
+                    onSetVideoHidden={setPlayerHidden}
+                    onShareVideo={(submission, contact) => {
+                      const sharedPlayer = selectApprovedPlayerForSubmission(
+                        approvedSubmissionPlayers,
+                        submission.id
+                      );
+
+                      if (sharedPlayer) {
+                        sendSharedPost(contact, sharedPlayer);
+                      }
+                    }}
                     onDeposit={handleDeposit}
                     onChangeAvatar={(avatar) => {
                       if (ownProfileId) {
@@ -439,6 +481,7 @@ export function AppRoutes({
                     onWithdraw={handleWithdraw}
                     player={selectPlayerByOwner(availablePlayers, user.id)}
                     profileAvatars={profileAvatars}
+                    shareContacts={shareContacts}
                     submissions={submissions}
                     user={user}
                   />

@@ -5,6 +5,7 @@ import type { Tab } from "../ui/types.ts";
 
 export type ReelReturnTarget =
   | { type: "own-profile" }
+  | { contactId: string; type: "messages" }
   | { account?: AppUser; player: Player; type: "public-profile" };
 
 export function useAppNavigation() {
@@ -48,6 +49,7 @@ export function useAppNavigation() {
     setReelReturnTarget(null);
     setSelectedAccount(null);
     setSelectedPlayer(null);
+    setFeedFocusPlayerId(null);
     setTab(nextTab);
   }, []);
 
@@ -73,6 +75,12 @@ export function useAppNavigation() {
     setReelReturnTarget(null);
     if (returnTarget.type === "own-profile") {
       setTab("profile");
+      return;
+    }
+
+    if (returnTarget.type === "messages") {
+      setActiveMessageContactId(returnTarget.contactId);
+      setTab("messages");
       return;
     }
 

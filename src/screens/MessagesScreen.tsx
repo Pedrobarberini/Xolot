@@ -2,9 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   BellOff,
+  ChevronRight,
+  ImageIcon,
   LockKeyhole,
   MessageCircle,
   Pin,
+  Play,
   Search,
   Send,
   UserCheck,
@@ -25,6 +28,7 @@ import { colors } from "../theme";
 import {
   DirectMessage,
   MessageContact,
+  Player,
   ProfileAvatarsByProfile
 } from "../types";
 import { canExchangeDirectMessages } from "../utils/socialAccess";
@@ -62,12 +66,14 @@ export function MessagesScreen({
   mutedContactIds,
   onDeleteConversation,
   onFindProfiles,
+  onOpenSharedPost,
   onSelectContact,
   onSendMessage,
   onToggleFollow,
   onToggleMute,
   onTogglePin,
   pinnedContactIds,
+  players,
   profileAvatars
 }: {
   activeContactId: string | null;
@@ -78,12 +84,14 @@ export function MessagesScreen({
   mutedContactIds: string[];
   onDeleteConversation: (contactId: string) => void;
   onFindProfiles: () => void;
+  onOpenSharedPost: (playerId: string) => void;
   onSelectContact: (contactId: string | null) => void;
   onSendMessage: (contactId: string, body: string) => void;
   onToggleFollow: (profileId: string) => void;
   onToggleMute: (contactId: string) => void;
   onTogglePin: (contactId: string) => void;
   pinnedContactIds: string[];
+  players: Player[];
   profileAvatars: ProfileAvatarsByProfile;
 }) {
   const [draft, setDraft] = useState("");
@@ -263,6 +271,11 @@ export function MessagesScreen({
           ) : (
             visibleMessages.map((message) => {
               const isMine = message.senderUserId === currentUserId;
+              const sharedPlayer = message.sharedPost
+                ? players.find(
+                    (player) => player.id === message.sharedPost?.playerId
+                  )
+                : undefined;
 
               return (
                 <View
@@ -272,21 +285,91 @@ export function MessagesScreen({
                     isMine ? styles.messageBubbleRowMine : null
                   ]}
                 >
-                  <View
-                    style={[
-                      styles.messageBubble,
-                      isMine ? styles.messageBubbleMine : null
-                    ]}
-                  >
-                    <Text
+                  {message.sharedPost ? (
+                    <Pressable
+                      accessibilityLabel={
+                        sharedPlayer
+                          ? `Abrir publicacao ${message.sharedPost.title}`
+                          : "Publicacao indisponivel"
+                      }
+                      accessibilityRole="button"
+                      disabled={!sharedPlayer}
+                      onPress={() =>
+                        sharedPlayer && onOpenSharedPost(sharedPlayer.id)
+                      }
                       style={[
-                        styles.messageBubbleText,
-                        isMine ? styles.messageBubbleTextMine : null
+                        styles.sharedPostMessage,
+                        isMine ? styles.sharedPostMessageMine : null,
+                        !sharedPlayer
+                          ? styles.sharedPostMessageUnavailable
+                          : null
                       ]}
                     >
-                      {message.body}
-                    </Text>
-                  </View>
+                      <View
+                        style={[
+                          styles.sharedPostMessageIcon,
+                          isMine ? styles.sharedPostMessageIconMine : null
+                        ]}
+                      >
+                        {message.sharedPost.mediaType === "image" ? (
+                          <ImageIcon
+                            color={isMine ? colors.primary : colors.onPrimary}
+                            size={17}
+                          />
+                        ) : (
+                          <Play
+                            color={isMine ? colors.primary : colors.onPrimary}
+                            fill={isMine ? colors.primary : colors.onPrimary}
+                            size={16}
+                          />
+                        )}
+                      </View>
+                      <View style={styles.sharedPostMessageIdentity}>
+                        <Text
+                          numberOfLines={2}
+                          style={[
+                            styles.sharedPostMessageTitle,
+                            isMine ? styles.sharedPostMessageTitleMine : null
+                          ]}
+                        >
+                          {message.sharedPost.title}
+                        </Text>
+                        <Text
+                          numberOfLines={1}
+                          style={[
+                            styles.sharedPostMessageMeta,
+                            isMine ? styles.sharedPostMessageMetaMine : null
+                          ]}
+                        >
+                          {sharedPlayer
+                            ? message.sharedPost.authorName
+                            : "Publicacao indisponivel"}
+                        </Text>
+                      </View>
+                      {sharedPlayer ? (
+                        <ChevronRight
+                          color={isMine ? colors.onPrimary : colors.muted}
+                          size={18}
+                        />
+                      ) : null}
+                    </Pressable>
+                  ) : (
+                    <View
+                      style={[
+                        styles.messageBubble,
+                        isMine ? styles.messageBubbleMine : null
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.messageBubbleText,
+                          isMine ? styles.messageBubbleTextMine : null
+                        ]}
+                      >
+                        {message.body}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               );
             })

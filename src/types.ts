@@ -76,15 +76,26 @@ export type MessageContact = {
   username?: string;
 };
 
+export type SharedPostReference = {
+  authorName: string;
+  mediaType: SubmissionMediaType;
+  playerId: string;
+  profileId: string;
+  title: string;
+};
+
 export type DirectMessage = {
   id: string;
   senderUserId: string;
   recipientUserId: string;
   body: string;
   createdAt: string;
+  sharedPost?: SharedPostReference;
 };
 
 export type FollowingByUser = Record<string, string[]>;
+
+export type HiddenPlayerIdsByUser = Record<string, string[]>;
 
 export type MessageContactsByUser = Record<string, MessageContact[]>;
 

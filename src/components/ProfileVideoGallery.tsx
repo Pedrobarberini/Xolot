@@ -1,15 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { ImageIcon, Images, Play, Trash2 } from "lucide-react-native";
+import { ImageIcon, Images, MoreVertical, Play } from "lucide-react-native";
 import { Image, Pressable, Text, View } from "react-native";
 import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import type { SubmissionMediaType } from "../types";
+import type {
+  MessageContact,
+  ProfileAvatarsByProfile,
+  SubmissionMediaType
+} from "../types";
+import { SharePostModal } from "./SharePostModal";
+import { VideoActionsModal } from "./VideoActionsModal";
 
 export type ProfileGalleryVideo = {
   id: string;
   mediaType?: SubmissionMediaType;
+  sourceId?: string;
   title: string;
   uri: string | number;
 };
@@ -17,16 +24,37 @@ export type ProfileGalleryVideo = {
 export function ProfileVideoGallery({
   emptyBody,
   emptyTitle,
+  hiddenVideoIds = new Set<string>(),
   onDeleteVideo,
+  onSetVideoHidden,
+  onShareVideo,
   onOpenVideo,
+  profileAvatars = {},
+  shareContacts = [],
   videos
 }: {
   emptyBody: string;
   emptyTitle: string;
+  hiddenVideoIds?: Set<string>;
   onDeleteVideo?: (video: ProfileGalleryVideo) => void;
+  onSetVideoHidden?: (video: ProfileGalleryVideo, hidden: boolean) => void;
+  onShareVideo?: (
+    video: ProfileGalleryVideo,
+    contact: MessageContact
+  ) => void;
   onOpenVideo: (video: ProfileGalleryVideo) => void;
+  profileAvatars?: ProfileAvatarsByProfile;
+  shareContacts?: MessageContact[];
   videos: ProfileGalleryVideo[];
 }) {
+  const [actionVideo, setActionVideo] =
+    useState<ProfileGalleryVideo | null>(null);
+  const [shareVideo, setShareVideo] =
+    useState<ProfileGalleryVideo | null>(null);
+  const hasVideoActions = Boolean(
+    onDeleteVideo || onSetVideoHidden || onShareVideo
+  );
+
   return (
     <View style={styles.profileGallerySection}>
       <View style={styles.profileGalleryHeader}>
@@ -63,8 +91,8 @@ export function ProfileVideoGallery({
                 <View
                   style={[
                     styles.profileGalleryPlayBadge,
-                    onDeleteVideo
-                      ? styles.profileGalleryPlayBadgeWithDelete
+                    hasVideoActions
+                      ? styles.profileGalleryPlayBadgeWithMenu
                       : null
                   ]}
                 >
@@ -82,24 +110,61 @@ export function ProfileVideoGallery({
                   {video.title}
                 </Text>
               </Pressable>
-              {onDeleteVideo ? (
+              {hasVideoActions ? (
                 <Pressable
-                  accessibilityLabel={`Excluir ${video.title}`}
+                  accessibilityLabel={`Abrir opcoes de ${video.title}`}
                   accessibilityRole="button"
                   hitSlop={6}
-                  onPress={() => onDeleteVideo(video)}
+                  onPress={() => setActionVideo(video)}
                   style={({ pressed }) => [
-                    styles.profileGalleryDeleteButton,
+                    styles.profileGalleryMenuButton,
                     pressed ? styles.buttonPressed : null
                   ]}
                 >
-                  <Trash2 color={colors.onPrimary} size={15} />
+                  <MoreVertical color={colors.onPrimary} size={17} />
                 </Pressable>
               ) : null}
             </View>
           ))}
         </View>
       )}
+
+      <VideoActionsModal
+        canDelete={Boolean(onDeleteVideo)}
+        hidden={Boolean(actionVideo && hiddenVideoIds.has(actionVideo.id))}
+        onClose={() => setActionVideo(null)}
+        onDelete={() => {
+          if (actionVideo && onDeleteVideo) {
+            onDeleteVideo(actionVideo);
+          }
+          setActionVideo(null);
+        }}
+        onShare={() => {
+          setShareVideo(actionVideo);
+          setActionVideo(null);
+        }}
+        onToggleHidden={() => {
+          if (actionVideo && onSetVideoHidden) {
+            onSetVideoHidden(actionVideo, !hiddenVideoIds.has(actionVideo.id));
+          }
+          setActionVideo(null);
+        }}
+        videoTitle={actionVideo?.title ?? ""}
+        visible={Boolean(actionVideo)}
+      />
+      <SharePostModal
+        contacts={shareContacts}
+        onClose={() => setShareVideo(null)}
+        onShare={(contact) => {
+          if (shareVideo && onShareVideo) {
+            onShareVideo(shareVideo, contact);
+          }
+        }}
+        profileAvatars={profileAvatars}
+        videoId={shareVideo?.id ?? ""}
+        videoTitle={shareVideo?.title ?? ""}
+        visible={Boolean(shareVideo)}
+      />
     </View>
   );
 }
