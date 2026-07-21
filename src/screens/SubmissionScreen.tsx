@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { ArrowLeft, Check, Send } from "lucide-react-native";
 import {
@@ -17,6 +17,7 @@ import {
   formatVideoFileSize,
   getVideoTitleFromFileName
 } from "../actions/appActions";
+import { getLatestGalleryMedia } from "../actions/mediaLibraryActions";
 import { LabeledInput } from "../components/Navigation";
 import {
   SelectedSubmissionMedia,
@@ -63,7 +64,7 @@ export function SubmitVideoScreen({
   const [draft, setDraft] = useState<SubmissionDraft>(emptySubmissionDraft);
   const [selectedMedia, setSelectedMedia] =
     useState<SelectedSubmissionMedia | null>(null);
-  const [lastMedia, setLastMedia] =
+  const [galleryMedia, setGalleryMedia] =
     useState<SelectedSubmissionMedia | null>(null);
   const [step, setStep] = useState<SubmissionStep>("media");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,7 +93,7 @@ export function SubmitVideoScreen({
   const canSubmit = submissionIssues.length === 0 && !isSubmitting;
 
   useEffect(() => {
-    const retainedUri = lastMedia?.uri;
+    const retainedUri = galleryMedia?.uri;
 
     return () => {
       if (
@@ -103,7 +104,23 @@ export function SubmitVideoScreen({
         URL.revokeObjectURL(retainedUri);
       }
     };
-  }, [lastMedia?.uri]);
+  }, [galleryMedia?.uri]);
+
+  const refreshGalleryThumbnail = useCallback(async () => {
+    try {
+      const latestMedia = await getLatestGalleryMedia();
+
+      if (latestMedia) {
+        setGalleryMedia(latestMedia);
+      }
+    } catch {
+      // The gallery icon keeps its fallback when the device cannot expose a preview.
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshGalleryThumbnail();
+  }, [refreshGalleryThumbnail]);
 
   useEffect(() => {
     if (!lastSubmittedId) {
@@ -147,7 +164,9 @@ export function SubmitVideoScreen({
 
   function selectMedia(media: SelectedSubmissionMedia) {
     setSelectedMedia(media);
-    setLastMedia(media);
+    if (Platform.OS === "web") {
+      setGalleryMedia(media);
+    }
     setDraft((current) => ({
       ...current,
       title:
@@ -178,6 +197,9 @@ export function SubmitVideoScreen({
       });
 
       if (result.canceled || !result.assets[0]) {
+        if (Platform.OS !== "web") {
+          void refreshGalleryThumbnail();
+        }
         return;
       }
 
@@ -188,7 +210,7 @@ export function SubmitVideoScreen({
           ? "video-selecionado.mp4"
           : "foto-selecionada.jpg";
 
-      selectMedia({
+      const pickedMedia: SelectedSubmissionMedia = {
         durationMs:
           mediaType === "video" ? asset.duration ?? undefined : undefined,
         file: asset.file,
@@ -199,7 +221,13 @@ export function SubmitVideoScreen({
         mimeType: asset.mimeType,
         uri: asset.uri,
         width: asset.width
-      });
+      };
+
+      selectMedia(pickedMedia);
+
+      if (Platform.OS !== "web") {
+        void refreshGalleryThumbnail();
+      }
     } catch {
       Alert.alert(
         "Não foi possível abrir a galeria",
@@ -265,7 +293,7 @@ export function SubmitVideoScreen({
     <View style={styles.submitScreen}>
       {step === "media" ? (
         <SubmissionMediaStage
-          lastMedia={lastMedia}
+          galleryMedia={galleryMedia}
           onBack={onBack}
           onCapture={selectMedia}
           onClear={() => setSelectedMedia(null)}

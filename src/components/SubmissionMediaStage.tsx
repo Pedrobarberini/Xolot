@@ -42,7 +42,7 @@ export type SelectedSubmissionMedia = {
 };
 
 export function SubmissionMediaStage({
-  lastMedia,
+  galleryMedia,
   onBack,
   onCapture,
   onClear,
@@ -50,7 +50,7 @@ export function SubmissionMediaStage({
   onOpenGallery,
   selectedMedia
 }: {
-  lastMedia: SelectedSubmissionMedia | null;
+  galleryMedia: SelectedSubmissionMedia | null;
   onBack: () => void;
   onCapture: (media: SelectedSubmissionMedia) => void;
   onClear: () => void;
@@ -459,21 +459,12 @@ export function SubmissionMediaStage({
         </View>
 
         <View
-          pointerEvents="none"
-          style={[
-            styles.submissionCameraBottomShade,
-            selectedMedia
-              ? styles.submissionCameraBottomShadeSelected
-              : null
-          ]}
-        />
-        <View
           style={[
             styles.submissionCameraControls,
             selectedMedia ? styles.submissionCameraControlsSelected : null
           ]}
         >
-          <GalleryButton media={lastMedia} onPress={onOpenGallery} />
+          <GalleryButton media={galleryMedia} onPress={onOpenGallery} />
 
           {selectedMedia ? (
             <Pressable

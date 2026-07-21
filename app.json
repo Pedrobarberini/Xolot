@@ -68,6 +68,17 @@
         }
       ],
       [
+        "expo-media-library",
+        {
+          "photosPermission": "Permita que o NextStar mostre a midia mais recente da sua galeria.",
+          "savePhotosPermission": false,
+          "granularPermissions": [
+            "photo",
+            "video"
+          ]
+        }
+      ],
+      [
         "expo-camera",
         {
           "cameraPermission": "Permita que o NextStar use a camera para registrar seus lances.",

@@ -108,17 +108,6 @@ export const submissionAdminStyles = {
     fontSize: 11,
     fontWeight: "900"
   },
-  submissionCameraBottomShade: {
-    backgroundColor: "rgba(0, 0, 0, 0.46)",
-    bottom: 0,
-    height: 176,
-    left: 0,
-    position: "absolute",
-    right: 0
-  },
-  submissionCameraBottomShadeSelected: {
-    height: 132
-  },
   submissionCameraControls: {
     alignItems: "center",
     bottom: 58,

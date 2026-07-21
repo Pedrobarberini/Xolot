@@ -913,6 +913,28 @@ Criterios de aceite:
 - O video ou a camera permanece visivel atras dos controles superiores.
 - Voltar e fechar continuam confortaveis de tocar no celular.
 
+### Task P2-015 - Integrar a galeria ao Envio
+
+Tipo: Frontend/UX/Midia
+
+Status: Concluido em 2026-07-21.
+
+Tasks:
+
+- [x] Manter o botao de galeria ligado diretamente ao seletor nativo de fotos e videos.
+- [x] Consultar a midia mais recente quando a permissao da galeria ja estiver concedida.
+- [x] Mostrar a foto mais recente ou o primeiro quadro do video mais recente no botao.
+- [x] Manter um icone neutro quando o dispositivo nao permitir a consulta previa.
+- [x] Configurar permissoes granulares apenas para fotos e videos.
+- [x] Remover a faixa preta inferior da camera e manter os controles sobre a imagem.
+
+Criterios de aceite:
+
+- Tocar na miniatura abre imediatamente a galeria do aparelho.
+- No Expo Go, o botao mostra o item mais recente autorizado pelo usuario.
+- Videos usam o primeiro quadro como miniatura, sem iniciar a reproducao.
+- A camera ocupa toda a area inferior sem uma faixa preta decorativa.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real
