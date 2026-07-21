@@ -844,6 +844,28 @@ Criterios de aceite:
 - Tocar no obturador no modo Video inicia e encerra a gravacao.
 - A gravacao concluida aparece como midia selecionada antes da publicacao.
 
+### Task P2-012 - Transformar o Envio em camera dedicada
+
+Tipo: Frontend/UX/Midia
+
+Status: Concluido em 2026-07-21.
+
+Tasks:
+
+- [x] Ocultar o cabecalho principal enquanto a aba Envio estiver aberta.
+- [x] Ocultar o footer de navegacao enquanto a aba Envio estiver aberta.
+- [x] Adicionar botao de voltar no canto superior esquerdo da camera.
+- [x] Fazer o botao de voltar retornar para o Inicio.
+- [x] Adicionar botao para alternar entre camera traseira e frontal.
+- [x] Bloquear a troca de camera durante captura ou gravacao.
+
+Criterios de aceite:
+
+- A camera ocupa toda a area disponivel entre as barras do sistema.
+- Galeria, obturador e troca de camera ficam alinhados na faixa inferior.
+- O usuario consegue sair da camera sem depender do footer principal.
+- A camera frontal ou traseira selecionada e remontada antes da captura.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

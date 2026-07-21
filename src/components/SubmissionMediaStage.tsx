@@ -5,7 +5,15 @@ import {
   useMicrophonePermissions
 } from "expo-camera";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { ArrowRight, Camera, Images, ShieldAlert, X } from "lucide-react-native";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Camera,
+  Images,
+  ShieldAlert,
+  SwitchCamera,
+  X
+} from "lucide-react-native";
 import { Alert, Image, Platform, Pressable, Text, View } from "react-native";
 import { startWebCameraRecording } from "../actions/webCameraRecorder";
 import { styles } from "../styles/appStyles";
@@ -35,6 +43,7 @@ export type SelectedSubmissionMedia = {
 
 export function SubmissionMediaStage({
   lastMedia,
+  onBack,
   onCapture,
   onClear,
   onContinue,
@@ -42,6 +51,7 @@ export function SubmissionMediaStage({
   selectedMedia
 }: {
   lastMedia: SelectedSubmissionMedia | null;
+  onBack: () => void;
   onCapture: (media: SelectedSubmissionMedia) => void;
   onClear: () => void;
   onContinue: () => void;
@@ -63,6 +73,7 @@ export function SubmissionMediaStage({
   const [microphonePermission, requestMicrophonePermission] =
     useMicrophonePermissions();
   const [captureMode, setCaptureMode] = useState<CaptureMode>("photo");
+  const [cameraFacing, setCameraFacing] = useState<"back" | "front">("back");
   const [cameraMode, setCameraMode] =
     useState<CameraOutputMode>("picture");
   const [cameraSessionKey, setCameraSessionKey] = useState(0);
@@ -153,6 +164,17 @@ export function SubmissionMediaStage({
 
     setCaptureMode(mode);
     restoreSelectedCameraMode(mode);
+  }
+
+  function toggleCameraFacing() {
+    if (isBusy || selectedMedia) {
+      return;
+    }
+
+    cameraReadyRef.current = false;
+    setIsCameraReady(false);
+    setCameraFacing((current) => (current === "back" ? "front" : "back"));
+    setCameraSessionKey((current) => current + 1);
   }
 
   async function capturePhoto() {
@@ -366,8 +388,8 @@ export function SubmissionMediaStage({
           />
         ) : permission?.granted ? (
           <CameraView
-            facing="back"
-            key={`${cameraSessionKey}-${cameraMode}-${recordingMuted}`}
+            facing={cameraFacing}
+            key={`${cameraSessionKey}-${cameraMode}-${cameraFacing}-${recordingMuted}`}
             mode={cameraMode}
             mute={recordingMuted}
             onCameraReady={handleCameraReady}
@@ -400,15 +422,30 @@ export function SubmissionMediaStage({
 
         <View pointerEvents="none" style={styles.submissionCameraTopShade} />
         <View style={styles.submissionCameraTopBar}>
-          <View>
-            <Text style={styles.submissionCameraBrand}>Nova publicação</Text>
-            {isPreparingRecording || isRecording ? (
-              <Text style={styles.submissionRecordingStatus}>
-                {isPreparingRecording
-                  ? "PREPARANDO"
-                  : `GRAVANDO ${formatRecordingTime(recordingSeconds)} / 2:00`}
-              </Text>
-            ) : null}
+          <View style={styles.submissionCameraTopLeading}>
+            <Pressable
+              accessibilityLabel="Voltar para o Início"
+              accessibilityRole="button"
+              disabled={isBusy}
+              hitSlop={6}
+              onPress={onBack}
+              style={[
+                styles.submissionCameraBackButton,
+                isBusy ? styles.submissionShutterDisabled : null
+              ]}
+            >
+              <ArrowLeft color={colors.onPrimary} size={23} />
+            </Pressable>
+            <View>
+              <Text style={styles.submissionCameraBrand}>Nova publicação</Text>
+              {isPreparingRecording || isRecording ? (
+                <Text style={styles.submissionRecordingStatus}>
+                  {isPreparingRecording
+                    ? "PREPARANDO"
+                    : `GRAVANDO ${formatRecordingTime(recordingSeconds)} / 2:00`}
+                </Text>
+              ) : null}
+            </View>
           </View>
           {selectedMedia ? (
             <Pressable
@@ -480,7 +517,26 @@ export function SubmissionMediaStage({
             </Pressable>
           )}
 
-          <View style={styles.submissionCameraControlSpacer} />
+          {selectedMedia ? (
+            <View style={styles.submissionCameraControlSpacer} />
+          ) : (
+            <Pressable
+              accessibilityLabel={
+                cameraFacing === "back"
+                  ? "Usar câmera frontal"
+                  : "Usar câmera traseira"
+              }
+              accessibilityRole="button"
+              disabled={isBusy}
+              onPress={toggleCameraFacing}
+              style={[
+                styles.submissionCameraSwitchButton,
+                isBusy ? styles.submissionShutterDisabled : null
+              ]}
+            >
+              <SwitchCamera color={colors.onPrimary} size={23} />
+            </Pressable>
+          )}
         </View>
 
         {!selectedMedia ? (

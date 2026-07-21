@@ -302,7 +302,7 @@ export function AppRoutes({
             </>
           ) : (
             <>
-              {tab !== "feed" ? (
+              {tab !== "feed" && tab !== "submit" ? (
                 <Header
                   onSignOut={signOutSession}
                   pendingReviews={pendingReviews}
@@ -378,6 +378,7 @@ export function AppRoutes({
               {tab === "submit" ? (
                 <ScreenFrame key="submit">
                   <SubmitVideoScreen
+                    onBack={() => openTab("feed")}
                     onSubmit={handleSubmitVideo}
                     user={user}
                   />
@@ -443,7 +444,13 @@ export function AppRoutes({
                   />
                 </ScreenFrame>
               ) : null}
-              <BottomTabs activeTab={tab} onChange={openTab} role={user.role} />
+              {tab !== "submit" ? (
+                <BottomTabs
+                  activeTab={tab}
+                  onChange={openTab}
+                  role={user.role}
+                />
+              ) : null}
             </>
           )}
         </KeyboardAvoidingView>

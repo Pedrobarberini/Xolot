@@ -95,6 +95,21 @@ export const submissionAdminStyles = {
     right: 0,
     top: 0
   },
+  submissionCameraTopLeading: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10
+  },
+  submissionCameraBackButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(15, 21, 18, 0.68)",
+    borderColor: "rgba(255, 255, 255, 0.42)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 42,
+    justifyContent: "center",
+    width: 42
+  },
   submissionCameraBrand: {
     color: colors.onPrimary,
     fontSize: 18,
@@ -141,6 +156,16 @@ export const submissionAdminStyles = {
   },
   submissionCameraControlSpacer: {
     height: 52,
+    width: 52
+  },
+  submissionCameraSwitchButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(15, 21, 18, 0.68)",
+    borderColor: "rgba(255, 255, 255, 0.64)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 52,
+    justifyContent: "center",
     width: 52
   },
   submissionGalleryButton: {

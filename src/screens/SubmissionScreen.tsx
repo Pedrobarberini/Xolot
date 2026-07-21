@@ -50,9 +50,11 @@ const emptySubmissionDraft: SubmissionDraft = {
 };
 
 export function SubmitVideoScreen({
+  onBack,
   onSubmit,
   user
 }: {
+  onBack: () => void;
   onSubmit: (submission: VideoSubmission) => void;
   user: AppUser;
 }) {
@@ -264,6 +266,7 @@ export function SubmitVideoScreen({
       {step === "media" ? (
         <SubmissionMediaStage
           lastMedia={lastMedia}
+          onBack={onBack}
           onCapture={selectMedia}
           onClear={() => setSelectedMedia(null)}
           onContinue={() => {
