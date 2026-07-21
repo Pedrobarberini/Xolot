@@ -796,6 +796,34 @@ Criterios de aceite:
 - Os dados textuais sao preenchidos somente na segunda etapa.
 - Fotos nao exibem controles de reproducao e continuam visiveis apos recarregar a pagina.
 
+### Task P2-010 - Adicionar modos Foto e Video na camera de envio
+
+Tipo: Frontend/UX/Midia
+
+Status: Concluido em 2026-07-20.
+
+Tasks:
+
+- [x] Adicionar as opcoes `Foto` e `Video` abaixo do obturador.
+- [x] Manter o toque simples no modo Foto para capturar uma imagem.
+- [x] Iniciar a gravacao ao segurar o obturador no modo Foto.
+- [x] Encerrar a gravacao ao soltar o obturador no modo Foto.
+- [x] Iniciar e encerrar a gravacao por toque no modo Video.
+- [x] Limitar toda gravacao a dois minutos.
+- [x] Solicitar permissao de microfone e permitir gravacao sem audio quando negada.
+- [x] Implementar gravacao compativel com Expo Go e navegadores com MediaRecorder.
+- [x] Mostrar uma foto como miniatura no botao da galeria.
+- [x] Mostrar o primeiro frame como miniatura quando a ultima midia for um video.
+- [x] Cobrir a selecao de formatos de gravacao web com testes automatizados.
+
+Criterios de aceite:
+
+- O usuario identifica facilmente se esta em Foto ou Video.
+- No modo Foto, tocar fotografa e segurar grava enquanto o botao estiver pressionado.
+- No modo Video, um toque inicia e outro toque encerra a gravacao.
+- Nenhuma gravacao ultrapassa dois minutos.
+- O quadrado da galeria representa visualmente a ultima foto ou video selecionado.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

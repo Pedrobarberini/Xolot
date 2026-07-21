@@ -71,8 +71,8 @@
         "expo-camera",
         {
           "cameraPermission": "Permita que o NextStar use a camera para registrar seus lances.",
-          "microphonePermission": false,
-          "recordAudioAndroid": false
+          "microphonePermission": "Permita que o NextStar use o microfone durante a gravacao dos seus lances.",
+          "recordAudioAndroid": true
         }
       ]
     ]

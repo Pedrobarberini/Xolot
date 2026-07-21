@@ -100,22 +100,34 @@ export const submissionAdminStyles = {
     fontSize: 18,
     fontWeight: "900"
   },
+  submissionRecordingStatus: {
+    color: "#FF6B76",
+    fontSize: 11,
+    fontWeight: "900",
+    marginTop: 4
+  },
   submissionCameraBottomShade: {
     backgroundColor: "rgba(0, 0, 0, 0.46)",
     bottom: 0,
-    height: 132,
+    height: 176,
     left: 0,
     position: "absolute",
     right: 0
   },
+  submissionCameraBottomShadeSelected: {
+    height: 132
+  },
   submissionCameraControls: {
     alignItems: "center",
-    bottom: 22,
+    bottom: 58,
     flexDirection: "row",
     justifyContent: "space-between",
     left: 22,
     position: "absolute",
     right: 22
+  },
+  submissionCameraControlsSelected: {
+    bottom: 22
   },
   submissionCameraIconButton: {
     alignItems: "center",
@@ -161,8 +173,52 @@ export const submissionAdminStyles = {
     height: 58,
     width: 58
   },
+  submissionShutterOuterRecording: {
+    borderColor: "#FF5361"
+  },
+  submissionShutterInnerVideo: {
+    backgroundColor: "#FF5361"
+  },
+  submissionShutterInnerRecording: {
+    backgroundColor: "#FF5361",
+    borderRadius: 8,
+    height: 30,
+    width: 30
+  },
   submissionShutterDisabled: {
     opacity: 0.42
+  },
+  submissionCaptureModes: {
+    alignItems: "flex-end",
+    bottom: 10,
+    flexDirection: "row",
+    gap: 26,
+    justifyContent: "center",
+    left: 0,
+    position: "absolute",
+    right: 0
+  },
+  submissionCaptureModeButton: {
+    alignItems: "center",
+    minWidth: 44,
+    paddingTop: 4
+  },
+  submissionCaptureModeText: {
+    color: "rgba(255, 255, 255, 0.58)",
+    fontSize: 12,
+    fontWeight: "800"
+  },
+  submissionCaptureModeTextActive: {
+    color: colors.onPrimary
+  },
+  submissionCaptureModeIndicator: {
+    borderRadius: 999,
+    height: 3,
+    marginTop: 4,
+    width: 18
+  },
+  submissionCaptureModeIndicatorActive: {
+    backgroundColor: colors.primary
   },
   submissionContinueButton: {
     alignItems: "center",
