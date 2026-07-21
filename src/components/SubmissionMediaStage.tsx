@@ -420,43 +420,42 @@ export function SubmissionMediaStage({
           </View>
         )}
 
-        <View pointerEvents="none" style={styles.submissionCameraTopShade} />
         <View style={styles.submissionCameraTopBar}>
-          <View style={styles.submissionCameraTopLeading}>
-            <Pressable
-              accessibilityLabel="Voltar para o Início"
-              accessibilityRole="button"
-              disabled={isBusy}
-              hitSlop={6}
-              onPress={onBack}
-              style={[
-                styles.submissionCameraBackButton,
-                isBusy ? styles.submissionShutterDisabled : null
-              ]}
-            >
-              <ArrowLeft color={colors.onPrimary} size={23} />
-            </Pressable>
-            <View>
-              <Text style={styles.submissionCameraBrand}>Nova publicação</Text>
-              {isPreparingRecording || isRecording ? (
-                <Text style={styles.submissionRecordingStatus}>
-                  {isPreparingRecording
-                    ? "PREPARANDO"
-                    : `GRAVANDO ${formatRecordingTime(recordingSeconds)} / 2:00`}
-                </Text>
-              ) : null}
-            </View>
+          <Pressable
+            accessibilityLabel="Voltar para o Início"
+            accessibilityRole="button"
+            disabled={isBusy}
+            hitSlop={10}
+            onPress={onBack}
+            style={[
+              styles.submissionCameraBackButton,
+              isBusy ? styles.submissionShutterDisabled : null
+            ]}
+          >
+            <ArrowLeft color={colors.onPrimary} size={20} />
+          </Pressable>
+          <View pointerEvents="none" style={styles.submissionCameraStatusSlot}>
+            {isPreparingRecording || isRecording ? (
+              <Text style={styles.submissionRecordingStatus}>
+                {isPreparingRecording
+                  ? "PREPARANDO"
+                  : `GRAVANDO ${formatRecordingTime(recordingSeconds)} / 2:00`}
+              </Text>
+            ) : null}
           </View>
           {selectedMedia ? (
             <Pressable
               accessibilityLabel="Remover mídia selecionada"
               accessibilityRole="button"
+              hitSlop={10}
               onPress={onClear}
               style={styles.submissionCameraIconButton}
             >
-              <X color={colors.onPrimary} size={22} />
+              <X color={colors.onPrimary} size={19} />
             </Pressable>
-          ) : null}
+          ) : (
+            <View style={styles.submissionCameraTopSpacer} />
+          )}
         </View>
 
         <View

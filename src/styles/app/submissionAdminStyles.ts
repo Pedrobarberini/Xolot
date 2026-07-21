@@ -76,50 +76,37 @@ export const submissionAdminStyles = {
     fontSize: 14,
     fontWeight: "900"
   },
-  submissionCameraTopShade: {
-    backgroundColor: "rgba(0, 0, 0, 0.36)",
-    height: 104,
-    left: 0,
-    position: "absolute",
-    right: 0,
-    top: 0
-  },
   submissionCameraTopBar: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
     left: 0,
-    paddingHorizontal: 18,
-    paddingTop: 18,
+    paddingHorizontal: 14,
+    paddingTop: 14,
     position: "absolute",
     right: 0,
     top: 0
   },
-  submissionCameraTopLeading: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10
-  },
   submissionCameraBackButton: {
     alignItems: "center",
-    backgroundColor: "rgba(15, 21, 18, 0.68)",
-    borderColor: "rgba(255, 255, 255, 0.42)",
-    borderRadius: 999,
-    borderWidth: 1,
-    height: 42,
+    height: 34,
     justifyContent: "center",
-    width: 42
+    width: 34
   },
-  submissionCameraBrand: {
-    color: colors.onPrimary,
-    fontSize: 18,
-    fontWeight: "900"
+  submissionCameraStatusSlot: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    minWidth: 0
+  },
+  submissionCameraTopSpacer: {
+    height: 34,
+    width: 34
   },
   submissionRecordingStatus: {
     color: "#FF6B76",
     fontSize: 11,
-    fontWeight: "900",
-    marginTop: 4
+    fontWeight: "900"
   },
   submissionCameraBottomShade: {
     backgroundColor: "rgba(0, 0, 0, 0.46)",
@@ -146,13 +133,9 @@ export const submissionAdminStyles = {
   },
   submissionCameraIconButton: {
     alignItems: "center",
-    backgroundColor: "rgba(15, 21, 18, 0.68)",
-    borderColor: "rgba(255, 255, 255, 0.42)",
-    borderRadius: 999,
-    borderWidth: 1,
-    height: 48,
+    height: 34,
     justifyContent: "center",
-    width: 48
+    width: 34
   },
   submissionCameraControlSpacer: {
     height: 52,

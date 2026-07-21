@@ -892,6 +892,27 @@ Criterios de aceite:
 - O usuario consegue avancar ou retroceder tocando ou arrastando a barra.
 - No Envio, a barra nao disputa espaco com os botoes inferiores.
 
+### Task P2-014 - Simplificar o topo da camera no Envio
+
+Tipo: Frontend/UX
+
+Status: Concluido em 2026-07-21.
+
+Tasks:
+
+- [x] Remover a faixa escura fixa do topo da camera.
+- [x] Remover o titulo Nova publicacao da camera.
+- [x] Retirar fundo, borda e sombra visual dos controles superiores.
+- [x] Reduzir os icones de voltar e fechar.
+- [x] Preservar uma area de toque acessivel ao redor dos icones.
+- [x] Exibir o status apenas durante preparacao ou gravacao.
+
+Criterios de aceite:
+
+- O topo da camera mostra somente os icones durante o uso normal.
+- O video ou a camera permanece visivel atras dos controles superiores.
+- Voltar e fechar continuam confortaveis de tocar no celular.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real
