@@ -50,23 +50,17 @@ export const navigationStyles = {
   headerIdentityCompactSolo: {
     paddingRight: 0
   },
-  headerLogo: {
-    height: 42,
-    marginRight: 8,
-    width: 54
-  },
-  headerLogoCompact: {
-    height: 38,
-    width: 48
-  },
   headerTitleBlock: {
     flex: 1
   },
-  brand: {
-    color: colors.primary,
-    fontSize: 23,
-    fontWeight: "900",
-    letterSpacing: 0
+  headerWordmark: {
+    alignSelf: "flex-start",
+    height: 29,
+    width: 132
+  },
+  headerWordmarkCompact: {
+    height: 27,
+    width: 122
   },
   headerSubtitle: {
     color: colors.muted,

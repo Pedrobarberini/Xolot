@@ -10,7 +10,10 @@ import {
   UserRound
 } from "lucide-react-native";
 import { Image, Pressable, Text, TextInput, useWindowDimensions, View } from "react-native";
-import { XOLOT_SYMBOL } from "../constants/assets";
+import {
+  XOLOT_HORIZONTAL_WORDMARK,
+  XOLOT_SYMBOL
+} from "../constants/assets";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
@@ -49,17 +52,16 @@ export function Header({
             : null
         ]}
       >
-        <Image
-          accessibilityLabel="Logo Xolot"
-          resizeMode="contain"
-          source={XOLOT_SYMBOL}
-          style={[
-            styles.headerLogo,
-            isCompact ? styles.headerLogoCompact : null
-          ]}
-        />
         <View style={styles.headerTitleBlock}>
-          <Text style={styles.brand}>Xolot</Text>
+          <Image
+            accessibilityLabel="Xolot"
+            resizeMode="contain"
+            source={XOLOT_HORIZONTAL_WORDMARK}
+            style={[
+              styles.headerWordmark,
+              isCompact ? styles.headerWordmarkCompact : null
+            ]}
+          />
           <Text numberOfLines={1} style={styles.headerSubtitle}>
             {user.role} | @{user.username}
           </Text>

@@ -1025,6 +1025,26 @@ Criterios de aceite:
 - Instalacao PWA e configuracao nativa usam o novo nome e os novos icones.
 - Dados criados antes da troca continuam disponiveis no mesmo dispositivo.
 
+### Task P2-019 - Refinar a tipografia e as assinaturas da marca Xolot
+
+Tipo: Branding/Frontend
+
+Status: Concluido em 2026-07-21.
+
+Tasks:
+
+- [x] Criar uma tipografia geometrica e esportiva que acompanhe os cortes diagonais do simbolo.
+- [x] Atualizar a assinatura vertical usada no login, carregamento e configuracao inicial.
+- [x] Criar uma assinatura horizontal especifica para os cabecalhos do aplicativo.
+- [x] Manter o simbolo isolado nas interfaces compactas sobre o video.
+- [x] Preservar fundo transparente, legibilidade e proporcao nos assets finais.
+
+Criterios de aceite:
+
+- O nome Xolot possui identidade visual coerente com o simbolo da marca.
+- A assinatura horizontal cabe no cabecalho mobile sem sobrepor saldo ou acoes.
+- A assinatura vertical permanece legivel nas telas de entrada e carregamento.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real
