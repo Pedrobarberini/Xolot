@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CircleDollarSign, X } from "lucide-react-native";
+import { CircleDollarSign } from "lucide-react-native";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { DetailHud } from "../components/Navigation";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
@@ -72,18 +72,6 @@ export function InvestmentScreen({
                 {player.position} | {player.city}
               </Text>
             </View>
-            <Pressable
-              accessibilityLabel="Fechar investimento e voltar ao perfil"
-              accessibilityRole="button"
-              hitSlop={6}
-              onPress={onBack}
-              style={({ pressed }) => [
-                styles.investmentCloseButton,
-                pressed ? styles.buttonPressed : null
-              ]}
-            >
-              <X color={colors.text} size={21} strokeWidth={2.2} />
-            </Pressable>
           </View>
         </View>
 

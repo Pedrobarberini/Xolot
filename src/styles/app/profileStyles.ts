@@ -740,16 +740,6 @@ export const profileStyles = {
   profileViewScene: {
     flex: 1
   },
-  profileSubviewBackButton: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 6,
-    borderWidth: 1,
-    height: 40,
-    justifyContent: "center",
-    width: 40
-  },
   profileSubviewTitle: {
     color: colors.text,
     fontSize: 18,

@@ -25,7 +25,7 @@ export function VideoActionsModal({
 }) {
   return (
     <Modal
-      animationType="slide"
+      animationType="fade"
       onRequestClose={onClose}
       statusBarTranslucent
       transparent

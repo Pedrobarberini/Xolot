@@ -36,7 +36,7 @@ export function FeedPostOptionsModal({
 }) {
   return (
     <Modal
-      animationType="slide"
+      animationType="fade"
       onRequestClose={onClose}
       statusBarTranslucent
       transparent

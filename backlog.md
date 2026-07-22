@@ -1045,6 +1045,29 @@ Criterios de aceite:
 - A assinatura horizontal cabe no cabecalho mobile sem sobrepor saldo ou acoes.
 - A assinatura vertical permanece legivel nas telas de entrada e carregamento.
 
+### Task P2-020 - Padronizar retornos e animacoes de paineis sobrepostos
+
+Tipo: Frontend/UX/Acessibilidade
+
+Status: Concluido em 2026-07-22.
+
+Tasks:
+
+- [x] Criar um componente unico para todas as acoes de voltar.
+- [x] Exibir somente a seta, sem fundo, borda, sombra ou caixa visivel.
+- [x] Preservar area de toque de 40 px, estado pressionado e acessibilidade.
+- [x] Aplicar o retorno padrao no Inicio, mensagens, perfil, configuracoes, carteira, envio, camera e telas de detalhe.
+- [x] Remover o retorno duplicado da tela de investimento.
+- [x] Padronizar os paineis sobrepostos com a animacao fade usada no menu do Perfil.
+- [x] Remover estilos locais de retorno que ficaram obsoletos.
+
+Criterios de aceite:
+
+- Todas as telas usam a mesma seta, tamanho, espessura e resposta ao toque.
+- Nenhum retorno exibe uma div, caixa ou fundo proprio.
+- A camera usa a mesma seta em branco para manter contraste sobre a imagem.
+- Todos os modais e paineis temporarios aparecem com a mesma transicao suave.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

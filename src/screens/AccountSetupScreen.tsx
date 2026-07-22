@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft, Check, LogOut } from "lucide-react-native";
+import { Check, LogOut } from "lucide-react-native";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -10,7 +10,7 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { LabeledInput } from "../components/Navigation";
+import { BackButton, LabeledInput } from "../components/Navigation";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AccountProfile, AppUser } from "../types";
@@ -84,15 +84,10 @@ export function AccountSetupScreen({
       >
         {!isInitialSetup ? (
           <View style={styles.profileSubviewHeader}>
-            <Pressable
+            <BackButton
               accessibilityLabel="Voltar para configuracoes"
-              accessibilityRole="button"
-              hitSlop={8}
-              onPress={onBack}
-              style={styles.profileSubviewBackButton}
-            >
-              <ArrowLeft color={colors.text} size={20} />
-            </Pressable>
+              onPress={() => onBack?.()}
+            />
             <Text style={styles.profileSubviewTitle}>Editar perfil</Text>
             <View style={styles.profileSubviewSpacer} />
           </View>

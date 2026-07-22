@@ -9,7 +9,16 @@ import {
   Upload,
   UserRound
 } from "lucide-react-native";
-import { Image, Pressable, Text, TextInput, useWindowDimensions, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  type StyleProp,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  View,
+  type ViewStyle
+} from "react-native";
 import {
   XOLOT_HORIZONTAL_WORDMARK,
   XOLOT_SYMBOL
@@ -121,6 +130,42 @@ export function BalanceLine({
   );
 }
 
+export function BackButton({
+  accessibilityLabel,
+  disabled = false,
+  inverse = false,
+  onPress,
+  style
+}: {
+  accessibilityLabel: string;
+  disabled?: boolean;
+  inverse?: boolean;
+  onPress: () => void;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return (
+    <Pressable
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      disabled={disabled}
+      hitSlop={8}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.backIconButton,
+        style,
+        pressed ? styles.backIconButtonPressed : null,
+        disabled ? styles.backIconButtonDisabled : null
+      ]}
+    >
+      <ArrowLeft
+        color={inverse ? colors.onPrimary : colors.text}
+        size={22}
+        strokeWidth={2.2}
+      />
+    </Pressable>
+  );
+}
+
 export function DetailHud({
   backLabel,
   onBack,
@@ -133,15 +178,10 @@ export function DetailHud({
   return (
     <View style={styles.detailFixedHud}>
       <View style={styles.detailHudLeading}>
-        <Pressable
+        <BackButton
           accessibilityLabel={backLabel}
-          accessibilityRole="button"
-          hitSlop={6}
           onPress={onBack}
-          style={styles.detailHudBackButton}
-        >
-          <ArrowLeft color={colors.text} size={21} strokeWidth={2.1} />
-        </Pressable>
+        />
         <Image
           accessibilityLabel="Logo Xolot"
           resizeMode="contain"

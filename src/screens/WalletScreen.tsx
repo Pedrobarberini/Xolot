@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  ArrowLeft,
   BanknoteArrowDown,
   CircleDollarSign,
   Info,
@@ -8,6 +7,7 @@ import {
 } from "lucide-react-native";
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { FinancialInfoModal } from "../components/FinancialInfoModal";
+import { BackButton } from "../components/Navigation";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AthleteFund, Investment, Player } from "../types";
@@ -55,15 +55,10 @@ export function PortfolioScreen({
       <ScrollView contentContainerStyle={styles.screenContent}>
         {onBack ? (
           <View style={styles.profileSubviewHeader}>
-            <Pressable
+            <BackButton
               accessibilityLabel="Voltar ao perfil"
-              accessibilityRole="button"
-              hitSlop={8}
               onPress={onBack}
-              style={styles.profileSubviewBackButton}
-            >
-              <ArrowLeft color={colors.text} size={20} />
-            </Pressable>
+            />
             <Text style={styles.profileSubviewTitle}>Carteira</Text>
             <Pressable
               accessibilityLabel="Informações sobre transações, saque e rendimento"

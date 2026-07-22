@@ -6,7 +6,6 @@ import {
 } from "expo-camera";
 import { VideoView, useVideoPlayer } from "expo-video";
 import {
-  ArrowLeft,
   ArrowRight,
   Camera,
   Images,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react-native";
 import { Alert, Image, Platform, Pressable, Text, View } from "react-native";
 import { startWebCameraRecording } from "../actions/webCameraRecorder";
+import { BackButton } from "./Navigation";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import type { SubmissionMediaType } from "../types";
@@ -421,19 +421,12 @@ export function SubmissionMediaStage({
         )}
 
         <View style={styles.submissionCameraTopBar}>
-          <Pressable
+          <BackButton
             accessibilityLabel="Voltar para o Início"
-            accessibilityRole="button"
             disabled={isBusy}
-            hitSlop={10}
+            inverse
             onPress={onBack}
-            style={[
-              styles.submissionCameraBackButton,
-              isBusy ? styles.submissionShutterDisabled : null
-            ]}
-          >
-            <ArrowLeft color={colors.onPrimary} size={20} />
-          </Pressable>
+          />
           <View pointerEvents="none" style={styles.submissionCameraStatusSlot}>
             {isPreparingRecording || isRecording ? (
               <Text style={styles.submissionRecordingStatus}>

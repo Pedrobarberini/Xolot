@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { ArrowLeft, Check, Send } from "lucide-react-native";
+import { Check, Send } from "lucide-react-native";
 import {
   Alert,
   Animated,
@@ -18,7 +18,7 @@ import {
   getVideoTitleFromFileName
 } from "../actions/appActions";
 import { getLatestGalleryMedia } from "../actions/mediaLibraryActions";
-import { LabeledInput } from "../components/Navigation";
+import { BackButton, LabeledInput } from "../components/Navigation";
 import {
   SelectedSubmissionMedia,
   SubmissionMediaStage
@@ -314,14 +314,10 @@ export function SubmitVideoScreen({
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.submissionDetailsHeader}>
-            <Pressable
+            <BackButton
               accessibilityLabel="Voltar para a mídia"
-              accessibilityRole="button"
               onPress={() => setStep("media")}
-              style={styles.submissionDetailsBackButton}
-            >
-              <ArrowLeft color={colors.text} size={21} />
-            </Pressable>
+            />
             <View style={styles.submissionDetailsTitleBlock}>
               <Text style={styles.discoveryTitle}>Nova publicação</Text>
               <Text style={styles.discoverySubtitle}>

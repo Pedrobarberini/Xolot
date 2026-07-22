@@ -22,20 +22,6 @@ export const feedStyles = {
     top: 10,
     zIndex: 7
   },
-  feedProfileBackButton: {
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderColor: colors.border,
-    borderRadius: 6,
-    borderWidth: 1,
-    height: 40,
-    justifyContent: "center",
-    shadowColor: "#10261A",
-    shadowOffset: { height: 2, width: 0 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    width: 40
-  },
   feedBrandSlot: {
     alignItems: "center",
     height: 40,

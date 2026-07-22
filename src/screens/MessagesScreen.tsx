@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft,
   BellOff,
   ChevronRight,
   ImageIcon,
@@ -22,6 +21,7 @@ import {
   View
 } from "react-native";
 import { ConversationActionsModal } from "../components/ConversationActionsModal";
+import { BackButton } from "../components/Navigation";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
@@ -169,15 +169,10 @@ export function MessagesScreen({
     return (
       <View style={styles.messagesScreen}>
         <View style={styles.messagesConversationHeader}>
-          <Pressable
+          <BackButton
             accessibilityLabel="Voltar para conversas"
-            accessibilityRole="button"
-            hitSlop={6}
             onPress={() => onSelectContact(null)}
-            style={styles.messagesBackButton}
-          >
-            <ArrowLeft color={colors.text} size={21} />
-          </Pressable>
+          />
           <View style={styles.messagesContactAvatar}>
             {profileAvatars[activeContact.profileId] ? (
               <ProfileAvatarImage

@@ -4,7 +4,6 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { VideoView, useVideoPlayer } from "expo-video";
 import {
-  ArrowLeft,
   Expand,
   Heart,
   MoreVertical,
@@ -23,7 +22,7 @@ import {
   getScoreColor
 } from "../actions/appActions";
 import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
-import { BalanceLine } from "../components/Navigation";
+import { BackButton, BalanceLine } from "../components/Navigation";
 import { FeedPostOptionsModal } from "../components/FeedPostOptionsModal";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import { SharePostModal } from "../components/SharePostModal";
@@ -303,15 +302,10 @@ export function FeedScreen({
       </ScrollView>
       <View style={styles.feedTopNavigation}>
         {onBackToProfile ? (
-          <Pressable
+          <BackButton
             accessibilityLabel={backLabel}
-            accessibilityRole="button"
-            hitSlop={6}
             onPress={onBackToProfile}
-            style={styles.feedProfileBackButton}
-          >
-            <ArrowLeft color={colors.text} size={21} strokeWidth={2.2} />
-          </Pressable>
+          />
         ) : null}
         <View pointerEvents="none" style={styles.feedBrandSlot}>
           <Image

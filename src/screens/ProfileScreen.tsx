@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import {
-  ArrowLeft,
   Bell,
   Camera,
   LogOut,
@@ -25,6 +24,7 @@ import {
 } from "react-native";
 import { AvatarPositionModal } from "../components/AvatarPositionModal";
 import { DeleteVideoModal } from "../components/DeleteVideoModal";
+import { BackButton } from "../components/Navigation";
 import {
   ProfileListModal,
   type ProfileListItemData
@@ -673,15 +673,10 @@ function SettingsView({
   return (
     <ScrollView contentContainerStyle={styles.screenContent}>
       <View style={styles.profileSubviewHeader}>
-        <Pressable
+        <BackButton
           accessibilityLabel="Voltar ao perfil"
-          accessibilityRole="button"
-          hitSlop={8}
           onPress={onBack}
-          style={styles.profileSubviewBackButton}
-        >
-          <ArrowLeft color={colors.text} size={20} />
-        </Pressable>
+        />
         <Text style={styles.profileSubviewTitle}>Configurações</Text>
         <View style={styles.profileSubviewSpacer} />
       </View>

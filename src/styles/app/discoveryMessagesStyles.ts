@@ -204,12 +204,6 @@ export const discoveryMessagesStyles = {
     paddingHorizontal: 10,
     paddingVertical: 8
   },
-  messagesBackButton: {
-    alignItems: "center",
-    height: 40,
-    justifyContent: "center",
-    width: 36
-  },
   messagesContactAvatar: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,

@@ -87,12 +87,6 @@ export const submissionAdminStyles = {
     right: 0,
     top: 0
   },
-  submissionCameraBackButton: {
-    alignItems: "center",
-    height: 34,
-    justifyContent: "center",
-    width: 34
-  },
   submissionCameraStatusSlot: {
     alignItems: "center",
     flex: 1,
@@ -100,8 +94,8 @@ export const submissionAdminStyles = {
     minWidth: 0
   },
   submissionCameraTopSpacer: {
-    height: 34,
-    width: 34
+    height: 40,
+    width: 40
   },
   submissionRecordingStatus: {
     color: "#FF6B76",
@@ -232,16 +226,6 @@ export const submissionAdminStyles = {
     flexDirection: "row",
     gap: 12,
     marginBottom: 2
-  },
-  submissionDetailsBackButton: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    height: 42,
-    justifyContent: "center",
-    width: 42
   },
   submissionDetailsTitleBlock: {
     flex: 1,

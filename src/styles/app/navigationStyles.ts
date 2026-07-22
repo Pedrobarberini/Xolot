@@ -106,6 +106,20 @@ export const navigationStyles = {
     textShadowOffset: { height: 1, width: 0 },
     textShadowRadius: 3
   },
+  backIconButton: {
+    alignItems: "center",
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    height: 40,
+    justifyContent: "center",
+    width: 40
+  },
+  backIconButtonPressed: {
+    opacity: 0.55
+  },
+  backIconButtonDisabled: {
+    opacity: 0.4
+  },
   headerReviewLine: {
     color: colors.muted,
     fontSize: 12,

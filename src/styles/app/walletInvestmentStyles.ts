@@ -566,14 +566,4 @@ export const walletInvestmentStyles = {
     marginBottom: 14,
     padding: 16
   },
-  investmentCloseButton: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.border,
-    borderRadius: 6,
-    borderWidth: 1,
-    height: 40,
-    justifyContent: "center",
-    width: 40
-  }
 } as const;

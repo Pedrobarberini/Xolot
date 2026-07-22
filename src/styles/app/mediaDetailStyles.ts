@@ -45,12 +45,6 @@ export const mediaDetailStyles = {
     flexDirection: "row",
     gap: 4
   },
-  detailHudBackButton: {
-    alignItems: "center",
-    height: 40,
-    justifyContent: "center",
-    width: 40
-  },
   detailHudLogo: {
     height: 38,
     width: 48
