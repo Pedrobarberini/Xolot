@@ -250,10 +250,31 @@ export const profileStyles = {
     marginBottom: 10,
     paddingBottom: 10
   },
+  profileGalleryHeaderTitleBlock: {
+    flex: 1,
+    minWidth: 0
+  },
   profileGalleryTitle: {
     color: colors.text,
     fontSize: 18,
     fontWeight: "900"
+  },
+  profileGallerySelectionCount: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: "800",
+    marginTop: 2
+  },
+  profileGallerySelectionActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8
+  },
+  profileGalleryHeaderIconButton: {
+    alignItems: "center",
+    height: 30,
+    justifyContent: "center",
+    width: 30
   },
   profileGalleryCount: {
     color: colors.muted,
@@ -315,32 +336,38 @@ export const profileStyles = {
     position: "absolute",
     right: 0
   },
-  profileGalleryPlayBadge: {
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.52)",
-    borderRadius: 999,
-    height: 30,
-    justifyContent: "center",
-    position: "absolute",
-    right: 8,
-    top: 8,
-    width: 30
-  },
-  profileGalleryPlayBadgeWithMenu: {
-    right: 44
-  },
   profileGalleryMenuButton: {
     alignItems: "center",
     backgroundColor: "rgba(5, 10, 7, 0.68)",
-    borderColor: "rgba(255, 255, 255, 0.44)",
     borderRadius: 999,
-    borderWidth: 1,
     height: 30,
     justifyContent: "center",
     position: "absolute",
     right: 8,
     top: 8,
     width: 30
+  },
+  profileGallerySelectionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(4, 13, 9, 0.28)",
+    borderColor: "transparent",
+    borderRadius: 6,
+    borderWidth: 3
+  },
+  profileGallerySelectionOverlayActive: {
+    backgroundColor: "rgba(0, 111, 61, 0.18)",
+    borderColor: colors.primary
+  },
+  profileGallerySelectionBadge: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    height: 28,
+    justifyContent: "center",
+    position: "absolute",
+    right: 7,
+    top: 7,
+    width: 28
   },
   profileGalleryCardTitle: {
     bottom: 8,

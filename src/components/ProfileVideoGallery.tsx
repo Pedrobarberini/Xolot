@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { Eye, ImageIcon, Images, MoreVertical, Play } from "lucide-react-native";
+import { Check, Eye, Images, MoreVertical, X } from "lucide-react-native";
 import { Image, Pressable, Text, View } from "react-native";
 import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { styles } from "../styles/appStyles";
@@ -10,6 +10,10 @@ import type {
   ProfileAvatarsByProfile,
   SubmissionMediaType
 } from "../types";
+import {
+  addProfileVideoSelection,
+  toggleProfileVideoSelection
+} from "../utils/profileVideoSelection";
 import { SharePostModal } from "./SharePostModal";
 import { VideoActionsModal } from "./VideoActionsModal";
 
@@ -26,6 +30,7 @@ export function ProfileVideoGallery({
   emptyTitle,
   hiddenVideoIds = new Set<string>(),
   onDeleteVideo,
+  onDeleteVideos,
   onSetVideoHidden,
   onShareVideo,
   onOpenVideo,
@@ -38,6 +43,7 @@ export function ProfileVideoGallery({
   emptyTitle: string;
   hiddenVideoIds?: Set<string>;
   onDeleteVideo?: (video: ProfileGalleryVideo) => void;
+  onDeleteVideos?: (videos: ProfileGalleryVideo[]) => void;
   onSetVideoHidden?: (video: ProfileGalleryVideo, hidden: boolean) => void;
   onShareVideo?: (
     video: ProfileGalleryVideo,
@@ -51,17 +57,89 @@ export function ProfileVideoGallery({
 }) {
   const [actionVideo, setActionVideo] =
     useState<ProfileGalleryVideo | null>(null);
-  const [shareVideo, setShareVideo] =
-    useState<ProfileGalleryVideo | null>(null);
+  const [isBatchActionsVisible, setIsBatchActionsVisible] = useState(false);
+  const [selectedVideoIds, setSelectedVideoIds] = useState<string[]>([]);
+  const [shareVideos, setShareVideos] = useState<ProfileGalleryVideo[]>([]);
+  const longPressedVideoId = useRef<string | null>(null);
   const hasVideoActions = Boolean(
     onDeleteVideo || onSetVideoHidden || onShareVideo
   );
+  const canSelectMultiple = Boolean(onDeleteVideos);
+  const selectedVideos = videos.filter((video) =>
+    selectedVideoIds.includes(video.id)
+  );
+  const isSelectionMode = selectedVideoIds.length > 0;
+  const areAllSelectedVideosHidden =
+    selectedVideos.length > 0 &&
+    selectedVideos.every((video) => hiddenVideoIds.has(video.id));
+
+  useEffect(() => {
+    setSelectedVideoIds((current) => {
+      const next = current.filter((videoId) =>
+        videos.some((video) => video.id === videoId)
+      );
+
+      return next.length === current.length ? current : next;
+    });
+  }, [videos]);
+
+  function clearSelection() {
+    setIsBatchActionsVisible(false);
+    setSelectedVideoIds([]);
+  }
+
+  function selectVideo(videoId: string) {
+    setSelectedVideoIds((current) =>
+      addProfileVideoSelection(current, videoId)
+    );
+  }
+
+  function toggleVideo(videoId: string) {
+    setSelectedVideoIds((current) =>
+      toggleProfileVideoSelection(current, videoId)
+    );
+  }
 
   return (
     <View style={styles.profileGallerySection}>
       <View style={styles.profileGalleryHeader}>
-        <Text style={styles.profileGalleryTitle}>Publicações</Text>
-        {videos.length > 0 ? (
+        <View style={styles.profileGalleryHeaderTitleBlock}>
+          <Text style={styles.profileGalleryTitle}>Publicações</Text>
+          {isSelectionMode ? (
+            <Text style={styles.profileGallerySelectionCount}>
+              {selectedVideoIds.length}{" "}
+              {selectedVideoIds.length === 1 ? "selecionada" : "selecionadas"}
+            </Text>
+          ) : null}
+        </View>
+        {isSelectionMode ? (
+          <View style={styles.profileGallerySelectionActions}>
+            <Pressable
+              accessibilityLabel="Cancelar seleção"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={clearSelection}
+              style={({ pressed }) => [
+                styles.profileGalleryHeaderIconButton,
+                pressed ? styles.buttonPressed : null
+              ]}
+            >
+              <X color={colors.muted} size={19} />
+            </Pressable>
+            <Pressable
+              accessibilityLabel="Abrir ações das publicações selecionadas"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => setIsBatchActionsVisible(true)}
+              style={({ pressed }) => [
+                styles.profileGalleryHeaderIconButton,
+                pressed ? styles.buttonPressed : null
+              ]}
+            >
+              <MoreVertical color={colors.text} size={20} />
+            </Pressable>
+          </View>
+        ) : videos.length > 0 ? (
           <Text style={styles.profileGalleryCount}>{videos.length}</Text>
         ) : null}
       </View>
@@ -74,66 +152,99 @@ export function ProfileVideoGallery({
         </View>
       ) : (
         <View style={styles.profileGalleryGrid}>
-          {videos.map((video) => (
-            <View key={video.id} style={styles.profileGalleryCard}>
-              <Pressable
-                accessibilityLabel={`Abrir ${video.title} no Início`}
-                accessibilityRole="button"
-                onPress={() => onOpenVideo(video)}
-                style={({ pressed }) => [
-                  styles.profileGalleryOpenButton,
-                  pressed ? styles.buttonPressed : null
-                ]}
-              >
-                <ProfileGalleryThumbnail
-                  mediaType={video.mediaType}
-                  uri={video.uri}
-                />
-                <View style={styles.profileGalleryCardShade} />
-                <View
-                  style={[
-                    styles.profileGalleryPlayBadge,
-                    hasVideoActions
-                      ? styles.profileGalleryPlayBadgeWithMenu
-                      : null
-                  ]}
-                >
-                  {video.mediaType === "image" ? (
-                    <ImageIcon color={colors.onPrimary} size={15} />
-                  ) : (
-                    <Play
-                      color={colors.onPrimary}
-                      fill={colors.onPrimary}
-                      size={14}
-                    />
-                  )}
-                </View>
-                <Text numberOfLines={2} style={styles.profileGalleryCardTitle}>
-                  {video.title}
-                </Text>
-                <View style={styles.profileGalleryViewCount}>
-                  <Eye color={colors.onPrimary} size={13} strokeWidth={2.2} />
-                  <Text style={styles.profileGalleryViewCountText}>
-                    {viewCountsByVideo[video.id] ?? 0}
-                  </Text>
-                </View>
-              </Pressable>
-              {hasVideoActions ? (
+          {videos.map((video) => {
+            const isSelected = selectedVideoIds.includes(video.id);
+
+            return (
+              <View key={video.id} style={styles.profileGalleryCard}>
                 <Pressable
-                  accessibilityLabel={`Abrir opcoes de ${video.title}`}
+                  accessibilityLabel={
+                    isSelectionMode
+                      ? `${isSelected ? "Remover" : "Adicionar"} ${video.title} da seleção`
+                      : `Abrir ${video.title} no Início`
+                  }
                   accessibilityRole="button"
-                  hitSlop={6}
-                  onPress={() => setActionVideo(video)}
+                  accessibilityState={{ selected: isSelected }}
+                  delayLongPress={320}
+                  onLongPress={
+                    canSelectMultiple
+                      ? () => {
+                          longPressedVideoId.current = video.id;
+                          selectVideo(video.id);
+                        }
+                      : undefined
+                  }
+                  onPress={() => {
+                    if (longPressedVideoId.current === video.id) {
+                      longPressedVideoId.current = null;
+                      return;
+                    }
+
+                    if (isSelectionMode) {
+                      toggleVideo(video.id);
+                      return;
+                    }
+
+                    onOpenVideo(video);
+                  }}
                   style={({ pressed }) => [
-                    styles.profileGalleryMenuButton,
+                    styles.profileGalleryOpenButton,
                     pressed ? styles.buttonPressed : null
                   ]}
                 >
-                  <MoreVertical color={colors.onPrimary} size={17} />
+                  <ProfileGalleryThumbnail
+                    mediaType={video.mediaType}
+                    uri={video.uri}
+                  />
+                  <View style={styles.profileGalleryCardShade} />
+                  <Text numberOfLines={2} style={styles.profileGalleryCardTitle}>
+                    {video.title}
+                  </Text>
+                  <View style={styles.profileGalleryViewCount}>
+                    <Eye color={colors.onPrimary} size={13} strokeWidth={2.2} />
+                    <Text style={styles.profileGalleryViewCountText}>
+                      {viewCountsByVideo[video.id] ?? 0}
+                    </Text>
+                  </View>
+                  {isSelectionMode ? (
+                    <View
+                      pointerEvents="none"
+                      style={[
+                        styles.profileGallerySelectionOverlay,
+                        isSelected
+                          ? styles.profileGallerySelectionOverlayActive
+                          : null
+                      ]}
+                    >
+                      {isSelected ? (
+                        <View style={styles.profileGallerySelectionBadge}>
+                          <Check
+                            color={colors.onPrimary}
+                            size={17}
+                            strokeWidth={3}
+                          />
+                        </View>
+                      ) : null}
+                    </View>
+                  ) : null}
                 </Pressable>
-              ) : null}
-            </View>
-          ))}
+                {hasVideoActions && !isSelectionMode ? (
+                  <Pressable
+                    accessibilityLabel={`Abrir opções de ${video.title}`}
+                    accessibilityRole="button"
+                    hitSlop={6}
+                    onPress={() => setActionVideo(video)}
+                    style={({ pressed }) => [
+                      styles.profileGalleryMenuButton,
+                      pressed ? styles.buttonPressed : null
+                    ]}
+                  >
+                    <MoreVertical color={colors.onPrimary} size={18} />
+                  </Pressable>
+                ) : null}
+              </View>
+            );
+          })}
         </View>
       )}
 
@@ -148,7 +259,7 @@ export function ProfileVideoGallery({
           setActionVideo(null);
         }}
         onShare={() => {
-          setShareVideo(actionVideo);
+          setShareVideos(actionVideo ? [actionVideo] : []);
           setActionVideo(null);
         }}
         onToggleHidden={() => {
@@ -160,18 +271,49 @@ export function ProfileVideoGallery({
         videoTitle={actionVideo?.title ?? ""}
         visible={Boolean(actionVideo)}
       />
+      <VideoActionsModal
+        batchMode
+        canDelete={Boolean(onDeleteVideos)}
+        hidden={areAllSelectedVideosHidden}
+        onClose={() => setIsBatchActionsVisible(false)}
+        onDelete={() => {
+          if (selectedVideos.length > 0 && onDeleteVideos) {
+            onDeleteVideos(selectedVideos);
+          }
+          clearSelection();
+        }}
+        onShare={() => {
+          setShareVideos(selectedVideos);
+          clearSelection();
+        }}
+        onToggleHidden={() => {
+          if (onSetVideoHidden) {
+            selectedVideos.forEach((video) =>
+              onSetVideoHidden(video, !areAllSelectedVideosHidden)
+            );
+          }
+          clearSelection();
+        }}
+        selectionCount={selectedVideos.length}
+        videoTitle=""
+        visible={isBatchActionsVisible && selectedVideos.length > 0}
+      />
       <SharePostModal
         contacts={shareContacts}
-        onClose={() => setShareVideo(null)}
+        onClose={() => setShareVideos([])}
         onShare={(contact) => {
-          if (shareVideo && onShareVideo) {
-            onShareVideo(shareVideo, contact);
+          if (onShareVideo) {
+            shareVideos.forEach((video) => onShareVideo(video, contact));
           }
         }}
         profileAvatars={profileAvatars}
-        videoId={shareVideo?.id ?? ""}
-        videoTitle={shareVideo?.title ?? ""}
-        visible={Boolean(shareVideo)}
+        videoId={shareVideos.map((video) => video.id).join(":")}
+        videoTitle={
+          shareVideos.length > 1
+            ? `${shareVideos.length} publicações selecionadas`
+            : shareVideos[0]?.title ?? ""
+        }
+        visible={shareVideos.length > 0}
       />
     </View>
   );

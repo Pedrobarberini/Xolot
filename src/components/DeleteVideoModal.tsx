@@ -6,17 +6,21 @@ import { colors } from "../theme";
 
 export function DeleteVideoModal({
   isDeleting,
+  itemCount = 1,
   onClose,
   onConfirm,
   videoTitle,
   visible
 }: {
   isDeleting: boolean;
+  itemCount?: number;
   onClose: () => void;
   onConfirm: () => void;
   videoTitle: string;
   visible: boolean;
 }) {
+  const isBatch = itemCount > 1;
+
   return (
     <Modal
       animationType="fade"
@@ -27,7 +31,7 @@ export function DeleteVideoModal({
     >
       <View style={styles.depositModalRoot}>
         <Pressable
-          accessibilityLabel="Cancelar exclusão do vídeo"
+          accessibilityLabel="Cancelar exclusão"
           disabled={isDeleting}
           onPress={onClose}
           style={styles.depositModalBackdrop}
@@ -39,7 +43,11 @@ export function DeleteVideoModal({
                 <Trash2 color={colors.danger} size={20} />
               </View>
               <View style={styles.depositDialogTitleBlock}>
-                <Text style={styles.deleteVideoTitle}>Excluir vídeo?</Text>
+                <Text style={styles.deleteVideoTitle}>
+                  {isBatch
+                    ? `Apagar ${itemCount} publicações?`
+                    : "Excluir publicação?"}
+                </Text>
                 <Text numberOfLines={2} style={styles.depositDialogSubtitle}>
                   {videoTitle}
                 </Text>
@@ -57,8 +65,9 @@ export function DeleteVideoModal({
           </View>
 
           <Text style={styles.deleteVideoBody}>
-            O vídeo será removido do Início e do seu perfil. Esta ação não pode
-            ser desfeita.
+            {isBatch
+              ? "As publicações serão removidas do Início e do seu perfil. Esta ação não pode ser desfeita."
+              : "A publicação será removida do Início e do seu perfil. Esta ação não pode ser desfeita."}
           </Text>
 
           <View style={styles.depositDialogActions}>
@@ -70,7 +79,7 @@ export function DeleteVideoModal({
               <Text style={styles.depositCancelText}>Cancelar</Text>
             </Pressable>
             <Pressable
-              accessibilityLabel="Confirmar exclusão do vídeo"
+              accessibilityLabel="Confirmar exclusão"
               disabled={isDeleting}
               onPress={onConfirm}
               style={[
@@ -84,7 +93,11 @@ export function DeleteVideoModal({
                 <Trash2 color={colors.onPrimary} size={17} />
               )}
               <Text style={styles.deleteVideoConfirmText}>
-                {isDeleting ? "Excluindo..." : "Excluir vídeo"}
+                {isDeleting
+                  ? "Excluindo..."
+                  : isBatch
+                    ? "Apagar publicações"
+                    : "Excluir publicação"}
               </Text>
             </Pressable>
           </View>

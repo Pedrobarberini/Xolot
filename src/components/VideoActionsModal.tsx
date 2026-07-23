@@ -1,28 +1,44 @@
 import React from "react";
-import { Eye, EyeOff, MoreVertical, Share2, Trash2, X } from "lucide-react-native";
+import {
+  Eye,
+  EyeOff,
+  MoreVertical,
+  Send,
+  Share2,
+  Trash2,
+  X
+} from "lucide-react-native";
 import { Modal, Pressable, Text, View } from "react-native";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 
 export function VideoActionsModal({
+  batchMode = false,
   canDelete,
   hidden,
   onClose,
   onDelete,
   onShare,
   onToggleHidden,
+  selectionCount = 1,
   videoTitle,
   visible
 }: {
+  batchMode?: boolean;
   canDelete: boolean;
   hidden: boolean;
   onClose: () => void;
   onDelete: () => void;
   onShare: () => void;
   onToggleHidden: () => void;
+  selectionCount?: number;
   videoTitle: string;
   visible: boolean;
 }) {
+  const selectionLabel = `${selectionCount} ${
+    selectionCount === 1 ? "publicação selecionada" : "publicações selecionadas"
+  }`;
+
   return (
     <Modal
       animationType="fade"
@@ -33,7 +49,7 @@ export function VideoActionsModal({
     >
       <View style={styles.videoActionsRoot}>
         <Pressable
-          accessibilityLabel="Fechar opcoes da publicacao"
+          accessibilityLabel="Fechar opções da publicação"
           onPress={onClose}
           style={styles.videoActionsBackdrop}
         />
@@ -43,9 +59,11 @@ export function VideoActionsModal({
               <MoreVertical color={colors.primary} size={20} />
             </View>
             <View style={styles.videoActionsTitleBlock}>
-              <Text style={styles.videoActionsTitle}>Publicação</Text>
+              <Text style={styles.videoActionsTitle}>
+                {batchMode ? "Ações" : "Publicação"}
+              </Text>
               <Text numberOfLines={1} style={styles.videoActionsSubtitle}>
-                {videoTitle}
+                {batchMode ? selectionLabel : videoTitle}
               </Text>
             </View>
             <Pressable
@@ -63,8 +81,14 @@ export function VideoActionsModal({
             onPress={onShare}
             style={styles.videoActionRow}
           >
-            <Share2 color={colors.text} size={20} />
-            <Text style={styles.videoActionText}>Compartilhar</Text>
+            {batchMode ? (
+              <Send color={colors.text} size={20} />
+            ) : (
+              <Share2 color={colors.text} size={20} />
+            )}
+            <Text style={styles.videoActionText}>
+              {batchMode ? "Enviar" : "Compartilhar"}
+            </Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -87,7 +111,9 @@ export function VideoActionsModal({
               style={[styles.videoActionRow, styles.videoActionDanger]}
             >
               <Trash2 color={colors.danger} size={20} />
-              <Text style={styles.videoActionDangerText}>Excluir</Text>
+              <Text style={styles.videoActionDangerText}>
+                {batchMode ? "Apagar" : "Excluir"}
+              </Text>
             </Pressable>
           ) : null}
         </View>

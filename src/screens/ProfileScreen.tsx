@@ -126,8 +126,9 @@ export function ProfileScreen({
   const [isAvatarPositionVisible, setIsAvatarPositionVisible] = useState(false);
   const [isDeletingVideo, setIsDeletingVideo] = useState(false);
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
-  const [videoPendingDeletion, setVideoPendingDeletion] =
-    useState<VideoSubmission | null>(null);
+  const [videosPendingDeletion, setVideosPendingDeletion] = useState<
+    VideoSubmission[]
+  >([]);
   const [profileView, setProfileView] = useState<ProfileView>("overview");
   const profileNavigationTimer = useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -191,24 +192,34 @@ export function ProfileScreen({
   }
 
   async function confirmVideoDeletion() {
-    if (!videoPendingDeletion || isDeletingVideo) {
+    if (videosPendingDeletion.length === 0 || isDeletingVideo) {
       return;
     }
 
     setIsDeletingVideo(true);
 
     try {
-      const wasDeleted = await onDeleteVideo(videoPendingDeletion);
+      const deletionResults = await Promise.all(
+        videosPendingDeletion.map((video) => onDeleteVideo(video))
+      );
+      const deletedCount = deletionResults.filter(Boolean).length;
 
-      if (!wasDeleted) {
+      if (deletedCount === 0) {
         Alert.alert(
           "Não foi possível excluir",
-          "Este vídeo não pertence a conta conectada."
+          "As publicações selecionadas não pertencem à conta conectada."
         );
         return;
       }
 
-      setVideoPendingDeletion(null);
+      if (deletedCount < videosPendingDeletion.length) {
+        Alert.alert(
+          "Exclusão parcial",
+          `${deletedCount} de ${videosPendingDeletion.length} publicações foram apagadas.`
+        );
+      }
+
+      setVideosPendingDeletion([]);
     } catch {
       Alert.alert(
         "Não foi possível excluir",
@@ -422,7 +433,19 @@ export function ProfileScreen({
               );
 
               if (selectedVideo) {
-                setVideoPendingDeletion(selectedVideo);
+                setVideosPendingDeletion([selectedVideo]);
+              }
+            }}
+            onDeleteVideos={(videos) => {
+              const selectedIds = new Set(
+                videos.map((video) => video.sourceId).filter(Boolean)
+              );
+              const selectedVideos = publishedVideos.filter((video) =>
+                selectedIds.has(video.id)
+              );
+
+              if (selectedVideos.length > 0) {
+                setVideosPendingDeletion(selectedVideos);
               }
             }}
             onOpenVideo={(video) => {
@@ -466,14 +489,19 @@ export function ProfileScreen({
       />
       <DeleteVideoModal
         isDeleting={isDeletingVideo}
+        itemCount={videosPendingDeletion.length}
         onClose={() => {
           if (!isDeletingVideo) {
-            setVideoPendingDeletion(null);
+            setVideosPendingDeletion([]);
           }
         }}
         onConfirm={confirmVideoDeletion}
-        videoTitle={videoPendingDeletion?.videoTitle ?? ""}
-        visible={Boolean(videoPendingDeletion)}
+        videoTitle={
+          videosPendingDeletion.length === 1
+            ? videosPendingDeletion[0]?.videoTitle ?? ""
+            : `${videosPendingDeletion.length} publicações selecionadas`
+        }
+        visible={videosPendingDeletion.length > 0}
       />
       <ProfileListModal
         emptyBody="Quando alguem seguir seu perfil, ela aparecerá nesta lista."

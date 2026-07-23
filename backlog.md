@@ -1095,6 +1095,33 @@ Criterios de aceite:
 - A lista mostra username, nome, contexto do perfil e permite abrir o perfil.
 - Publicacoes sem marcacoes nao exibem o icone.
 
+### Task P2-022 - Selecionar e gerenciar publicacoes em lote no perfil
+
+Tipo: Frontend/UX/Dados sociais
+
+Status: Concluido em 2026-07-22.
+
+Tasks:
+
+- [x] Remover o selo de reproducao redundante dos cards da galeria.
+- [x] Exibir os tres pontos sem contorno branco.
+- [x] Ativar o modo de selecao ao manter uma publicacao pressionada.
+- [x] Permitir adicionar e remover outras publicacoes com toques simples.
+- [x] Exibir contagem, cancelar e um unico botao de acoes durante a selecao.
+- [x] Oferecer envio, ocultacao e exclusao na HUD de acoes em lote.
+- [x] Encaminhar todas as publicacoes selecionadas ao contato escolhido.
+- [x] Confirmar exclusao plural e apagar somente midias da conta conectada.
+- [x] Restringir a selecao destrutiva ao proprio perfil.
+- [x] Cobrir a logica de inclusao, remocao e deduplicacao com testes.
+
+Criterios de aceite:
+
+- O toque normal continua abrindo a publicacao quando a selecao esta inativa.
+- O toque longo seleciona o primeiro item sem abrir o video.
+- Itens selecionados recebem borda verde e indicador de confirmacao.
+- O menu individual permanece disponivel fora do modo de selecao.
+- A exclusao em lote exige confirmacao e atualiza Inicio e perfil.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real
