@@ -369,6 +369,7 @@ export function AppRoutes({
                     reelReturnTarget ? returnToReelOrigin : undefined
                   }
                   onOpenPlayer={openAthleteProfile}
+                  onOpenTaggedUser={openAccountProfile}
                   onRecordView={recordPlayerView}
                   onShare={(player, contact) =>
                     sendSharedPost(contact, player)
@@ -396,6 +397,7 @@ export function AppRoutes({
                   players={orderedFeedPlayers}
                   profileAvatars={profileAvatars}
                   shareContacts={shareContacts}
+                  users={registeredUsers}
                 />
               ) : null}
               {tab === "search" ? (
@@ -451,6 +453,7 @@ export function AppRoutes({
               {tab === "submit" ? (
                 <ScreenFrame key="submit">
                   <SubmitVideoScreen
+                    accounts={registeredUsers}
                     onBack={() => openTab("feed")}
                     onSubmit={handleSubmitVideo}
                     user={user}

@@ -714,6 +714,9 @@ export const feedStyles = {
   feedCompactDescriptionTitle: {
     fontWeight: "900"
   },
+  feedCompactDescriptionBody: {
+    marginTop: 3
+  },
   feedCompactInlineAction: {
     color: colors.onPrimary,
     fontWeight: "900"
@@ -801,6 +804,11 @@ export const feedStyles = {
     marginTop: 16,
     zIndex: 2
   },
+  feedCompactExpandedActionGroup: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12
+  },
   feedCompactTextButton: {
     minHeight: 34,
     justifyContent: "center",
@@ -846,6 +854,27 @@ export const feedStyles = {
     fontWeight: "700",
     lineHeight: 19,
     marginTop: 8
+  },
+  feedReadMoreRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  feedMentionsButton: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+    justifyContent: "center",
+    marginTop: 6,
+    minHeight: 34,
+    paddingHorizontal: 4
+  },
+  feedMentionsButtonCompact: {
+    marginTop: 0
+  },
+  feedMentionsCount: {
+    fontSize: 12,
+    fontWeight: "900"
   },
   feedReadMoreButton: {
     alignSelf: "flex-start",

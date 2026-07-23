@@ -244,6 +244,89 @@ export const submissionAdminStyles = {
     alignSelf: "stretch",
     marginTop: 10
   },
+  submissionMentionPicker: {
+    marginTop: 2
+  },
+  submissionMentionHint: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    lineHeight: 16,
+    marginTop: 6
+  },
+  submissionMentionSelectedRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 7,
+    marginTop: 10
+  },
+  submissionMentionChip: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.border,
+    borderRadius: 999,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 5,
+    maxWidth: "100%",
+    minHeight: 32,
+    paddingHorizontal: 10
+  },
+  submissionMentionChipText: {
+    color: colors.primary,
+    flexShrink: 1,
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  submissionMentionResults: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 9,
+    overflow: "hidden"
+  },
+  submissionMentionResult: {
+    alignItems: "center",
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 58,
+    paddingHorizontal: 11,
+    paddingVertical: 8
+  },
+  submissionMentionResultIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 999,
+    height: 34,
+    justifyContent: "center",
+    width: 34
+  },
+  submissionMentionResultIdentity: {
+    flex: 1,
+    minWidth: 0
+  },
+  submissionMentionResultUsername: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  submissionMentionResultName: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    marginTop: 2
+  },
+  submissionMentionEmpty: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    paddingHorizontal: 12,
+    paddingVertical: 16,
+    textAlign: "center"
+  },
   adminHero: {
     backgroundColor: colors.surface,
     borderColor: colors.border,

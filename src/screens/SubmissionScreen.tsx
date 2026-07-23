@@ -24,6 +24,7 @@ import {
   SubmissionMediaStage
 } from "../components/SubmissionMediaStage";
 import { SubmissionMediaPreview } from "../components/SubmissionComponents";
+import { SubmissionMentionPicker } from "../components/SubmissionMentionPicker";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { persistPickedVideo } from "../services/videoStorage";
 import { styles } from "../styles/appStyles";
@@ -37,7 +38,7 @@ type SubmissionStep = "details" | "media";
 type SubmissionDraft = {
   hasGuardianConsent: boolean;
   highlight: string;
-  mentionsText: string;
+  mentions: string[];
   tagsText: string;
   title: string;
 };
@@ -45,16 +46,18 @@ type SubmissionDraft = {
 const emptySubmissionDraft: SubmissionDraft = {
   hasGuardianConsent: false,
   highlight: "",
-  mentionsText: "",
+  mentions: [],
   tagsText: "",
   title: ""
 };
 
 export function SubmitVideoScreen({
+  accounts,
   onBack,
   onSubmit,
   user
 }: {
+  accounts: AppUser[];
   onBack: () => void;
   onSubmit: (submission: VideoSubmission) => void;
   user: AppUser;
@@ -73,7 +76,7 @@ export function SubmitVideoScreen({
   const age = user.age ?? 0;
   const needsGuardianConsent = age > 0 && age < 18;
   const tags = parseSubmissionTokens(draft.tagsText, "#");
-  const mentions = parseSubmissionTokens(draft.mentionsText, "@");
+
   const submissionIssues = [
     user.profileCompleted ? null : "Complete os dados do perfil antes de enviar.",
     age >= 12
@@ -85,7 +88,7 @@ export function SubmitVideoScreen({
       : "O título precisa ter pelo menos 4 caracteres.",
     draft.highlight.trim().length >= 4
       ? null
-      : "Escreva um texto para a publicação com pelo menos 4 caracteres.",
+      : "Escreva uma descrição com pelo menos 4 caracteres.",
     !needsGuardianConsent || draft.hasGuardianConsent
       ? null
       : "Confirme a autorização do responsável legal."
@@ -155,9 +158,9 @@ export function SubmitVideoScreen({
     return () => toastAnimation.stop();
   }, [lastSubmittedId, submissionToastProgress]);
 
-  function updateDraft(
-    field: keyof SubmissionDraft,
-    value: string | boolean
+  function updateDraft<Field extends keyof SubmissionDraft>(
+    field: Field,
+    value: SubmissionDraft[Field]
   ) {
     setDraft((current) => ({ ...current, [field]: value }));
   }
@@ -262,7 +265,7 @@ export function SubmitVideoScreen({
         highlight: draft.highlight.trim(),
         id,
         mediaType: selectedMedia.mediaType,
-        mentions,
+        mentions: draft.mentions,
         position: user.position,
         status: DIRECT_PUBLICATION_STATUS,
         submittedAt: new Date().toISOString(),
@@ -364,10 +367,10 @@ export function SubmitVideoScreen({
               value={draft.title}
             />
             <LabeledInput
-              label="Texto da publicação"
+              label="Descrição"
               multiline
               onChangeText={(value) => updateDraft("highlight", value)}
-              placeholder="Conte o que acontece nesta publicação"
+              placeholder="Descreva o que acontece nesta publicação"
               value={draft.highlight}
             />
             <LabeledInput
@@ -377,12 +380,11 @@ export function SubmitVideoScreen({
               placeholder="#treino #futebol #oportunidade"
               value={draft.tagsText}
             />
-            <LabeledInput
-              autoCapitalize="none"
-              label="Marcações"
-              onChangeText={(value) => updateDraft("mentionsText", value)}
-              placeholder="@clube @projeto"
-              value={draft.mentionsText}
+            <SubmissionMentionPicker
+              accounts={accounts}
+              currentUserId={user.id}
+              onChange={(mentions) => updateDraft("mentions", mentions)}
+              value={draft.mentions}
             />
 
             {needsGuardianConsent ? (

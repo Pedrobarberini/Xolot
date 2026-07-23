@@ -1068,6 +1068,33 @@ Criterios de aceite:
 - A camera usa a mesma seta em branco para manter contraste sobre a imagem.
 - Todos os modais e paineis temporarios aparecem com a mesma transicao suave.
 
+### Task P2-021 - Estruturar descricao e marcacoes de usuarios nas publicacoes
+
+Tipo: Frontend/UX/Dados sociais
+
+Status: Concluido em 2026-07-22.
+
+Tasks:
+
+- [x] Renomear o campo de texto da publicacao para Descricao.
+- [x] Exibir a descricao abaixo do titulo no Inicio, em estados recolhido e expandido.
+- [x] Substituir marcacoes em texto livre por busca de contas cadastradas.
+- [x] Permitir selecionar e remover ate oito usuarios antes da publicacao.
+- [x] Persistir as marcacoes pelo username unico de cada conta.
+- [x] Exibir um icone com a contagem de pessoas marcadas apenas no conteudo expandido.
+- [x] Abrir a lista de perfis marcados em modal com animacao padronizada.
+- [x] Permitir abrir o perfil correspondente a partir da lista de marcacoes.
+- [x] Cobrir busca, filtro, remocao e limite de marcacoes com testes automatizados.
+
+Criterios de aceite:
+
+- Titulo e descricao nunca aparecem unidos pela mesma linha no Inicio.
+- Somente contas cadastradas podem ser marcadas em novas publicacoes.
+- A propria conta e contas administrativas nao aparecem na busca de marcacoes.
+- O icone de marcacoes fica no canto inferior direito da descricao expandida.
+- A lista mostra username, nome, contexto do perfil e permite abrir o perfil.
+- Publicacoes sem marcacoes nao exibem o icone.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

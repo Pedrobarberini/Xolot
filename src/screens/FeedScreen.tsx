@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   UserCheck,
   UserPlus,
+  UsersRound,
   UserRound
 } from "lucide-react-native";
 import { Alert, Animated, Easing, Image, PanResponder, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
@@ -25,6 +26,10 @@ import { useResolvedVideoSource } from "../actions/useResolvedVideoSource";
 import { BackButton, BalanceLine } from "../components/Navigation";
 import { FeedPostOptionsModal } from "../components/FeedPostOptionsModal";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
+import {
+  ProfileListModal,
+  type ProfileListItemData
+} from "../components/ProfileListModal";
 import { SharePostModal } from "../components/SharePostModal";
 import { VideoVolumeControl } from "../components/VideoVolumeControl";
 import { XOLOT_SYMBOL } from "../constants/assets";
@@ -32,6 +37,7 @@ import { FEED_TEXT_LIMIT_COMPACT, FEED_TEXT_LIMIT_WIDE, USE_CENTERED_WEB_LAYOUT 
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import {
+  AppUser,
   AthleteFund,
   MessageContact,
   Player,
@@ -60,6 +66,7 @@ export function FeedScreen({
   onBackToProfile,
   onOpenInvestment,
   onOpenPlayer,
+  onOpenTaggedUser,
   onRecordView,
   onShare,
   onToggleBlockProfile,
@@ -69,7 +76,8 @@ export function FeedScreen({
   onToggleMutedContent,
   players: feedPlayers,
   profileAvatars,
-  shareContacts
+  shareContacts,
+  users
 }: {
   backLabel?: string;
   balance: number | null;
@@ -85,6 +93,7 @@ export function FeedScreen({
   onBackToProfile?: () => void;
   onOpenInvestment: (player: Player) => void;
   onOpenPlayer: (player: Player) => void;
+  onOpenTaggedUser: (user: AppUser) => void;
   onRecordView: (playerId: string) => void;
   onShare: (player: Player, contact: MessageContact) => void;
   onToggleBlockProfile: (player: Player) => void;
@@ -95,12 +104,14 @@ export function FeedScreen({
   players: Player[];
   profileAvatars: ProfileAvatarsByProfile;
   shareContacts: MessageContact[];
+  users: AppUser[];
 }) {
   const { height } = useWindowDimensions();
   const [feedHeight, setFeedHeight] = useState(0);
   const [activeFeedIndex, setActiveFeedIndex] = useState(0);
   const [preferencePlayer, setPreferencePlayer] = useState<Player | null>(null);
   const [sharePlayer, setSharePlayer] = useState<Player | null>(null);
+  const [mentionedPlayer, setMentionedPlayer] = useState<Player | null>(null);
   const feedScrollRef = useRef<ScrollView | null>(null);
   const activeFeedIndexRef = useRef(0);
   const gestureStartIndexRef = useRef(0);
@@ -110,6 +121,32 @@ export function FeedScreen({
   const pageHeight = feedHeight || height;
   const lastFeedIndex = Math.max(feedPlayers.length - 1, 0);
   const activePlayerId = feedPlayers[activeFeedIndex]?.id;
+  const mentionedUsers = useMemo(
+    () =>
+      (mentionedPlayer?.mentions ?? [])
+        .map((mention) =>
+          users.find(
+            (account) =>
+              account.username.toLocaleLowerCase("pt-BR") ===
+              mention.toLocaleLowerCase("pt-BR")
+          )
+        )
+        .filter((account): account is AppUser => Boolean(account)),
+    [mentionedPlayer, users]
+  );
+  const mentionedProfiles = useMemo<ProfileListItemData[]>(
+    () =>
+      mentionedUsers.map((account) => ({
+        avatar: profileAvatars["profile-" + account.id],
+        id: account.id,
+        name: account.name,
+        subtitle: account.profileCompleted
+          ? account.position + " | " + account.city
+          : "Perfil Xolot",
+        username: account.username
+      })),
+    [mentionedUsers, profileAvatars]
+  );
 
   useEffect(() => {
     if (!activePlayerId) {
@@ -289,6 +326,7 @@ export function FeedScreen({
               likeCount={likeCountsByPlayer[player.id] ?? 0}
               onInvest={() => onOpenInvestment(player)}
               onMore={() => setPreferencePlayer(player)}
+              onOpenMentions={() => setMentionedPlayer(player)}
               onOpen={() => onOpenPlayer(player)}
               onShare={() => setSharePlayer(player)}
               onToggleLike={() => onToggleLike(player)}
@@ -374,6 +412,22 @@ export function FeedScreen({
         videoTitle={sharePlayer?.videoTitle ?? ""}
         visible={Boolean(sharePlayer)}
       />
+      <ProfileListModal
+        emptyBody="Os perfis marcados não estão mais disponíveis."
+        emptyTitle="Nenhum perfil disponível"
+        items={mentionedProfiles}
+        onClose={() => setMentionedPlayer(null)}
+        onSelectItem={(profile) => {
+          const account = users.find((item) => item.id === profile.id);
+
+          setMentionedPlayer(null);
+          if (account) {
+            onOpenTaggedUser(account);
+          }
+        }}
+        title="Pessoas marcadas"
+        visible={Boolean(mentionedPlayer)}
+      />
     </View>
   );
 }
@@ -389,6 +443,7 @@ function FeedReel({
   onInvest,
   onMore,
   onOpen,
+  onOpenMentions,
   onShare,
   onToggleLike,
   onToggleFollow,
@@ -406,6 +461,7 @@ function FeedReel({
   onInvest: () => void;
   onMore: () => void;
   onOpen: () => void;
+  onOpenMentions: () => void;
   onShare: () => void;
   onToggleLike: () => void;
   onToggleFollow: () => void;
@@ -446,6 +502,7 @@ function FeedReel({
     ? Math.min(Math.max(fund.fundedAmount / fund.goalAmount, 0), 1)
     : 0;
   const canInvest = fund?.status === "Captando";
+  const hasMentions = Boolean(player.mentions?.length);
   const minimumTicketLabel = evaluation
     ? formatBRL(evaluation.minimumTicket)
     : null;
@@ -821,6 +878,9 @@ function FeedReel({
                 >
                   {player.videoTitle}
                 </Text>
+                <Text style={[styles.feedReelHighlight, { color: palette.text }]}>
+                  {visibleText}
+                </Text>
                 <Text
                   numberOfLines={1}
                   style={[styles.feedReelMeta, { color: palette.muted }]}
@@ -841,51 +901,57 @@ function FeedReel({
                       #{tag}
                     </Text>
                   ))}
-                  {player.mentions?.slice(0, 2).map((mention) => (
-                    <Text
-                      key={`mention-${mention}`}
-                      numberOfLines={1}
-                      style={[
-                        styles.feedTag,
-                        { borderColor: palette.border, color: palette.text }
-                      ]}
-                    >
-                      @{mention}
-                    </Text>
-                  ))}
                 </View>
-                <Text style={[styles.feedReelHighlight, { color: palette.text }]}>
-                  {visibleText}
-                </Text>
-                {hasMoreText ? (
-                  <Pressable
-                    onPress={() => animateDescription(!isExpanded)}
-                    style={styles.feedReadMoreButton}
-                  >
-                    <Text
-                      style={[styles.feedReadMoreText, { color: palette.accent }]}
+                <View style={styles.feedReadMoreRow}>
+                  {hasMoreText || hasMentions ? (
+                    <Pressable
+                      onPress={() => animateDescription(!isExpanded)}
+                      style={styles.feedReadMoreButton}
                     >
-                      {isExpanded ? "Ver menos" : "Ver mais"}
-                    </Text>
-                  </Pressable>
-                ) : null}
+                      <Text
+                        style={[styles.feedReadMoreText, { color: palette.accent }]}
+                      >
+                        {isExpanded ? "Ver menos" : "Ver mais"}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                  {isExpanded && hasMentions ? (
+                    <FeedMentionsButton
+                      color={palette.accent}
+                      count={player.mentions?.length ?? 0}
+                      onPress={onOpenMentions}
+                    />
+                  ) : null}
+                </View>
               </>
             ) : (
               <>
                 {!isExpanded ? (
-                  <Text style={styles.feedCompactDescription}>
-                    <Text style={styles.feedCompactDescriptionTitle}>
+                  <View>
+                    <Text
+                      style={[
+                        styles.feedCompactDescription,
+                        styles.feedCompactDescriptionTitle
+                      ]}
+                    >
                       {player.videoTitle}
                     </Text>
-                    {presentationText ? ` - ${compactPreview}` : ""}
                     <Text
-                      accessibilityRole="button"
-                      onPress={() => animateDescription(true)}
-                      style={styles.feedCompactInlineAction}
+                      style={[
+                        styles.feedCompactDescription,
+                        styles.feedCompactDescriptionBody
+                      ]}
                     >
-                      {"  "}mais
+                      {compactPreview}
+                      <Text
+                        accessibilityRole="button"
+                        onPress={() => animateDescription(true)}
+                        style={styles.feedCompactInlineAction}
+                      >
+                        {"  "}mais
+                      </Text>
                     </Text>
-                  </Text>
+                  </View>
                 ) : (
                   <Animated.View
                     style={[
@@ -903,11 +969,21 @@ function FeedReel({
                       }
                     ]}
                   >
-                    <Text style={styles.feedCompactDescription}>
-                      <Text style={styles.feedCompactDescriptionTitle}>
-                        {player.videoTitle}
-                      </Text>
-                      {presentationText ? ` - ${presentationText}` : ""}
+                    <Text
+                      style={[
+                        styles.feedCompactDescription,
+                        styles.feedCompactDescriptionTitle
+                      ]}
+                    >
+                      {player.videoTitle}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.feedCompactDescription,
+                        styles.feedCompactDescriptionBody
+                      ]}
+                    >
+                      {presentationText}
                     </Text>
                     <Text style={styles.feedCompactExpandedMeta}>
                       {player.age} anos | {player.club}
@@ -917,18 +993,6 @@ function FeedReel({
                         {player.tags.slice(0, 4).map((tag) => (
                           <Text key={tag} style={styles.feedCompactHashtag}>
                             #{tag}
-                          </Text>
-                        ))}
-                      </View>
-                    ) : null}
-                    {player.mentions && player.mentions.length > 0 ? (
-                      <View style={styles.feedCompactHashtagRow}>
-                        {player.mentions.slice(0, 4).map((mention) => (
-                          <Text
-                            key={mention}
-                            style={styles.feedCompactHashtag}
-                          >
-                            @{mention}
                           </Text>
                         ))}
                       </View>
@@ -987,17 +1051,27 @@ function FeedReel({
                           Investir
                         </Text>
                       </Pressable>
-                      <Pressable
-                        accessibilityLabel="Recolher descrição"
-                        accessibilityRole="button"
-                        hitSlop={8}
-                        onPress={() => animateDescription(false)}
-                        style={styles.feedCompactTextButton}
-                      >
-                        <Text style={styles.feedCompactTextButtonLabel}>
-                          menos
-                        </Text>
-                      </Pressable>
+                      <View style={styles.feedCompactExpandedActionGroup}>
+                        {hasMentions ? (
+                          <FeedMentionsButton
+                            compact
+                            color={colors.onPrimary}
+                            count={player.mentions?.length ?? 0}
+                            onPress={onOpenMentions}
+                          />
+                        ) : null}
+                        <Pressable
+                          accessibilityLabel="Recolher descrição"
+                          accessibilityRole="button"
+                          hitSlop={8}
+                          onPress={() => animateDescription(false)}
+                          style={styles.feedCompactTextButton}
+                        >
+                          <Text style={styles.feedCompactTextButtonLabel}>
+                            menos
+                          </Text>
+                        </Pressable>
+                      </View>
                     </View>
                   </Animated.View>
                 )}
@@ -1151,6 +1225,36 @@ function FeedReel({
         </View>
       </Animated.View>
     </View>
+  );
+}
+
+function FeedMentionsButton({
+  color,
+  compact = false,
+  count,
+  onPress
+}: {
+  color: string;
+  compact?: boolean;
+  count: number;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityLabel={
+        "Ver " + count + (count === 1 ? " pessoa marcada" : " pessoas marcadas")
+      }
+      accessibilityRole="button"
+      hitSlop={8}
+      onPress={onPress}
+      style={[
+        styles.feedMentionsButton,
+        compact ? styles.feedMentionsButtonCompact : null
+      ]}
+    >
+      <UsersRound color={color} size={18} strokeWidth={2.3} />
+      <Text style={[styles.feedMentionsCount, { color }]}>{count}</Text>
+    </Pressable>
   );
 }
 
