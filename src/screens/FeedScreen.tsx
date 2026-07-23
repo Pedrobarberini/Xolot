@@ -566,17 +566,7 @@ function FeedReel({
         style={[
           styles.feedReelStage,
           isWide ? styles.feedReelStageWide : null,
-          {
-            opacity: revealProgress,
-            transform: [
-              {
-                translateY: revealProgress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [18, 0]
-                })
-              }
-            ]
-          }
+          { opacity: revealProgress }
         ]}
       >
         <View

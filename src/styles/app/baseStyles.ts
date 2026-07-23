@@ -2,19 +2,28 @@ import { StyleSheet } from "react-native";
 import {
   DETAIL_CONTENT_PADDING,
   TAB_BAR_CONTENT_PADDING,
-  TAB_BAR_SAFE_PADDING
+  TAB_BAR_SAFE_PADDING,
+  USE_CENTERED_WEB_LAYOUT
 } from "../../constants/layout";
 import { colors } from "../../theme";
 
 export const baseStyles = {
   appRoot: {
-    backgroundColor: colors.background,
+    alignItems: "center",
+    backgroundColor: USE_CENTERED_WEB_LAYOUT
+      ? colors.surfaceMuted
+      : colors.background,
     flex: 1
   },
   safeArea: {
     backgroundColor: colors.background,
     flex: 1,
-    width: "100%"
+    width: "100%",
+    ...(USE_CENTERED_WEB_LAYOUT
+      ? {
+          maxWidth: 480
+        }
+      : {})
   },
   brandLaunch: {
     ...StyleSheet.absoluteFillObject,

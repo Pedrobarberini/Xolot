@@ -1147,6 +1147,29 @@ Criterios de aceite:
 - A camera permanece preta durante toda a troca para a aba Envio.
 - Cabecalho, footer e areas rolaveis continuam ocupando toda a largura.
 
+### Task P2-024 - Restaurar layout compacto web e corrigir transicao do Inicio
+
+Tipo: Frontend/UX/Layout responsivo
+
+Status: Concluido em 2026-07-23.
+
+Tasks:
+
+- [x] Restaurar o limite de 480 px do aplicativo no navegador desktop.
+- [x] Manter o shell sem bordas laterais e sem sombra.
+- [x] Evitar que o video do Inicio seja esticado em monitores largos.
+- [x] Remover o deslocamento vertical da animacao exclusiva dos reels.
+- [x] Manter somente a revelacao por opacidade no Inicio.
+- [x] Usar fundo preto atras do video durante toda a revelacao.
+
+Criterios de aceite:
+
+- No computador, o aplicativo volta a ter proporcao compacta de celular.
+- O video nao ocupa toda a largura do monitor.
+- Nao existe linha branca entre o aplicativo e o fundo lateral.
+- O reel nao surge de baixo para cima.
+- A animacao do Inicio nao revela faixa branca no topo.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

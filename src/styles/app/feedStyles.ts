@@ -9,7 +9,7 @@ import { colors } from "../../theme";
 
 export const feedStyles = {
   feedPagerShell: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.media,
     flex: 1,
     position: "relative"
   },
@@ -29,7 +29,7 @@ export const feedStyles = {
     width: 48
   },
   feedPager: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.media,
     flex: 1
   },
   feedEmptyState: {
@@ -62,10 +62,11 @@ export const feedStyles = {
   },
   feedReel: {
     alignSelf: "stretch",
+    backgroundColor: colors.media,
     width: "100%"
   },
   feedReelStage: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.media,
     alignItems: "stretch",
     flex: 1,
     justifyContent: "center",
