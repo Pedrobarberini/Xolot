@@ -71,8 +71,20 @@ export function BrandLaunchScreen({ onFinish }: { onFinish: () => void }) {
   );
 }
 
-export function ScreenBackdrop() {
-  return <View pointerEvents="none" style={styles.screenBackdrop} />;
+export function ScreenBackdrop({
+  backgroundColor
+}: {
+  backgroundColor?: string;
+}) {
+  return (
+    <View
+      pointerEvents="none"
+      style={[
+        styles.screenBackdrop,
+        backgroundColor ? { backgroundColor } : null
+      ]}
+    />
+  );
 }
 
 export function ScreenTransition({
@@ -87,31 +99,20 @@ export function ScreenTransition({
   useEffect(() => {
     progress.setValue(0);
 
-    Animated.timing(progress, {
-      duration: 360,
+    const animation = Animated.timing(progress, {
+      duration: 240,
       easing: Easing.out(Easing.cubic),
       toValue: 1,
       useNativeDriver: true
-    }).start();
+    });
+
+    animation.start();
+
+    return () => animation.stop();
   }, [progress]);
 
   return (
-    <Animated.View
-      style={[
-        style,
-        {
-          opacity: progress,
-          transform: [
-            {
-              translateY: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [16, 0]
-              })
-            }
-          ]
-        }
-      ]}
-    >
+    <Animated.View style={[style, { opacity: progress }]}>
       {children}
     </Animated.View>
   );
@@ -119,24 +120,28 @@ export function ScreenTransition({
 
 export function ScreenFrame({
   animated = true,
+  backgroundColor,
   children
 }: {
   animated?: boolean;
+  backgroundColor?: string;
   children: React.ReactNode;
 }) {
-  if (!animated) {
-    return (
-      <View style={styles.tabScene}>
-        <ScreenBackdrop />
-        {children}
-      </View>
-    );
-  }
-
   return (
-    <ScreenTransition style={styles.tabScene}>
-      <ScreenBackdrop />
-      {children}
-    </ScreenTransition>
+    <View
+      style={[
+        styles.tabScene,
+        backgroundColor ? { backgroundColor } : null
+      ]}
+    >
+      <ScreenBackdrop backgroundColor={backgroundColor} />
+      {animated ? (
+        <ScreenTransition style={styles.tabSceneContent}>
+          {children}
+        </ScreenTransition>
+      ) : (
+        children
+      )}
+    </View>
   );
 }

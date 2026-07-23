@@ -451,7 +451,7 @@ export function AppRoutes({
                 </ScreenFrame>
               ) : null}
               {tab === "submit" ? (
-                <ScreenFrame key="submit">
+                <ScreenFrame backgroundColor={colors.media} key="submit">
                   <SubmitVideoScreen
                     accounts={registeredUsers}
                     onBack={() => openTab("feed")}

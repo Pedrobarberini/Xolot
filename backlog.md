@@ -1122,6 +1122,31 @@ Criterios de aceite:
 - O menu individual permanece disponivel fora do modo de selecao.
 - A exclusao em lote exige confirmacao e atualiza Inicio e perfil.
 
+### Task P2-023 - Tornar o shell do app totalmente preenchido
+
+Tipo: Frontend/UX/Layout global
+
+Status: Concluido em 2026-07-23.
+
+Tasks:
+
+- [x] Remover bordas laterais do conteiner principal no navegador.
+- [x] Remover sombra e limite artificial de 480 px do shell web.
+- [x] Fazer todas as telas ocuparem a largura total disponivel.
+- [x] Preservar limites internos de leitura apenas no conteudo de cada tela.
+- [x] Manter o fundo da tela estatico durante as transicoes.
+- [x] Substituir o deslocamento vertical por uma revelacao suave por opacidade.
+- [x] Reduzir a duracao da transicao para evitar sensacao de atraso.
+- [x] Usar fundo preto persistente durante a entrada da camera.
+
+Criterios de aceite:
+
+- Nenhuma tela exibe moldura, sombra ou faixa branca nas laterais.
+- A transicao nao expoe uma faixa clara no topo.
+- Apenas o conteudo novo aparece gradualmente sobre o fundo correto.
+- A camera permanece preta durante toda a troca para a aba Envio.
+- Cabecalho, footer e areas rolaveis continuam ocupando toda a largura.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

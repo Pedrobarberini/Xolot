@@ -2,36 +2,19 @@ import { StyleSheet } from "react-native";
 import {
   DETAIL_CONTENT_PADDING,
   TAB_BAR_CONTENT_PADDING,
-  TAB_BAR_SAFE_PADDING,
-  USE_CENTERED_WEB_LAYOUT
+  TAB_BAR_SAFE_PADDING
 } from "../../constants/layout";
 import { colors } from "../../theme";
 
 export const baseStyles = {
   appRoot: {
-    alignItems: "center",
-    backgroundColor: USE_CENTERED_WEB_LAYOUT
-      ? colors.surfaceMuted
-      : colors.background,
+    backgroundColor: colors.background,
     flex: 1
   },
   safeArea: {
     backgroundColor: colors.background,
     flex: 1,
-    width: "100%",
-    ...(USE_CENTERED_WEB_LAYOUT
-      ? {
-          borderLeftColor: colors.border,
-          borderLeftWidth: 1,
-          borderRightColor: colors.border,
-          borderRightWidth: 1,
-          maxWidth: 480,
-          shadowColor: "#10261A",
-          shadowOffset: { height: 0, width: 0 },
-          shadowOpacity: 0.12,
-          shadowRadius: 22
-        }
-      : {})
+    width: "100%"
   },
   brandLaunch: {
     ...StyleSheet.absoluteFillObject,
@@ -53,6 +36,9 @@ export const baseStyles = {
     backgroundColor: colors.background,
     flex: 1,
     overflow: "hidden"
+  },
+  tabSceneContent: {
+    flex: 1
   },
   screenBackdrop: {
     ...StyleSheet.absoluteFillObject,
