@@ -1,5 +1,6 @@
 import type {
   AppUser,
+  DirectMessage,
   MessageContact,
   Player,
   SharedPostReference
@@ -19,6 +20,25 @@ export function createSharedPostReference(
     profileId: player.profileId,
     title: player.videoTitle
   };
+}
+export function getSharedPostCaption(message: DirectMessage) {
+  const caption = message.sharedPost?.caption?.trim();
+
+  if (caption) {
+    return caption;
+  }
+
+  if (!message.sharedPost) {
+    return "";
+  }
+
+  const body = message.body.trim();
+
+  return body
+    .toLocaleLowerCase()
+    .startsWith("compartilhou uma publica")
+    ? ""
+    : body;
 }
 
 export function selectShareContacts({

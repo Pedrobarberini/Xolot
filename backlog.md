@@ -1195,6 +1195,29 @@ Criterios de aceite:
 - Fotos e videos usam enquadramento vertical com preenchimento proporcional.
 - Um toque no cartao continua abrindo a publicacao no Inicio.
 
+### Task P2-026 - Ampliar previa compartilhada e garantir mensagem anexada
+
+Tipo: Frontend/UX/Mensagens
+
+Status: Concluido em 2026-07-24.
+
+Tasks:
+
+- [x] Mover titulo e autor para o topo do cartao compartilhado.
+- [x] Alterar o cartao para composicao vertical.
+- [x] Ampliar a miniatura para 200 x 250 px.
+- [x] Persistir a mensagem opcional tambem no corpo da conversa.
+- [x] Recuperar a mensagem pelo campo anexado ou pelo corpo persistido.
+- [x] Ocultar o texto generico de compartilhamento em mensagens antigas.
+- [x] Cobrir a compatibilidade por testes automatizados.
+
+Criterios de aceite:
+
+- O titulo aparece acima da miniatura.
+- A previa tem largura de aproximadamente 200 px e continua vertical.
+- A mensagem escrita no compartilhamento aparece abaixo da previa.
+- Compartilhamentos antigos continuam sem exibir texto generico como legenda.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

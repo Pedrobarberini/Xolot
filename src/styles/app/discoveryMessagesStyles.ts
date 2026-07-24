@@ -367,18 +367,17 @@ export const discoveryMessagesStyles = {
     color: colors.onPrimary
   },
   sharedPostMessage: {
-    alignItems: "center",
+    alignItems: "stretch",
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
-    flexDirection: "row",
     gap: 10,
-    maxWidth: "86%",
+    maxWidth: "94%",
     minHeight: 96,
     paddingHorizontal: 10,
     paddingVertical: 9,
-    width: 310
+    width: 330
   },
   sharedPostMessageMine: {
     backgroundColor: colors.primary,
@@ -388,13 +387,15 @@ export const discoveryMessagesStyles = {
     opacity: 0.62
   },
   sharedPostMessageThumbnail: {
+    alignSelf: "center",
+    marginTop: 2,
     alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: 6,
-    height: 78,
+    height: 250,
     justifyContent: "center",
     overflow: "hidden",
-    width: 56
+    width: 200
   },
   sharedPostMessageThumbnailMine: {
     backgroundColor: colors.surface
@@ -409,15 +410,22 @@ export const discoveryMessagesStyles = {
     justifyContent: "center",
     width: "100%"
   },
+  sharedPostMessageHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "space-between",
+    width: "100%"
+  },
   sharedPostMessageIdentity: {
     flex: 1,
     minWidth: 0
   },
   sharedPostMessageTitle: {
     color: colors.text,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "900",
-    lineHeight: 17
+    lineHeight: 18
   },
   sharedPostMessageTitleMine: {
     color: colors.onPrimary
@@ -432,9 +440,9 @@ export const discoveryMessagesStyles = {
   },
   sharedPostMessageCaption: {
     color: colors.text,
-    fontSize: 12,
-    lineHeight: 16,
-    marginTop: 6
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 0
   },
   sharedPostMessageCaptionMine: {
     color: "rgba(255, 255, 255, 0.92)"

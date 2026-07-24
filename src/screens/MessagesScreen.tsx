@@ -32,6 +32,7 @@ import {
 } from "../types";
 import { canExchangeDirectMessages } from "../utils/socialAccess";
 import { MAX_PINNED_CONVERSATIONS } from "../utils/conversations";
+import { getSharedPostCaption } from "../utils/socialSharing";
 
 function getInitials(name: string) {
   return name
@@ -270,6 +271,7 @@ export function MessagesScreen({
                     (player) => player.id === message.sharedPost?.playerId
                   )
                 : undefined;
+              const sharedCaption = getSharedPostCaption(message);
 
               return (
                 <View
@@ -299,49 +301,51 @@ export function MessagesScreen({
                           : null
                       ]}
                     >
+                      <View style={styles.sharedPostMessageHeader}>
+                        <View style={styles.sharedPostMessageIdentity}>
+                          <Text
+                            numberOfLines={2}
+                            style={[
+                              styles.sharedPostMessageTitle,
+                              isMine ? styles.sharedPostMessageTitleMine : null
+                            ]}
+                          >
+                            {message.sharedPost.title}
+                          </Text>
+                          <Text
+                            numberOfLines={1}
+                            style={[
+                              styles.sharedPostMessageMeta,
+                              isMine ? styles.sharedPostMessageMetaMine : null
+                            ]}
+                          >
+                            {sharedPlayer
+                              ? message.sharedPost.authorName
+                              : "Publicacao indisponivel"}
+                          </Text>
+                        </View>
+                        {sharedPlayer ? (
+                          <ChevronRight
+                            color={isMine ? colors.onPrimary : colors.muted}
+                            size={18}
+                          />
+                        ) : null}
+                      </View>
                       <SharedPostThumbnail
                         isMine={isMine}
                         mediaType={message.sharedPost.mediaType}
                         player={sharedPlayer}
                       />
-                      <View style={styles.sharedPostMessageIdentity}>
+                      {sharedCaption ? (
                         <Text
-                          numberOfLines={2}
+                          numberOfLines={4}
                           style={[
-                            styles.sharedPostMessageTitle,
-                            isMine ? styles.sharedPostMessageTitleMine : null
+                            styles.sharedPostMessageCaption,
+                            isMine ? styles.sharedPostMessageCaptionMine : null
                           ]}
                         >
-                          {message.sharedPost.title}
+                          {sharedCaption}
                         </Text>
-                        <Text
-                          numberOfLines={1}
-                          style={[
-                            styles.sharedPostMessageMeta,
-                            isMine ? styles.sharedPostMessageMetaMine : null
-                          ]}
-                        >
-                          {sharedPlayer
-                            ? message.sharedPost.authorName
-                            : "Publicacao indisponivel"}
-                        </Text>
-                        {message.sharedPost.caption ? (
-                          <Text
-                            numberOfLines={3}
-                            style={[
-                              styles.sharedPostMessageCaption,
-                              isMine ? styles.sharedPostMessageCaptionMine : null
-                            ]}
-                          >
-                            {message.sharedPost.caption}
-                          </Text>
-                        ) : null}
-                      </View>
-                      {sharedPlayer ? (
-                        <ChevronRight
-                          color={isMine ? colors.onPrimary : colors.muted}
-                          size={18}
-                        />
                       ) : null}
                     </Pressable>
                   ) : (

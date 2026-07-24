@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { AppUser, Player } from "../src/types.ts";
+import type { AppUser, DirectMessage, Player } from "../src/types.ts";
 import {
   createSharedPostReference,
+  getSharedPostCaption,
   selectShareContacts
 } from "../src/utils/socialSharing.ts";
 
@@ -62,6 +63,34 @@ test("inclui uma mensagem opcional na referencia compartilhada", () => {
     }
   );
 });
+test("recupera a mensagem anexada pelo campo persistido ou pelo corpo", () => {
+  const baseMessage: DirectMessage = {
+    body: "Compartilhou uma publicacao",
+    createdAt: "2026-07-24T00:00:00.000Z",
+    id: "message-share",
+    recipientUserId: "user-b",
+    senderUserId: "user-a",
+    sharedPost: createSharedPostReference(player, "Veja este lance")
+  };
+
+  assert.equal(getSharedPostCaption(baseMessage), "Veja este lance");
+  assert.equal(
+    getSharedPostCaption({
+      ...baseMessage,
+      body: "Mensagem recuperada pelo corpo",
+      sharedPost: createSharedPostReference(player)
+    }),
+    "Mensagem recuperada pelo corpo"
+  );
+  assert.equal(
+    getSharedPostCaption({
+      ...baseMessage,
+      sharedPost: createSharedPostReference(player)
+    }),
+    ""
+  );
+});
+
 
 test("une conversas e perfis seguidos sem duplicar ou incluir a propria conta", () => {
   const contacts = selectShareContacts({

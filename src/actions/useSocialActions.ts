@@ -299,6 +299,7 @@ export function useSocialActions({
 
     sendMessageToContact(
       contact,
+      trimmedMessage ||
       "Compartilhou uma publicação",
       createSharedPostReference(player, trimmedMessage)
     );
