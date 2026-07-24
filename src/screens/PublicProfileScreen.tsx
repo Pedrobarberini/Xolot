@@ -58,7 +58,11 @@ export function PublicProfileScreen({
   onMessage: () => void;
   onOpenVideo: (player: Player) => void;
   onSetVideoHidden: (playerId: string, hidden: boolean) => void;
-  onShareVideo: (player: Player, contact: MessageContact) => void;
+  onShareVideo: (
+    player: Player,
+    contact: MessageContact,
+    message: string
+  ) => void;
   onToggleFollow: () => void;
   player?: Player;
   profileAvatars: ProfileAvatarsByProfile;
@@ -259,11 +263,11 @@ export function PublicProfileScreen({
           onSetVideoHidden={(video, hidden) =>
             onSetVideoHidden(video.id, hidden)
           }
-          onShareVideo={(video, contact) => {
+          onShareVideo={(video, contact, message) => {
             const selectedVideo = videos.find((item) => item.id === video.id);
 
             if (selectedVideo) {
-              onShareVideo(selectedVideo, contact);
+              onShareVideo(selectedVideo, contact, message);
             }
           }}
           profileAvatars={profileAvatars}

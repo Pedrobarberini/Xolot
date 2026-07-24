@@ -95,7 +95,11 @@ export function FeedScreen({
   onOpenPlayer: (player: Player) => void;
   onOpenTaggedUser: (user: AppUser) => void;
   onRecordView: (playerId: string) => void;
-  onShare: (player: Player, contact: MessageContact) => void;
+  onShare: (
+    player: Player,
+    contact: MessageContact,
+    message: string
+  ) => void;
   onToggleBlockProfile: (player: Player) => void;
   onToggleFollow: (player: Player) => void;
   onToggleInterest: (player: Player) => void;
@@ -402,9 +406,9 @@ export function FeedScreen({
       <SharePostModal
         contacts={shareContacts}
         onClose={() => setSharePlayer(null)}
-        onShare={(contact) => {
+        onShare={(contact, message) => {
           if (sharePlayer) {
-            onShare(sharePlayer, contact);
+            onShare(sharePlayer, contact, message);
           }
         }}
         profileAvatars={profileAvatars}

@@ -49,6 +49,20 @@ test("cria referencia persistente para uma publicacao compartilhada", () => {
   });
 });
 
+test("inclui uma mensagem opcional na referencia compartilhada", () => {
+  assert.deepEqual(
+    createSharedPostReference(player, "  Veja este lance  "),
+    {
+      authorName: player.name,
+      caption: "Veja este lance",
+      mediaType: "video",
+      playerId: player.id,
+      profileId: player.profileId,
+      title: player.videoTitle
+    }
+  );
+});
+
 test("une conversas e perfis seguidos sem duplicar ou incluir a propria conta", () => {
   const contacts = selectShareContacts({
     contacts: [

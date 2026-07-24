@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Check, Send, Share2, X } from "lucide-react-native";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import type {
@@ -29,17 +29,19 @@ export function SharePostModal({
 }: {
   contacts: MessageContact[];
   onClose: () => void;
-  onShare: (contact: MessageContact) => void;
+  onShare: (contact: MessageContact, message: string) => void;
   profileAvatars: ProfileAvatarsByProfile;
   videoId: string;
   videoTitle: string;
   visible: boolean;
 }) {
   const [sentContactIds, setSentContactIds] = useState<string[]>([]);
+  const [shareMessage, setShareMessage] = useState("");
 
   useEffect(() => {
     if (visible) {
       setSentContactIds([]);
+      setShareMessage("");
     }
   }, [videoId, visible]);
 
@@ -48,7 +50,7 @@ export function SharePostModal({
       return;
     }
 
-    onShare(contact);
+    onShare(contact, shareMessage);
     setSentContactIds((current) => [...current, contact.id]);
   }
 
@@ -86,6 +88,20 @@ export function SharePostModal({
               <X color={colors.muted} size={20} />
             </Pressable>
           </View>
+          <View style={styles.sharePostMessageField}>
+            <Text style={styles.sharePostMessageLabel}>Mensagem opcional</Text>
+            <TextInput
+              accessibilityLabel="Mensagem para acompanhar a publicacao"
+              maxLength={280}
+              multiline
+              onChangeText={setShareMessage}
+              placeholder="Escreva uma mensagem..."
+              placeholderTextColor={colors.muted}
+              style={styles.sharePostMessageInput}
+              value={shareMessage}
+            />
+          </View>
+
 
           {contacts.length > 0 ? (
             <ScrollView

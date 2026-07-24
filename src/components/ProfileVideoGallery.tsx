@@ -47,7 +47,8 @@ export function ProfileVideoGallery({
   onSetVideoHidden?: (video: ProfileGalleryVideo, hidden: boolean) => void;
   onShareVideo?: (
     video: ProfileGalleryVideo,
-    contact: MessageContact
+    contact: MessageContact,
+    message: string
   ) => void;
   onOpenVideo: (video: ProfileGalleryVideo) => void;
   profileAvatars?: ProfileAvatarsByProfile;
@@ -301,9 +302,11 @@ export function ProfileVideoGallery({
       <SharePostModal
         contacts={shareContacts}
         onClose={() => setShareVideos([])}
-        onShare={(contact) => {
+        onShare={(contact, message) => {
           if (onShareVideo) {
-            shareVideos.forEach((video) => onShareVideo(video, contact));
+            shareVideos.forEach((video, index) =>
+              onShareVideo(video, contact, index === 0 ? message : "")
+            );
           }
         }}
         profileAvatars={profileAvatars}

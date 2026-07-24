@@ -290,11 +290,17 @@ export function useSocialActions({
     sendMessageToContact(contact, body);
   }
 
-  function sendSharedPost(contact: MessageContact, player: Player) {
+  function sendSharedPost(
+    contact: MessageContact,
+    player: Player,
+    message = ""
+  ) {
+    const trimmedMessage = message.trim();
+
     sendMessageToContact(
       contact,
       "Compartilhou uma publicação",
-      createSharedPostReference(player)
+      createSharedPostReference(player, trimmedMessage)
     );
   }
 

@@ -1170,6 +1170,31 @@ Criterios de aceite:
 - O reel nao surge de baixo para cima.
 - A animacao do Inicio nao revela faixa branca no topo.
 
+### Task P2-025 - Enriquecer publicacoes compartilhadas em Mensagens
+
+Tipo: Frontend/UX/Mensagens
+
+Status: Concluido em 2026-07-23.
+
+Tasks:
+
+- [x] Permitir escrever uma mensagem opcional antes de compartilhar a publicacao.
+- [x] Propagar a mensagem pelo Inicio, perfil proprio e perfis publicos.
+- [x] Evitar repetir a mensagem ao compartilhar varias publicacoes de uma vez.
+- [x] Exibir uma miniatura vertical ao lado do titulo na conversa.
+- [x] Mostrar a propria foto para publicacoes de imagem.
+- [x] Pausar o video no primeiro frame para formar a miniatura.
+- [x] Resolver midias salvas no armazenamento local antes de renderizar a previa.
+- [x] Manter mensagens compartilhadas antigas compativeis.
+- [x] Cobrir a referencia com mensagem opcional por teste automatizado.
+
+Criterios de aceite:
+
+- O usuario pode escrever ate 280 caracteres antes de escolher o destinatario.
+- O cartao compartilhado mostra midia, titulo, autor e a mensagem opcional.
+- Fotos e videos usam enquadramento vertical com preenchimento proporcional.
+- Um toque no cartao continua abrindo a publicacao no Inicio.
+
 ## P3 - Financeiro futuro
 
 ### Task P3-001 - Validação jurídica antes de qualquer dinheiro real

@@ -108,7 +108,8 @@ export function ProfileScreen({
   onSetVideoHidden: (playerId: string, hidden: boolean) => void;
   onShareVideo: (
     video: VideoSubmission,
-    contact: MessageContact
+    contact: MessageContact,
+    message: string
   ) => void;
   onSignOut: () => void;
   onUpdateProfile: (profile: AccountProfile) => void;
@@ -460,13 +461,13 @@ export function ProfileScreen({
             onSetVideoHidden={(video, hidden) =>
               onSetVideoHidden(video.id, hidden)
             }
-            onShareVideo={(video, contact) => {
+            onShareVideo={(video, contact, message) => {
               const selectedVideo = publishedVideos.find(
                 (item) => item.id === video.sourceId
               );
 
               if (selectedVideo) {
-                onShareVideo(selectedVideo, contact);
+                onShareVideo(selectedVideo, contact, message);
               }
             }}
             profileAvatars={profileAvatars}

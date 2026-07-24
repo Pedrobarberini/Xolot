@@ -2,11 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   BellOff,
   ChevronRight,
-  ImageIcon,
   LockKeyhole,
   MessageCircle,
   Pin,
-  Play,
   Search,
   Send,
   UserCheck,
@@ -23,6 +21,7 @@ import {
 import { ConversationActionsModal } from "../components/ConversationActionsModal";
 import { BackButton } from "../components/Navigation";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
+import { SharedPostThumbnail } from "../components/SharedPostThumbnail";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import {
@@ -300,25 +299,11 @@ export function MessagesScreen({
                           : null
                       ]}
                     >
-                      <View
-                        style={[
-                          styles.sharedPostMessageIcon,
-                          isMine ? styles.sharedPostMessageIconMine : null
-                        ]}
-                      >
-                        {message.sharedPost.mediaType === "image" ? (
-                          <ImageIcon
-                            color={isMine ? colors.primary : colors.onPrimary}
-                            size={17}
-                          />
-                        ) : (
-                          <Play
-                            color={isMine ? colors.primary : colors.onPrimary}
-                            fill={isMine ? colors.primary : colors.onPrimary}
-                            size={16}
-                          />
-                        )}
-                      </View>
+                      <SharedPostThumbnail
+                        isMine={isMine}
+                        mediaType={message.sharedPost.mediaType}
+                        player={sharedPlayer}
+                      />
                       <View style={styles.sharedPostMessageIdentity}>
                         <Text
                           numberOfLines={2}
@@ -340,6 +325,17 @@ export function MessagesScreen({
                             ? message.sharedPost.authorName
                             : "Publicacao indisponivel"}
                         </Text>
+                        {message.sharedPost.caption ? (
+                          <Text
+                            numberOfLines={3}
+                            style={[
+                              styles.sharedPostMessageCaption,
+                              isMine ? styles.sharedPostMessageCaptionMine : null
+                            ]}
+                          >
+                            {message.sharedPost.caption}
+                          </Text>
+                        ) : null}
                       </View>
                       {sharedPlayer ? (
                         <ChevronRight

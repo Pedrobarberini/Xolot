@@ -114,7 +114,11 @@ type AppRoutesProps = {
   selectedProfilePlayer?: Player;
   selectedProfileVideos: Player[];
   sendDirectMessage: (contactId: string, body: string) => void;
-  sendSharedPost: (contact: MessageContact, player: Player) => void;
+  sendSharedPost: (
+    contact: MessageContact,
+    player: Player,
+    message?: string
+  ) => void;
   setPlayerHidden: (playerId: string, hidden: boolean) => void;
   setActiveMessageContactId: Dispatch<SetStateAction<string | null>>;
   setProfileAvatar: (
@@ -316,8 +320,8 @@ export function AppRoutes({
                     })
                   }
                   onSetVideoHidden={setPlayerHidden}
-                  onShareVideo={(player, contact) =>
-                    sendSharedPost(contact, player)
+                  onShareVideo={(player, contact, message) =>
+                    sendSharedPost(contact, player, message)
                   }
                   player={selectedProfilePlayer}
                   profileAvatars={profileAvatars}
@@ -371,8 +375,8 @@ export function AppRoutes({
                   onOpenPlayer={openAthleteProfile}
                   onOpenTaggedUser={openAccountProfile}
                   onRecordView={recordPlayerView}
-                  onShare={(player, contact) =>
-                    sendSharedPost(contact, player)
+                  onShare={(player, contact, message) =>
+                    sendSharedPost(contact, player, message)
                   }
                   onOpenInvestment={(player) => {
                     const fund = selectProfileFund(player, athleteFunds);
@@ -507,14 +511,14 @@ export function AppRoutes({
                       }
                     }}
                     onSetVideoHidden={setPlayerHidden}
-                    onShareVideo={(submission, contact) => {
+                    onShareVideo={(submission, contact, message) => {
                       const sharedPlayer = selectApprovedPlayerForSubmission(
                         approvedSubmissionPlayers,
                         submission.id
                       );
 
                       if (sharedPlayer) {
-                        sendSharedPost(contact, sharedPlayer);
+                        sendSharedPost(contact, sharedPlayer, message);
                       }
                     }}
                     onDeposit={handleDeposit}

@@ -486,6 +486,29 @@ export const profileStyles = {
     fontSize: 14,
     fontWeight: "900"
   },
+  sharePostMessageField: {
+    marginTop: 12
+  },
+  sharePostMessageLabel: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "800",
+    marginBottom: 6
+  },
+  sharePostMessageInput: {
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.border,
+    borderRadius: 6,
+    borderWidth: 1,
+    color: colors.text,
+    fontSize: 13,
+    lineHeight: 18,
+    maxHeight: 96,
+    minHeight: 54,
+    paddingHorizontal: 11,
+    paddingVertical: 9,
+    textAlignVertical: "top"
+  },
   sharePostContactScroll: {
     maxHeight: 360
   },

@@ -6,10 +6,14 @@ import type {
 } from "../types";
 
 export function createSharedPostReference(
-  player: Player
+  player: Player,
+  caption?: string
 ): SharedPostReference {
+  const trimmedCaption = caption?.trim();
+
   return {
     authorName: player.name,
+    ...(trimmedCaption ? { caption: trimmedCaption } : {}),
     mediaType: player.mediaType ?? "video",
     playerId: player.id,
     profileId: player.profileId,

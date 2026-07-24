@@ -78,6 +78,7 @@ export type MessageContact = {
 
 export type SharedPostReference = {
   authorName: string;
+  caption?: string;
   mediaType: SubmissionMediaType;
   playerId: string;
   profileId: string;
