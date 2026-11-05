@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import type {
   AppUser,
   DirectMessage,
@@ -114,13 +115,13 @@ export function selectShareContacts({
 
     contactsById.set(contactId, {
       id: contactId,
-      name: account?.name ?? player?.name ?? "Perfil Xolot",
+      name: account?.name ?? player?.name ?? `Perfil ${BRAND.name}`,
       profileId,
       subtitle: account?.profileCompleted
         ? formatProfileActivity(account.sport, account.position, account.city)
         : player
           ? formatProfileActivity(player.sport, player.position, player.city)
-          : "Usuário Xolot",
+          : `Usuário ${BRAND.name}`,
       username: account?.username ?? player?.username
     });
   });

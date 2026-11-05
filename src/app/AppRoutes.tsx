@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React, { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
@@ -302,7 +303,7 @@ export function AppRoutes(props: AppRoutesProps) {
       .then((result) => {
         if (result.status === "authorized") {
           Alert.alert(
-            "Xolot Plus ativado",
+            `${BRAND.subscriptionName} ativado`,
             "O pagamento foi confirmado e o selo de identidade verificada está ativo."
           );
           return;

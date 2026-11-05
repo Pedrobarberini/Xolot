@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import {
@@ -587,8 +588,8 @@ export function useSocialActions({
           ? "Notificações indisponíveis"
           : "Permissão de notificações bloqueada",
         permission === "unsupported"
-          ? "Este navegador não oferece pop-ups de notificação. No celular, abra a Xolot em um navegador compatível."
-          : "Libere as notificações da Xolot nas configurações do navegador e tente novamente."
+          ? `Este navegador não oferece pop-ups de notificação. No celular, abra a ${BRAND.name} em um navegador compatível.`
+          : `Libere as notificações da ${BRAND.name} nas configurações do navegador e tente novamente.`
       );
       return;
     }
@@ -625,7 +626,7 @@ export function useSocialActions({
       name: ownPlayer?.name ?? user.name,
       subtitle: ownPlayer
         ? formatProfileActivity(ownPlayer.sport, ownPlayer.position, ownPlayer.city)
-        : "Usuário Xolot",
+        : `Usuário ${BRAND.name}`,
       username: user.username
     };
     const directMessage: DirectMessage = {

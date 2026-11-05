@@ -9,7 +9,7 @@ export const styles = createThemedStyles(StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.5)"
+    backgroundColor: "rgba(12, 13, 20, 0.5)"
   },
   dialog: {
     alignSelf: "center",
@@ -84,7 +84,7 @@ export const styles = createThemedStyles(StyleSheet.create({
     width: 42
   },
   avatarText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 12,
     fontWeight: "900"
   },
@@ -179,7 +179,7 @@ export const styles = createThemedStyles(StyleSheet.create({
     paddingHorizontal: 16
   },
   loadMoreText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 12,
     fontWeight: "900"
   }

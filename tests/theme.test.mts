@@ -12,8 +12,8 @@ import {
 test("normaliza a preferência persistida de tema", () => {
   assert.equal(normalizeThemeMode("dark"), "dark");
   assert.equal(normalizeThemeMode("light"), "light");
-  assert.equal(normalizeThemeMode("desconhecido"), "light");
-  assert.equal(normalizeThemeMode(null), "light");
+  assert.equal(normalizeThemeMode("desconhecido"), "dark");
+  assert.equal(normalizeThemeMode(null), "dark");
 });
 
 test("troca cores diretas e estilos compartilhados com a paleta ativa", () => {

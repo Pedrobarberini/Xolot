@@ -88,7 +88,7 @@ export function SubmissionMentionPicker({
               <Text numberOfLines={1} style={styles.submissionMentionChipText}>
                 {"@" + username}
               </Text>
-              <X color={colors.primary} size={14} strokeWidth={2.5} />
+              <X color={colors.primaryText} size={14} strokeWidth={2.5} />
             </Pressable>
           ))}
         </View>

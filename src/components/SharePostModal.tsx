@@ -81,7 +81,7 @@ export function SharePostModal({
         <View accessibilityViewIsModal style={styles.sharePostSheet}>
           <View style={styles.videoActionsHeader}>
             <View style={styles.videoActionsHeaderIcon}>
-              <Share2 color={colors.primary} size={19} />
+              <Share2 color={colors.primaryText} size={19} />
             </View>
             <View style={styles.videoActionsTitleBlock}>
               <Text style={styles.videoActionsTitle}>Compartilhar</Text>

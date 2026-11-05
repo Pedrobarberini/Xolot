@@ -1,0 +1,52 @@
+{
+  "receivedAt": "2026-11-05",
+  "instruction": "Remover somente o fundo preto; preservar RGB do logo 1 na entrada/abertura e do logo 2 no header/feed, sem filtros ou texto recriado.",
+  "outputs": [
+    {
+      "source": "assets/brand/folko-primary-original.png",
+      "file": "assets/brand/folko-primary-transparent.png",
+      "receivedFilename": "Folko logo 1.png",
+      "sha256": "d122631ee60eee9d14f62fc412be88c3d259eb6579756911da7e8b5df6f3eadd",
+      "eye": [
+        659,
+        389,
+        26
+      ],
+      "usage": "entrada_cadastro_abertura",
+      "width": 802,
+      "height": 865,
+      "sourceRect": [
+        232,
+        164,
+        802,
+        865
+      ],
+      "visiblePixels": 287835,
+      "rgbPixelsChanged": 0,
+      "outputSha256": "2f28ba8996f7c3491c2fae4354fd615999b27e05cd234cf87e28b0a9e755ab70"
+    },
+    {
+      "source": "assets/brand/folko-horizontal-original.png",
+      "file": "assets/brand/folko-horizontal-display-transparent.png",
+      "receivedFilename": "Folko Logo 2.png",
+      "sha256": "09f51a4ef08dbca65c207ba591d1ea29953fab7e1e492f8184423b9ff8823c97",
+      "eye": [
+        630,
+        313,
+        28
+      ],
+      "usage": "header_feed",
+      "width": 1213,
+      "height": 780,
+      "sourceRect": [
+        241,
+        56,
+        1213,
+        780
+      ],
+      "visiblePixels": 348253,
+      "rgbPixelsChanged": 0,
+      "outputSha256": "9e5fa1d4badc5fecdca0c180124ba5a57585496996a52bea7ef4b12cf980691e"
+    }
+  ]
+}

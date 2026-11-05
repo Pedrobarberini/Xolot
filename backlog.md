@@ -1,8 +1,12 @@
-# Backlog técnico - Xolot
+# Backlog técnico - Folko
 
 Atualizado em 2026-07-27.
 
 Este arquivo é orientado a desenvolvimento. Cada item deve virar issue ou task rastreável antes de entrar em implementação.
+
+## Direção vigente — 2026-11-05
+
+Manter as funcionalidades existentes e abrir a rede à divulgação em geral no Brasil. Cadastro sem nicho esportivo, nome Folko e logo a ser fornecido. Feed com texto, fotos e vídeos confirmado; texto ainda será implementado em P04–P07. O [plano revisado](docs/refatoracao/README.md), a [direção de produto](docs/refatoracao/05-direcao-folko.md) e estado.json prevalecem sobre as fases históricas abaixo. Não reabrir itens concluídos nem criar outro controle concorrente.
 
 ## Prioridades
 

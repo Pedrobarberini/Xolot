@@ -1,6 +1,10 @@
-# Technical Debt - Xolot
+# Technical Debt - Folko
 
-Documento de dívida técnica do estado atual do repositório, atualizado em 2026-07-18.
+Inventário histórico de dívida técnica, com convenção de refatoração atualizada em 2026-11-01. As seções antigas descrevem fases anteriores; o diagnóstico atual e a execução ficam em `docs/refatoracao/` e `docs/architecture/`.
+
+## Direção vigente
+
+Em 2026-11-05 o proprietário manteve os recursos existentes e mudou o público para uma rede social geral de divulgação no Brasil, chamada Folko. O cadastro deve deixar de exigir enquadramento esportivo. Texto no feed e nova marca têm fichas P próprias, sem apagar provas técnicas. Ver [direção Folko](docs/refatoracao/05-direcao-folko.md). As referências esportivas/profissionais e de páginas abaixo são histórico, não autorização para restaurar nicho ou remover recursos.
 
 ## Legenda
 
@@ -23,24 +27,24 @@ O `App.tsx` possui cerca de 300 linhas e ainda concentra conexão entre hooks gl
 
 ## Convenção de refactor
 
-Durante a reorganização, novas telas devem viver em `src/pages/` e componentes reutilizáveis em `src/components/`. Cada componente extraído deve preferir uma pasta própria, mantendo implementação, estilos e tipos locais juntos.
+Conforme ADR-002 em `docs/architecture/decisoes.md`, novas unidades e extrações devem viver em `src/features/<dominio>/`, com componentes e estilos locais. Unidades reutilizadas por domínios distintos podem viver em `src/shared/ui`. `src/screens`, `src/actions` e `src/services` são origens legadas; não criar uma organização paralela em `src/pages`.
 
 Formato recomendado:
 
 ```txt
-src/components/VideoPlayer/
+src/shared/ui/VideoPlayer/
   VideoPlayer.tsx
   VideoPlayer.styles.ts
   VideoPlayer.types.ts
   index.ts
 ```
 
-Para componentes específicos de uma página, manter dentro da própria página até existir reutilização real:
+Para componentes específicos de uma funcionalidade, manter junto da tela até existir reutilização real:
 
 ```txt
-src/pages/FeedPage/
-  FeedPage.tsx
-  FeedPage.styles.ts
+src/features/feed/ui/FeedScreen/
+  FeedScreen.tsx
+  FeedScreen.styles.ts
   components/
     FeedCaption/
       FeedCaption.tsx

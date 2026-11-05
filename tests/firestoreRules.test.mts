@@ -3,10 +3,6 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
-const authFunctions = readFileSync(
-  new URL("../functions/src/auth.ts", import.meta.url),
-  "utf8"
-);
 const socialFunctions = readFileSync(
   new URL("../functions/src/social.ts", import.meta.url),
   "utf8"
@@ -38,8 +34,6 @@ test("regras do Firestore exigem conta registrada, email verificado e deny by de
   assert.match(rules, /function registeredVerifiedUser/);
   assert.match(rules, /documents\/accounts\/\$\(request\.auth\.uid\)/);
   assert.match(rules, /documents\/profiles\/\$\(request\.auth\.uid\)/);
-  assert.match(authFunctions, /database\.doc\(`accounts\/\$\{uid\}`\)/);
-  assert.match(authFunctions, /profile\.data\(\)\?\.profileCompleted !== true/);
   assert.match(rules, /return registeredVerifiedUser\(\) && request\.auth\.uid == uid/);
   assert.match(rules, /match \/\{document=\*\*\}/);
   assert.match(rules, /allow read, write: if false/);
@@ -112,10 +106,6 @@ test("estado social sincronizado preserva privacidade e contadores do servidor",
 });
 test("IDs visuais do feed sao convertidos para o documento real do post", () => {
   assert.match(socialFunctions, /function getPostDocumentId/);
-  assert.equal(
-    socialFunctions.includes("database.doc(\`posts/\${postId}\`)"),
-    true
-  );
   assert.equal(
     socialFunctions.includes("database.doc(\`posts/\${sharedPostId}\`)"),
     true

@@ -1,6 +1,7 @@
 packages:
   - "."
   - "functions"
+nodeLinker: hoisted
 allowBuilds:
   "@firebase/util": false
   protobufjs: false

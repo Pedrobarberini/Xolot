@@ -15,7 +15,7 @@ export function isValidUsername(value: string) {
 }
 
 export function isUsernameAvailable(
-  accounts: AccountIdentity[],
+  accounts: Pick<AccountIdentity, "id" | "username">[],
   username: string,
   ignoredAccountId?: string
 ) {

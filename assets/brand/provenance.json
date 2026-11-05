@@ -1,0 +1,97 @@
+{
+  "brand": "Folko",
+  "receivedAt": "2026-11-05",
+  "source": "assets/brand/folko-logo.png",
+  "iconSource": "assets/brand/folko-symbol-transparent.png",
+  "presentation": {
+    "source": "assets/brand/folko-horizontal.png",
+    "sourceSha256": "8a41364005a0cbb24872f6fd700390eb1ffba4d87322febf535c830dbb9db957",
+    "method": "Owner-authorized color extraction. Only alpha and framing change; RGB comes directly from the original horizontal art. AI cutouts rejected; original eye, feather and beak preserved.",
+    "background": [
+      0,
+      0,
+      0
+    ],
+    "threshold": 12,
+    "outputs": [
+      {
+        "role": "symbol",
+        "file": "assets/brand/folko-symbol-transparent.png",
+        "width": 780,
+        "height": 780,
+        "sourceRect": [
+          231,
+          56,
+          780,
+          780
+        ],
+        "visiblePixels": 215410,
+        "sha256": "e76282f1c449bb1caf5986a7d0afac7d89e44f0e8180f0a372875367690897cb",
+        "rgbPixelsChanged": 0
+      },
+      {
+        "role": "horizontal",
+        "file": "assets/brand/folko-horizontal-transparent.png",
+        "width": 1213,
+        "height": 780,
+        "sourceRect": [
+          241,
+          56,
+          1213,
+          780
+        ],
+        "visiblePixels": 348253,
+        "sha256": "9e5fa1d4badc5fecdca0c180124ba5a57585496996a52bea7ef4b12cf980691e",
+        "rgbPixelsChanged": 0
+      }
+    ]
+  },
+  "compatibilityIcons": {
+    "public/icons/icon-192.png": "public/icons/folko-icon-192.png",
+    "public/icons/icon-512.png": "public/icons/folko-icon-512.png",
+    "public/icons/apple-touch-icon.png": "public/icons/folko-apple-touch-icon.png"
+  },
+  "sourceFilename": "codex-clipboard-3b264d66-150a-4f28-8c9e-c43480c50e2f.png",
+  "sha256": "7465f9e6b156b75251f65448b5ce07d273342d7ae956e55b27ff0cb35fb1c580",
+  "width": 1254,
+  "height": 1254,
+  "supersedes": [
+    "Folko WPP.png",
+    "Folko Logan.png"
+  ],
+  "originals": [
+    {
+      "file": "assets/brand/folko-logo.png",
+      "filename": "codex-clipboard-3b264d66-150a-4f28-8c9e-c43480c50e2f.png",
+      "role": "ícone",
+      "sha256": "7465f9e6b156b75251f65448b5ce07d273342d7ae956e55b27ff0cb35fb1c580",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "file": "assets/brand/folko-horizontal.png",
+      "filename": "codex-clipboard-29d0a65b-5f32-4b06-9455-1223db9fe2a5.png",
+      "role": "assinatura horizontal",
+      "sha256": "8a41364005a0cbb24872f6fd700390eb1ffba4d87322febf535c830dbb9db957",
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "file": "assets/brand/folko-stacked.png",
+      "filename": "codex-clipboard-ab3fa99a-a11d-42c7-a1d5-f545e6ce61d7.png",
+      "role": "assinatura vertical",
+      "sha256": "891a69a406b2dbdb4755126513172e245c4b7400266046eef40424938f00c988",
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "processing": "Originais preservados. Recorte por cor autorizado, preservando pixels RGB visíveis da arte horizontal. Ícones escuros e adaptive com alpha; fonte única para manter pena e bico consistentes.",
+  "derivatives": {
+    "assets/brand/folko-app-icon.png": "dbfba177c37f30c0cc5fcce83dce4d3b87520a2434dd4b45157c721b2b0a90dd",
+    "assets/brand/folko-adaptive-icon.png": "3bd41d6764a37feaf0df5808285374c0b74a818f26a950fb64ef7a9ca5520c42",
+    "public/icons/folko-icon-192.png": "4fbac41fdd13bb00f542d00c8577f65b416bfcf7e517c0125153ff13372b959b",
+    "public/icons/folko-icon-512.png": "55fce892f10a49734c0cb1aa4ac952f315c4c27a36f20d0f0a013562c9fc388a",
+    "public/icons/folko-maskable-512.png": "ea027cc4cfaa93b3473f3b27a4581aeee0216aff0deea758dc742e951ee8c0cc",
+    "public/icons/folko-apple-touch-icon.png": "b107f10a4b38d774f0941f2fab0cc1002c1c030527fdeb80250c80238ba95bf0"
+  }
+}

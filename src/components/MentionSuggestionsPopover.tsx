@@ -110,7 +110,7 @@ export function MentionSuggestionsPopover({
                   </Text>
                 </View>
                 {isSelected ? (
-                  <Check color={colors.primary} size={18} strokeWidth={2.7} />
+                  <Check color={colors.primaryText} size={18} strokeWidth={2.7} />
                 ) : null}
               </Pressable>
             );

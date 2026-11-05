@@ -39,7 +39,7 @@ test("formata métricas e rótulos do domínio profissional", () => {
   assert.equal(formatCompactMetric(900), "900");
   assert.equal(formatCompactMetric(1400), "1.4 mil");
   assert.equal(getProfessionalCategoryLabel("brand"), "Marca");
-  assert.equal(getProfessionalPlanLabel("pro"), "Xolot Plus");
+  assert.equal(getProfessionalPlanLabel("pro"), "Folko Plus");
   assert.equal(getCampaignObjectiveLabel("messages"), "Mais mensagens");
 });
 

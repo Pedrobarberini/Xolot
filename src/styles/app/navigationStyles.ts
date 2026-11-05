@@ -1,10 +1,4 @@
-import { StyleSheet } from "react-native";
-import {
-  DETAIL_CONTENT_PADDING,
-  TAB_BAR_CONTENT_PADDING,
-  TAB_BAR_SAFE_PADDING,
-  USE_CENTERED_WEB_LAYOUT
-} from "../../constants/layout";
+import { TAB_BAR_SAFE_PADDING } from "../../constants/layout";
 import { colors } from "../../theme";
 
 export const navigationStyles = {
@@ -30,9 +24,9 @@ export const navigationStyles = {
     flexDirection: "row",
     flexWrap: "nowrap",
     gap: 0,
-    paddingBottom: 10,
+    paddingBottom: 8,
     paddingHorizontal: 14,
-    paddingTop: 10
+    paddingTop: 8
   },
   headerIdentity: {
     alignItems: "center",
@@ -53,15 +47,6 @@ export const navigationStyles = {
   headerTitleBlock: {
     flex: 1
   },
-  headerWordmark: {
-    alignSelf: "flex-start",
-    height: 29,
-    width: 132
-  },
-  headerWordmarkCompact: {
-    height: 27,
-    width: 122
-  },
   headerSubtitle: {
     color: colors.muted,
     fontSize: 12,
@@ -78,47 +63,6 @@ export const navigationStyles = {
     position: "absolute",
     right: 14,
     top: 11
-  },
-  balanceLine: {
-    alignItems: "flex-end",
-    justifyContent: "center",
-    minHeight: 38,
-    minWidth: 86
-  },
-  balanceLineOverlay: {
-    minHeight: 30,
-    minWidth: 0,
-    position: "absolute",
-    right: 72,
-    top: 18,
-    zIndex: 6
-  },
-  balanceLineValue: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: "900"
-  },
-  balanceLineValueOverlay: {
-    color: colors.onPrimary,
-    fontSize: 14,
-    fontWeight: "900",
-    textShadowColor: "rgba(0, 0, 0, 0.82)",
-    textShadowOffset: { height: 1, width: 0 },
-    textShadowRadius: 3
-  },
-  backIconButton: {
-    alignItems: "center",
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    height: 40,
-    justifyContent: "center",
-    width: 40
-  },
-  backIconButtonPressed: {
-    opacity: 0.55
-  },
-  backIconButtonDisabled: {
-    opacity: 0.4
   },
   headerReviewLine: {
     color: colors.muted,
@@ -141,11 +85,6 @@ export const navigationStyles = {
     minHeight: 46,
     paddingHorizontal: 18
   },
-  signOutText: {
-    color: colors.primary,
-    fontSize: 12,
-    fontWeight: "900"
-  },
   tabBar: {
     backgroundColor: colors.surface,
     borderTopColor: colors.border,
@@ -156,7 +95,7 @@ export const navigationStyles = {
     paddingBottom: TAB_BAR_SAFE_PADDING,
     paddingHorizontal: 8,
     paddingTop: 8,
-    shadowColor: "#10261A",
+    shadowColor: "#1B160A",
     shadowOffset: { height: -4, width: 0 },
     shadowOpacity: 0.12,
     shadowRadius: 12,
@@ -173,22 +112,12 @@ export const navigationStyles = {
   tabButtonActive: {
     backgroundColor: colors.primarySoft
   },
-  tabMarker: {
-    backgroundColor: "rgba(245, 222, 178, 0.26)",
-    borderRadius: 999,
-    height: 3,
-    width: 22
-  },
-  tabMarkerActive: {
-    backgroundColor: colors.primary,
-    width: 34
-  },
   tabText: {
     color: colors.muted,
     fontSize: 11,
     fontWeight: "900"
   },
   tabTextActive: {
-    color: colors.primary
+    color: colors.primaryText
   }
 } as const;

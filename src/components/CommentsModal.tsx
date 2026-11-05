@@ -236,7 +236,7 @@ export function CommentsModal({
           <View accessibilityViewIsModal style={styles.commentsSheet}>
             <View style={styles.commentsHeader}>
               <View style={styles.commentsHeaderIcon}>
-                <MessageCircle color={colors.primary} size={19} />
+                <MessageCircle color={colors.primaryText} size={19} />
               </View>
               <View style={styles.commentsHeaderText}>
                 <Text style={styles.commentsTitle}>Comentários</Text>
@@ -343,7 +343,7 @@ export function CommentsModal({
                           onPress={() => startReply(comment)}
                           style={styles.commentReplyButton}
                         >
-                          <CornerUpLeft color={colors.primary} size={13} />
+                          <CornerUpLeft color={colors.primaryText} size={13} />
                           <Text style={styles.commentReplyButtonText}>Responder</Text>
                         </Pressable>
                         {replyCount > 0 ? (
@@ -379,7 +379,7 @@ export function CommentsModal({
             ) : (
               <View style={styles.commentsEmptyState}>
                 <View style={styles.commentsEmptyIcon}>
-                  <MessageCircle color={colors.primary} size={25} />
+                  <MessageCircle color={colors.primaryText} size={25} />
                 </View>
                 <Text style={styles.commentsEmptyTitle}>Inicie a conversa</Text>
                 <Text style={styles.commentsEmptyBody}>

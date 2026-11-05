@@ -58,7 +58,7 @@ export function FeedPostOptionsModal({
         <View accessibilityViewIsModal style={styles.videoActionsSheet}>
           <View style={styles.videoActionsHeader}>
             <View style={styles.videoActionsHeaderIcon}>
-              <MoreVertical color={colors.primary} size={20} />
+              <MoreVertical color={colors.primaryText} size={20} />
             </View>
             <View style={styles.videoActionsTitleBlock}>
               <Text style={styles.videoActionsTitle}>Preferências</Text>
@@ -82,7 +82,7 @@ export function FeedPostOptionsModal({
             style={styles.videoActionRow}
           >
             {interested ? (
-              <CheckCircle2 color={colors.primary} size={20} />
+              <CheckCircle2 color={colors.primaryText} size={20} />
             ) : (
               <ThumbsUp color={colors.text} size={20} />
             )}

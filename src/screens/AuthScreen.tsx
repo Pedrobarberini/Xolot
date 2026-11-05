@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React, { useEffect, useState } from "react";
 import { Check, LogIn, UserPlus, X } from "lucide-react-native";
 import {
@@ -9,12 +10,12 @@ import {
   Pressable,
   ScrollView,
   Text,
-  useWindowDimensions,
   View
 } from "react-native";
 import { ScreenBackdrop, ScreenTransition } from "../components/AppShell";
 import { LabeledInput } from "../components/Navigation";
-import { GOOGLE_SIGNIN_ICON, XOLOT_WORDMARK } from "../constants/assets";
+import { GOOGLE_SIGNIN_ICON } from "../constants/assets";
+import { BrandMark } from "../shared/ui/BrandMark";
 import { useGoogleSignIn } from "../hooks/useGoogleSignIn";
 import {
   AccountCompletionRequiredError,
@@ -48,7 +49,6 @@ export function AuthScreen({
 }: {
   onComplete: (user: AppUser) => void;
 }) {
-  const { width } = useWindowDimensions();
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,7 +67,6 @@ export function AuthScreen({
     isSigningIn: isGoogleSigningIn,
     signInWithGoogle
   } = useGoogleSignIn();
-  const isCompact = width < 380;
   const cleanEmail = email.trim().toLowerCase();
   const hasValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail);
   const passwordRequirements = getPasswordRequirements(password);
@@ -258,7 +257,7 @@ export function AuthScreen({
         setNeedsAccountCompletion(true);
         setAcceptedTerms(false);
         setErrorMessage(
-          "Sua identidade foi encontrada. Aceite os termos abaixo para concluir a conta Xolot."
+          `Sua identidade foi encontrada. Aceite os termos abaixo para concluir a conta ${BRAND.name}.`
         );
         return;
       }
@@ -327,20 +326,15 @@ export function AuthScreen({
       >
         <ScreenTransition style={styles.authCard}>
           <View style={styles.authTopRow}>
-            <Text style={styles.authPanelKicker}>Talentos em movimento</Text>
+            <Text style={styles.authPanelKicker}>Seu espaço para compartilhar</Text>
             <View style={styles.authModePill}>
               <Text style={styles.authModeText}>
                 {mode === "login" ? "Login" : "Cadastro"}
               </Text>
             </View>
           </View>
-          <Image
-            accessibilityLabel="Logo Xolot"
-            resizeMode="contain"
-            source={XOLOT_WORDMARK}
-            style={[styles.authLogo, isCompact ? styles.authLogoCompact : null]}
-          />
-          <Text style={styles.authEyebrow}>Descubra. Avalie. Conecte.</Text>
+          <BrandMark hero />
+          <Text style={styles.authEyebrow}>Publique. Divulgue. Conecte.</Text>
           <Text style={styles.authTitle}>
             {needsGoogleAccountCompletion
               ? "Conclua seu primeiro acesso"
@@ -537,7 +531,7 @@ export function AuthScreen({
                 ) : null}
               </View>
               <Text style={styles.checkText}>
-                Aceito os Termos de Uso e a Política de Privacidade da Xolot.
+                Aceito os Termos de Uso e a Política de Privacidade do {BRAND.name}.
               </Text>
             </Pressable>
           ) : null}
@@ -576,9 +570,9 @@ export function AuthScreen({
             ]}
           >
             {isSubmitting ? (
-              <ActivityIndicator color={colors.onPrimary} size="small" />
+              <ActivityIndicator color={colors.onAccent} size="small" />
             ) : (
-              <SubmitIcon color={colors.onPrimary} size={19} strokeWidth={2.3} />
+              <SubmitIcon color={colors.onAccent} size={19} strokeWidth={2.3} />
             )}
             <Text style={styles.primaryButtonText}>{submitLabel}</Text>
           </Pressable>
@@ -593,11 +587,11 @@ export function AuthScreen({
             style={styles.secondaryButton}
           >
             {needsGoogleAccountCompletion ? (
-              <X color={colors.primary} size={18} />
+              <X color={colors.primaryText} size={18} />
             ) : mode === "login" ? (
-              <UserPlus color={colors.primary} size={18} />
+              <UserPlus color={colors.primaryText} size={18} />
             ) : (
-              <LogIn color={colors.primary} size={18} />
+              <LogIn color={colors.primaryText} size={18} />
             )}
             <Text style={styles.secondaryButtonText}>
               {needsGoogleAccountCompletion

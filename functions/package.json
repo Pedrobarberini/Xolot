@@ -2,11 +2,12 @@
   "name": "xolot-functions",
   "private": true,
   "main": "lib/index.js",
+  "files": ["lib", "src", "scripts", "tsconfig.json"],
   "engines": {
     "node": "22"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "node scripts/clean-lib.cjs && tsc",
     "serve": "pnpm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions"
   },

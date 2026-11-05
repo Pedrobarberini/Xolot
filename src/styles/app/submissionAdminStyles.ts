@@ -1,10 +1,5 @@
 import { StyleSheet } from "react-native";
-import {
-  DETAIL_CONTENT_PADDING,
-  TAB_BAR_CONTENT_PADDING,
-  TAB_BAR_SAFE_PADDING,
-  USE_CENTERED_WEB_LAYOUT
-} from "../../constants/layout";
+import { TAB_BAR_CONTENT_PADDING } from "../../constants/layout";
 import { colors } from "../../theme";
 
 export const submissionAdminStyles = {
@@ -34,7 +29,7 @@ export const submissionAdminStyles = {
   submissionCameraPermission: {
     ...StyleSheet.absoluteFillObject,
     alignItems: "center",
-    backgroundColor: "#101613",
+    backgroundColor: "#111219",
     justifyContent: "center",
     paddingHorizontal: 32
   },
@@ -275,59 +270,10 @@ export const submissionAdminStyles = {
     paddingHorizontal: 10
   },
   submissionMentionChipText: {
-    color: colors.primary,
+    color: colors.primaryText,
     flexShrink: 1,
     fontSize: 12,
     fontWeight: "900"
-  },
-  submissionMentionResults: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    marginTop: 9,
-    overflow: "hidden"
-  },
-  submissionMentionResult: {
-    alignItems: "center",
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    gap: 10,
-    minHeight: 58,
-    paddingHorizontal: 11,
-    paddingVertical: 8
-  },
-  submissionMentionResultIcon: {
-    alignItems: "center",
-    backgroundColor: colors.primarySoft,
-    borderRadius: 999,
-    height: 34,
-    justifyContent: "center",
-    width: 34
-  },
-  submissionMentionResultIdentity: {
-    flex: 1,
-    minWidth: 0
-  },
-  submissionMentionResultUsername: {
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: "900"
-  },
-  submissionMentionResultName: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: "700",
-    marginTop: 2
-  },
-  submissionMentionEmpty: {
-    color: colors.muted,
-    fontSize: 12,
-    fontWeight: "700",
-    paddingHorizontal: 12,
-    paddingVertical: 16,
-    textAlign: "center"
   },
   adminHero: {
     backgroundColor: colors.surface,
@@ -340,51 +286,6 @@ export const submissionAdminStyles = {
   submitInfoPanelCompact: {
     paddingHorizontal: 12
   },
-  videoPickerButton: {
-    alignItems: "center",
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.primary,
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 9,
-    justifyContent: "center",
-    marginTop: 12,
-    minHeight: 48,
-    paddingHorizontal: 14
-  },
-  videoPickerIcon: {
-    color: colors.primary,
-    fontSize: 22,
-    fontWeight: "700"
-  },
-  videoPickerButtonText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: "900"
-  },
-  videoPickerHint: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: "700",
-    lineHeight: 16,
-    marginTop: 7
-  },
-  selectedVideoPanel: {
-    alignItems: "center",
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 12,
-    padding: 10
-  },
-  selectedVideoTextBlock: {
-    flex: 1,
-    minWidth: 0
-  },
   selectedVideoName: {
     color: colors.text,
     fontSize: 13,
@@ -395,23 +296,6 @@ export const submissionAdminStyles = {
     fontSize: 11,
     fontWeight: "700",
     marginTop: 3
-  },
-  videoSourceDivider: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 9,
-    marginTop: 12
-  },
-  videoSourceDividerLine: {
-    backgroundColor: colors.border,
-    flex: 1,
-    height: 1
-  },
-  videoSourceDividerText: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: "900",
-    textTransform: "uppercase"
   },
   submissionVideoPreview: {
     alignSelf: "center",
@@ -503,48 +387,6 @@ export const submissionAdminStyles = {
     transform: [{ translateX: -6 }],
     width: 12
   },
-  inputRow: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.borderStrong,
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: "row",
-    marginTop: 14,
-    paddingHorizontal: 12
-  },
-  currencyPrefix: {
-    color: colors.primary,
-    fontSize: 17,
-    fontWeight: "900",
-    marginRight: 8
-  },
-  amountInput: {
-    color: colors.text,
-    flex: 1,
-    fontSize: 22,
-    fontWeight: "900",
-    minHeight: 54
-  },
-  availableBalanceText: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: "900",
-    marginTop: 10
-  },
-  twoColumnRow: {
-    flexDirection: "row",
-    gap: 10
-  },
-  columnField: {
-    flex: 1
-  },
-  validationText: {
-    color: colors.danger,
-    fontSize: 13,
-    fontWeight: "800",
-    marginTop: 10
-  },
   submissionValidationPanel: {
     backgroundColor: colors.dangerSoft,
     borderColor: "#E9A8B0",
@@ -579,7 +421,7 @@ export const submissionAdminStyles = {
   },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: colors.primary,
+    backgroundColor: colors.accent,
     borderRadius: 8,
     flexDirection: "row",
     gap: 8,
@@ -589,10 +431,10 @@ export const submissionAdminStyles = {
     paddingVertical: 13
   },
   primaryButtonDisabled: {
-    backgroundColor: colors.borderStrong
+    opacity: 0.38
   },
   primaryButtonText: {
-    color: colors.onPrimary,
+    color: colors.onAccent,
     fontSize: 15,
     fontWeight: "900"
   },
@@ -608,11 +450,8 @@ export const submissionAdminStyles = {
     marginTop: 12,
     paddingVertical: 13
   },
-  secondaryButtonDisabled: {
-    backgroundColor: colors.surfaceMuted
-  },
   secondaryButtonText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 14,
     fontWeight: "900"
   },
@@ -649,11 +488,6 @@ export const submissionAdminStyles = {
     justifyContent: "center",
     width: 32
   },
-  submissionToastIconText: {
-    color: colors.primary,
-    fontSize: 10,
-    fontWeight: "900"
-  },
   submissionToastTextBlock: {
     flex: 1,
     minWidth: 0
@@ -664,17 +498,11 @@ export const submissionAdminStyles = {
     fontWeight: "900"
   },
   submissionToastBody: {
-    color: "#DCEFE4",
+    color: "#F6EFDF",
     fontSize: 12,
     fontWeight: "700",
     lineHeight: 17,
     marginTop: 2
-  },
-  submissionItem: {
-    borderColor: colors.border,
-    borderTopWidth: 1,
-    paddingTop: 12,
-    marginTop: 12
   },
   adminItem: {
     borderColor: colors.border,

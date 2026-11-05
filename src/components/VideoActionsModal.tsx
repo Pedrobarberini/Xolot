@@ -56,7 +56,7 @@ export function VideoActionsModal({
         <View accessibilityViewIsModal style={styles.videoActionsSheet}>
           <View style={styles.videoActionsHeader}>
             <View style={styles.videoActionsHeaderIcon}>
-              <MoreVertical color={colors.primary} size={20} />
+              <MoreVertical color={colors.primaryText} size={20} />
             </View>
             <View style={styles.videoActionsTitleBlock}>
               <Text style={styles.videoActionsTitle}>

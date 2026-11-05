@@ -1,0 +1,472 @@
+{
+  "cancelPlusSubscription": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "MERCADO_PAGO_ACCESS_TOKEN"
+      }
+    ],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "cleanupDeletedAccount": {
+    "platform": "gcfv1",
+    "availableMemoryMb": 1024,
+    "timeoutSeconds": 540,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "R2_ACCESS_KEY_ID"
+      },
+      {
+        "key": "R2_SECRET_ACCESS_KEY"
+      },
+      {
+        "key": "MERCADO_PAGO_ACCESS_TOKEN"
+      }
+    ],
+    "eventTrigger": {
+      "eventType": "providers/firebase.auth/eventTypes/user.delete",
+      "eventFilters": {
+        "resource": "projects/demo-xolot-functions"
+      },
+      "retry": false
+    },
+    "labels": {}
+  },
+  "createAvatarUpload": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "R2_ACCESS_KEY_ID"
+      },
+      {
+        "key": "R2_SECRET_ACCESS_KEY"
+      }
+    ],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "createMediaUpload": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "R2_ACCESS_KEY_ID"
+      },
+      {
+        "key": "R2_SECRET_ACCESS_KEY"
+      }
+    ],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "createPlusSubscription": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "MERCADO_PAGO_ACCESS_TOKEN"
+      },
+      {
+        "key": "MERCADO_PAGO_TEST_PAYER_EMAIL"
+      }
+    ],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "deleteOwnAccount": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "deleteR2Post": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "R2_ACCESS_KEY_ID"
+      },
+      {
+        "key": "R2_SECRET_ACCESS_KEY"
+      }
+    ],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "ensureTagCatalogEntry": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "finalizeAccountRegistration": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "finalizeAvatarUpload": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "R2_ACCESS_KEY_ID"
+      },
+      {
+        "key": "R2_SECRET_ACCESS_KEY"
+      }
+    ],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "finalizeMediaUpload": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "R2_ACCESS_KEY_ID"
+      },
+      {
+        "key": "R2_SECRET_ACCESS_KEY"
+      }
+    ],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "markNotificationsRead": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "mercadoPagoWebhook": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "MERCADO_PAGO_ACCESS_TOKEN"
+      },
+      {
+        "key": "MERCADO_PAGO_WEBHOOK_SECRET"
+      }
+    ],
+    "labels": {},
+    "httpsTrigger": {
+      "invoker": ["public"]
+    }
+  },
+  "notifyDirectMessage": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "eventTrigger": {
+      "eventType": "google.cloud.firestore.document.v1.created",
+      "eventFilters": {
+        "database": "(default)",
+        "namespace": "(default)"
+      },
+      "eventFilterPathPatterns": {
+        "document": "directMessages/{messageId}"
+      },
+      "retry": false
+    }
+  },
+  "notifyPostComment": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "eventTrigger": {
+      "eventType": "google.cloud.firestore.document.v1.created",
+      "eventFilters": {
+        "database": "(default)",
+        "namespace": "(default)"
+      },
+      "eventFilterPathPatterns": {
+        "document": "postComments/{commentId}"
+      },
+      "retry": false
+    }
+  },
+  "notifyPostLike": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "eventTrigger": {
+      "eventType": "google.cloud.firestore.document.v1.created",
+      "eventFilters": {
+        "database": "(default)",
+        "namespace": "(default)"
+      },
+      "eventFilterPathPatterns": {
+        "document": "userPostLikes/{actorUid}/posts/{playerId}"
+      },
+      "retry": false
+    }
+  },
+  "recordPostView": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "sendDirectMessage": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "setPostLike": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "syncIdentityVerificationBadge": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "eventTrigger": {
+      "eventType": "google.cloud.firestore.document.v1.written",
+      "eventFilters": {
+        "database": "(default)",
+        "namespace": "(default)"
+      },
+      "eventFilterPathPatterns": {
+        "document": "identityVerifications/{uid}"
+      },
+      "retry": false
+    }
+  },
+  "syncPlusSubscription": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "secretEnvironmentVariables": [
+      {
+        "key": "MERCADO_PAGO_ACCESS_TOKEN"
+      }
+    ],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "syncPostTagCatalog": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "eventTrigger": {
+      "eventType": "google.cloud.firestore.document.v1.written",
+      "eventFilters": {
+        "database": "(default)",
+        "namespace": "(default)"
+      },
+      "eventFilterPathPatterns": {
+        "document": "posts/{postId}"
+      },
+      "retry": false
+    }
+  },
+  "updateAvatarCrop": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  },
+  "updateDirectMessageReceipts": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "minInstances": null,
+    "maxInstances": null,
+    "ingressSettings": null,
+    "concurrency": null,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  }
+}

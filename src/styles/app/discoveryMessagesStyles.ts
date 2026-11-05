@@ -1,10 +1,5 @@
 import { StyleSheet } from "react-native";
-import {
-  DETAIL_CONTENT_PADDING,
-  TAB_BAR_CONTENT_PADDING,
-  TAB_BAR_SAFE_PADDING,
-  USE_CENTERED_WEB_LAYOUT
-} from "../../constants/layout";
+import { TAB_BAR_CONTENT_PADDING } from "../../constants/layout";
 import { colors } from "../../theme";
 
 export const discoveryMessagesStyles = {
@@ -95,7 +90,7 @@ export const discoveryMessagesStyles = {
     width: 48
   },
   searchProfileAvatarText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 13,
     fontWeight: "900"
   },
@@ -109,7 +104,7 @@ export const discoveryMessagesStyles = {
     fontWeight: "900"
   },
   searchProfileUsername: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 11,
     fontWeight: "800",
     marginTop: 1
@@ -127,7 +122,7 @@ export const discoveryMessagesStyles = {
     marginTop: 5
   },
   searchProfileBadgeActive: {
-    color: colors.primary
+    color: colors.primaryText
   },
   discoveryEmptyState: {
     alignItems: "center",
@@ -224,7 +219,7 @@ export const discoveryMessagesStyles = {
     width: 42
   },
   messagesContactAvatarText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 12,
     fontWeight: "900"
   },
@@ -333,7 +328,7 @@ export const discoveryMessagesStyles = {
     width: "100%"
   },
   messagesRequestSentTitle: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 12,
     fontWeight: "900",
     textAlign: "center"
@@ -518,7 +513,7 @@ export const discoveryMessagesStyles = {
     marginTop: 2
   },
   messagesSectionCount: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 12,
     fontWeight: "900"
   },
@@ -559,7 +554,7 @@ export const discoveryMessagesStyles = {
     paddingVertical: 5
   },
   messagesRequestPillText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 9,
     fontWeight: "900"
   },
@@ -570,7 +565,7 @@ export const discoveryMessagesStyles = {
   },
   conversationActionsBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.52)"
+    backgroundColor: "rgba(12, 13, 20, 0.52)"
   },
   conversationActionsDialog: {
     alignSelf: "center",

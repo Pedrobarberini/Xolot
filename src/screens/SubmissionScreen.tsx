@@ -464,7 +464,7 @@ export function SubmitVideoScreen({
                 !canSubmit ? styles.primaryButtonDisabled : null
               ]}
             >
-              <Send color={colors.onPrimary} size={19} />
+              <Send color={colors.onAccent} size={19} />
               <Text style={styles.primaryButtonText}>
                 {isSubmitting
                   ? uploadProgress > 0
@@ -499,7 +499,7 @@ export function SubmitVideoScreen({
             ]}
           >
             <View style={styles.submissionToastIcon}>
-              <Check color={colors.primary} size={19} strokeWidth={3} />
+              <Check color={colors.primaryText} size={19} strokeWidth={3} />
             </View>
             <View style={styles.submissionToastTextBlock}>
               <Text style={styles.submissionToastTitle}>Publicação enviada</Text>

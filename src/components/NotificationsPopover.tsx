@@ -33,13 +33,13 @@ function NotificationKindIcon({
     case "like":
       return <Heart color={colors.like} fill={colors.like} size={18} />;
     case "comment":
-      return <MessageCircle color={colors.primary} size={18} />;
+      return <MessageCircle color={colors.primaryText} size={18} />;
     case "reply":
-      return <Reply color={colors.primary} size={18} />;
+      return <Reply color={colors.primaryText} size={18} />;
     case "shared-post":
-      return <PlaySquare color={colors.primary} size={18} />;
+      return <PlaySquare color={colors.primaryText} size={18} />;
     case "message":
-      return <MessageCircle color={colors.primary} size={18} />;
+      return <MessageCircle color={colors.primaryText} size={18} />;
   }
 }
 
@@ -105,7 +105,7 @@ export function NotificationsPopover({
         >
           <View style={styles.notificationsHeader}>
             <View style={styles.notificationsTitleRow}>
-              <Bell color={colors.primary} size={20} />
+              <Bell color={colors.primaryText} size={20} />
               <Text style={styles.notificationsTitle}>Notificações</Text>
             </View>
             <Pressable

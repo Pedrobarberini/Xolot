@@ -45,114 +45,6 @@ async function applyMessageRateLimit(uid: string) {
   });
 }
 
-export const setPostLike = onCall(callableOptions, async (request) => {
-  const uid = requireVerifiedUser(request);
-  await verifyRegisteredUser(uid);
-  const data = requireRecord(request.data);
-  const playerId = requireText(data.playerId, "Publicação", 1, 128);
-  if (!/^[A-Za-z0-9_-]+$/.test(playerId) || typeof data.liked !== "boolean") {
-    throw new HttpsError("invalid-argument", "Curtida inválida.");
-  }
-
-  const liked = data.liked;
-  const postId = getPostDocumentId(playerId);
-  const database = getFirestore();
-  const postReference = database.doc(`posts/${postId}`);
-  const likeReference = database.doc(`userPostLikes/${uid}/posts/${playerId}`);
-  const engagementReference = database.doc(`postEngagement/${playerId}`);
-
-  await database.runTransaction(async (transaction) => {
-    const [post, like, engagement] = await Promise.all([
-      transaction.get(postReference),
-      transaction.get(likeReference),
-      transaction.get(engagementReference)
-    ]);
-    if (!post.exists || post.data()?.status !== "published") {
-      throw new HttpsError("not-found", "Esta publicação não está disponível.");
-    }
-
-    const wasLiked = like.exists;
-    if (wasLiked === liked) {
-      return;
-    }
-
-    const currentLikes = normalizedCount(engagement.data()?.likes);
-    if (liked) {
-      transaction.set(likeReference, {
-        createdAt: FieldValue.serverTimestamp(),
-        playerId,
-        userId: uid
-      });
-    } else {
-      transaction.delete(likeReference);
-    }
-    transaction.set(
-      engagementReference,
-      {
-        likes: liked ? currentLikes + 1 : Math.max(0, currentLikes - 1),
-        playerId,
-        shares: normalizedCount(engagement.data()?.shares),
-        updatedAt: FieldValue.serverTimestamp(),
-        views: normalizedCount(engagement.data()?.views)
-      },
-      { merge: true }
-    );
-  });
-
-  return { liked };
-});
-
-export const recordPostView = onCall(callableOptions, async (request) => {
-  const uid = requireVerifiedUser(request);
-  await verifyRegisteredUser(uid);
-  const data = requireRecord(request.data);
-  const playerId = requireText(data.playerId, "Publicação", 1, 128);
-  if (!/^[A-Za-z0-9_-]+$/.test(playerId)) {
-    throw new HttpsError("invalid-argument", "Visualização inválida.");
-  }
-
-  const postId = getPostDocumentId(playerId);
-  const database = getFirestore();
-  const postReference = database.doc(`posts/${postId}`);
-  const viewReference = database.doc(`userPostViews/${uid}/posts/${playerId}`);
-  const engagementReference = database.doc(`postEngagement/${playerId}`);
-  let recorded = false;
-
-  await database.runTransaction(async (transaction) => {
-    const [post, view, engagement] = await Promise.all([
-      transaction.get(postReference),
-      transaction.get(viewReference),
-      transaction.get(engagementReference)
-    ]);
-    if (!post.exists || post.data()?.status !== "published") {
-      throw new HttpsError("not-found", "Esta publicação não está disponível.");
-    }
-    if (view.exists) {
-      return;
-    }
-
-    recorded = true;
-    transaction.set(viewReference, {
-      createdAt: FieldValue.serverTimestamp(),
-      playerId,
-      userId: uid
-    });
-    transaction.set(
-      engagementReference,
-      {
-        likes: normalizedCount(engagement.data()?.likes),
-        playerId,
-        shares: normalizedCount(engagement.data()?.shares),
-        updatedAt: FieldValue.serverTimestamp(),
-        views: normalizedCount(engagement.data()?.views) + 1
-      },
-      { merge: true }
-    );
-  });
-
-  return { recorded };
-});
-
 export const sendDirectMessage = onCall(callableOptions, async (request) => {
   const uid = requireVerifiedUser(request);
   await verifyRegisteredUser(uid);
@@ -219,7 +111,7 @@ export const sendDirectMessage = onCall(callableOptions, async (request) => {
       const authorData = authorProfile.data();
       sharedPost = {
         authorName:
-          typeof authorData?.name === "string" ? authorData.name : "Perfil Xolot",
+          typeof authorData?.name === "string" ? authorData.name : "Perfil Folko",
         mediaType: postData?.mediaType === "image" ? "image" : "video",
         playerId: sharedPlayerId,
         profileId: `profile-${authorId}`,

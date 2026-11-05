@@ -1,11 +1,7 @@
 import { StyleSheet } from "react-native";
-import {
-  DETAIL_CONTENT_PADDING,
-  TAB_BAR_CONTENT_PADDING,
-  TAB_BAR_SAFE_PADDING,
-  USE_CENTERED_WEB_LAYOUT
-} from "../../constants/layout";
+import { TAB_BAR_CONTENT_PADDING } from "../../constants/layout";
 import { colors } from "../../theme";
+import { FOLKO_HORIZONTAL_ASPECT_RATIO } from "../../constants/assets";
 
 export const feedStyles = {
   feedPagerShell: {
@@ -24,9 +20,9 @@ export const feedStyles = {
   },
   feedBrandSlot: {
     alignItems: "center",
-    height: 40,
+    height: 76 / FOLKO_HORIZONTAL_ASPECT_RATIO,
     justifyContent: "center",
-    width: 48
+    width: 76
   },
   feedBrandSlotPressed: {
     opacity: 0.62,
@@ -93,80 +89,6 @@ export const feedStyles = {
   feedVideoBackground: {
     ...StyleSheet.absoluteFillObject,
     overflow: "hidden"
-  },
-  feedVideoAccent: {
-    borderRadius: 8,
-    borderWidth: 1,
-    height: "58%",
-    opacity: 0.62,
-    position: "absolute",
-    right: -48,
-    top: 42,
-    transform: [{ rotate: "-8deg" }],
-    width: "68%"
-  },
-  feedVideoFrame: {
-    borderRadius: 8,
-    borderWidth: 1,
-    bottom: "17%",
-    left: "6%",
-    opacity: 0.34,
-    position: "absolute",
-    right: "6%",
-    top: "10%"
-  },
-  feedVideoTexture: {
-    backgroundColor: "rgba(255, 255, 255, 0.025)",
-    height: "100%",
-    left: "50%",
-    position: "absolute",
-    top: 0,
-    transform: [{ rotate: "12deg" }],
-    width: 1
-  },
-  feedVideoLane: {
-    borderColor: "rgba(247, 200, 75, 0.11)",
-    borderWidth: 1,
-    height: "62%",
-    position: "absolute",
-    top: "13%",
-    width: "26%"
-  },
-  feedVideoLaneLeft: {
-    borderBottomRightRadius: 8,
-    borderTopRightRadius: 8,
-    left: "-8%"
-  },
-  feedVideoLaneRight: {
-    borderBottomLeftRadius: 8,
-    borderTopLeftRadius: 8,
-    right: "-8%"
-  },
-  feedVideoFocusBox: {
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    borderRadius: 8,
-    borderWidth: 1,
-    height: "18%",
-    left: "24%",
-    position: "absolute",
-    top: "26%",
-    width: "52%"
-  },
-  feedVideoShadeTop: {
-    backgroundColor: "rgba(5, 5, 3, 0.22)",
-    height: "34%",
-    left: 0,
-    position: "absolute",
-    right: 0,
-    top: 0
-  },
-  feedVideoShadeBottom: {
-    backgroundColor: "rgba(5, 5, 3, 0.9)",
-    bottom: 0,
-    height: "64%",
-    left: 0,
-    position: "absolute",
-    right: 0
   },
   feedVideoBox: {
     overflow: "hidden",
@@ -276,86 +198,6 @@ export const feedStyles = {
     position: "absolute",
     width: 10
   },
-  feedVideoControlIcon: {
-    color: colors.onPrimary,
-    fontSize: 15,
-    fontWeight: "900"
-  },
-  feedVideoBoxGlow: {
-    borderRadius: 8,
-    height: "48%",
-    opacity: 0.9,
-    position: "absolute",
-    right: "-28%",
-    top: "7%",
-    transform: [{ rotate: "-18deg" }],
-    width: "80%"
-  },
-  feedVideoPitchMarkings: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.42
-  },
-  feedVideoPitchCenterLine: {
-    backgroundColor: "rgba(255, 244, 204, 0.22)",
-    height: 1,
-    left: 0,
-    position: "absolute",
-    right: 0,
-    top: "50%"
-  },
-  feedVideoPitchCenterCircle: {
-    alignSelf: "center",
-    borderColor: "rgba(255, 244, 204, 0.16)",
-    borderRadius: 999,
-    borderWidth: 1,
-    height: 88,
-    position: "absolute",
-    top: "39%",
-    width: 88
-  },
-  feedVideoPitchBoxTop: {
-    alignSelf: "center",
-    borderColor: "rgba(255, 244, 204, 0.14)",
-    borderTopWidth: 0,
-    borderWidth: 1,
-    height: 72,
-    position: "absolute",
-    top: 0,
-    width: "58%"
-  },
-  feedVideoPitchBoxBottom: {
-    alignSelf: "center",
-    borderBottomWidth: 0,
-    borderColor: "rgba(255, 244, 204, 0.14)",
-    borderWidth: 1,
-    bottom: 0,
-    height: 72,
-    position: "absolute",
-    width: "58%"
-  },
-  feedVideoNoiseWash: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255, 255, 255, 0.025)"
-  },
-  feedVideoSubject: {
-    alignItems: "center",
-    alignSelf: "center",
-    backgroundColor: "rgba(5, 5, 3, 0.62)",
-    borderRadius: 999,
-    borderWidth: 2,
-    height: 74,
-    justifyContent: "center",
-    position: "absolute",
-    top: "29%",
-    width: 74
-  },
-  feedVideoSubjectCompact: {
-    top: "26%"
-  },
-  feedVideoSubjectText: {
-    fontSize: 21,
-    fontWeight: "900"
-  },
   feedVideoPlayCircle: {
     alignItems: "center",
     alignSelf: "center",
@@ -365,45 +207,6 @@ export const feedStyles = {
     position: "absolute",
     top: "47%",
     width: 54
-  },
-  feedVideoPlayCircleCompact: {
-    top: "48%"
-  },
-  feedVideoPlayTriangle: {
-    borderBottomColor: "transparent",
-    borderBottomWidth: 9,
-    borderLeftWidth: 14,
-    borderTopColor: "transparent",
-    borderTopWidth: 9,
-    height: 0,
-    marginLeft: 4,
-    width: 0
-  },
-  feedVideoActionRail: {
-    gap: 9,
-    position: "absolute",
-    right: 10,
-    top: "34%"
-  },
-  feedVideoActionButton: {
-    alignItems: "center",
-    backgroundColor: "rgba(5, 5, 3, 0.58)",
-    borderRadius: 8,
-    borderWidth: 1,
-    height: 46,
-    justifyContent: "center",
-    width: 46
-  },
-  feedVideoActionValue: {
-    color: colors.onPrimary,
-    fontSize: 12,
-    fontWeight: "900"
-  },
-  feedVideoActionLabel: {
-    color: "#DCE8E0",
-    fontSize: 8,
-    fontWeight: "900",
-    marginTop: 1
   },
   feedSocialActionRail: {
     alignItems: "center",
@@ -493,25 +296,9 @@ export const feedStyles = {
     transform: [{ translateX: -6 }],
     width: 12
   },
-  feedReelHeaderOverlay: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "flex-end",
-    left: 18,
-    position: "absolute",
-    right: 18,
-    top: 18,
-    zIndex: 4
-  },
   feedReelBrandMark: {
-    height: 38,
-    width: 48
-  },
-  feedReelCount: {
-    fontSize: 12,
-    fontWeight: "800",
-    marginTop: 4
+    height: 76 / FOLKO_HORIZONTAL_ASPECT_RATIO,
+    width: 76
   },
   feedTextOverlay: {
     backgroundColor: colors.surface,
@@ -523,7 +310,7 @@ export const feedStyles = {
     padding: 14,
     position: "absolute",
     right: 18,
-    shadowColor: "#10261A",
+    shadowColor: "#1B160A",
     shadowOffset: { height: -4, width: 0 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -569,13 +356,6 @@ export const feedStyles = {
   feedCompactGradient: {
     ...StyleSheet.absoluteFillObject
   },
-  feedOverlayEyebrow: {
-    fontSize: 10,
-    fontWeight: "900",
-    letterSpacing: 0,
-    marginBottom: 9,
-    textTransform: "uppercase"
-  },
   feedProfileRow: {
     alignItems: "center",
     flexDirection: "row",
@@ -592,7 +372,7 @@ export const feedStyles = {
     justifyContent: "center"
   },
   feedProfileButtonCompact: {
-    backgroundColor: "rgba(5, 18, 12, 0.62)",
+    backgroundColor: "rgba(12, 13, 20, 0.62)",
     borderColor: "rgba(255, 255, 255, 0.72)",
     borderRadius: 999,
     borderWidth: 1,
@@ -642,7 +422,7 @@ export const feedStyles = {
     borderColor: colors.primary
   },
   feedFollowButtonActiveCompact: {
-    backgroundColor: "rgba(5, 18, 12, 0.58)",
+    backgroundColor: "rgba(12, 13, 20, 0.58)",
     borderColor: "rgba(255, 255, 255, 0.68)"
   },
   feedFollowButtonText: {
@@ -651,7 +431,7 @@ export const feedStyles = {
     fontWeight: "900"
   },
   feedFollowButtonTextActiveWide: {
-    color: colors.primary
+    color: colors.primaryText
   },
   feedProfileName: {
     flexShrink: 1,
@@ -756,18 +536,10 @@ export const feedStyles = {
     marginTop: 16,
     zIndex: 2
   },
-  feedCompactExpandedActionGroup: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12
-  },
   feedCompactTextButton: {
     minHeight: 34,
     justifyContent: "center",
     paddingHorizontal: 4
-  },
-  feedCompactTextButtonDisabled: {
-    opacity: 0.52
   },
   feedCompactTextButtonLabel: {
     color: colors.onPrimary,
@@ -776,9 +548,6 @@ export const feedStyles = {
     textShadowColor: "rgba(0, 0, 0, 0.72)",
     textShadowOffset: { height: 1, width: 0 },
     textShadowRadius: 2
-  },
-  feedCompactTextButtonLabelDisabled: {
-    color: "rgba(255, 255, 255, 0.72)"
   },
   feedReelMeta: {
     fontSize: 13,
@@ -837,60 +606,6 @@ export const feedStyles = {
     fontSize: 13,
     fontWeight: "900"
   },
-  feedInsightStrip: {
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 10,
-    paddingHorizontal: 9,
-    paddingVertical: 8
-  },
-  feedInsightStripCompact: {
-    marginTop: 8,
-    paddingVertical: 6
-  },
-  feedInsightItem: {
-    flex: 1,
-    minWidth: 0
-  },
-  feedInsightValue: {
-    fontSize: 13,
-    fontWeight: "900"
-  },
-  feedInsightLabel: {
-    fontSize: 9,
-    fontWeight: "900",
-    marginTop: 2,
-    textTransform: "uppercase"
-  },
-  feedReelMetricRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 12
-  },
-  feedReelMetric: {
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    flex: 1,
-    minHeight: 50,
-    paddingHorizontal: 9,
-    paddingVertical: 7
-  },
-  feedReelMetricValue: {
-    fontSize: 14,
-    fontWeight: "900"
-  },
-  feedReelMetricLabel: {
-    fontSize: 10,
-    fontWeight: "900",
-    marginTop: 3,
-    textTransform: "uppercase"
-  },
   feedLearnMoreButton: {
     alignItems: "center",
     backgroundColor: colors.primary,
@@ -901,13 +616,6 @@ export const feedStyles = {
     minHeight: 48,
     paddingHorizontal: 15
   },
-  feedProgressTrackCompact: {
-    height: 5,
-    marginTop: 10
-  },
-  feedProgressFillCompact: {
-    height: 5
-  },
   feedReelButtonPressed: {
     opacity: 0.84,
     transform: [{ scale: 0.98 }]
@@ -917,74 +625,4 @@ export const feedStyles = {
     fontSize: 14,
     fontWeight: "900"
   },
-  feedDesktopPanel: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    bottom: 18,
-    padding: 16,
-    position: "absolute",
-    right: 30,
-    width: 280,
-    zIndex: 4
-  },
-  feedDesktopPanelTitle: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: "900",
-    marginBottom: 12
-  },
-  feedDesktopPanelRow: {
-    borderColor: colors.border,
-    borderTopWidth: 1,
-    paddingVertical: 11
-  },
-  feedDesktopPanelLabel: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: "900",
-    textTransform: "uppercase"
-  },
-  feedDesktopPanelValue: {
-    color: colors.primary,
-    fontSize: 15,
-    fontWeight: "900",
-    marginTop: 4
-  },
-  feedStatsGrid: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 14
-  },
-  feedStatCard: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    flex: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 13
-  },
-  feedStatValue: {
-    color: colors.primary,
-    fontSize: 24,
-    fontWeight: "900",
-    letterSpacing: 0
-  },
-  feedStatLabel: {
-    color: colors.muted,
-    fontSize: 12,
-    fontWeight: "900",
-    marginTop: 2,
-    textTransform: "uppercase"
-  },
-  feedHero: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 16,
-    padding: 18
-  }
 } as const;

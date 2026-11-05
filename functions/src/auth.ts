@@ -1,33 +1,32 @@
-import { getFirestore } from "firebase-admin/firestore";
-import { HttpsError } from "firebase-functions/v2/https";
+import { requireRegisteredAccount } from "./modules/accounts/application/requireRegisteredAccount";
+import { firestoreRegistration } from "./modules/accounts/data/firestoreRegistration";
+import { toCallableError } from "./platform/callableErrors";
+import {
+  verifiedRequestContext, requireAdministrator, requireRecentAuthentication, requireResourceOwner,
+  type RequestContext, type RequestInput,
+} from "./modules/accounts/domain/requestContext";
 
-export function requireVerifiedUser(request: {
-  auth?: { uid: string; token: Record<string, unknown> };
-}) {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Entre na sua conta para publicar.");
-  }
-
-  if (request.auth.token.email_verified !== true) {
-    throw new HttpsError(
-      "permission-denied",
-      "Confirme seu e-mail antes de publicar."
-    );
-  }
-
-  return request.auth.uid;
+function callablePolicy<T>(run: () => T): T {
+  try { return run(); } catch (error: unknown) { throw toCallableError(error); }
 }
-
+export function getVerifiedRequestContext(request: RequestInput) {
+  return callablePolicy(() => verifiedRequestContext(request));
+}
+export function requireVerifiedUser(request: RequestInput) {
+  return getVerifiedRequestContext(request).uid;
+}
+export function assertResourceOwner(context: RequestContext, ownerUid: unknown, message: string) {
+  return callablePolicy(() => requireResourceOwner(context, ownerUid, message));
+}
+export function assertRecentAuthentication(context: RequestContext, nowSeconds: number, maxAgeSeconds = 600) {
+  return callablePolicy(() => requireRecentAuthentication(context, nowSeconds, maxAgeSeconds));
+}
+export function getAdminRequestContext(request: RequestInput) {
+  const context = getVerifiedRequestContext(request);
+  callablePolicy(() => requireAdministrator(context));
+  return context;
+}
 export async function verifyRegisteredUser(uid: string) {
-  const database = getFirestore();
-  const [account, profile] = await Promise.all([
-    database.doc(`accounts/${uid}`).get(),
-    database.doc(`profiles/${uid}`).get()
-  ]);
-  if (!account.exists && profile.data()?.profileCompleted !== true) {
-    throw new HttpsError(
-      "permission-denied",
-      "Complete o cadastro da sua conta antes de publicar."
-    );
-  }
+  try { await requireRegisteredAccount(uid, firestoreRegistration); }
+  catch (error: unknown) { throw toCallableError(error); }
 }

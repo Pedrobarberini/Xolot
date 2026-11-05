@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "status": "contrato_observado_no_codigo",
+  "environmentEvidence": "docs/architecture/ambientes.md",
+  "wireTime": "Timestamp Firestore no banco; ISO UTC nos DTOs locais; datas do provedor adaptadas explicitamente",
+  "schemaVersion": "Ausente nos documentos legados; não escrever o campo até leitores e Rules compatíveis",
+  "resources": [
+    {
+      "path": "Firebase Auth",
+      "authority": "Firebase Auth",
+      "readers": "sessão do próprio usuário / backend autorizado",
+      "writers": "Auth SDK e backend autorizado",
+      "fields": "uid,email,emailVerified,providerData,claims; senha/tokens não entram em perfil nem log"
+    },
+    {
+      "path": "accounts/{uid}",
+      "authority": "cadastro privado",
+      "readers": "dono por get, backend",
+      "writers": "cadastro validado/callable; cliente não atualiza/apaga",
+      "fields": "uid,authProvider,createdAt,termsAcceptedAt"
+    },
+    {
+      "path": "pendingAccounts/{uid}",
+      "authority": "cadastro password pendente",
+      "readers": "dono/backend",
+      "writers": "próprio UID com token não verificado; conclusão validada",
+      "fields": "uid,authProvider,createdAt,termsAcceptedAt"
+    },
+    {
+      "path": "profiles/{uid}",
+      "authority": "identidade social",
+      "readers": "contas registradas verificadas, sem acesso anônimo",
+      "writers": "dono nos campos sociais; backend nas projeções",
+      "dto": "PublicProfileDocument",
+      "fields": "uid,username,name,bio,age,position,sport,city,club,photoURL,interestTags,profileCompleted,createdAt,updatedAt,identityVerified,plusActive"
+    },
+    {
+      "path": "usernames/{username}",
+      "authority": "reserva única",
+      "readers": "contas registradas verificadas",
+      "writers": "transação do dono vinculada ao perfil",
+      "fields": "uid,createdAt"
+    },
+    {
+      "path": "posts/{postId}",
+      "authority": "publicação e referência de mídia",
+      "readers": "regras sociais atuais",
+      "writers": "callable R2; caminho Firebase legado com validação de autor",
+      "dto": "FirebasePostDocument",
+      "fields": "authorId,title,description,tags,mentions,status,mediaType,storageProvider?,mediaKey?,mediaPath,fileName,fileSize,mimeType,width,height,durationMs,createdAt,updatedAt"
+    },
+    {
+      "path": "profileMedia/{uid}",
+      "authority": "avatar/enquadramento",
+      "readers": "regras sociais atuais",
+      "writers": "somente backend",
+      "dto": "ProfileAvatar",
+      "fields": "uid,avatarPath,avatarURL,mediaKey,storageProvider,cropScale,focusX,focusY,sourceWidth,sourceHeight,createdAt,updatedAt"
+    },
+    {
+      "path": "postEngagement/{legacyPlayerId}",
+      "authority": "projeção reconstruível de métricas",
+      "readers": "contas registradas verificadas",
+      "writers": "backend",
+      "fields": "playerId,likes,views,shares,updatedAt"
+    },
+    {
+      "path": "userPostLikes/{uid}/posts/{legacyPlayerId}",
+      "authority": "seleção de curtida",
+      "readers": "dono/backend",
+      "writers": "backend idempotente por usuário/post",
+      "fields": "marcador por par usuário/post e datas; não confiar em contagem do cliente"
+    },
+    {
+      "path": "userPostViews/{uid}/posts/{legacyPlayerId}",
+      "authority": "visualização única por usuário/post",
+      "readers": "dono/backend",
+      "writers": "backend",
+      "fields": "marcador por par usuário/post e datas; sem TTL que altere a semântica"
+    },
+    {
+      "path": "follows/{legacyEdgeId}",
+      "authority": "relação de seguir",
+      "readers": "contas registradas verificadas",
+      "writers": "seguidor validado nas Rules atuais; servidor em B07",
+      "fields": "followerUid,targetUid,targetProfileId,createdAt"
+    },
+    {
+      "path": "postComments/{commentId}",
+      "authority": "comentário/resposta",
+      "readers": "contas registradas verificadas",
+      "writers": "autor validado; servidor em B07",
+      "dto": "PostComment",
+      "fields": "authorName,authorProfileId,authorUserId,authorUsername,body,createdAt,parentCommentId?,playerId,postId,replyToUserId?,replyToUsername?"
+    },
+    {
+      "path": "directMessages/{messageId}",
+      "authority": "mensagem legada",
+      "readers": "remetente/destinatário",
+      "writers": "backend, recibos validados",
+      "dto": "DirectMessage",
+      "fields": "id,senderUserId,recipientUserId,body,createdAt,deliveredAt?,readAt?,sharedPost?"
+    },
+    {
+      "path": "notifications/{id}",
+      "authority": "projeção de evento social",
+      "readers": "destinatário/backend",
+      "writers": "backend, confirmação de leitura validada",
+      "dto": "AppNotification",
+      "fields": "id,actorName,actorUserId,actorUsername,recipientUserId,kind,sourceId,createdAt,playerId?,mediaType?,preview?,readAt?"
+    },
+    {
+      "path": "socialPreferences/{uid}",
+      "authority": "preferências privadas legadas",
+      "readers": "dono/backend",
+      "writers": "dono com campos/limites validados",
+      "fields": "ownerUid,autoplayEnabled?,notificationsEnabled?,blockedProfileIds,deletedAtByContactId,hiddenPlayerIds,interestedContentKeys,mutedContactIds,mutedContentKeys,pinnedContactIds,reportedPlayerIds,updatedAt"
+    },
+    {
+      "path": "tagCatalog/{tagKey} e marcadores posts/users",
+      "authority": "projeção reconstruível de tags",
+      "readers": "contas registradas verificadas",
+      "writers": "backend",
+      "dto": "TagCatalogEntry",
+      "fields": "key,label,postCount,creatorCount e marcadores derivados"
+    },
+    {
+      "path": "subscriptions/{uid}",
+      "authority": "estado operacional derivado do Mercado Pago",
+      "readers": "dono por get/backend",
+      "writers": "somente backend com verificação do provedor",
+      "dto": "ProfessionalSubscription",
+      "fields": "ownerUid,provider,providerSubscriptionId,plan,status,amount,currency,checkoutUrl,nextPaymentAt,createdAt,updatedAt,authorizedAt?,canceledAt?,checkoutAttemptId?,paymentEnvironment?,payerEmailHash?"
+    },
+    {
+      "path": "identityVerifications/{uid}",
+      "authority": "resultado mínimo de verificação",
+      "readers": "dono por get/backend",
+      "writers": "somente backend autorizado",
+      "dto": "IdentityVerification",
+      "fields": "status,provider?,reviewNote?,submittedAt?,updatedAt; documentos KYC não são perfil social"
+    },
+    {
+      "path": "mediaUploadIntents/{id} e avatarUploadIntents/{id}",
+      "authority": "intenção temporária do backend",
+      "readers": "backend",
+      "writers": "backend",
+      "fields": "ownerUid,postId quando aplicável,expectedSize,mimeType,mediaType,fileName,uploadKey,mediaKey,expiresAt,status e datas; estados atuais pending/finalizing/completed"
+    },
+    {
+      "path": "mediaRateLimits/socialRateLimits/tagRateLimits",
+      "authority": "contenção operacional",
+      "readers": "backend",
+      "writers": "backend transacional",
+      "fields": "janela,contagem,updatedAt; nunca autoridade do cliente"
+    },
+    {
+      "path": "R2 e Firebase Storage",
+      "authority": "bytes e metadados do objeto",
+      "readers": "R2 público por URL; Storage conforme Rules; documento privado não protege URL pública",
+      "writers": "upload autorizado e backend",
+      "fields": "bucket lógico,chave,tamanho,MIME,metadados; duração/dimensões R2 atuais ainda informadas pelo cliente"
+    },
+    {
+      "path": "cache local schema 6",
+      "authority": "cache/rascunho/simulação locais, não assinatura",
+      "readers": "app no dispositivo",
+      "writers": "repositório local",
+      "dto": "LocalAppState",
+      "fields": "version,submissions,professionalSettingsByUser,campaigns; isolamento por UID será aplicado em S02"
+    },
+    {
+      "path": "tema do dispositivo",
+      "authority": "preferência local",
+      "readers": "provider de tema",
+      "writers": "usuário no dispositivo",
+      "fields": "@xolot/theme-mode-v1: light/dark; não contém dado de conta"
+    }
+  ],
+  "invariants": {
+    "badge": "identityVerified reflete identity.status=approved; plusActive exige assinatura authorized E identidade approved; apenas servidor escreve projeções",
+    "money": "amount de assinatura v1 é decimal em reais do provedor, BRL; preço atual 9.90 e legado 19.90 não são reinterpretados nem alterados",
+    "simulation": "campanhas, estimativas e orçamento locais não fazem cobrança; professionalSettings.plan não concede benefício pago",
+    "ids": "Auth UID e IDs do banco preservam caixa. Alias approved-/profile- só resolve com inventário inequívoco; sem renomeação física nesta etapa",
+    "providers": "cliente reconhece apple; Rules de cadastro atuais autorizam password/google. Não habilitar novo provedor silenciosamente"
+  }
+}

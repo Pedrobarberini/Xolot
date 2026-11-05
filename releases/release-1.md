@@ -1196,3 +1196,13 @@ Criterios de aceite:
 - A lista abre como popup, sem alterar a rota do Perfil.
 - A primeira página exibe no máximo oito perfis e novas páginas são carregadas por comando explícito.
 - Typecheck e testes automatizados passam com Node 22.
+
+## Limpeza local e dependências — 2026-11-01
+
+- Removida a cópia antiga de deploy após comparar seus arquivos com o commit de origem e confirmar que o `.env` era idêntico ao atual.
+- Removida a tela `SearchScreen.tsx` sem referências; a busca ativa continua em `ProfileDiscoveryScreen.tsx`.
+- Removidos 184 estilos sem uso e imports desnecessários nos módulos de estilos.
+- Migrada a configuração `nodeLinker: hoisted` para `pnpm-workspace.yaml`, usada pelo pnpm 11, e removido o `.npmrc` redundante.
+- Reinstaladas as mesmas versões do lockfile para substituir dependências copiadas do caminho antigo do OneDrive.
+- Preservados documentos de registro, PDFs finais, recursos do aplicativo e configurações locais; o gerador do plano R2 foi movido de `tmp/pdfs/` para `docs/` com caminho de saída relativo ao projeto.
+- Validação: 164 testes, checagem TypeScript do aplicativo e do backend e build web aprovados.

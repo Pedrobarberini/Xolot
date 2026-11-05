@@ -1,47 +1,19 @@
-export type SubmissionMediaType = "image" | "video";
-
-export type PublicationMediaInput = {
-  durationMs?: number;
-  file?: File;
-  fileName: string;
-  fileSize?: number;
-  height?: number;
-  mediaType: SubmissionMediaType;
-  mimeType?: string;
-  uri: string;
-  width?: number;
-};
-
-export type Player = {
-  id: string;
-  profileId: string;
-  ownerUserId?: string;
-  name: string;
-  username?: string;
-  age: number;
-  city: string;
-  position: string;
-  sport?: string;
-  club: string;
-  videoTitle: string;
-  videoLength: string;
-  videoUri: string | number;
-  mediaType?: SubmissionMediaType;
-  mediaHeight?: number;
-  mediaWidth?: number;
-  hasAudio?: boolean;
-  highlight: string;
-  tags: string[];
-  mentions?: string[];
-};
+import type { SubmissionMediaType } from "./features/posts/index";
+import type { AuthenticatedUser } from "./features/auth/index";
+import type { SocialUser } from "./features/profiles/index";
+export type {
+  PublicationMediaInput,
+  Player,
+  VideoSubmissionStatus,
+  VideoSubmission,
+  SubmissionMediaType,
+} from "./features/posts/index";
+export type { UserRole, AuthProvider, AuthenticatedUser } from "./features/auth/index";
+export type { AccountProfile, SocialUser } from "./features/profiles/index";
 
 export type ProfessionalPlanId = "free" | "pro" | "business";
 
-export type ProfessionalSubscriptionStatus =
-  | "authorized"
-  | "canceled"
-  | "paused"
-  | "pending";
+export type ProfessionalSubscriptionStatus = "authorized" | "canceled" | "paused" | "pending";
 
 export type ProfessionalSubscription = {
   authorizedAt?: string;
@@ -56,11 +28,7 @@ export type ProfessionalSubscription = {
   updatedAt: string;
 };
 
-export type IdentityVerificationStatus =
-  | "approved"
-  | "expired"
-  | "pending"
-  | "rejected";
+export type IdentityVerificationStatus = "approved" | "expired" | "pending" | "rejected";
 
 export type IdentityVerification = {
   provider?: string;
@@ -86,15 +54,9 @@ export type ProfessionalSettings = {
   updatedAt: string;
 };
 
-export type ProfessionalSettingsByUser = Record<
-  string,
-  ProfessionalSettings
->;
+export type ProfessionalSettingsByUser = Record<string, ProfessionalSettings>;
 
-export type CampaignObjective =
-  | "reach"
-  | "profile_visits"
-  | "messages";
+export type CampaignObjective = "reach" | "profile_visits" | "messages";
 
 export type CampaignStatus = "active" | "paused" | "completed";
 
@@ -132,12 +94,7 @@ export type SharedPostReference = {
   title: string;
 };
 
-export type AppNotificationKind =
-  | "comment"
-  | "like"
-  | "message"
-  | "reply"
-  | "shared-post";
+export type AppNotificationKind = "comment" | "like" | "message" | "reply" | "shared-post";
 
 export type AppNotification = {
   actorName: string;
@@ -193,10 +150,7 @@ export type ConversationPreferences = {
   pinnedContactIds: string[];
 };
 
-export type ConversationPreferencesByUser = Record<
-  string,
-  ConversationPreferences
->;
+export type ConversationPreferencesByUser = Record<string, ConversationPreferences>;
 
 export type ProfileAvatar = {
   cropScale: number;
@@ -216,67 +170,12 @@ export type TagCatalogEntry = {
   postCount: number;
 };
 
-export type UserRole = "Usuário" | "Admin";
-
-
-export type AccountProfile = {
-  age: number | null;
-  bio: string;
-  city: string;
-  club: string;
-  interestTags: string[];
-  name: string;
-  sport: string;
-  position: string;
-  username: string;
-};
-
-export type AuthProvider = "password" | "google" | "apple";
-
-export type AppUser = AccountProfile & {
-  id: string;
-  email: string;
-  role: UserRole;
-  username: string;
-  acceptedTerms: boolean;
-  authProvider?: AuthProvider;
-  googleUid?: string;
-  photoURL?: string;
-  identityVerified?: boolean;
-  plusActive?: boolean;
-  profileCompleted: boolean;
-};
-
-export type VideoSubmissionStatus =
-  | "Em revisão"
-  | "Ajustes solicitados"
-  | "Aprovado"
-  | "Reprovado";
-
-export type VideoSubmission = {
-  id: string;
-  userId: string;
-  athleteName: string;
-  age: number;
-  city: string;
-  position: string;
-  club: string;
-  videoTitle: string;
-  videoLink: string;
-  mediaType?: SubmissionMediaType;
-  videoDurationMs?: number;
-  videoFileName?: string;
-  videoFileSize?: number;
-  mediaHeight?: number;
-  mediaWidth?: number;
-  mimeType?: string;
-  storagePath?: string;
-  highlight: string;
-  tags?: string[];
-  mentions?: string[];
-  hasGuardianConsent: boolean;
-  status: VideoSubmissionStatus;
-  submittedAt: string;
-  reviewNote?: string;
-  approvedAt?: string;
-};
+// Fachada temporária: perfil social não exige credenciais fictícias.
+export type AppUser =
+  | AuthenticatedUser
+  | (SocialUser & {
+      email?: never;
+      acceptedTerms?: never;
+      authProvider?: never;
+      googleUid?: never;
+    });

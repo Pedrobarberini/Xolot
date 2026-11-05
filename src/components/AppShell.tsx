@@ -1,6 +1,7 @@
+import { BRAND } from "../config/brand.ts";
 import React, { useEffect, useRef } from "react";
 import { AccessibilityInfo, Animated, Easing, View } from "react-native";
-import { XOLOT_WORDMARK } from "../constants/assets";
+import { FOLKO_PRIMARY } from "../constants/assets";
 import { styles } from "../styles/appStyles";
 
 export function BrandLaunchScreen({ onFinish }: { onFinish: () => void }) {
@@ -58,13 +59,13 @@ export function BrandLaunchScreen({ onFinish }: { onFinish: () => void }) {
 
   return (
     <Animated.View
-      accessibilityLabel="Carregando Xolot"
+      accessibilityLabel={`Carregando ${BRAND.name}`}
       accessibilityRole="progressbar"
       style={[styles.brandLaunch, { opacity }]}
     >
       <Animated.Image
         resizeMode="contain"
-        source={XOLOT_WORDMARK}
+        source={FOLKO_PRIMARY}
         style={[styles.brandLaunchLogo, { transform: [{ scale }] }]}
       />
     </Animated.View>

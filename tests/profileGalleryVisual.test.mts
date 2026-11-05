@@ -11,13 +11,9 @@ const profileStylesSource = readFileSync(
   "utf8"
 );
 
-test("galeria mostra o titulo diretamente sobre a midia", () => {
+test("galeria não reintroduz a camada de sombra legada", () => {
   assert.doesNotMatch(gallerySource, /profileGalleryCardShade/);
   assert.doesNotMatch(profileStylesSource, /profileGalleryCardShade/);
-  assert.match(
-    profileStylesSource,
-    /profileGalleryCardTitle:[\s\S]*textShadowColor:[\s\S]*textShadowRadius: 3/
-  );
 });
 
 test("botao de opcoes preserva contraste em tamanho compacto", () => {

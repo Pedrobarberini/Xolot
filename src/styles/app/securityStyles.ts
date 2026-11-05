@@ -30,7 +30,7 @@ export const securityStyles = {
     textAlign: "center"
   },
   securitySegmentLabelActive: {
-    color: colors.primary
+    color: colors.primaryText
   },
   securitySegmentCount: {
     color: colors.muted,
@@ -38,7 +38,7 @@ export const securityStyles = {
     fontWeight: "900"
   },
   securitySegmentCountActive: {
-    color: colors.primary
+    color: colors.primaryText
   },
   securityListSection: {
     backgroundColor: colors.surface,
@@ -92,7 +92,7 @@ export const securityStyles = {
     width: 44
   },
   securityAvatarText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 12,
     fontWeight: "900"
   },

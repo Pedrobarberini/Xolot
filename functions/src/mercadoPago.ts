@@ -19,7 +19,7 @@ import {
 const PLUS_AMOUNT = 9.9;
 const LEGACY_PLUS_AMOUNTS = [19.9];
 const PLUS_CURRENCY = "BRL";
-const PLUS_REASON = "Xolot Plus";
+const PLUS_REASON = "Folko Plus";
 const CHECKOUT_RETURN_URL = "https://xolot.com.br/?subscription=return";
 const WEBHOOK_URL =
   "https://southamerica-east1-xolot-384e9.cloudfunctions.net/mercadoPagoWebhook?source_news=webhooks";
@@ -143,7 +143,7 @@ function assertExpectedSubscription(subscription: MercadoPagoSubscription) {
     ) ||
     currency !== PLUS_CURRENCY
   ) {
-    throw new Error("A assinatura recebida não corresponde ao plano Xolot Plus.");
+    throw new Error("A assinatura recebida não corresponde ao plano Folko Plus.");
   }
 }
 
@@ -312,7 +312,7 @@ export const createPlusSubscription = onCall(createSubscriptionOptions, async (r
   if (identity.data()?.status !== "approved") {
     throw new HttpsError(
       "failed-precondition",
-      "Conclua a verificação de identidade antes de assinar o selo Xolot Plus."
+      "Conclua a verificação de identidade antes de assinar o selo Folko Plus."
     );
   }
 
@@ -324,7 +324,7 @@ export const createPlusSubscription = onCall(createSubscriptionOptions, async (r
   if (!accountEmail) {
     throw new HttpsError(
       "failed-precondition",
-      "Sua conta precisa ter um e-mail válido para assinar o Xolot Plus."
+      "Sua conta precisa ter um e-mail válido para assinar o Folko Plus."
     );
   }
 
@@ -392,7 +392,7 @@ export const createPlusSubscription = onCall(createSubscriptionOptions, async (r
     };
   } catch (error) {
     const details = readMercadoPagoApiError(error);
-    console.error("Falha ao criar assinatura Xolot Plus.", {
+    console.error("Falha ao criar assinatura Folko Plus.", {
       causeCodes: details.cause
         ?.map((item) => item.code)
         .filter((code): code is string => Boolean(code)),
@@ -430,7 +430,7 @@ export const syncPlusSubscription = onCall(callableOptions, async (request) => {
     const status = await saveSubscription(uid, subscription);
     return { status, synced: true };
   } catch (error) {
-    console.error("Falha ao sincronizar assinatura Xolot Plus.", {
+    console.error("Falha ao sincronizar assinatura Folko Plus.", {
       message: error instanceof Error ? error.message : "Erro desconhecido",
       uid
     });
@@ -492,7 +492,7 @@ export const cancelPlusSubscription = onCall(callableOptions, async (request) =>
 
     return { status };
   } catch (error) {
-    console.error("Falha ao cancelar assinatura Xolot Plus.", {
+    console.error("Falha ao cancelar assinatura Folko Plus.", {
       message: error instanceof Error ? error.message : "Erro desconhecido",
       uid
     });

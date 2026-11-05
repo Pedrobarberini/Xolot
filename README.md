@@ -1,13 +1,15 @@
-# Xolot
+# Folko
 
-Rede social mobile-first para pessoas, criadores, talentos, marcas, projetos e serviços divulgarem seu trabalho por meio de vídeos verticais.
+Rede social para pessoas, criadores, marcas, serviços, projetos e comunidades compartilharem e divulgarem conteúdo no Brasil.
 
-## Produto atual
+Direção atualizada em 2026-11-05: manter os recursos existentes e retirar o nicho esportivo. O cadastro usa apresentação geral. A marca Folko utiliza o ícone e as assinaturas fornecidos pelo proprietário, com paleta preta, creme, amarela, laranja e verde. As fontes e os usos estão no [inventário de marca](assets/brand/README.md). Texto, fotos e vídeos foram confirmados para o feed; publicação de texto é ampliação planejada em P04–P07, não funcionalidade já entregue. Consulte o [plano Folko](docs/refatoracao/README.md) e o [escopo vigente](docs/refatoracao/05-direcao-folko.md).
+
+## Funcionalidades existentes
 
 - Aplicativo React Native com Expo e TypeScript para Android, iOS e web/PWA.
 - Contas por email/senha e Google usando Firebase Authentication.
 - Verificação de email, recuperação de senha e restauração segura de sessão.
-- Primeiro acesso com configuração de `@username`, nome público, biografia, idade, área de atuação, cidade e organização.
+- Primeiro acesso com configuração de `@username`, nome público, biografia, idade, área de interesse, apresentação, cidade e organização.
 - Perfis públicos sincronizados pelo Cloud Firestore, com reserva transacional de `@username`.
 - Perfis próprios e públicos com galeria, métricas sociais e link profissional.
 - Início vertical com reprodução automática apenas do conteúdo visível, curtidas, compartilhamento, follow e preferências.
@@ -16,7 +18,7 @@ Rede social mobile-first para pessoas, criadores, talentos, marcas, projetos e s
 - Mensagens diretas, solicitações de contato e compartilhamento de publicações.
 - Modo profissional, planos de pré-lançamento e campanhas simuladas.
 
-Planos e campanhas continuam sem cobrança real. Billing, mídia remota, publicações, follows e mensagens server-side entram nas próximas fases.
+A base já possui integração de mídia remota, comandos sociais e assinatura web; isso não significa que toda funcionalidade esteja promovida ou que campanhas simuladas tenham cobrança real. Preservar o estado específico de cada recurso e as autoridades do backend durante a transição.
 
 ## Teste online
 
@@ -35,7 +37,7 @@ A sessão e a lista de contas não são mais gravadas no estado local do app. Se
 
 ### Ainda local
 
-Publicações, mídia, follows, mensagens, preferências, avatares personalizados, configurações profissionais e campanhas ainda ficam no dispositivo. Na web, a mídia usa IndexedDB. Esses dados ainda não sincronizam entre aparelhos.
+Caches, rascunhos, algumas preferências, configurações profissionais e simulações ainda têm armazenamento local. O projeto também possui serviços remotos de posts, mídia, relações e mensagens. A refatoração separa essas autoridades; um cache não substitui o backend nem prova que todo dado seja apenas local.
 
 ## Como executar
 
@@ -48,6 +50,10 @@ pnpm start --tunnel
 ```
 
 O modo `--tunnel` permite abrir o projeto no Expo Go quando computador e celular não estão na mesma rede.
+
+As opções do pnpm ficam em `pnpm-workspace.yaml`. O projeto usa `nodeLinker: hoisted` para manter uma instalação compartilhada de dependências. Depois de mover o projeto de pasta ou computador, execute `pnpm install --frozen-lockfile` para recriar os caminhos locais.
+
+`node_modules/`, `.expo/`, `.firebase/`, `dist/`, `functions/lib/` e os logs do Expo são gerados localmente. Não precisam ser copiados para backups do código; as dependências são recriadas com `pnpm install --frozen-lockfile` e os builds com os scripts do projeto. Os documentos de registro em `docs/registro-nextstar/` e os PDFs finais em `output/pdf/` são entregáveis e devem ser preservados.
 
 ### Qualidade
 

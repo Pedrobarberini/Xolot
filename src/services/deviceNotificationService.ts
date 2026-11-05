@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import { Platform } from "react-native";
 import type { AppNotification } from "../types";
 import { getNotificationText } from "../utils/notifications";
@@ -51,7 +52,7 @@ export async function showDeviceNotification(notification: AppNotification) {
   };
 
   try {
-    const popup = new notificationApi("Xolot", options);
+    const popup = new notificationApi(BRAND.name, options);
 
     popup.onclick = () => {
       if (typeof window !== "undefined") {
@@ -70,7 +71,7 @@ export async function showDeviceNotification(notification: AppNotification) {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      await registration.showNotification("Xolot", options);
+      await registration.showNotification(BRAND.name, options);
       return true;
     } catch {
       return false;

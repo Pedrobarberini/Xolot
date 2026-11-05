@@ -1,38 +1,35 @@
 {
   "id": "./",
-  "name": "Xolot",
-  "short_name": "Xolot",
-  "description": "Descubra, envie e avalie talentos do futebol.",
+  "name": "Folko",
+  "short_name": "Folko",
+  "description": "Uma rede social para compartilhar e divulgar o que você faz.",
   "lang": "pt-BR",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F5F8F5",
-  "theme_color": "#046136",
-  "categories": ["sports", "entertainment"],
+  "background_color": "#090A0F",
+  "theme_color": "#090A0F",
+  "categories": [
+    "social",
+    "entertainment"
+  ],
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "icons/folko-icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "icons/folko-icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "maskable"
-    },
-    {
-      "src": "icons/icon-512.png",
+      "src": "icons/folko-maskable-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"

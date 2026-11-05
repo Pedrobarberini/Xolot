@@ -1,0 +1,141 @@
+{
+  "version": 2,
+  "status": "proposta_local_sem_escrita_ou_deploy",
+  "compatibility": {
+    "legacyWithoutVersion": 1,
+    "unknownVersion": "recusar edição/migração automática, preservar original e emitir diagnóstico sanitizado",
+    "cutover": "leitores aditivos + Rules/índices prontos antes de qualquer escritor v2; dry-run/checkpoint/dual compatibilidade em G01-G04",
+    "wire": "Timestamp Firestore; DTOs ISO UTC; dinheiro novo em campo amountCents inteiro BRL, sem reinterpretar amount v1"
+  },
+  "resources": [
+    {
+      "path": "conversations/{conversationId}",
+      "authority": "backend",
+      "readers": "dois participantes imutáveis",
+      "writers": "comando idempotente",
+      "fields": "schemaVersion=2,participantUids[2],createdAt,lastMessageAt,lastMessageId; ID de tupla versionada ordenada"
+    },
+    {
+      "path": "conversations/{conversationId}/messages/{messageId}",
+      "authority": "backend",
+      "readers": "participantes",
+      "writers": "remetente por comando, recibos do destinatário validados",
+      "fields": "schemaVersion=2,id,conversationId,senderUid,recipientUid,body,sharedPost?,clientOperationId,createdAt,deliveredAt?,readAt?"
+    },
+    {
+      "path": "userInboxes/{uid}/conversations/{conversationId}",
+      "authority": "projeção reconstruível do servidor",
+      "readers": "dono",
+      "writers": "backend",
+      "fields": "schemaVersion=2,conversationId,otherUid,lastMessageAt,lastMessageId,preview limitado,unreadCount"
+    },
+    {
+      "path": "userData/{uid}/preferences/app",
+      "authority": "preferências do dono",
+      "readers": "dono/backend",
+      "writers": "dono com allowlist",
+      "fields": "schemaVersion=2,autoplayEnabled,notificationsEnabled,updatedAt"
+    },
+    {
+      "path": "userData/{uid}/blockedProfiles/{targetUid}",
+      "authority": "preferência privada",
+      "readers": "dono/backend para comandos",
+      "writers": "dono/comando protegido",
+      "fields": "schemaVersion=2,targetUid,createdAt"
+    },
+    {
+      "path": "userData/{uid}/hiddenPosts/{postId}",
+      "authority": "preferência privada, não exclusão do post",
+      "readers": "dono",
+      "writers": "dono",
+      "fields": "schemaVersion=2,postId,createdAt"
+    },
+    {
+      "path": "userData/{uid}/mutedTopics/{topicId}",
+      "authority": "preferência privada",
+      "readers": "dono",
+      "writers": "dono",
+      "fields": "schemaVersion=2,topicId,createdAt"
+    },
+    {
+      "path": "userData/{uid}/conversationStates/{conversationId}",
+      "authority": "preferências da conversa por usuário",
+      "readers": "dono",
+      "writers": "dono sem modificar participantes/mensagem",
+      "fields": "schemaVersion=2,muted,pinned,deletedBefore,updatedAt"
+    },
+    {
+      "path": "userData/{uid}/preferences/professional",
+      "authority": "configuração profissional do dono",
+      "readers": "dono; projeção social exige decisão explícita de exposição",
+      "writers": "dono em campos não financeiros",
+      "fields": "schemaVersion=2,enabled,category,externalLink,updatedAt; sem plan como autorização"
+    },
+    {
+      "path": "simulação local por UID",
+      "authority": "dispositivo",
+      "readers": "dono no dispositivo",
+      "writers": "simulador local",
+      "fields": "schemaVersion=2,simulation=true,campaigns; moeda/orçamento v1 preservados no adaptador; nunca invoice/payment"
+    },
+    {
+      "path": "entitlements/{uid}",
+      "authority": "projeção reconstruível do backend",
+      "readers": "dono/serviços autorizados",
+      "writers": "reconciliador de identidade/assinatura",
+      "fields": "schemaVersion=2,identityApproved,subscriptionAuthorized,plusActive,updatedAt,sourceVersion"
+    },
+    {
+      "path": "billingEvents/{eventKey}",
+      "authority": "integração de cobrança",
+      "readers": "operação restrita",
+      "writers": "webhook validado e reconciliador",
+      "fields": "schemaVersion=2,providerEventId,kind,status,receivedAt,processedAt; sem payload privado irrestrito"
+    },
+    {
+      "path": "operationJobs/{jobId}",
+      "authority": "backend/workers",
+      "readers": "operação restrita",
+      "writers": "backend/worker com lease",
+      "fields": "schemaVersion=2,kind,status,attempt,nextAttemptAt,leaseUntil,checkpoint,resultCode; transitions por I01-I09"
+    },
+    {
+      "path": "reports/{id},moderationDecisions/{id},auditEvents/{id}",
+      "authority": "servidor autorizado",
+      "readers": "mínimo necessário a autor/revisor/operador",
+      "writers": "comandos validados",
+      "fields": "schemaVersion=2,referências canônicas,código de motivo/decisão,datas; conteúdo e retenção dependem de SEC01/I08"
+    },
+    {
+      "path": "migrationRuns/{id} e checkpoints",
+      "authority": "ferramenta administrativa",
+      "readers": "operação restrita",
+      "writers": "migração autorizada",
+      "fields": "schemaVersion=2,alvo,versão,cursor,contagens,status; sem dados privados em relatório"
+    }
+  ],
+  "publicationStates": [
+    "draft",
+    "processing",
+    "published",
+    "hidden",
+    "rejected",
+    "deleting",
+    "deleted"
+  ],
+  "uploadStates": ["created", "uploaded", "verifying", "processing", "ready", "failed", "expired"],
+  "deploymentGates": [
+    "staging identificado",
+    "IAM conferido",
+    "backup/restauração ensaiados",
+    "índices prontos",
+    "Rules negativas exercitadas",
+    "revisão e autorização do alvo"
+  ],
+  "preserved": [
+    "sem nova cobrança",
+    "sem acesso anônimo",
+    "sem ampliar exposição da idade",
+    "sem migração física por suposição"
+  ]
+}

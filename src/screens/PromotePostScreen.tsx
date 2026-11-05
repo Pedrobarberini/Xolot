@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React, { useState } from "react";
 import { CreditCard, Megaphone, Play } from "lucide-react-native";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
@@ -70,7 +71,7 @@ export function PromotePostScreen({
             >
               <View style={s.optionHeader}>
                 <Text style={s.optionTitle}>{option.label}</Text>
-                {active ? <Megaphone color={colors.primary} size={18} /> : null}
+                {active ? <Megaphone color={colors.primaryText} size={18} /> : null}
               </View>
               <Text style={s.optionDescription}>{option.description}</Text>
             </Pressable>
@@ -108,7 +109,7 @@ export function PromotePostScreen({
 
       <View style={s.notice}>
         <Text style={s.noticeText}>
-          O impulsionamento será uma compra separada do Xolot Plus. Alcance,
+          O impulsionamento será uma compra separada do {BRAND.subscriptionName}. Alcance,
           pagamento e entrega só serão exibidos depois da confirmação do backend
           de anúncios. Nenhuma cobrança foi realizada nesta tela.
         </Text>

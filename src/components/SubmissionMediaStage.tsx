@@ -19,8 +19,7 @@ import { BackButton } from "./Navigation";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import type {
-  PublicationMediaInput,
-  SubmissionMediaType
+  PublicationMediaInput
 } from "../types";
 import { SubmissionMediaPreview } from "./SubmissionComponents";
 
@@ -190,7 +189,7 @@ export function SubmissionMediaStage({
       }
 
       onCapture({
-        fileName: `xolot-${Date.now()}.jpg`,
+        fileName: `folko-${Date.now()}.jpg`,
         height: photo.height,
         mediaType: "image",
         mimeType: "image/jpeg",
@@ -264,7 +263,7 @@ export function SubmissionMediaStage({
               Date.now() - startedAt,
               MAX_RECORDING_DURATION_MS
             ),
-            fileName: `xolot-${Date.now()}.mp4`,
+            fileName: `folko-${Date.now()}.mp4`,
             mediaType: "video",
             mimeType: "video/mp4",
             uri: result.uri

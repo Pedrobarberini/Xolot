@@ -272,7 +272,7 @@ export function MessagesScreen({
               ]}
             >
               {isFollowing ? (
-                <UserCheck color={colors.primary} size={17} strokeWidth={2.3} />
+                <UserCheck color={colors.primaryText} size={17} strokeWidth={2.3} />
               ) : (
                 <UserPlus color={colors.onPrimary} size={17} strokeWidth={2.3} />
               )}
@@ -287,7 +287,7 @@ export function MessagesScreen({
           {!hasConversationAccess && incomingRequestMessages.length > 0 ? (
             <View style={styles.messagesRequestGate}>
               <View style={styles.messagesRequestGateIcon}>
-                <LockKeyhole color={colors.primary} size={24} />
+                <LockKeyhole color={colors.primaryText} size={24} />
               </View>
               <Text style={styles.messagesThreadEmptyTitle}>
                 Solicitação de mensagem
@@ -309,7 +309,7 @@ export function MessagesScreen({
             </View>
           ) : visibleMessages.length === 0 ? (
             <View style={styles.messagesThreadEmpty}>
-              <MessageCircle color={colors.primary} size={28} />
+              <MessageCircle color={colors.primaryText} size={28} />
               <Text style={styles.messagesThreadEmptyTitle}>
                 {hasConversationAccess
                   ? "Envie a primeira mensagem"
@@ -578,7 +578,7 @@ export function MessagesScreen({
           </Text>
         </View>
         <View style={styles.messagesContactIndicators}>
-          {isPinned ? <Pin color={colors.primary} size={15} /> : null}
+          {isPinned ? <Pin color={colors.primaryText} size={15} /> : null}
           {isMuted ? <BellOff color={colors.muted} size={15} /> : null}
           {isRequest ? (
             <View style={styles.messagesRequestPill}>
@@ -627,7 +627,7 @@ export function MessagesScreen({
       {contacts.length === 0 ? (
         <View style={styles.messagesEmptyState}>
           <View style={styles.messagesIcon}>
-            <MessageCircle color={colors.primary} size={30} />
+            <MessageCircle color={colors.primaryText} size={30} />
           </View>
           <Text style={styles.discoveryEmptyTitle}>Nenhuma conversa ainda</Text>
           <Text style={styles.discoveryEmptyBody}>

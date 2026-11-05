@@ -1,0 +1,43 @@
+{
+  "source": "assets/brand/folko-horizontal.png",
+  "sourceSha256": "8a41364005a0cbb24872f6fd700390eb1ffba4d87322febf535c830dbb9db957",
+  "method": "Owner-authorized color extraction. Only alpha and framing change; RGB comes directly from the original horizontal art. AI cutouts rejected; original eye, feather and beak preserved.",
+  "background": [
+    0,
+    0,
+    0
+  ],
+  "threshold": 12,
+  "outputs": [
+    {
+      "role": "symbol",
+      "file": "assets/brand/folko-symbol-transparent.png",
+      "width": 780,
+      "height": 780,
+      "sourceRect": [
+        231,
+        56,
+        780,
+        780
+      ],
+      "visiblePixels": 215410,
+      "sha256": "e76282f1c449bb1caf5986a7d0afac7d89e44f0e8180f0a372875367690897cb",
+      "rgbPixelsChanged": 0
+    },
+    {
+      "role": "horizontal",
+      "file": "assets/brand/folko-horizontal-transparent.png",
+      "width": 1213,
+      "height": 780,
+      "sourceRect": [
+        241,
+        56,
+        1213,
+        780
+      ],
+      "visiblePixels": 348253,
+      "sha256": "9e5fa1d4badc5fecdca0c180124ba5a57585496996a52bea7ef4b12cf980691e",
+      "rgbPixelsChanged": 0
+    }
+  ]
+}

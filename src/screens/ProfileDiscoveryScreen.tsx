@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React, { useMemo, useState } from "react";
 import { BadgeCheck, ChevronRight, Search, X } from "lucide-react-native";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
@@ -78,7 +79,7 @@ export function SearchScreen({
         ? formatProfileActivity(account.sport, account.position, account.city)
         : player
           ? formatProfileActivity(player.sport, player.position, player.city)
-          : "Usuário Xolot | Sem publicações";
+          : `Usuário ${BRAND.name} | Sem publicações`;
 
       return {
         id: `account-${account.id}`,
@@ -331,7 +332,7 @@ export function SearchScreen({
                 </Text>
                 <View style={styles.searchProfileBadgeRow}>
                   {profile.professionalLabel ? (
-                    <BadgeCheck color={colors.primary} size={13} />
+                    <BadgeCheck color={colors.primaryText} size={13} />
                   ) : null}
                   <Text
                     numberOfLines={1}

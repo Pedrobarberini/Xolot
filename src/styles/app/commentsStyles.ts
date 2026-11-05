@@ -9,7 +9,7 @@ export const commentsStyles = {
   },
   commentsBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.58)"
+    backgroundColor: "rgba(12, 13, 20, 0.58)"
   },
   commentsKeyboardArea: {
     alignItems: "center",
@@ -102,7 +102,7 @@ export const commentsStyles = {
     width: 30
   },
   commentAvatarText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 11,
     fontWeight: "900"
   },
@@ -141,7 +141,7 @@ export const commentsStyles = {
     marginTop: 6
   },
   commentReplyMention: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontWeight: "900"
   },
   commentReplyButton: {
@@ -153,7 +153,7 @@ export const commentsStyles = {
     paddingVertical: 2
   },
   commentReplyButtonText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 10,
     fontWeight: "800"
   },
@@ -220,7 +220,7 @@ export const commentsStyles = {
     paddingVertical: 7
   },
   commentReplyTargetText: {
-    color: colors.primary,
+    color: colors.primaryText,
     flex: 1,
     fontSize: 11,
     fontWeight: "800"
@@ -276,7 +276,7 @@ export const commentsStyles = {
   },
   commentDeleteConfirmationBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.48)"
+    backgroundColor: "rgba(12, 13, 20, 0.48)"
   },
   commentDeleteConfirmationCard: {
     backgroundColor: colors.surface,

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import {
-  ArrowLeft,
   Home,
   LogOut,
   MessageCircle,
@@ -11,21 +10,20 @@ import {
 } from "lucide-react-native";
 import {
   Animated,
-  Image,
   Pressable,
-  type StyleProp,
   Text,
-  TextInput,
   useWindowDimensions,
-  View,
-  type ViewStyle
+  View
 } from "react-native";
-import { XOLOT_HORIZONTAL_WORDMARK } from "../constants/assets";
+import { BrandMark } from "../shared/ui/BrandMark";
 import { USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { AppUser, UserRole } from "../types";
 import { Tab } from "../ui/types";
+import { BackButton } from "../shared/ui/BackButton";
+export { BackButton } from "../shared/ui/BackButton";
+export { LabeledInput } from "../shared/ui/LabeledInput";
 
 export function Header({
   onSignOut,
@@ -54,15 +52,7 @@ export function Header({
         ]}
       >
         <View style={styles.headerTitleBlock}>
-          <Image
-            accessibilityLabel="Xolot"
-            resizeMode="contain"
-            source={XOLOT_HORIZONTAL_WORDMARK}
-            style={[
-              styles.headerWordmark,
-              isCompact ? styles.headerWordmarkCompact : null
-            ]}
-          />
+          <BrandMark />
           <Text numberOfLines={1} style={styles.headerSubtitle}>
             {user.role} | @{user.username}
           </Text>
@@ -87,48 +77,12 @@ export function Header({
                 isCompact ? styles.signOutButtonCompact : null
               ]}
             >
-              <LogOut color={colors.primary} size={20} strokeWidth={2.2} />
+              <LogOut color={colors.primaryText} size={20} strokeWidth={2.2} />
             </Pressable>
           ) : null}
         </View>
       ) : null}
     </View>
-  );
-}
-
-export function BackButton({
-  accessibilityLabel,
-  disabled = false,
-  inverse = false,
-  onPress,
-  style
-}: {
-  accessibilityLabel: string;
-  disabled?: boolean;
-  inverse?: boolean;
-  onPress: () => void;
-  style?: StyleProp<ViewStyle>;
-}) {
-  return (
-    <Pressable
-      accessibilityLabel={accessibilityLabel}
-      accessibilityRole="button"
-      disabled={disabled}
-      hitSlop={8}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.backIconButton,
-        style,
-        pressed ? styles.backIconButtonPressed : null,
-        disabled ? styles.backIconButtonDisabled : null
-      ]}
-    >
-      <ArrowLeft
-        color={inverse ? colors.onPrimary : colors.text}
-        size={22}
-        strokeWidth={2.2}
-      />
-    </Pressable>
   );
 }
 
@@ -142,25 +96,6 @@ export function DetailHud({
   return (
     <View style={styles.detailFixedHud}>
       <BackButton accessibilityLabel={backLabel} onPress={onBack} />
-    </View>
-  );
-}
-
-export function LabeledInput({
-  label,
-  multiline,
-  ...props
-}: React.ComponentProps<typeof TextInput> & { label: string }) {
-  return (
-    <View style={styles.labeledInputBlock}>
-      <Text style={styles.inputLabel}>{label}</Text>
-      <TextInput
-        multiline={multiline}
-        placeholderTextColor={colors.muted}
-        style={[styles.formInput, multiline ? styles.formInputMultiline : null]}
-        textAlignVertical={multiline ? "top" : "center"}
-        {...props}
-      />
     </View>
   );
 }
@@ -250,7 +185,7 @@ export function BottomTabs({
             style={[styles.tabButton, isActive ? styles.tabButtonActive : null]}
           >
             <TabIcon
-              color={isActive ? colors.primary : colors.muted}
+              color={isActive ? colors.primaryText : colors.muted}
               size={21}
               strokeWidth={isActive ? 2.4 : 2}
             />

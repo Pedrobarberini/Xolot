@@ -1,9 +1,10 @@
+import { BRAND } from "../config/brand.ts";
 import { colors } from "../theme.ts";
 import type { Player, VideoSubmission } from "../types.ts";
 import type { CardPalette } from "../ui/types.ts";
 
 const CARD_PALETTE: CardPalette = {
-  name: "Xolot",
+  name: BRAND.name,
   card: colors.surface,
   media: colors.media,
   border: colors.border,

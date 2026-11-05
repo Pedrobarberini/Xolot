@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+const appConfig = JSON.parse(readFileSync(new URL("../app.json", import.meta.url), "utf8")).expo;
 
 const distDir = join(process.cwd(), "dist");
 const editableExtensions = new Set([".html", ".js", ".css"]);
@@ -7,7 +8,7 @@ const pageShellStyle = `    <style id="xolot-page-shell">
       html,
       body,
       #root {
-        background-color: #F5F8F5;
+        background-color: ${appConfig.web.backgroundColor};
         min-height: 100%;
         min-height: 100dvh;
       }
@@ -44,9 +45,9 @@ const pageShellStyle = `    <style id="xolot-page-shell">
 const pwaHeadTags = `    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Xolot" />
+    <meta name="apple-mobile-web-app-title" content="${appConfig.name}" />
     <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />`;
+    <link rel="apple-touch-icon" href="/icons/folko-apple-touch-icon.png" />`;
 
 const serviceWorkerScript = `    <script id="xolot-pwa-register">
       if ("serviceWorker" in navigator) {

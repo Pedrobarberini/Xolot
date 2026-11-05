@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -373,7 +374,7 @@ export function ProfileScreen({
       const checkout = await createPlusSubscriptionCheckout();
 
       if (checkout.status === "authorized") {
-        Alert.alert("Xolot Plus", "Sua assinatura já está ativa.");
+        Alert.alert(BRAND.subscriptionName, "Sua assinatura já está ativa.");
         return;
       }
 
@@ -421,7 +422,7 @@ export function ProfileScreen({
       await cancelProfessionalSubscription();
       Alert.alert(
         "Assinatura cancelada",
-        "A renovação do Xolot Plus foi cancelada com sucesso."
+        `A renovação do ${BRAND.subscriptionName} foi cancelada com sucesso.`
       );
     } catch (error) {
       Alert.alert(
@@ -592,8 +593,8 @@ export function ProfileScreen({
                     @{user.username}
                   </Text>
                   {isPlusSubscriber ? (
-                    <View accessible accessibilityLabel="Assinante Xolot Plus">
-                      <BadgeCheck color={colors.primary} size={18} />
+                    <View accessible accessibilityLabel={`Assinante ${BRAND.subscriptionName}`}>
+                      <BadgeCheck color={colors.primaryText} size={18} />
                     </View>
                   ) : null}
                 </View>
@@ -798,8 +799,8 @@ function toProfileListItem(
     subtitle: account.profileCompleted
       ? formatProfileActivity(account.sport, account.position, account.city)
       : account.role === "Admin"
-        ? "Administrador Xolot"
-        : "Usuário Xolot",
+        ? `Administrador ${BRAND.name}`
+        : `Usuário ${BRAND.name}`,
     username: account.username
   };
 }
@@ -993,12 +994,12 @@ function SettingsView({
             style={styles.settingsRow}
           >
             <View style={styles.settingsRowIcon}>
-              <UserRoundPen color={colors.primary} size={19} />
+              <UserRoundPen color={colors.primaryText} size={19} />
             </View>
             <View style={styles.settingsRowBody}>
               <Text style={styles.settingsRowTitle}>Editar perfil</Text>
               <Text style={styles.settingsRowDescription}>
-                Nome, biografia, modalidade, função, cidade e equipe.
+                Nome, biografia, área de interesse, apresentação, cidade e organização.
               </Text>
             </View>
           </Pressable>
@@ -1051,7 +1052,7 @@ function SettingsView({
         <Text style={styles.settingsSectionTitle}>Preferências</Text>
         <View style={styles.settingsRow}>
           <View style={styles.settingsRowIcon}>
-            <Moon color={colors.primary} size={19} />
+            <Moon color={colors.primaryText} size={19} />
           </View>
           <View style={styles.settingsRowBody}>
             <Text style={styles.settingsRowTitle}>Tema escuro</Text>
@@ -1071,7 +1072,7 @@ function SettingsView({
         </View>
         <View style={styles.settingsRow}>
           <View style={styles.settingsRowIcon}>
-            <Bell color={colors.primary} size={19} />
+            <Bell color={colors.primaryText} size={19} />
           </View>
           <View style={styles.settingsRowBody}>
             <Text style={styles.settingsRowTitle}>Notificações do dispositivo</Text>
@@ -1089,7 +1090,7 @@ function SettingsView({
         </View>
         <View style={styles.settingsRow}>
           <View style={styles.settingsRowIcon}>
-            <Play color={colors.primary} size={19} />
+            <Play color={colors.primaryText} size={19} />
           </View>
           <View style={styles.settingsRowBody}>
             <Text style={styles.settingsRowTitle}>Reprodução automática</Text>
@@ -1135,8 +1136,8 @@ function SettingsView({
       <View style={[styles.settingsSection, styles.settingsDangerSection]}>
         <Text style={styles.settingsSectionTitle}>Excluir conta</Text>
         <Text style={styles.settingsDangerDescription}>
-          Remove permanentemente seu perfil, suas publicações e seus dados da
-          Xolot. Uma assinatura ativa será cancelada.
+          Remove permanentemente seu perfil, suas publicações e seus dados do
+          {BRAND.name}. Uma assinatura ativa será cancelada.
         </Text>
         <Pressable
           accessibilityLabel="Excluir minha conta"

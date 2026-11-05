@@ -1,65 +1,7 @@
 import { StyleSheet } from "react-native";
-import {
-  DETAIL_CONTENT_PADDING,
-  TAB_BAR_CONTENT_PADDING,
-  TAB_BAR_SAFE_PADDING,
-  USE_CENTERED_WEB_LAYOUT
-} from "../../constants/layout";
 import { colors } from "../../theme";
 
 export const profileStyles = {
-  profileVideoCard: {
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    overflow: "hidden",
-    paddingBottom: 10,
-    width: 138
-  },
-  profileVideoCardSelected: {
-    borderColor: colors.primary,
-    borderWidth: 2
-  },
-  profileVideoThumbnail: {
-    aspectRatio: 9 / 13,
-    backgroundColor: colors.media,
-    overflow: "hidden",
-    position: "relative",
-    width: "100%"
-  },
-  profileVideoThumbnailMedia: {
-    ...StyleSheet.absoluteFillObject,
-    height: "100%",
-    width: "100%"
-  },
-  profileVideoPlayIcon: {
-    alignItems: "center",
-    backgroundColor: "rgba(5, 18, 12, 0.72)",
-    borderRadius: 999,
-    height: 36,
-    justifyContent: "center",
-    left: "50%",
-    marginLeft: -18,
-    marginTop: -18,
-    position: "absolute",
-    top: "50%",
-    width: 36
-  },
-  profileVideoTitle: {
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: "900",
-    lineHeight: 17,
-    marginTop: 9,
-    paddingHorizontal: 9
-  },
-  profileVideoDuration: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: "700",
-    marginTop: 3,
-    paddingHorizontal: 9
-  },
   profileHero: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
@@ -85,7 +27,7 @@ export const profileStyles = {
     width: 50
   },
   profileAvatarText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 15,
     fontWeight: "900"
   },
@@ -96,7 +38,7 @@ export const profileStyles = {
   },
   profileAvatarPreviewBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.72)"
+    backgroundColor: "rgba(12, 13, 20, 0.72)"
   },
   profileAvatarPreviewCircle: {
     backgroundColor: colors.surfaceMuted,
@@ -105,7 +47,7 @@ export const profileStyles = {
     borderWidth: 3,
     elevation: 12,
     overflow: "hidden",
-    shadowColor: "#05120C",
+    shadowColor: "#17130C",
     shadowOffset: { height: 6, width: 0 },
     shadowOpacity: 0.26,
     shadowRadius: 18
@@ -114,20 +56,6 @@ export const profileStyles = {
     flex: 1,
     minWidth: 0
   },
-  profileStatusPill: {
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 8
-  },
-  profileStatusText: {
-    color: colors.primary,
-    fontSize: 10,
-    fontWeight: "900",
-    textTransform: "uppercase"
-  },
   profileName: {
     color: colors.text,
     fontSize: 26,
@@ -135,7 +63,7 @@ export const profileStyles = {
     letterSpacing: 0
   },
   profileUsername: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 12,
     fontWeight: "800",
     marginTop: 2
@@ -147,7 +75,7 @@ export const profileStyles = {
     letterSpacing: 0
   },
   profileSecondaryName: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 12,
     fontWeight: "800",
     marginTop: 2
@@ -166,7 +94,7 @@ export const profileStyles = {
     marginTop: 14
   },
   profileClub: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 11,
     fontWeight: "900",
     marginTop: 6,
@@ -186,7 +114,7 @@ export const profileStyles = {
     minWidth: 0
   },
   profileQuickValue: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 14,
     fontWeight: "900"
   },
@@ -196,22 +124,6 @@ export const profileStyles = {
     fontWeight: "900",
     marginTop: 3,
     textTransform: "uppercase"
-  },
-  profileDesktopGrid: {
-    flexDirection: "row",
-    gap: 14
-  },
-  profilePanelGridItem: {
-    flex: 1,
-    minWidth: 0
-  },
-  profilePanel: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    marginBottom: 12,
-    padding: 16
   },
   profileRow: {
     alignItems: "center",
@@ -262,7 +174,7 @@ export const profileStyles = {
     fontWeight: "900"
   },
   profileGallerySelectionCount: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 11,
     fontWeight: "800",
     marginTop: 2
@@ -399,7 +311,7 @@ export const profileStyles = {
   },
   videoActionsBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.54)"
+    backgroundColor: "rgba(12, 13, 20, 0.54)"
   },
   videoActionsPopoverRoot: {
     flex: 1
@@ -582,7 +494,7 @@ export const profileStyles = {
     width: 42
   },
   sharePostAvatarText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 11,
     fontWeight: "900"
   },
@@ -657,7 +569,7 @@ export const profileStyles = {
   },
   confirmationModalBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.56)"
+    backgroundColor: "rgba(12, 13, 20, 0.56)"
   },
   confirmationDialogHeader: {
     alignItems: "flex-start",
@@ -758,38 +670,6 @@ export const profileStyles = {
     fontWeight: "900",
     textAlign: "center"
   },
-  profileVideoModalRoot: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
-    padding: 16
-  },
-  profileVideoModalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.72)"
-  },
-  profileVideoDialog: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    maxWidth: 430,
-    padding: 14,
-    width: "100%"
-  },
-  profileVideoDialogHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "space-between"
-  },
-  profileVideoDialogTitle: {
-    color: colors.text,
-    flex: 1,
-    fontSize: 16,
-    fontWeight: "900",
-    minWidth: 0
-  },
   profileMenuButton: {
     alignItems: "center",
     backgroundColor: colors.surfaceMuted,
@@ -799,9 +679,6 @@ export const profileStyles = {
     height: 40,
     justifyContent: "center",
     width: 40
-  },
-  profileActionButtonDisabled: {
-    opacity: 0.5
   },
   profileMenuModalRoot: {
     alignItems: "center",
@@ -825,7 +702,7 @@ export const profileStyles = {
     borderWidth: 1,
     elevation: 12,
     padding: 8,
-    shadowColor: "#10261A",
+    shadowColor: "#1B160A",
     shadowOffset: { height: 6, width: 0 },
     shadowOpacity: 0.18,
     shadowRadius: 16,
@@ -917,11 +794,6 @@ export const profileStyles = {
     justifyContent: "space-between",
     marginTop: 14
   },
-  publicProfileFollowerCount: {
-    color: colors.muted,
-    fontSize: 13,
-    fontWeight: "800"
-  },
   publicProfileFollowButton: {
     alignItems: "center",
     backgroundColor: colors.primary,
@@ -945,11 +817,7 @@ export const profileStyles = {
     fontWeight: "900"
   },
   publicProfileFollowButtonTextActive: {
-    color: colors.primary
-  },
-  publicProfileName: {
-    fontSize: 20,
-    lineHeight: 23
+    color: colors.primaryText
   },
   publicProfileMeta: {
     lineHeight: 16

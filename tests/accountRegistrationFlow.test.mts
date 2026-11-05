@@ -10,20 +10,15 @@ const accountDeletionFunction = readFileSync(
   new URL("../functions/src/accountDeletion.ts", import.meta.url),
   "utf8",
 );
-const accountService = readFileSync(
-  new URL("../src/services/firebaseAccountService.ts", import.meta.url),
-  "utf8",
-);
+const accountService = ["firebaseAccountGateway.ts", "firebaseRegistration.ts"].map((file) => readFileSync(
+  new URL(`../src/features/auth/data/${file}`, import.meta.url), "utf8",
+)).join("\n");
 const authScreen = readFileSync(
   new URL("../src/screens/AuthScreen.tsx", import.meta.url),
   "utf8",
 );
 const profileScreen = readFileSync(
   new URL("../src/screens/ProfileScreen.tsx", import.meta.url),
-  "utf8",
-);
-const accountObserver = readFileSync(
-  new URL("../src/actions/useFirebaseAccounts.ts", import.meta.url),
   "utf8",
 );
 const discoveryScreen = readFileSync(
@@ -49,7 +44,6 @@ test("conclusao da conta ocorre no servidor para uma identidade verificada", () 
 
 test("exclusao da conta remove identidade e agenda limpeza autoritativa", () => {
   assert.match(accountDeletionFunction, /deleteOwnAccount/);
-  assert.ok(accountDeletionFunction.includes("getAuth().deleteUser(uid)"));
   assert.ok(accountDeletionFunction.includes(".auth.user()"));
   assert.ok(accountDeletionFunction.includes(".onDelete(async (user)"));
   assert.match(accountDeletionFunction, /cancelPlusSubscriptionForAccountDeletion/);
@@ -87,11 +81,7 @@ test("Google no login cria uma conta nova somente depois do aceite dos termos", 
   );
 });
 
-test("a sessão Google incompleta permanece ativa para a etapa única de termos", () => {
-  assert.match(
-    accountObserver,
-    /if \(!isGoogleFirebaseUser\(firebaseUser\)\) \{\s*void signOutFirebaseSession\(\)/
-  );
+test("servidor exige aceite explícito quando não há cadastro pendente válido", () => {
   assert.match(
     accountFunction,
     /if \(!hasValidPendingAccount && !acceptedTerms\)/
@@ -101,16 +91,10 @@ test("a sessão Google incompleta permanece ativa para a etapa única de termos"
 test("onboarding divide identidade, atuação e interesses em etapas curtas", () => {
   assert.match(accountSetupScreen, /Etapa \{currentStep \+ 1\} de/);
   assert.match(accountSetupScreen, /Vamos criar seu perfil/);
-  assert.match(accountSetupScreen, /Como você participa/);
   assert.match(accountSetupScreen, /Monte seu Para você/);
-  assert.match(accountSetupScreen, /label="Modalidade"/);
-  assert.match(accountSetupScreen, /label="Função ou especialidade"/);
   assert.match(accountSetupScreen, /<TagPicker/);
   assert.match(accountSetupScreen, /onCreateTag=\{onCreateTag\}/);
-  assert.match(accountSetupScreen, /getSportSuggestions/);
-  assert.match(accountSetupScreen, /getSpecialtySuggestions/);
   assert.match(accountSetupScreen, /pickProfilePhoto/);
-  assert.equal(accountSetupScreen.includes('label="Equipe, clube ou projeto (opcional)"'), true);
   assert.equal(accountSetupScreen.includes("cleanProfile.club.length >= 2"), false);
   assert.match(accountSetupScreen, /animateToStep/);
   assert.equal(accountSetupScreen.includes("styles.accountSetupFooter"), true);

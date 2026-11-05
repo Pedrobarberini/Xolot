@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
@@ -34,7 +35,7 @@ import {
 } from "../components/ProfileListModal";
 import { SharePostModal } from "../components/SharePostModal";
 import { VideoVolumeControl } from "../components/VideoVolumeControl";
-import { XOLOT_SYMBOL } from "../constants/assets";
+import { FOLKO_HORIZONTAL } from "../constants/assets";
 import { FEED_TEXT_LIMIT_COMPACT, FEED_TEXT_LIMIT_WIDE, USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
@@ -208,7 +209,7 @@ export function FeedScreen({
         name: account.name,
         subtitle: account.profileCompleted
           ? formatProfileActivity(account.sport, account.position, account.city)
-          : "Perfil Xolot",
+          : `Perfil ${BRAND.name}`,
         username: account.username
       })),
     [mentionedUsers, profileAvatars]
@@ -421,7 +422,7 @@ export function FeedScreen({
         {feedPlayers.length === 0 ? (
           <View style={[styles.feedEmptyState, { height: pageHeight }]}>
             <View style={styles.feedEmptyStateIcon}>
-              <SlidersHorizontal color={colors.primary} size={26} />
+              <SlidersHorizontal color={colors.primaryText} size={26} />
             </View>
             <Text style={styles.feedEmptyStateTitle}>
               Nenhuma publicação disponível
@@ -491,9 +492,9 @@ export function FeedScreen({
           ]}
         >
           <Image
-            accessibilityLabel="Xolot"
+            accessibilityLabel={BRAND.name}
             resizeMode="contain"
-            source={XOLOT_SYMBOL}
+            source={FOLKO_HORIZONTAL}
             style={styles.feedReelBrandMark}
           />
         </Pressable>
@@ -970,7 +971,7 @@ function FeedReel({
             {!isWide && isExpanded ? (
               <Animated.View pointerEvents="none" style={[styles.feedCompactBackdropAnimation, { opacity: expansionProgress }]}>
                 <BlurView experimentalBlurMethod={Platform.OS === "android" ? "dimezisBlurView" : "none"} intensity={24} pointerEvents="none" style={styles.feedCompactBlur} tint="dark" />
-                <LinearGradient colors={["rgba(5, 18, 12, 0)", "rgba(5, 18, 12, 1)"]} end={{ x: 0.5, y: 1 }} locations={[0, 1]} pointerEvents="none" start={{ x: 0.5, y: 0 }} style={styles.feedCompactGradient} />
+                <LinearGradient colors={["rgba(12, 13, 20, 0)", "rgba(12, 13, 20, 1)"]} end={{ x: 0.5, y: 1 }} locations={[0, 1]} pointerEvents="none" start={{ x: 0.5, y: 0 }} style={styles.feedCompactGradient} />
               </Animated.View>
             ) : null}
 
@@ -1022,7 +1023,7 @@ function FeedReel({
                     pressed ? styles.buttonPressed : null
                   ]}
                 >
-                  {isFollowing ? <UserCheck color={isWide ? colors.primary : colors.onPrimary} size={15} strokeWidth={2.4} /> : <UserPlus color={colors.onPrimary} size={15} strokeWidth={2.4} />}
+                  {isFollowing ? <UserCheck color={isWide ? colors.primaryText : colors.onPrimary} size={15} strokeWidth={2.4} /> : <UserPlus color={colors.onPrimary} size={15} strokeWidth={2.4} />}
                   <Text numberOfLines={1} style={[styles.feedFollowButtonText, isFollowing && isWide ? styles.feedFollowButtonTextActiveWide : null]}>{isFollowing ? "Seguindo" : "Seguir"}</Text>
                 </Pressable>
               ) : null}
@@ -1217,7 +1218,6 @@ function FeedMediaTapTarget({
   const pendingSinglePressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gestureStateRef = useRef(createMediaTapGestureState());
   const isHoldingRef = useRef(false);
-  const ignoreNextPressRef = useRef(false);
 
   onDoublePressRef.current = onDoublePress;
   onHoldChangeRef.current = onHoldChange;

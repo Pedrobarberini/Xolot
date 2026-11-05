@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React from "react";
 import {
   BadgeCheck,
@@ -69,14 +70,14 @@ export function PublicProfileScreen({
   videos: Player[];
   viewCountsByPlayer: Record<string, number>;
 }) {
-  const profileName = account?.name ?? player?.name ?? "Perfil Xolot";
+  const profileName = account?.name ?? player?.name ?? `Perfil ${BRAND.name}`;
   const profileUsername = account?.username ?? player?.username;
   const initials = profileName.split(" ").slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   const profileMeta = account?.profileCompleted
     ? formatProfileActivity(account.sport, account.position, account.city)
     : player
       ? formatProfileActivity(player.sport, player.position, player.city)
-      : "Usuário Xolot | Sem publicações";
+      : `Usuário ${BRAND.name} | Sem publicações`;
   const visibleProfileMeta =
     profileMeta || "Informações do perfil ainda não preenchidas";
   const profileBio = account?.bio ?? "";
@@ -122,7 +123,7 @@ export function PublicProfileScreen({
                 <Text numberOfLines={1} style={[styles.profilePrimaryUsername, { flexShrink: 1 }]}>
                   {profileUsername ? `@${profileUsername}` : profileName}
                 </Text>
-                {isPlusSubscriber ? <BadgeCheck color={colors.primary} size={18} /> : null}
+                {isPlusSubscriber ? <BadgeCheck color={colors.primaryText} size={18} /> : null}
               </View>
               {profileUsername ? <Text numberOfLines={1} style={styles.profileSecondaryName}>{profileName}</Text> : null}
               <Text numberOfLines={2} style={[styles.profileMeta, styles.publicProfileMeta]}>
@@ -130,12 +131,12 @@ export function PublicProfileScreen({
               </Text>
             </View>
             <Pressable accessibilityLabel={`Enviar mensagem para ${profileName}`} accessibilityRole="button" onPress={onMessage} style={styles.profileMenuButton}>
-              <MessageCircle color={colors.primary} size={22} />
+              <MessageCircle color={colors.primaryText} size={22} />
             </Pressable>
           </View>
 
           {isProfessional ? (
-            <Text style={[styles.profileClub, { color: colors.primary }]}>{getProfessionalCategoryLabel(professionalSettings.category)} · Perfil profissional</Text>
+            <Text style={[styles.profileClub, { color: colors.primaryText }]}>{getProfessionalCategoryLabel(professionalSettings.category)} · Perfil profissional</Text>
           ) : null}
           {profileBio ? <Text style={styles.profileBio}>{profileBio}</Text> : null}
           {profileClub ? <Text style={styles.profileClub}>{profileClub}</Text> : null}
@@ -174,7 +175,7 @@ export function PublicProfileScreen({
                 onPress={onToggleFollow}
                 style={[styles.publicProfileFollowButton, isFollowing ? styles.publicProfileFollowButtonActive : null]}
               >
-                {isFollowing ? <UserCheck color={colors.primary} size={17} strokeWidth={2.3} /> : <UserPlus color={colors.onPrimary} size={17} strokeWidth={2.3} />}
+                {isFollowing ? <UserCheck color={colors.primaryText} size={17} strokeWidth={2.3} /> : <UserPlus color={colors.onPrimary} size={17} strokeWidth={2.3} />}
                 <Text style={[styles.publicProfileFollowButtonText, isFollowing ? styles.publicProfileFollowButtonTextActive : null]}>{isFollowing ? "Seguindo" : "Seguir"}</Text>
               </Pressable>
             ) : null}

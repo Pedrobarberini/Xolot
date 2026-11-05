@@ -135,7 +135,7 @@ export function TagPicker({
             style={styles.tagPickerSuggestionRow}
           >
             <View style={styles.tagPickerCreateIcon}>
-              <Plus color={colors.primary} size={17} strokeWidth={2.5} />
+              <Plus color={colors.primaryText} size={17} strokeWidth={2.5} />
             </View>
             <View style={styles.tagPickerSuggestionCopy}>
               <Text style={styles.tagPickerSuggestionLabel}>

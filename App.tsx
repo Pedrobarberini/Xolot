@@ -1,3 +1,4 @@
+import { BRAND } from "./src/config/brand.ts";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createAppActions } from "./src/actions/createAppActions";
 import { useFirebaseAccounts } from "./src/actions/useFirebaseAccounts";
@@ -234,10 +235,10 @@ export default function App() {
       name:
         selectedProfilePlayer?.name ??
         selectedProfileAccount?.name ??
-        "Perfil Xolot",
+        `Perfil ${BRAND.name}`,
       subtitle: selectedProfilePlayer
         ? `${selectedProfilePlayer.position} | ${selectedProfilePlayer.city}`
-        : "Usuário Xolot",
+        : `Usuário ${BRAND.name}`,
       username:
         selectedProfileAccount?.username ?? selectedProfilePlayer?.username
     };

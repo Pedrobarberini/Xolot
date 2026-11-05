@@ -50,7 +50,7 @@ export const mentionSuggestionStyles = {
     width: 34
   },
   mentionSuggestionInitial: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 13,
     fontWeight: "900" as const
   },

@@ -1,10 +1,4 @@
 import { StyleSheet } from "react-native";
-import {
-  DETAIL_CONTENT_PADDING,
-  TAB_BAR_CONTENT_PADDING,
-  TAB_BAR_SAFE_PADDING,
-  USE_CENTERED_WEB_LAYOUT
-} from "../../constants/layout";
 import { colors } from "../../theme";
 
 export const accountAvatarSettingsStyles = {
@@ -18,11 +12,6 @@ export const accountAvatarSettingsStyles = {
     justifyContent: "center",
     padding: 36
   },
-  accountSetupModalBrandLogo: {
-    height: 190,
-    opacity: 0.18,
-    width: "86%"
-  },
   accountSetupModalRoot: {
     alignItems: "center",
     flex: 1,
@@ -31,7 +20,7 @@ export const accountAvatarSettingsStyles = {
   },
   accountSetupModalBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.58)"
+    backgroundColor: "rgba(12, 13, 20, 0.58)"
   },
   accountSetupModalDialog: {
     backgroundColor: colors.surface,
@@ -78,7 +67,7 @@ export const accountAvatarSettingsStyles = {
     paddingHorizontal: 2
   },
   accountSetupEyebrow: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 11,
     fontWeight: "900",
     textTransform: "uppercase"
@@ -120,7 +109,7 @@ export const accountAvatarSettingsStyles = {
     textAlign: "center"
   },
   accountSetupProgressLabelActive: {
-    color: colors.primary
+    color: colors.primaryText
   },
   accountSetupAvatarRow: {
     alignItems: "center",
@@ -157,7 +146,7 @@ export const accountAvatarSettingsStyles = {
     paddingVertical: 6
   },
   accountSetupAvatarButtonText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 11,
     fontWeight: "900"
   },
@@ -207,21 +196,6 @@ export const accountAvatarSettingsStyles = {
     borderWidth: 0,
     padding: 0
   },
-  accountSetupSectionHeader: {
-    alignItems: "center",
-    borderBottomColor: colors.border,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 2,
-    paddingBottom: 10
-  },
-  accountSetupRequired: {
-    color: colors.muted,
-    fontSize: 9,
-    fontWeight: "900",
-    textTransform: "uppercase"
-  },
   accountSetupFieldRow: {
     flexDirection: "row",
     gap: 10
@@ -244,56 +218,10 @@ export const accountAvatarSettingsStyles = {
     justifyContent: "space-between",
     marginTop: 6
   },
-  accountSetupInterestSection: {
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    marginTop: 14,
-    paddingTop: 14
-  },
-  accountSetupInterestHeader: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "space-between",
-    marginBottom: 10
-  },
-  accountSetupInterestCopy: {
-    flex: 1,
-    gap: 3,
-    minWidth: 0
-  },
   accountSetupInterestTitle: {
     color: colors.text,
     fontSize: 13,
     fontWeight: "900"
-  },
-  accountSetupInterestList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 7
-  },
-  accountSetupInterestTag: {
-    backgroundColor: colors.surface,
-    borderColor: colors.borderStrong,
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 11,
-    paddingVertical: 7
-  },
-  accountSetupInterestTagSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary
-  },
-  accountSetupInterestTagDisabled: {
-    opacity: 0.38
-  },
-  accountSetupInterestTagText: {
-    color: colors.text,
-    fontSize: 11,
-    fontWeight: "800"
-  },
-  accountSetupInterestTagTextSelected: {
-    color: colors.onPrimary
   },
   accountSetupSuggestionBlock: {
     gap: 6,
@@ -330,7 +258,7 @@ export const accountAvatarSettingsStyles = {
     fontWeight: "800"
   },
   accountSetupSuggestionChipTextSelected: {
-    color: colors.primary
+    color: colors.primaryText
   },
   accountSetupHint: {
     color: colors.muted,
@@ -348,9 +276,6 @@ export const accountAvatarSettingsStyles = {
     color: colors.muted,
     fontSize: 10,
     fontWeight: "900"
-  },
-  accountSetupSaveButton: {
-    marginTop: 14
   },
   accountSetupSignOutButton: {
     alignItems: "center",
@@ -427,7 +352,7 @@ export const accountAvatarSettingsStyles = {
     width: 62
   },
   settingsAvatarInitials: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 17,
     fontWeight: "900"
   },
@@ -464,7 +389,7 @@ export const accountAvatarSettingsStyles = {
   },
   avatarPositionBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 18, 12, 0.56)"
+    backgroundColor: "rgba(12, 13, 20, 0.56)"
   },
   avatarPositionDialog: {
     backgroundColor: colors.surface,
@@ -511,7 +436,7 @@ export const accountAvatarSettingsStyles = {
   },
   avatarPositionPreview: {
     alignSelf: "center",
-    backgroundColor: "#07110D",
+    backgroundColor: "#0C0D14",
     borderColor: colors.borderStrong,
     borderRadius: 8,
     borderWidth: 1,
@@ -544,7 +469,7 @@ export const accountAvatarSettingsStyles = {
     fontWeight: "900"
   },
   avatarCropSizeValue: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 14,
     fontWeight: "900"
   },

@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React, { useState } from "react";
 import {
   BadgeCheck,
@@ -177,7 +178,7 @@ export function ProfessionalDashboardScreen({
             <Text style={s.sectionTitle}>Visão geral</Text>
             <Text style={s.sectionDescription}>Desempenho real do conteúdo publicado.</Text>
           </View>
-          <BarChart3 color={colors.primary} size={22} />
+          <BarChart3 color={colors.primaryText} size={22} />
         </View>
         <View style={s.metricGrid}>
           <Metric label="visualizações" value={formatCompactMetric(metrics.views)} />
@@ -210,7 +211,7 @@ export function ProfessionalDashboardScreen({
         </View>
         <Text style={[s.label, { marginTop: 18 }]}>Link profissional</Text>
         <View style={s.inputWithIcon}>
-          <Link2 color={colors.primary} size={18} />
+          <Link2 color={colors.primaryText} size={18} />
           <TextInput
             autoCapitalize="none"
             keyboardType="url"
@@ -228,7 +229,7 @@ export function ProfessionalDashboardScreen({
       <View style={s.section}>
         <View style={s.row}>
           <View style={{ flex: 1 }}>
-            <Text style={s.sectionTitle}>Xolot Plus</Text>
+            <Text style={s.sectionTitle}>{BRAND.subscriptionName}</Text>
             <Text style={s.sectionDescription}>
               {subscriptionLoading
                 ? "Consultando assinatura..."
@@ -236,9 +237,9 @@ export function ProfessionalDashboardScreen({
             </Text>
           </View>
           {hasVerifiedBadge ? (
-            <BadgeCheck color={colors.primary} size={26} />
+            <BadgeCheck color={colors.primaryText} size={26} />
           ) : (
-            <Sparkles color={colors.primary} size={24} />
+            <Sparkles color={colors.primaryText} size={24} />
           )}
         </View>
 
@@ -295,9 +296,9 @@ export function ProfessionalDashboardScreen({
             style={s.secondaryAction}
           >
             {subscriptionAction === "sync" ? (
-              <ActivityIndicator color={colors.primary} size="small" />
+              <ActivityIndicator color={colors.primaryText} size="small" />
             ) : (
-              <RefreshCw color={colors.primary} size={17} />
+              <RefreshCw color={colors.primaryText} size={17} />
             )}
             <Text style={s.secondaryActionText}>Atualizar status do pagamento</Text>
           </Pressable>
@@ -319,7 +320,7 @@ export function ProfessionalDashboardScreen({
 
         <View style={[s.notice, { marginTop: 12 }]}>
           <Text style={s.noticeText}>
-            A cobrança mensal de R$ 9,90 é processada pelo Mercado Pago. A Xolot
+            A cobrança mensal de R$ 9,90 é processada pelo Mercado Pago. A {BRAND.name}
             não recebe nem armazena os dados do cartão.
           </Text>
         </View>
@@ -333,7 +334,7 @@ export function ProfessionalDashboardScreen({
               O impulsionamento será cobrado por campanha, sem exigir o Plus.
             </Text>
           </View>
-          <Megaphone color={colors.primary} size={22} />
+          <Megaphone color={colors.primaryText} size={22} />
         </View>
         {posts.length > 0 ? (
           posts.map((post, index) => (
@@ -343,7 +344,7 @@ export function ProfessionalDashboardScreen({
               style={[s.postItem, index === 0 ? s.postItemFirst : null]}
             >
               <View style={s.postMediaIcon}>
-                <ImageIcon color={colors.primary} size={20} />
+                <ImageIcon color={colors.primaryText} size={20} />
               </View>
               <View style={s.postText}>
                 <Text numberOfLines={1} style={s.postTitle}>{post.videoTitle}</Text>
@@ -383,7 +384,7 @@ export function ProfessionalDashboardScreen({
         <Pressable onPress={() => setIsCheckoutConfirmationVisible(false)} style={s.modalBackdrop}>
           <Pressable onPress={(event) => event.stopPropagation()} style={s.modalCard}>
             <Text style={s.modalTitle}>
-              {subscription?.status === "pending" ? "Continuar assinatura?" : "Assinar Xolot Plus?"}
+              {subscription?.status === "pending" ? "Continuar assinatura?" : `Assinar ${BRAND.subscriptionName}?`}
             </Text>
             <Text style={s.checkoutPrice}>R$ 9,90 por mês</Text>
             <Text style={s.modalBody}>
@@ -427,7 +428,7 @@ export function ProfessionalDashboardScreen({
       >
         <Pressable onPress={() => setIsCancelConfirmationVisible(false)} style={s.modalBackdrop}>
           <Pressable onPress={(event) => event.stopPropagation()} style={s.modalCard}>
-            <Text style={s.modalTitle}>Cancelar Xolot Plus?</Text>
+            <Text style={s.modalTitle}>Cancelar {BRAND.subscriptionName}?</Text>
             <Text style={s.modalBody}>
               A renovação será interrompida e o selo verificado será removido
               quando o Mercado Pago confirmar o cancelamento. As ferramentas

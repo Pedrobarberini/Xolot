@@ -1,0 +1,209 @@
+[
+  {
+    "fingerprint": "a9573d3eafeb7d2bcbc6307e7c524dad66e8038e35aad2b4c3d900ef50328d34",
+    "file": "src/actions/useFirebasePosts.ts",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'user'. Either include it or remove the dependency array.",
+    "line": 64,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "831deca1cc7c0f35cf58d5cfc3c027a2b71c78b449f4e597d24b68312f4ee812",
+    "file": "src/actions/useFirebaseTagCatalog.ts",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'user'. Either include it or remove the dependency array.",
+    "line": 22,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "ee07fa6202abeda0eba62d9c1afb81706b41ae8b85ea9d76b103c642d0f71631",
+    "file": "src/actions/useProfileActions.ts",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'user'. Either include it or remove the dependency array.",
+    "line": 65,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "a3b9420f963c3678daf2b16782996e51f83b0dcad53e76f9b08759f63a14a5f3",
+    "file": "src/actions/useSocialActions.ts",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'user'. Either include it or remove the dependency array.",
+    "line": 192,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "a600f2c94226364017e167752ca50db310dda2ee9cad16c3224d3abec524a69b",
+    "file": "src/actions/useSocialActions.ts",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'user'. Either include it or remove the dependency array.",
+    "line": 264,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "67fa2d830d9bcab0ea23f609da42f7ba0557c55216b95baa5c693bcc523961e6",
+    "file": "src/actions/useSocialActions.ts",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'user'. Either include it or remove the dependency array.",
+    "line": 527,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "f7f58f2194f5da806121cf3ddfa762bdce2e4196ff4976c15bc6fbf6d39b0824",
+    "file": "src/components/Navigation.tsx",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.",
+    "line": 134,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "a6863e64e1d87e33a40478ac1e58faff5389f2ec2146669b46ad67f9a3fa91a9",
+    "file": "src/components/ProfileAvatarImage.tsx",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'avatar'. Either include it or remove the dependency array.",
+    "line": 48,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "21f29e1268577af746fce462736c8ecc0dbf15ee15f0f7b40c193bd6fd4b3307",
+    "file": "src/screens/FeedScreen.tsx",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'setCleanViewActive'. Either include it or remove the dependency array.",
+    "line": 233,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "31e1e01edf957698022f4351c5da56fa3abb292150dedd3eadd39e22bb787b5b",
+    "file": "src/screens/FeedScreen.tsx",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'activateFeedIndex'. Either include it or remove the dependency array.",
+    "line": 279,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "c034732ce748c052438378acb5a139f97f784fd5d0defc66aa6f990a3aec68ff",
+    "file": "src/screens/FeedScreen.tsx",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'activateFeedIndex'. Either include it or remove the dependency array.",
+    "line": 305,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "dd892b3cd79939beefaf5c8bc0232306225f4e7914526fd28acf496045c5b3f7",
+    "file": "src/screens/MessagesScreen.tsx",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'unreadIncomingMessageIds'. Either include it or remove the dependency array.",
+    "line": 189,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "05d81bef44c4ed09a8f57af4342fb9e1e35bff482427925cb98f6b8eb830269b",
+    "file": "src/screens/ProfileScreen.tsx",
+    "ruleId": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'onProfessionalOpenRequestHandled'. Either include it or remove the dependency array. If 'onProfessionalOpenRequestHandled' changes too often, find the parent component that defines it and wrap that definition in useCallback.",
+    "line": 205,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "14f0a4b2f8fe8631014312eb31889450f1100dbace73d23ac45a5cecf6ef0198",
+    "file": "src/screens/SecurityScreen.tsx",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.",
+    "line": 29,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "d970a26137a3abb2e48aedaf5b247f0263c0ff8f1cc1e18e4f4708d1b279a978",
+    "file": "src/utils/avatarFocus.ts",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'ReadonlyArray<T>' is forbidden. Use 'readonly T[]' instead.",
+    "line": 48,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "15280c98d6a11fb6a61acd89e90eef234daa4ee9bd13b33eaa498a5cd63a435f",
+    "file": "src/utils/professional.ts",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.",
+    "line": 9,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "3e9d5f3d50d0e01467ceb9a767c3276ec5c3276da34312f37b981edea38ad6b6",
+    "file": "src/utils/professional.ts",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.",
+    "line": 31,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "f5201369315e4f3275b16c96786672145d77c4e05983622c0f749efa1fc33871",
+    "file": "src/utils/professional.ts",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.",
+    "line": 43,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "9c2a2481746b6ce34b63fa7ecad62bbe7bc9dcefb2f888dff870958fe53e2980",
+    "file": "src/utils/profileSearch.ts",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.",
+    "line": 12,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "93e287e7a3735327602236b1756c3602fa17d025472683e6cce4305a95d9855a",
+    "file": "src/utils/profileSuggestions.ts",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.",
+    "line": 41,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "a4687d2a16441e1d495e60eb0e8f717e88ebf8a5b7639d129bf996ebf075753d",
+    "file": "src/utils/socialSharing.ts",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.",
+    "line": 29,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "e0e1140b64eb12088208a3df7a3c7bed972b20c298e79e113e7caaa4d4f66afd",
+    "file": "functions/src/accountDeletion.ts",
+    "ruleId": "import/namespace",
+    "message": "'region' not found in imported namespace 'functions'.",
+    "line": 222,
+    "fatal": false,
+    "count": 1
+  },
+  {
+    "fingerprint": "30544586a8ef3810dbe9697be270c9f6e558375855b8d81660454f70a1bbdd22",
+    "file": "functions/src/mercadoPago.ts",
+    "ruleId": "@typescript-eslint/array-type",
+    "message": "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.",
+    "line": 49,
+    "fatal": false,
+    "count": 1
+  }
+]

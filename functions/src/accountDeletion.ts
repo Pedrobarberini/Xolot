@@ -7,7 +7,7 @@ import {
 } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import * as functions from "firebase-functions/v1";
-import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { onCall } from "firebase-functions/v2/https";
 import {
   REGION,
   R2_MEDIA_BUCKET,
@@ -16,7 +16,7 @@ import {
   r2AccessKeyId,
   r2SecretAccessKey
 } from "./config";
-import { requireVerifiedUser } from "./auth";
+import { assertRecentAuthentication, getVerifiedRequestContext } from "./auth";
 import { cancelPlusSubscriptionForAccountDeletion } from "./mercadoPago";
 import { createR2Client } from "./r2";
 
@@ -204,16 +204,10 @@ export async function cleanupAccountData(uid: string) {
 export const deleteOwnAccount = onCall(
   { region: REGION },
   async (request) => {
-    const uid = requireVerifiedUser(request);
-    const authTime = Number(request.auth?.token.auth_time ?? 0);
+    const context = getVerifiedRequestContext(request);
     const now = Math.floor(Date.now() / 1000);
-    if (!authTime || now - authTime > RECENT_AUTH_WINDOW_SECONDS) {
-      throw new HttpsError(
-        "failed-precondition",
-        "Entre novamente na sua conta antes de confirmar a exclusão."
-      );
-    }
-    await getAuth().deleteUser(uid);
+    assertRecentAuthentication(context, now, RECENT_AUTH_WINDOW_SECONDS);
+    await getAuth().deleteUser(context.uid);
     return { deleted: true };
   }
 );

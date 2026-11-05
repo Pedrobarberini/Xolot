@@ -1,50 +1,49 @@
 {
   "expo": {
-    "name": "Xolot",
+    "name": "Folko",
     "slug": "xolot",
     "scheme": "xolot",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/brand/xolot-app-icon.png",
-    "userInterfaceStyle": "light",
-    "backgroundColor": "#F5F8F5",
+    "icon": "./assets/brand/folko-app-icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#090A0F",
     "splash": {
-      "image": "./assets/brand/xolot-wordmark.png",
+      "image": "./assets/brand/folko-primary-transparent.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F7FAF7"
+      "backgroundColor": "#090A0F"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": false,
-      "icon": "./assets/brand/xolot-app-icon.png"
+      "icon": "./assets/brand/folko-app-icon.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/brand/xolot-symbol.png",
-        "monochromeImage": "./assets/brand/xolot-symbol.png",
-        "backgroundColor": "#F7FAF7"
+        "foregroundImage": "./assets/brand/folko-adaptive-icon.png",
+        "backgroundColor": "#090A0F"
       },
       "edgeToEdgeEnabled": true
     },
     "androidStatusBar": {
-      "barStyle": "dark-content",
-      "backgroundColor": "#F7FAF7"
+      "barStyle": "light-content",
+      "backgroundColor": "#090A0F"
     },
     "androidNavigationBar": {
-      "barStyle": "dark-content",
-      "backgroundColor": "#F7FAF7"
+      "barStyle": "light-content",
+      "backgroundColor": "#090A0F"
     },
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/brand/xolot-app-icon.png",
-      "name": "Xolot",
-      "shortName": "Xolot",
-      "description": "Descubra, envie e avalie talentos do futebol.",
-      "themeColor": "#046136",
-      "backgroundColor": "#F5F8F5",
+      "favicon": "./assets/brand/folko-app-icon.png",
+      "name": "Folko",
+      "shortName": "Folko",
+      "description": "Uma rede social para compartilhar e divulgar o que você faz.",
+      "themeColor": "#090A0F",
+      "backgroundColor": "#090A0F",
       "lang": "pt-BR"
     },
     "plugins": [
@@ -53,16 +52,16 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F7FAF7",
-          "image": "./assets/brand/xolot-wordmark.png",
-          "imageWidth": 300,
+          "backgroundColor": "#090A0F",
+          "image": "./assets/brand/folko-primary-transparent.png",
+          "imageWidth": 240,
           "resizeMode": "contain"
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Permita que o Xolot acesse suas fotos e videos para criar publicacoes.",
+          "photosPermission": "Permita que o Folko acesse suas fotos e videos para criar publicacoes.",
           "cameraPermission": false,
           "microphonePermission": false
         }
@@ -70,7 +69,7 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Permita que o Xolot mostre a midia mais recente da sua galeria.",
+          "photosPermission": "Permita que o Folko mostre a midia mais recente da sua galeria.",
           "savePhotosPermission": false,
           "granularPermissions": [
             "photo",
@@ -81,8 +80,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Permita que o Xolot use a camera para registrar seus lances.",
-          "microphonePermission": "Permita que o Xolot use o microfone durante a gravacao dos seus lances.",
+          "cameraPermission": "Permita que o Folko use a camera para registrar seus vídeos e publicações.",
+          "microphonePermission": "Permita que o Folko use o microfone durante a gravacao dos seus vídeos e publicações.",
           "recordAudioAndroid": true
         }
       ]

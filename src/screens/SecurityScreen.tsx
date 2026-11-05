@@ -115,7 +115,7 @@ export function SecurityScreen({
               ]}
             >
               <Icon
-                color={isActive ? colors.primary : colors.muted}
+                color={isActive ? colors.primaryText : colors.muted}
                 size={18}
                 strokeWidth={2.2}
               />
@@ -143,7 +143,7 @@ export function SecurityScreen({
 
       <View style={styles.securityListSection}>
         <View style={styles.securitySectionHeading}>
-          <ShieldCheck color={colors.primary} size={20} strokeWidth={2.2} />
+          <ShieldCheck color={colors.primaryText} size={20} strokeWidth={2.2} />
           <Text style={styles.securitySectionTitle}>
             {getSectionTitle(activeSection)}
           </Text>
@@ -330,7 +330,7 @@ function SecurityPlayerRow({
   return (
     <View style={styles.securityListRow}>
       <View style={styles.securityMediaIcon}>
-        <MediaIcon color={colors.primary} size={20} strokeWidth={2.1} />
+        <MediaIcon color={colors.primaryText} size={20} strokeWidth={2.1} />
       </View>
       <View style={styles.securityRowBody}>
         <Text numberOfLines={1} style={styles.securityRowTitle}>
@@ -355,7 +355,7 @@ function SecurityMutedContentRow({
   return (
     <View style={styles.securityListRow}>
       <View style={styles.securityMediaIcon}>
-        <EyeOff color={colors.primary} size={20} strokeWidth={2.1} />
+        <EyeOff color={colors.primaryText} size={20} strokeWidth={2.1} />
       </View>
       <View style={styles.securityRowBody}>
         <Text numberOfLines={1} style={styles.securityRowTitle}>
@@ -430,7 +430,7 @@ function RestoreButton({
         pressed ? styles.securityRestoreButtonPressed : null
       ]}
     >
-      <RotateCcw color={colors.primary} size={19} strokeWidth={2.3} />
+      <RotateCcw color={colors.primaryText} size={19} strokeWidth={2.3} />
     </Pressable>
   );
 }

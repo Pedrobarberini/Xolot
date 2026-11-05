@@ -1,0 +1,105 @@
+{
+  "date": "2026-11-01",
+  "commit": "2172dd5732e581b850ff8438e1f577d9370434a8",
+  "observedRuntime": {
+    "node": "v24.22.1",
+    "pnpm": "11.25.0"
+  },
+  "preexistingTrackedChanges": [
+    {
+      "file": ".gitignore",
+      "exists": true,
+      "sha256": "258ddd6ea98e3de6ccebc2a2bbf1c70498d3200c35e6295eb5dc61b475ce1458"
+    },
+    {
+      "file": ".npmrc",
+      "exists": false,
+      "sha256": null
+    },
+    {
+      "file": "README.md",
+      "exists": true,
+      "sha256": "7f0ffc8ed179f39730fb10cc0243996e4dd7f85d25b0f2f03c10430a9a7eb902"
+    },
+    {
+      "file": "pnpm-workspace.yaml",
+      "exists": true,
+      "sha256": "9cd97aadaf0386abcdb9bff1c61ce1acec7bf531463d3cb9c776576efb99eca0"
+    },
+    {
+      "file": "releases/release-1.md",
+      "exists": true,
+      "sha256": "b36b47438099775e2bf0616184ac48ceba1c88f610a7166b21950469ef5e3433"
+    },
+    {
+      "file": "src/screens/SearchScreen.tsx",
+      "exists": false,
+      "sha256": null
+    },
+    {
+      "file": "src/styles/app/accountAvatarSettingsStyles.ts",
+      "exists": true,
+      "sha256": "81b82c1a145e16a5e39b9224a969a7e02885fae8cc2ac8e10fac98a521b3f563"
+    },
+    {
+      "file": "src/styles/app/authStyles.ts",
+      "exists": true,
+      "sha256": "00a0ab82f568222437178124f9328520193103300ecb40a4dfa9d0610bcc6709"
+    },
+    {
+      "file": "src/styles/app/baseStyles.ts",
+      "exists": true,
+      "sha256": "6a46af564a0bc8eb196d702cefeb057a8268fd9bcef2c3283ca52313fe763a5e"
+    },
+    {
+      "file": "src/styles/app/discoveryMessagesStyles.ts",
+      "exists": true,
+      "sha256": "fd9850092791dfb44bfaebb798d0180ae166ee462f2d2b875feb96977b157250"
+    },
+    {
+      "file": "src/styles/app/feedStyles.ts",
+      "exists": true,
+      "sha256": "e1eb697f4f8cbd0f3f5e067efa1836d7de356e6e0f471adf44f899b87d839a0a"
+    },
+    {
+      "file": "src/styles/app/mediaDetailStyles.ts",
+      "exists": true,
+      "sha256": "b8179acc6c77dd290b3c26bedf253a18fdfa1c2f80292837c0afc2f4672ce9e9"
+    },
+    {
+      "file": "src/styles/app/navigationStyles.ts",
+      "exists": true,
+      "sha256": "ce2d0b85639e11f40b4a34f38570943c4d07bceb215f4794023cc48ac02a064b"
+    },
+    {
+      "file": "src/styles/app/profileDiscoveryStyles.ts",
+      "exists": true,
+      "sha256": "f97d764620c3bacc5ed008fdf0eed87675588ae994ed651465fd35335ea6b106"
+    },
+    {
+      "file": "src/styles/app/profileStyles.ts",
+      "exists": true,
+      "sha256": "e0f7b24ad5ab6e6349cdc6bdfebe9f5772db9fffbb602a048d09a11dcea3647f"
+    },
+    {
+      "file": "src/styles/app/sharedContentStyles.ts",
+      "exists": true,
+      "sha256": "c1badb443b20a87354b63ab47391d82bef11c46462b977ffed3391e4c5c7b1f6"
+    },
+    {
+      "file": "src/styles/app/submissionAdminStyles.ts",
+      "exists": true,
+      "sha256": "33e49cf9569cafc2f4a2b1224d057b2c4a6f4d5d1875ad001358b53d42d9943b"
+    }
+  ],
+  "baseline": {
+    "tests": 164,
+    "appTypecheck": "passed",
+    "functionsTypecheck": "passed"
+  },
+  "notes": [
+    "As alterações de limpeza já existiam antes deste pedido.",
+    "Documentos de registro e PDFs finais permanecem preservados.",
+    "O gerenciador de progresso e seus três testes são novos nesta execução."
+  ]
+}

@@ -1,7 +1,7 @@
 import React from "react";
-import { Image, SafeAreaView, StatusBar, View } from "react-native";
+import { SafeAreaView, StatusBar, View } from "react-native";
 import { BrandLaunchScreen, ScreenBackdrop } from "../components/AppShell";
-import { XOLOT_WORDMARK } from "../constants/assets";
+import { BrandMark } from "../shared/ui/BrandMark";
 import { AccountSetupModal } from "../screens/AccountSetupScreen";
 import { AuthScreen } from "../screens/AuthScreen";
 import { styles } from "../styles/appStyles";
@@ -95,12 +95,7 @@ export function AccountSetupGate({
         <AppStatusBar />
         <ScreenBackdrop />
         <View style={styles.accountSetupModalBrand}>
-          <Image
-            accessibilityLabel="Logo Xolot"
-            resizeMode="contain"
-            source={XOLOT_WORDMARK}
-            style={styles.accountSetupModalBrandLogo}
-          />
+          <BrandMark hero />
         </View>
         <AccountSetupModal
           avatar={avatar}

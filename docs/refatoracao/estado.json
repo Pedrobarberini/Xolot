@@ -1,0 +1,3147 @@
+{
+  "planVersion": 3,
+  "date": "2026-11-01",
+  "baseCommit": "2172dd5",
+  "baseIncludesUncommittedChanges": true,
+  "status": "em_execucao",
+  "note": "Execução autorizada em etapas. Fichas concluídas são removidas; provas e dependências permanecem neste arquivo.",
+  "tasks": [
+    {
+      "id": "F00",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Baseline reproduzido com alterações anteriores preservadas; controle de progresso com remoção de fichas concluídas testado.",
+        "files": [
+          "docs/architecture/baseline.md",
+          "docs/architecture/baseline.json",
+          "scripts/refactor-progress.mjs",
+          "tests/refactorProgress.test.mts"
+        ],
+        "checks": [
+          {
+            "command": "pnpm run typecheck",
+            "exitCode": 0,
+            "result": "aprovado na base"
+          },
+          {
+            "command": "pnpm test",
+            "exitCode": 0,
+            "result": "164 testes aprovados na base"
+          },
+          {
+            "command": "pnpm --dir functions exec tsc --noEmit",
+            "exitCode": 0,
+            "result": "aprovado na base"
+          },
+          {
+            "command": "pnpm run build:web",
+            "exitCode": 0,
+            "result": "bundle web e service worker gerados"
+          },
+          {
+            "command": "node --test tests/refactorProgress.test.mts",
+            "exitCode": 0,
+            "result": "3 testes do controle de progresso aprovados"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Sem teste ou deploy em produção."
+        ]
+      },
+      "blocker": null,
+      "title": "Registrar a base funcional e preservar o trabalho existente",
+      "dependencies": [],
+      "completedAt": "2026-11-01T22:44:10.939Z"
+    },
+    {
+      "id": "F01",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Ferramentas fixadas, CLI Firebase executável, Node 22 validado e alvos TypeScript separados. Ferramentas de lint/UI/Rules preparadas para as próximas fichas.",
+        "files": [
+          "package.json",
+          "pnpm-lock.yaml",
+          "tsconfig.json",
+          ".node-version",
+          "docs/architecture/ferramentas.md"
+        ],
+        "checks": [
+          {
+            "command": "Node 22.23.4 + firebase-tools --version/--help",
+            "exitCode": 0,
+            "result": "CLI 15.34.1 executou versão e ajuda"
+          },
+          {
+            "command": "pnpm install --frozen-lockfile --ignore-scripts em tmp/f01-clean",
+            "exitCode": 0,
+            "result": "instalação limpa concluída com 1912 pacotes, sem scripts"
+          },
+          {
+            "command": "Node 22 tsc --noEmit (cliente e functions)",
+            "exitCode": 0,
+            "result": "ambos os alvos aprovados"
+          },
+          {
+            "command": "Node 22 --test testes existentes e contratos de IDs/progresso",
+            "exitCode": 0,
+            "result": "suíte da base e oito casos novos de IDs/progresso aprovados"
+          },
+          {
+            "command": "comparação das dependências de runtime com lockfile de origem",
+            "exitCode": 0,
+            "result": "nenhuma versão direta do app ou functions alterada"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "JDK 21 exigido e identificado; execução dos emuladores é validada em F04.",
+          "Sem login ou deploy implícito."
+        ]
+      },
+      "blocker": null,
+      "title": "Fixar ferramentas e separar os alvos de compilação",
+      "dependencies": [
+        "F00"
+      ],
+      "completedAt": "2026-11-01T22:57:30.612Z"
+    },
+    {
+      "id": "F02",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Decisões e mapa de arquivos formalizados; convenção oficial por funcionalidade adotada, preservando o histórico e sem mover código prematuramente.",
+        "files": [
+          "docs/architecture/decisoes.md",
+          "docs/architecture/mapa-arquivos.md",
+          "TechnicalDebt.md"
+        ],
+        "checks": [
+          {
+            "command": "revisão das ADRs e mapa de origem/destino",
+            "exitCode": 0,
+            "result": "convenção única features/shared; destinos ainda não criados marcados como planejados"
+          },
+          {
+            "command": "conferência de estado e dependência F00",
+            "exitCode": 0,
+            "result": "baseline concluído com provas preservadas"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Movimentações serão aplicadas nas tarefas de domínio e interface."
+        ]
+      },
+      "blocker": null,
+      "title": "Registrar fronteiras e a convenção de pastas",
+      "dependencies": [
+        "F00"
+      ],
+      "completedAt": "2026-11-01T22:46:05.502Z"
+    },
+    {
+      "id": "F03",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Lint Expo incremental com orçamento explícito de 23 diagnósticos legados, fronteiras sem exceção e rejeição verificável de any novo; formatação apenas de código novo/migrado.",
+        "files": [
+          "eslint.config.mjs",
+          ".prettierrc.json",
+          "scripts/lint.mjs",
+          "scripts/format.mjs",
+          "scripts/eslint-architecture.mjs",
+          "config/lint-baseline.json",
+          "config/format-legacy-files.json",
+          "tests/lintBudget.test.mts",
+          "package.json",
+          "docs/architecture/qualidade-incremental.md"
+        ],
+        "checks": [
+          {
+            "command": "pnpm run lint",
+            "exitCode": 0,
+            "result": "23 diagnósticos existentes; 0 regressões"
+          },
+          {
+            "command": "pnpm run format:check",
+            "exitCode": 0,
+            "result": "14 arquivos verificados; 193 caminhos legados explícitos"
+          },
+          {
+            "command": "pnpm run typecheck",
+            "exitCode": 0,
+            "result": "cliente aprovado"
+          },
+          {
+            "command": "pnpm test",
+            "exitCode": 0,
+            "result": "175 testes aprovados, incluindo fronteiras válidas/inválidas, orçamento e any novo"
+          },
+          {
+            "command": "git -c core.safecrlf=false diff --check",
+            "exitCode": 0,
+            "result": "sem erros de whitespace; alterações anteriores preservadas"
+          }
+        ],
+        "dependenciesVerified": [
+          "F01: versões fixadas e ferramentas compatíveis registradas no estado",
+          "F02: decisões de fronteiras e mapa de arquivos conferidos"
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "23 diagnósticos legados permanecem visíveis; formatação do legado migra por tarefa.",
+          "Regra de arquitetura cobre imports/reexports estáticos; não é análise completa de ciclos.",
+          "Scripts preparados para CI; workflow é entregue por F06. Sem deploy."
+        ],
+        "recovery": "Reverter somente arquivos desta tarefa, preservando as alterações preexistentes."
+      },
+      "blocker": null,
+      "title": "Adicionar lint e formatação com adoção incremental",
+      "dependencies": [
+        "F01",
+        "F02"
+      ],
+      "completedAt": "2026-11-04T20:25:57.257Z"
+    },
+    {
+      "id": "F04",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Suíte real de Rules criada e executada em Firestore/Storage demo, com guardas de alvo e matriz de identidades. Limitação de sobrescrita própria do Storage registrada sem alterar Rules.",
+        "files": [
+          "firebase.emulators.json",
+          "scripts/rules-target.mjs",
+          "scripts/test-rules.mjs",
+          "tests/rules/permissions.test.mts",
+          "tests/rulesTarget.test.mts",
+          "docs/architecture/emuladores.md",
+          "docs/architecture/rules-assessment.json"
+        ],
+        "checks": [
+          {
+            "command": "Node 22 + JDK 21: pnpm run test:rules",
+            "exitCode": 0,
+            "result": "15 testes aprovados, incluindo operações reais get/list/write/delete nos dois emuladores; fixtures sintéticas"
+          },
+          {
+            "command": "node --test tests/rulesTarget.test.mts",
+            "exitCode": 0,
+            "result": "projeto real e hosts incorretos recusados antes de inicializar SDKs"
+          },
+          {
+            "command": "node scripts/lint.mjs",
+            "exitCode": 0,
+            "result": "sem regressões"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Avaliação parcial das Rules locais; sem deploy, IAM ou testes de endpoints Admin.",
+          "Sobrescrita válida do próprio objeto legado continua possível; registrada para SEC02/I01."
+        ]
+      },
+      "blocker": null,
+      "title": "Criar testes reais das Rules em emuladores",
+      "dependencies": [
+        "F01"
+      ],
+      "completedAt": "2026-11-04T20:39:27.648Z"
+    },
+    {
+      "id": "F05",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Infra Jest/Expo executa hook e galeria; duas verificações estruturais substituídas por comportamento equivalente, demais proteções preservadas e mapeadas.",
+        "files": [
+          "package.json",
+          "jest.config.cjs",
+          "tests/ui/firebasePosts.test.tsx",
+          "tests/ui/profileGallery.test.tsx",
+          "tests/remoteSync.test.mts",
+          "tests/profileGalleryVisual.test.mts",
+          "docs/architecture/testes-comportamento.md"
+        ],
+        "checks": [
+          {
+            "command": "pnpm run test:ui",
+            "exitCode": 0,
+            "result": "2 suítes e 4 testes aprovados, inclusive após restaurar mutações"
+          },
+          {
+            "command": "node tmp/f05-mutation.mjs",
+            "exitCode": 0,
+            "result": "Remoção temporária da espera do cache e da sombra do título produziu falha nas duas suítes; fontes restaurados em finally"
+          },
+          {
+            "command": "pnpm test",
+            "exitCode": 0,
+            "result": "174 testes Node aprovados; regex do hook substituída por múltiplas provas de comportamento"
+          },
+          {
+            "command": "pnpm run format:check",
+            "exitCode": 0,
+            "result": "14 arquivos novos/migrados aprovados"
+          },
+          {
+            "command": "git -c core.safecrlf=false diff --check",
+            "exitCode": 0,
+            "result": "diff sem erros; alterações anteriores preservadas"
+          }
+        ],
+        "dependenciesVerified": [
+          "F00: baseline e proteções existentes conferidos",
+          "F01: Jest, renderer, Expo e Testing Library fixados"
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Não mede pixels, vídeo real ou dispositivo; testes estruturais restantes mapeados para os respectivos domínios.",
+          "Nenhum comportamento de produção alterado; SDK remoto simulado."
+        ],
+        "recovery": "Reverter apenas as substituições e configuração de testes desta ficha."
+      },
+      "blocker": null,
+      "title": "Preparar testes de comportamento para extrações",
+      "dependencies": [
+        "F00",
+        "F01"
+      ],
+      "completedAt": "2026-11-04T20:28:01.521Z"
+    },
+    {
+      "id": "F06",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "CI preparada em três jobs sem credenciais de produção e pacote de Functions comprovado fora do workspace com dependências congeladas exclusivas do backend.",
+        "files": [
+          ".github/workflows/quality.yml",
+          "scripts/check-functions-package.mjs",
+          "scripts/functions-package-lock.mjs",
+          "scripts/smoke-functions.cjs",
+          "tests/functionsPackageLock.test.mts",
+          "functions/package.json",
+          "docs/architecture/ci.md"
+        ],
+        "checks": [
+          {
+            "command": "pnpm install --frozen-lockfile --ignore-scripts",
+            "exitCode": 0,
+            "result": "instalação congelada concluída"
+          },
+          {
+            "command": "pnpm run test:package:functions (Node 22)",
+            "exitCode": 0,
+            "result": "267 pacotes; compilação e carga de 24 exports isoladas; Expo/React Native/Jest/CLI ausentes; instalação raiz inalterada"
+          },
+          {
+            "command": "node --test tests/functionsPackageLock.test.mts",
+            "exitCode": 0,
+            "result": "2 testes do importer e recusa de referência local aprovados"
+          },
+          {
+            "command": "pnpm run lint, format:check, typecheck e typecheck:functions",
+            "exitCode": 0,
+            "result": "sem regressão de lint ou erros de formato/tipos"
+          },
+          {
+            "command": "pnpm test e pnpm run test:ui",
+            "exitCode": 0,
+            "result": "175 testes Node e 4 testes de interface aprovados antes da adição dos 2 testes de empacotamento"
+          },
+          {
+            "command": "EXPO_NO_DOTENV=1 pnpm run build:web",
+            "exitCode": 0,
+            "result": "bundle web e service worker gerados sem ler .env"
+          },
+          {
+            "command": "leitura YAML e revisão dos jobs",
+            "exitCode": 0,
+            "result": "3 jobs, Actions fixadas por commit, sem deploy ou credencial de produção"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Jobs exercitados por seus comandos locais; execução no runner GitHub depende da publicação destas alterações e não foi simulada como aprovada."
+        ]
+      },
+      "blocker": null,
+      "title": "Criar a CI de qualidade e empacotamento",
+      "dependencies": [
+        "F01",
+        "F03",
+        "F04",
+        "F05"
+      ],
+      "completedAt": "2026-11-04T20:46:13.283Z"
+    },
+    {
+      "id": "D00",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Edição Standard/API Native e região confirmadas no banco existente por consultas somente leitura; índices, TTL, backups e runtime inventariados com incertezas explícitas de IAM e provedores.",
+        "files": [
+          "docs/architecture/ambientes.md"
+        ],
+        "checks": [
+          {
+            "command": "Firebase CLI 15.34.1: firestore:databases:get (default) --project xolot-384e9 --json",
+            "exitCode": 0,
+            "result": "STANDARD, FIRESTORE_NATIVE, southamerica-east1; proteção de exclusão ativa, PITR desativado"
+          },
+          {
+            "command": "firestore:indexes; firestore:backups:list; firestore:backups:schedules:list",
+            "exitCode": 0,
+            "result": "sem índices/field overrides, backups ou agendamentos retornados no escopo consultado"
+          },
+          {
+            "command": "functions:list --project xolot-384e9 --json (projeção sanitizada)",
+            "exitCode": 0,
+            "result": "24 exports implantados, Node 22 e região southamerica-east1"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Sem alteração cloud ou leitura de documentos privados.",
+          "IAM, configuração efetiva R2/Mercado Pago e staging independente continuam pendentes antes de promoção física."
+        ]
+      },
+      "blocker": null,
+      "title": "Confirmar o ambiente real de dados sem modificá-lo",
+      "dependencies": [
+        "F01"
+      ],
+      "completedAt": "2026-11-04T20:46:13.453Z"
+    },
+    {
+      "id": "D01",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Contratos de IDs canônicos e adaptadores legados com inventário explícito, detecção de ambiguidade e identidade de conversa sem colisão por separador.",
+        "files": [
+          "src/shared/primitives/ids.ts",
+          "tests/canonicalIds.test.mts"
+        ],
+        "checks": [
+          {
+            "command": "Node 22 --test tests/canonicalIds.test.mts",
+            "exitCode": 0,
+            "result": "5 testes aprovados: validação, round-trip, ambiguidades, conversa e deduplicação"
+          },
+          {
+            "command": "tsc --noEmit",
+            "exitCode": 0,
+            "result": "contratos compilam no cliente"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Mapas de colisões de produção dependem do inventário D00; nenhuma chave real foi renomeada."
+        ]
+      },
+      "blocker": null,
+      "title": "Definir IDs canônicos e mapas legados",
+      "dependencies": [
+        "F02"
+      ],
+      "completedAt": "2026-11-01T22:57:30.841Z"
+    },
+    {
+      "id": "D02",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Contratos observados v1 e proposta v2 registrados com autoridades, leitores/escritores, campos, unidades, estados e gates; campanhas mantidas como simulação e configuração profissional sem autoridade financeira.",
+        "files": [
+          "contracts/v1/data.json",
+          "contracts/v2/data.json",
+          "contracts/README.md"
+        ],
+        "checks": [
+          {
+            "command": "leitura JSON e revisão da cobertura de recursos",
+            "exitCode": 0,
+            "result": "23 recursos v1 e 15 propostos v2 com autoridade, leitores, escritores e campos; paths sem duplicata"
+          },
+          {
+            "command": "revisão com Rules, DTOs, local schema 6, escrita R2/assinatura/avatar e metadados do ambiente",
+            "exitCode": 0,
+            "result": "formato legado, provedor, dinheiro e política de selo preservados; v2 explicitamente sem deploy"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Contratos documentados não são schema implantado. Nenhum campo novo, migração ou Rule foi publicado.",
+          "IAM/retentores, staging e decisões de privacidade específicas seguem gates antes da promoção física."
+        ]
+      },
+      "blocker": null,
+      "title": "Fechar os contratos lógicos e a autoridade dos dados",
+      "dependencies": [
+        "D00",
+        "D01",
+        "F02"
+      ],
+      "completedAt": "2026-11-04T22:17:18.466Z"
+    },
+    {
+      "id": "D03",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Catálogo de 10 consultas e 8 índices candidatos preparado; Page/Cursor versionado com escopo, desempate e precisão do snapshot; paginação exige servidor e não usa offset.",
+        "files": [
+          "src/config/queryCatalog.ts",
+          "src/shared/primitives/pagination.ts",
+          "src/shared/data/firestorePage.ts",
+          "firestore.indexes.json",
+          "scripts/check-query-indexes.mjs",
+          "tests/pagination.test.mts",
+          "tests/rules/queries.test.mts",
+          "docs/architecture/consultas.md"
+        ],
+        "checks": [
+          {
+            "command": "Node 22 + JDK 21: test:rules",
+            "exitCode": 0,
+            "result": "20 testes aprovados; datas iguais, precisão submilissegundo, exclusão do cursor, inserção entre páginas, escopos privados, prefixos, catálogo e offline exercitados no emulador"
+          },
+          {
+            "command": "node scripts/check-query-indexes.mjs; testes/pagination; tsc --noEmit; lint",
+            "exitCode": 0,
+            "result": "10 consultas/8 índices conferidos; cursores incompatíveis recusados; tipos e lint aprovados"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Índices ainda não implantados. Emulador não impõe a mesma necessidade de índice composto do serviço; validar READY em staging antes de ativar consumidores.",
+          "Listeners globais do app serão substituídos nas tarefas Q01-Q08/M03-M04. Documentos sem campo de ordenação exigem inventário/backfill, sem data inventada.",
+          "Teste detectou diferença entre instâncias SDK compat/modular; clientes de teste agora conectam explicitamente ao loopback antes de ler. Nenhum dado de produção foi acessado ou alterado."
+        ]
+      },
+      "blocker": null,
+      "title": "Versionar consultas, índices e paginação",
+      "dependencies": [
+        "D02",
+        "F04"
+      ],
+      "completedAt": "2026-11-04T22:42:15.937Z"
+    },
+    {
+      "id": "O01",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Protocolo fechado de falhas e adaptadores de log aplicados ao cache e à assinatura de upload R2; erros esperados/inesperados distinguíveis sem payload privado.",
+        "files": [
+          "src/shared/observability/failureEvent.ts",
+          "src/shared/observability/logger.ts",
+          "functions/src/platform/failureEvent.ts",
+          "functions/src/platform/logger.ts",
+          "src/actions/usePersistentAppState.ts",
+          "functions/src/modules/posts/legacyMediaHandlers.ts",
+          "tests/operationLogging.test.mts",
+          "tests/ui/persistentState.test.tsx",
+          "docs/architecture/observabilidade.md"
+        ],
+        "checks": [
+          {
+            "command": "node --test tests/operationLogging.test.mts",
+            "exitCode": 0,
+            "result": "5 testes de conformidade, allowlist e sanitização aprovados; tokens/URLs/KYC não serializados"
+          },
+          {
+            "command": "Jest persistentState.test.tsx",
+            "exitCode": 0,
+            "result": "2 testes aprovados: recuperação com falha de leitura e preservação de conteúdo após falha de gravação"
+          },
+          {
+            "command": "tsc cliente/backend; node --test tests/backend/*.test.mjs; lint",
+            "exitCode": 0,
+            "result": "tipos e contratos aprovados, sem regressão de lint"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Métricas completas serão instrumentadas e medidas em O03; nenhum fornecedor ou coleta externa adicionado.",
+          "Outros logs legados permanecem para revisão de seus domínios; correlação atual é por falha e não é propagação distribuída entre serviços."
+        ]
+      },
+      "blocker": null,
+      "title": "Estabelecer logs, erros e métricas sanitizados",
+      "dependencies": [
+        "F02",
+        "F06"
+      ],
+      "completedAt": "2026-11-04T22:17:18.317Z"
+    },
+    {
+      "id": "SEC01",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Matriz de acesso, classificação de dados, ameaças/testes negativos e retenção proposta documentadas. Pendências de privacidade e promoção permanecem explícitas; mídia R2 pública não é descrita como sigilosa.",
+        "files": [
+          "docs/architecture/seguranca-e-retencao.md",
+          "contracts/v1/data.json",
+          "contracts/v2/data.json",
+          "docs/architecture/rules-assessment.json"
+        ],
+        "checks": [
+          {
+            "command": "revisão contra Rules, auth, exclusão de conta, identidade, UI KYC, contratos e D00",
+            "exitCode": 0,
+            "result": "exposição atual, autoridade Admin, recência, selos e ausência de TTL/backups confirmados; sem decisão silenciosa de retenção"
+          },
+          {
+            "command": "matriz vinculada a provas existentes",
+            "exitCode": 0,
+            "result": "20 testes Rules/queries e casos de privacidade/logs/cadastro vinculados; riscos ainda não cobertos identificados"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Prazos de retenção, exposição da idade, bloqueio, direitos sobre histórico, IAM operacional e staging precisam de decisão antes de migração física.",
+          "Não é parecer jurídico nem certificação de segurança; nenhuma permissão, claim, retenção ou dado cloud alterado."
+        ]
+      },
+      "blocker": null,
+      "title": "Definir ameaça, visibilidade e retenção",
+      "dependencies": [
+        "D02",
+        "O01"
+      ],
+      "completedAt": "2026-11-04T22:48:13.016Z"
+    },
+    {
+      "id": "C01",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Tipos e adaptadores de conta autenticada/onboarding/perfil social separados. Perfis de terceiros não recebem email ou consentimento fictício; fachada AppUser preserva consumidores legados.",
+        "files": [
+          "src/features/auth/domain/types.ts",
+          "src/features/auth/application/accountView.ts",
+          "src/features/profiles/domain/types.ts",
+          "src/features/profiles/application/profileView.ts",
+          "src/features/auth/index.ts",
+          "src/features/profiles/index.ts",
+          "src/types.ts",
+          "src/services/firebaseProfileService.ts",
+          "src/utils/firebaseProfileDocument.ts",
+          "src/utils/userIdentity.ts",
+          "tests/accountViews.test.mts",
+          "docs/architecture/conta-perfil.md"
+        ],
+        "checks": [
+          {
+            "command": "node --test tests/*.test.mts",
+            "exitCode": 0,
+            "result": "185 testes aprovados, incluindo UID divergente, perfil sem campos privados e onboarding"
+          },
+          {
+            "command": "Jest --runInBand; lint; tsc --noEmit",
+            "exitCode": 0,
+            "result": "15 testes de interface, lint e tipos aprovados"
+          },
+          {
+            "command": "Node 22 pnpm run build:web",
+            "exitCode": 0,
+            "result": "novos módulos e fachadas resolvidos no bundle"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "AppUser continua como união temporária para props legadas; C06/C07 especializam estado e repositórios.",
+          "Aceite da vista própria mantém semântica legada; prova autoritativa continua no cadastro privado/backend."
+        ]
+      },
+      "blocker": null,
+      "title": "Separar tipos de autenticação e perfil",
+      "dependencies": [
+        "D01",
+        "D02",
+        "F05"
+      ],
+      "completedAt": "2026-11-04T22:22:41.273Z"
+    },
+    {
+      "id": "C02",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Post/PublishedPost/MediaAsset/Draft e FeedItem definidos sem dados pessoais misturados; formatos Player/VideoSubmission e normalizador migrados com fachadas compatíveis e fixtures dos dois provedores.",
+        "files": [
+          "src/features/posts/domain/types.ts",
+          "src/features/posts/application/legacyTypes.ts",
+          "src/features/posts/data/postDocument.ts",
+          "src/features/posts/data/postAdapters.ts",
+          "src/features/posts/index.ts",
+          "src/features/feed/domain/types.ts",
+          "src/features/feed/index.ts",
+          "src/types.ts",
+          "src/utils/firebasePostDocument.ts",
+          "tests/postModels.test.mts",
+          "docs/architecture/publicacoes.md"
+        ],
+        "checks": [
+          {
+            "command": "tsc --noEmit; testes postModels/firebasePostDocument",
+            "exitCode": 0,
+            "result": "tipos e 10 testes aprovados; fotos/vídeos Firebase/R2 mantêm facade e seletores, versões futuras/estados não publicáveis recusados"
+          },
+          {
+            "command": "lint",
+            "exitCode": 0,
+            "result": "regressão de import/first corrigida; sem novos diagnósticos"
+          },
+          {
+            "command": "Node 22 pnpm run build:web",
+            "exitCode": 0,
+            "result": "fachadas e módulos resolvidos no bundle/PWA"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "UI legada continua usando Player/VideoSubmission até U01/U02/U06; o novo contrato não ativa estados v2 nem altera dados remotos."
+        ]
+      },
+      "blocker": null,
+      "title": "Separar Post, MediaAsset, Draft e FeedItem",
+      "dependencies": [
+        "D01",
+        "D02",
+        "F05"
+      ],
+      "completedAt": "2026-11-04T22:30:49.222Z"
+    },
+    {
+      "id": "C03",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "BackButton e LabeledInput extraídos para shared/ui, com props e reexports legados preservados. Header, tabs e shell de marca continuam com seus donos atuais.",
+        "files": [
+          "src/shared/ui/BackButton.tsx",
+          "src/shared/ui/LabeledInput.tsx",
+          "src/components/Navigation.tsx",
+          "tests/ui/sharedPrimitives.test.tsx",
+          "docs/architecture/mapa-arquivos.md"
+        ],
+        "checks": [
+          {
+            "command": "pnpm run test:ui",
+            "exitCode": 0,
+            "result": "8 testes renderizados aprovados, incluindo botão desabilitado, toque, eventos de texto, precedência de props e temas claro/escuro"
+          },
+          {
+            "command": "tsc --noEmit e lint",
+            "exitCode": 0,
+            "result": "sem erro de tipos ou regressão de lint"
+          },
+          {
+            "command": "Node 22 pnpm run build:web",
+            "exitCode": 0,
+            "result": "imports resolvidos e bundle/PWA gerados"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Imports legados usam fachadas temporárias; migrar consumidores por tela nas tarefas U02-U07/N04."
+        ]
+      },
+      "blocker": null,
+      "title": "Extrair primitives visuais realmente compartilhados",
+      "dependencies": [
+        "F02",
+        "F05"
+      ],
+      "completedAt": "2026-11-04T22:00:32.223Z"
+    },
+    {
+      "id": "C04",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Estilos exclusivos de BackButton e LabeledInput colocados junto dos componentes; sete chaves removidas do agregador global sem duplicação de autoridade.",
+        "files": [
+          "src/shared/ui/BackButton.styles.ts",
+          "src/shared/ui/LabeledInput.styles.ts",
+          "src/shared/ui/BackButton.tsx",
+          "src/shared/ui/LabeledInput.tsx",
+          "src/styles/app/navigationStyles.ts",
+          "src/styles/app/sharedContentStyles.ts",
+          "docs/architecture/estilos.md"
+        ],
+        "checks": [
+          {
+            "command": "Jest sharedPrimitives.test.tsx",
+            "exitCode": 0,
+            "result": "4 testes aprovados, incluindo cores e dimensões nos temas claro e escuro"
+          },
+          {
+            "command": "tsc --noEmit; lint",
+            "exitCode": 0,
+            "result": "sem erros ou regressões; baseline podado de entradas obsoletas, mantendo 23 diagnósticos atuais"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Estilos das telas legadas serão migrados somente nas respectivas tarefas."
+        ]
+      },
+      "blocker": null,
+      "title": "Estabelecer estilos colocados junto dos componentes",
+      "dependencies": [
+        "C03",
+        "F03"
+      ],
+      "completedAt": "2026-11-04T22:02:44.735Z"
+    },
+    {
+      "id": "C05",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Tema extraído para shared/theme com tokens, contexto, persistência e efeito web separados. Singleton legado sincroniza somente em callbacks/effects; primitives novos recebem a paleta por contexto.",
+        "files": [
+          "src/shared/theme/ThemeProvider.tsx",
+          "src/shared/theme/context.ts",
+          "src/shared/theme/preferences.ts",
+          "src/shared/theme/platform.ts",
+          "src/shared/theme/tokens.ts",
+          "src/shared/theme/legacy.ts",
+          "src/ThemeProvider.tsx",
+          "src/theme.ts",
+          "tests/ui/themeProvider.test.tsx",
+          "docs/architecture/estilos.md"
+        ],
+        "checks": [
+          {
+            "command": "pnpm run test:ui",
+            "exitCode": 0,
+            "result": "13 testes aprovados; restauração, rerender sem mutação global, remount, resposta atrasada e falha de disco exercitados"
+          },
+          {
+            "command": "tsc --noEmit; node --test tests/theme.test.mts; lint",
+            "exitCode": 0,
+            "result": "tipos, 2 testes de compatibilidade e lint aprovados"
+          },
+          {
+            "command": "Node 22 pnpm run build:web",
+            "exitCode": 0,
+            "result": "bundle e service worker gerados com novos módulos"
+          },
+          {
+            "command": "navegador http://localhost:8082/",
+            "exitCode": 0,
+            "result": "sessão restaurada, feed e perfil renderizados; nenhum erro de console observado; captura output/testes/refatoracao-c05-perfil.png"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Adaptador global permanece somente para consumidores legados, sincronizado fora de render; remoção definitiva depende da migração das telas.",
+          "Sem teste em aparelho nativo nesta etapa; testes renderizados usam React Native/Expo."
+        ]
+      },
+      "blocker": null,
+      "title": "Remover efeito de tema durante renderização",
+      "dependencies": [
+        "C03",
+        "C04"
+      ],
+      "completedAt": "2026-11-04T22:08:40.857Z"
+    },
+    {
+      "id": "C06",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Sessão isolada em controlador sem SDK/React e SessionProvider; adaptadores de conta/cadastro e composição separados. Geração, cancelamento de polling e descarte de snapshots/erros protegem troca de UID. Fachadas mantêm fluxos e UI atuais.",
+        "files": [
+          "src/features/auth/application/sessionController.ts",
+          "src/features/auth/application/sessionRepository.ts",
+          "src/features/auth/ui/SessionProvider.tsx",
+          "src/features/auth/data/firebaseAccountGateway.ts",
+          "src/features/auth/data/firebaseRegistration.ts",
+          "src/features/auth/data/firebaseSessionRepository.ts",
+          "src/features/profiles/data/firebaseProfileReader.ts",
+          "src/bootstrap/authServices.ts",
+          "src/actions/useFirebaseAccounts.ts",
+          "tests/sessionController.test.mts",
+          "tests/ui/sessionProvider.test.tsx",
+          "tests/rules/authSession.test.mts",
+          "docs/architecture/conta-perfil.md"
+        ],
+        "dependenciesVerified": [
+          "C01: projeções autenticada/social e onboarding preservadas",
+          "F04: guardas demo e Rules locais; Auth emulado adicionado na porta 9095",
+          "F05: renderer Expo e testes comportamentais em uso"
+        ],
+        "checks": [
+          {
+            "command": "Node --test tests/*.test.mts",
+            "exitCode": 0,
+            "result": "197 testes aprovados; 7 casos novos de sessão substituem regex da restauração"
+          },
+          {
+            "command": "Node 22 --test tests/sessionController.test.mts tests/rulesTarget.test.mts",
+            "exitCode": 0,
+            "result": "8 testes aprovados, incluindo Google vinculado com provedor Apple e bloqueio de alvo remoto"
+          },
+          {
+            "command": "Node 22 jest --runInBand",
+            "exitCode": 0,
+            "result": "6 suítes e 17 testes aprovados após extrair SDKs da API pública da UI"
+          },
+          {
+            "command": "Node 22 scripts/test-rules.mjs",
+            "exitCode": 0,
+            "result": "24 testes aprovados em Auth/Firestore/Storage demo; cadastro pendente, email não verificado, login, perfil próprio, logout e onboarding da conta B com SDK real"
+          },
+          {
+            "command": "Node 22 scripts/lint.mjs",
+            "exitCode": 0,
+            "result": "23 diagnósticos legados; nenhuma regressão ou violação de arquitetura"
+          },
+          {
+            "command": "Node 22 tsc --noEmit",
+            "exitCode": 0,
+            "result": "cliente aprovado após composição e API pública finais"
+          },
+          {
+            "command": "Node 22 scripts/format.mjs",
+            "exitCode": 0,
+            "result": "107 arquivos verificados; 187 caminhos legados registrados"
+          },
+          {
+            "command": "Node 22 pnpm run build:web",
+            "exitCode": 0,
+            "result": "bundle web e service worker gerados; 12 URLs e 5,53 MB de precache"
+          },
+          {
+            "command": "Navegação CUA em localhost:8082 após reload",
+            "exitCode": 0,
+            "result": "Sessão restaurada; feed, perfil, 10 perfis seguidos e lista de mensagens verificados; nenhum erro no console. Prova em output/testes/refatoracao-c06-c07-b06.json e screenshot associado."
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Sem deploy. Testes automatizados usam dados sintéticos; smoke no navegador usa a sessão existente e os serviços já implantados.",
+          "Auth emulado usa Admin local para simular confirmação de email e cadastro ativado; não executa o callable de ativação, email real, popup Google ou build native.",
+          "Lista pública legada continua limitada a 200 até Q03; não controla a sessão.",
+          "Fachadas de SDK/estado legado serão retiradas quando U07/N04 migrarem seus consumidores."
+        ],
+        "recovery": "Restaurar somente a composição e fachadas desta etapa a partir do diff preservado. Nenhuma migração de dados ou alteração de Rules foi executada.",
+        "rolloutStatus": "local_sem_deploy"
+      },
+      "blocker": null,
+      "title": "Isolar a sessão e o ciclo de autenticação",
+      "dependencies": [
+        "C01",
+        "F04",
+        "F05"
+      ],
+      "subtasks": [
+        {
+          "id": "C06-a",
+          "title": "Separar adaptadores de autenticação e cadastro das fachadas legadas",
+          "status": "concluida"
+        },
+        {
+          "id": "C06-b",
+          "title": "Controlador de sessão com portas, provider e cancelamento por geração",
+          "status": "concluida"
+        },
+        {
+          "id": "C06-c",
+          "title": "Testes comportamentais e auth sintética no emulador",
+          "status": "concluida"
+        }
+      ],
+      "completedAt": "2026-11-04T23:54:48.450Z"
+    },
+    {
+      "id": "C07",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Perfis têm portas sem SDK, caso de uso com identidade injetada, projeção permitida e repositório transacional para perfil/username. Concorrência preserva uma única reserva; conflito comprovado no servidor mantém o erro de nome em uso sem mascarar negação real.",
+        "files": [
+          "src/features/profiles/application/profileRepository.ts",
+          "src/features/profiles/application/saveProfile.ts",
+          "src/features/profiles/domain/errors.ts",
+          "src/features/profiles/data/firebaseProfileRepository.ts",
+          "src/features/profiles/data/firebaseProfileReader.ts",
+          "src/features/profiles/index.ts",
+          "src/bootstrap/profileServices.ts",
+          "src/services/firebaseProfileService.ts",
+          "tests/profileCommands.test.mts",
+          "tests/rules/profileRepository.test.mts",
+          "docs/architecture/conta-perfil.md"
+        ],
+        "dependenciesVerified": [
+          "C01: domínio/projeção social e formulário preservados",
+          "C06: sessão usa porta própria e atualizações não dependem da lista pública",
+          "D03: limites/cursor permanecem próprios; consulta global não é declarada paginada nesta etapa"
+        ],
+        "checks": [
+          {
+            "command": "Node 22 --test tests/profileCommands.test.mts tests/sessionController.test.mts tests/remoteSync.test.mts",
+            "exitCode": 0,
+            "result": "12 testes aprovados; normalização, campos de sistema descartados, ownership, limites e erros de negócio/infraestrutura"
+          },
+          {
+            "command": "Node 22 scripts/test-rules.mjs",
+            "exitCode": 0,
+            "result": "28 testes aprovados; quatro casos novos de perfil cobrem dois clientes concorrentes, repetição, rename/reload, criação/selos preservados, reservas inconsistentes e negação real das Rules"
+          },
+          {
+            "command": "Node 22 tsc --noEmit",
+            "exitCode": 0,
+            "result": "cliente aprovado com os adaptadores e caso de uso extraídos"
+          },
+          {
+            "command": "Node 22 jest --runInBand",
+            "exitCode": 0,
+            "result": "6 suítes e 17 testes de UI aprovados"
+          },
+          {
+            "command": "Node 22 scripts/lint.mjs",
+            "exitCode": 0,
+            "result": "23 diagnósticos legados, nenhuma regressão ou violação de arquitetura"
+          },
+          {
+            "command": "Node 22 scripts/format.mjs",
+            "exitCode": 0,
+            "result": "115 arquivos novos/migrados verificados, 186 caminhos legados registrados"
+          },
+          {
+            "command": "Navegação CUA em localhost:8082 após reload",
+            "exitCode": 0,
+            "result": "Sessão restaurada; feed, perfil, 10 perfis seguidos e lista de mensagens verificados; nenhum erro no console. Prova em output/testes/refatoracao-c06-c07-b06.json e screenshot associado."
+          }
+        ],
+        "pendingAcceptance": [],
+        "behaviorChanges": [
+          "Idades não inteiras, NaN e infinito são rejeitadas no cliente antes da escrita; as Rules já negavam esses valores.",
+          "Quando o commit concorrente é negado, leitura no servidor só traduz o erro se comprova reserva de outro UID. Permissão negada genuína continua propagada."
+        ],
+        "limitations": [
+          "Sem deploy, alteração de Rules, coleções ou documentos de produção.",
+          "Lista pública de até 200 perfis continua legada até Q03; consulta local de username não é autoridade.",
+          "Avatar/crop permanecem nos serviços existentes até B05/I07.",
+          "Documentos legados incompletos não recebem backfill de datas ou concessões silenciosas."
+        ],
+        "recovery": "Fachadas existentes preservam imports e mensagens; recuperar apenas o patch de composição, aplicação e repositório desta etapa, sem migrar dados.",
+        "rolloutStatus": "local_sem_deploy"
+      },
+      "blocker": null,
+      "title": "Isolar repositório e casos de uso de perfis",
+      "dependencies": [
+        "C01",
+        "C06",
+        "D03"
+      ],
+      "subtasks": [
+        {
+          "id": "C07-a",
+          "title": "Extrair validação, porta e transação de perfil/username, mantendo fachada",
+          "status": "concluida"
+        },
+        {
+          "id": "C07-b",
+          "title": "Validar casos de uso e disputa de username com Rules emuladas",
+          "status": "concluida"
+        }
+      ],
+      "completedAt": "2026-11-05T12:18:54.528Z"
+    },
+    {
+      "id": "B01",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Entrypoint de Functions reduzido a composição/reexports; bootstrap Admin único e idempotente; handlers legados de mídia movidos sem alterar contratos.",
+        "files": [
+          "functions/src/index.ts",
+          "functions/src/bootstrap/admin.ts",
+          "functions/src/modules/posts/legacyMediaHandlers.ts",
+          "config/functions-exports.json",
+          "tests/backend/exports.test.mjs",
+          "docs/architecture/backend.md"
+        ],
+        "checks": [
+          {
+            "command": "tsc --project functions/tsconfig.json; node --test tests/backend/*.test.mjs",
+            "exitCode": 0,
+            "result": "compilação aprovada; 24 contratos comparados integralmente e recarga do bootstrap não duplicou Admin App"
+          },
+          {
+            "command": "Node 22 scripts/check-functions-package.mjs via pnpm",
+            "exitCode": 0,
+            "result": "267 dependências congeladas, novo módulo compilado e 24 exports carregados fora do workspace"
+          },
+          {
+            "command": "lint",
+            "exitCode": 0,
+            "result": "sem regressão"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Fluxo de mídia permanece legado, explicitamente mapeado para B04/I01; nenhuma promessa de idempotência foi adicionada por movimentação.",
+          "Sem deploy ou mudança de nome, região, geração, segredo ou payload de endpoint."
+        ]
+      },
+      "blocker": null,
+      "title": "Transformar o entrypoint do backend em composição",
+      "dependencies": [
+        "F01",
+        "F02",
+        "F05"
+      ],
+      "completedAt": "2026-11-04T22:10:39.996Z"
+    },
+    {
+      "id": "B02",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Primeira porta de repositório consumida por caso de uso de cadastro e erro de domínio independente de SDK; fachada auth mantém API e códigos externos.",
+        "files": [
+          "functions/src/domain/OperationError.ts",
+          "functions/src/modules/accounts/application/requireRegisteredAccount.ts",
+          "functions/src/modules/accounts/data/firestoreRegistration.ts",
+          "functions/src/platform/callableErrors.ts",
+          "functions/src/auth.ts",
+          "tests/backend/registration.test.mjs",
+          "docs/architecture/backend.md"
+        ],
+        "checks": [
+          {
+            "command": "tsc Functions; node --test tests/backend/*.test.mjs",
+            "exitCode": 0,
+            "result": "4 testes aprovados; conta/perfil legado, recusa do incompleto, código preservado e infraestrutura sem autorização falsa"
+          },
+          {
+            "command": "node --test tests/*.test.mts; lint",
+            "exitCode": 0,
+            "result": "191 testes Node aprovados; duas regex substituídas por caso de uso executado; leitura de fonte obsoleta removida; sem regressão de lint"
+          },
+          {
+            "command": "pacote Functions independente com Node 22",
+            "exitCode": 0,
+            "result": "267 dependências e 24 exports resolvidos, sem frontend ou alteração da instalação raiz"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Clock, IDs e provedores recebem portas quando os respectivos casos de uso forem extraídos; interfaces sem consumidor não foram adicionadas."
+        ]
+      },
+      "blocker": null,
+      "title": "Criar portas de infraestrutura e erros do backend",
+      "dependencies": [
+        "B01",
+        "O01"
+      ],
+      "completedAt": "2026-11-04T22:48:12.845Z"
+    },
+    {
+      "id": "B03",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "RequestContext verificado, políticas de ownership/claim/recência e validação fechada dos comandos de mídia centralizados. Exclusão própria usa apenas UID do token, com janela de dez minutos.",
+        "files": [
+          "functions/src/modules/accounts/domain/requestContext.ts",
+          "functions/src/auth.ts",
+          "functions/src/validation.ts",
+          "functions/src/modules/posts/mediaCommandFields.ts",
+          "functions/src/modules/posts/legacyMediaHandlers.ts",
+          "functions/src/accountDeletion.ts",
+          "tests/backend/requestPolicies.test.mjs",
+          "docs/architecture/backend.md"
+        ],
+        "checks": [
+          {
+            "command": "tsc Functions; testes backend de políticas e exports",
+            "exitCode": 0,
+            "result": "contratos de deploy preservados e 7 testes de políticas, incluindo execução real do callable com efeito Auth simulado, aprovados"
+          },
+          {
+            "command": "node --test tests/*.test.mts; lint",
+            "exitCode": 0,
+            "result": "191 testes aprovados; asserção textual de deleteUser substituída por teste do callable; sem regressão de lint"
+          },
+          {
+            "command": "revisão dos payloads atuais de r2PostService",
+            "exitCode": 0,
+            "result": "create/finalize/delete usam exatamente as chaves declaradas; valores/formatos de sucesso mantidos"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Hardening local rejeita campos extras/de sistema e IDs com caminhos/trim; ensaiar clientes suportados antes de deploy.",
+          "Helper administrativo não concede claims nem ativa comandos novos. Outras allowlists migram em B05-B12.",
+          "Nenhuma conta real foi excluída: efeito Admin Auth foi simulado no teste."
+        ]
+      },
+      "blocker": null,
+      "title": "Centralizar autorização e validação de comandos",
+      "dependencies": [
+        "B02",
+        "F04",
+        "SEC01"
+      ],
+      "completedAt": "2026-11-04T22:57:47.774Z"
+    },
+    {
+      "id": "B04",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Mídia v1 separada em parsers, handlers, serviço sem SDK e adaptadores Firestore/R2, com portas de clock/IDs/provedores. Arquivo legado misturado removido após caracterização e integração emulada.",
+        "files": [
+          "functions/src/modules/posts/handlers.ts",
+          "functions/src/modules/posts/commands.ts",
+          "functions/src/modules/posts/application/postMediaService.ts",
+          "functions/src/modules/posts/application/mediaPorts.ts",
+          "functions/src/modules/posts/application/uploadQuota.ts",
+          "functions/src/modules/posts/domain/mediaTypes.ts",
+          "functions/src/modules/posts/data/firestorePostMedia.ts",
+          "functions/src/modules/posts/data/r2PostMedia.ts",
+          "functions/src/index.ts",
+          "functions/scripts/clean-lib.cjs",
+          "tests/backend/postMedia.test.mjs",
+          "tests/rules/mediaRepository.test.mts",
+          "docs/architecture/backend.md"
+        ],
+        "checks": [
+          {
+            "command": "build limpo Functions e node --test tests/backend/*.test.mjs",
+            "exitCode": 0,
+            "result": "21 testes backend aprovados, incluindo 10 de mídia e os contratos dos 24 exports públicos"
+          },
+          {
+            "command": "Node 22/JDK 21 test:rules",
+            "exitCode": 0,
+            "result": "23 testes aprovados; repositório de mídia executado no Firestore emulado com R2 simulado, conflito sem sobrescrita e quota transacional"
+          },
+          {
+            "command": "Node 22 pacote Functions isolado, compilado de fonte sem lib",
+            "exitCode": 0,
+            "result": "267 dependências; 24 exports carregados sem frontend nem saída antiga; instalação raiz inalterada"
+          },
+          {
+            "command": "lint e format",
+            "exitCode": 0,
+            "result": "sem regressões; globals CommonJS definidos para scripts Node; lib legado não reintroduzido no build"
+          }
+        ],
+        "pendingAcceptance": [],
+        "limitations": [
+          "Cópia antes do commit, expiração antes do replay completed e exclusão do objeto antes do documento são comportamentos v1 caracterizados; recuperação durável fica em I01/I04.",
+          "HEAD confere tamanho/MIME declarados; inspeção real do binário continua em I02.",
+          "R2 foi simulado nos testes; sem deploy, alteração cloud ou remoção de mídia real."
+        ]
+      },
+      "blocker": null,
+      "title": "Extrair handlers e serviço de mídia de posts",
+      "dependencies": [
+        "B01",
+        "B02",
+        "B03",
+        "C02"
+      ],
+      "subtasks": [
+        {
+          "id": "B04-a",
+          "title": "Contratos e parsers dos comandos",
+          "status": "concluida"
+        },
+        {
+          "id": "B04-b",
+          "title": "Serviço de aplicação e adaptadores Firestore/R2",
+          "status": "concluida"
+        },
+        {
+          "id": "B04-c",
+          "title": "Composição e caracterização dos três handlers",
+          "status": "concluida"
+        }
+      ],
+      "completedAt": "2026-11-04T23:29:39.367Z"
+    },
+    {
+      "id": "P01",
+      "title": "Generalizar cadastro para a rede social Folclore",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "dependencies": [
+        "C06",
+        "C07",
+        "F03",
+        "F05"
+      ],
+      "blocker": null,
+      "productRevision": 2,
+      "completedAt": "2026-11-05T14:55:40.014Z",
+      "evidence": {
+        "summary": "Plano revisado para Folclore preservando funcionalidades e as 25 provas técnicas anteriores; cadastro e edição passam a áreas/apresentações gerais sem obrigar esporte e mantendo payload/valores v1.",
+        "files": [
+          "docs/product-plan.md",
+          "docs/refatoracao/README.md",
+          "docs/refatoracao/05-direcao-folclore.md",
+          "docs/refatoracao/01-arquitetura.md",
+          "docs/refatoracao/02-dados.md",
+          "docs/refatoracao/03-validacao-operacao.md",
+          "docs/refatoracao/04-execucao-por-modelo.md",
+          "src/screens/AccountSetupScreen.tsx",
+          "src/screens/AuthScreen.tsx",
+          "src/screens/ProfileScreen.tsx",
+          "src/features/profiles/domain/presentationCatalog.ts",
+          "src/features/profiles/index.ts",
+          "tests/ui/accountSetup.test.tsx",
+          "tests/profilePresentation.test.mts",
+          "tests/accountRegistrationFlow.test.mts",
+          "output/testes/folclore-cadastro-geral.png"
+        ],
+        "dependenciesVerified": [
+          "C06: sessão/Auth e verificação preservadas; não criada conta real",
+          "C07: payload geral passa na normalização v1 sem alterar schema ou campos reservados",
+          "F03: sem regressões de lint/formatação",
+          "F05: UI real executada; SDK da galeria é a dependência simulada"
+        ],
+        "checks": [
+          {
+            "command": "tsc --noEmit",
+            "exitCode": 0,
+            "result": "cliente aprovado com o novo catálogo e o cadastro geral"
+          },
+          {
+            "command": "Node 22 --test tests/*.test.mts",
+            "exitCode": 0,
+            "result": "202 testes aprovados, incluindo catálogo geral, perfil e registro"
+          },
+          {
+            "command": "Node 22 jest --runInBand",
+            "exitCode": 0,
+            "result": "7 suítes e 19 testes aprovados; cadastro geral em três etapas, payload v1, edição legada, texto livre e falha de gravação"
+          },
+          {
+            "command": "Node 22 scripts/lint.mjs",
+            "exitCode": 0,
+            "result": "23 diagnósticos legados, nenhuma regressão ou violação de arquitetura"
+          },
+          {
+            "command": "Node 22 scripts/format.mjs",
+            "exitCode": 0,
+            "result": "126 arquivos verificados; 186 caminhos legados registrados"
+          },
+          {
+            "command": "Node 22 pnpm run build:web",
+            "exitCode": 0,
+            "result": "bundle web e PWA aprovados; 12 URLs e 5,53 MB de precache"
+          },
+          {
+            "command": "Validação do plano, links, títulos e grafo de dependências",
+            "exitCode": 0,
+            "result": "76 Markdown verificados, 92 tarefas, nenhum link/dependência ausente ou ciclo; 25 tarefas concluídas anteriores preservadas integralmente antes da atualização"
+          },
+          {
+            "command": "Smoke CUA em localhost:8082",
+            "exitCode": 0,
+            "result": "Formulário geral observado; preview de Tecnologia/Perfil pessoal descartado sem salvar; perfil existente preservado e console sem erros"
+          }
+        ],
+        "pendingAcceptance": [],
+        "behaviorChanges": [
+          "Cadastro mostra Área de interesse, Como você se apresenta e Marca/projeto/organização opcional, com sugestões gerais e texto livre.",
+          "Textos de entrada passam a divulgar compartilhamento e conexão, sem avaliação de talento esportivo.",
+          "Plano v2 adiciona P01–P09; texto no feed fica separado da mudança imediata do cadastro."
+        ],
+        "limitations": [
+          "Sem deploy, mudança de Rules, schema físico ou dados existentes.",
+          "Logo atual preservado; P03 aguarda a arte final do proprietário.",
+          "Marca textual completa será centralizada em P02; texto no feed ainda será implementado em P04–P07.",
+          "Idade/cidade, consentimento e demais limites atuais foram preservados; simplificação adicional exigirá contrato e validação próprios.",
+          "Smoke visual usa a edição compartilhada; cadastro sintético completo foi exercitado em testes de UI, sem criar conta de produção."
+        ],
+        "recovery": "Recuperar somente o patch de apresentação/catálogo e referências desta tarefa. Nenhuma migração de banco é necessária para reverter a apresentação.",
+        "rolloutStatus": "local_sem_deploy"
+      }
+    },
+    {
+      "id": "P02",
+      "title": "Centralizar a marca Folko preservando integrações",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "dependencies": [
+        "P01"
+      ],
+      "blocker": null,
+      "productRevision": 3,
+      "completedAt": "2026-11-05T20:30:53.217Z",
+      "evidence": {
+        "summary": "Nome público Folko centralizado em configuração pura e aplicado por contexto nos consumidores, acessibilidade, erros, metadados Expo/PWA e notificações. Identificadores técnicos e recursos existentes preservados. Provas anteriores mantidas.",
+        "files": [
+          "src/config/brand.ts",
+          "src/screens/AuthScreen.tsx",
+          "src/screens/AccountSetupScreen.tsx",
+          "src/components/Navigation.tsx",
+          "src/utils/professional.ts",
+          "app.json",
+          "public/manifest.json",
+          "scripts/prepare-web.mjs",
+          "tests/brandPresentation.test.mts",
+          "assets/brand/README.md",
+          "docs/refatoracao/05-direcao-folko.md",
+          "output/testes/folko-perfil-claro.png",
+          "output/testes/folko-perfil-escuro.png",
+          "output/testes/folko-entrada-mobile.png"
+        ],
+        "checks": [
+          {
+            "command": "Node 22 tsc --noEmit",
+            "exitCode": 0,
+            "result": "Cliente aprovado após aplicação das três artes e ajuste de proporção."
+          },
+          {
+            "command": "Node 22 scripts/lint.mjs",
+            "exitCode": 0,
+            "result": "23 diagnósticos legados; zero regressões."
+          },
+          {
+            "command": "Node 22 scripts/format.mjs",
+            "exitCode": 0,
+            "result": "131 arquivos novos/migrados aprovados; 186 caminhos legados registrados."
+          },
+          {
+            "command": "Node 22 --test tests/*.test.mts + revalidação de tests/brandPresentation.test.mts",
+            "exitCode": 0,
+            "result": "205 testes aprovados na execução integral; os 3 testes de marca foram ampliados para as três artes finais e revalidados."
+          },
+          {
+            "command": "Jest --runInBand + revalidações de accountSetup.test.tsx e brandMark.test.tsx",
+            "exitCode": 0,
+            "result": "21 testes na execução integral; 6 testes de cadastro/marca após as assinaturas adicionais e os 4 de marca revalidados após ajuste final de proporção."
+          },
+          {
+            "command": "pnpm run build:web (Node 22)",
+            "exitCode": 0,
+            "result": "Build final exportado: bundle 4,11 MB, precache de 16 URLs / 6,37 MB; sem deploy."
+          },
+          {
+            "command": "node tmp/verify-folko-build.mjs",
+            "exitCode": 0,
+            "result": "Título e manifesto Folko, três artes no precache, revisões dos ícones iguais aos bytes, bundle/shell com novas revisões entre dois builds; quatro assets Xolot ausentes dos consumidores."
+          },
+          {
+            "command": "Revisão CUA do app local",
+            "exitCode": 0,
+            "result": "Sessão existente restaurada, feed com vídeo e perfil preservados; tema claro/escuro conferidos e preferência original clara restaurada. Entrada/cadastro em 390x844 e entrada/perfil em 1280x720; screenshots salvos. Nenhum cadastro, upload ou envio de mensagem realizado."
+          }
+        ],
+        "rolloutStatus": "local_sem_deploy",
+        "pendingAcceptance": [],
+        "limitations": [
+          "Execução local, sem commit, push ou deploy.",
+          "Splash/ícones nativos configurados; aparência em preview/release de dispositivo ainda não validada.",
+          "Revisões do precache conferidas em artefatos de dois builds; atualização de uma instalação PWA antiga ainda requer ensaio. Chaves e três URLs públicas antigas de ícones conservadas.",
+          "Banco, Auth/OAuth, domínios, UIDs, chaves de cache e contratos/preços de cobrança preservados; eventuais textos enviados pelo provedor externo não foram alterados."
+        ]
+      }
+    },
+    {
+      "id": "P03",
+      "title": "Aplicar o logo e a paleta Folko fornecidos pelo proprietário",
+      "status": "em_revisao",
+      "codeStatus": "validado_localmente",
+      "rolloutStatus": "local_sem_deploy",
+      "dependencies": [
+        "P02"
+      ],
+      "blocker": null,
+      "productRevision": 3,
+      "inputs": {
+        "files": [
+          "assets/brand/folko-logo.png",
+          "assets/brand/folko-horizontal.png",
+          "assets/brand/folko-stacked.png"
+        ],
+        "sourceFilename": "codex-clipboard-3b264d66-150a-4f28-8c9e-c43480c50e2f.png",
+        "sha256": "7465f9e6b156b75251f65448b5ce07d273342d7ae956e55b27ff0cb35fb1c580",
+        "supersedes": [
+          "Folko WPP.png",
+          "Folko Logan.png"
+        ],
+        "palette": "Fundo escuro, amarelo/laranja, creme e verde de apoio",
+        "provenance": "assets/brand/provenance.json",
+        "displayFiles": [
+          "assets/brand/folko-primary-original.png",
+          "assets/brand/folko-horizontal-original.png"
+        ]
+      },
+      "localReview": {
+        "updateKey": "display_logos_3",
+        "date": "2026-11-05",
+        "summary": "Logos Folko logo 1.png e Folko Logo 2.png preservados e recortados por cor conforme pedido confirmado. Logo completo sem fundo na entrada/cadastro/abertura; assinatura horizontal sem fundo substitui símbolo e texto separados no header/feed. RGB visível preservado. Após revisão do proprietário, largura compacta reduzida de 124 para 76 px e padding vertical do header para 8 px.",
+        "files": [
+          "assets/brand/folko-primary-original.png",
+          "assets/brand/folko-primary-transparent.png",
+          "assets/brand/folko-horizontal-original.png",
+          "assets/brand/folko-horizontal-display-transparent.png",
+          "assets/brand/display-logos.json",
+          "scripts/prepare-display-logos.mjs",
+          "src/constants/assets.ts",
+          "src/shared/ui/BrandMark.tsx",
+          "src/styles/app/navigationStyles.ts",
+          "src/styles/app/feedStyles.ts",
+          "src/components/AppShell.tsx",
+          "app.json",
+          "output/testes/folko-logo-completo-sem-fundo.png",
+          "output/testes/folko-logo-compacto-perfil.png",
+          "output/testes/folko-cabecalho-reduzido.png",
+          "output/testes/folko-demonstrativo-logos-compactos.png"
+        ],
+        "checks": [
+          {
+            "command": "Node 22 tsc --noEmit",
+            "exitCode": 0,
+            "result": "Cliente aprovado após aplicar os dois recortes."
+          },
+          {
+            "command": "Jest brandMark.test.tsx accountSetup.test.tsx",
+            "exitCode": 0,
+            "result": "6 testes aprovados; imagem completa/horizontal acessíveis, sem texto recriado ou tint, cadastro preservado."
+          },
+          {
+            "command": "Node 22 --test tests/brandPresentation.test.mts",
+            "exitCode": 0,
+            "result": "3 testes aprovados: fontes por SHA-256, alpha real incluindo interior das letras, ícones/IDs, fidelidade e contraste."
+          },
+          {
+            "command": "Node 22 scripts/format.mjs --write; scripts/lint.mjs; git diff --check",
+            "exitCode": 0,
+            "result": "133 arquivos novos/migrados formatados; 23 diagnósticos existentes, zero regressões; diff sem erros de whitespace."
+          },
+          {
+            "command": "pnpm run build:web",
+            "exitCode": 0,
+            "result": "Build final aprovado: 15 URLs de precache / 5,13 MB, incluindo somente os novos recortes na apresentação."
+          },
+          {
+            "command": "CUA: entrada e header/perfil em 390x844",
+            "exitCode": 0,
+            "result": "Fundo preto separado das letras, logo completo exibido na entrada e horizontal menor conferido no header. Sessão e tema preservados; viewport restaurado; capturas reais salvas."
+          },
+          {
+            "command": "node tmp/finalize-display-logos.mjs",
+            "exitCode": 0,
+            "result": "Recortes comparados pixel a pixel com os dois originais: zero pixels RGB visíveis alterados. Artefatos do build e demonstrativo conferidos."
+          }
+        ],
+        "pendingAcceptance": [
+          "Validar ícones/splash em preview/release nativo num dispositivo.",
+          "Ensaiar atualização de uma instalação PWA já em cache, conforme O07/G03."
+        ],
+        "limitations": [
+          "Validação local, sem deploy. Pipeline de ícones preservado; apresentação de splash ainda depende de build nativo."
+        ],
+        "display": {
+          "receivedAt": "2026-11-05",
+          "instruction": "Remover somente o fundo preto; preservar RGB do logo 1 na entrada/abertura e do logo 2 no header/feed, sem filtros ou texto recriado.",
+          "outputs": [
+            {
+              "source": "assets/brand/folko-primary-original.png",
+              "file": "assets/brand/folko-primary-transparent.png",
+              "receivedFilename": "Folko logo 1.png",
+              "sha256": "d122631ee60eee9d14f62fc412be88c3d259eb6579756911da7e8b5df6f3eadd",
+              "eye": [
+                659,
+                389,
+                26
+              ],
+              "usage": "entrada_cadastro_abertura",
+              "width": 802,
+              "height": 865,
+              "sourceRect": [
+                232,
+                164,
+                802,
+                865
+              ],
+              "visiblePixels": 287835,
+              "rgbPixelsChanged": 0,
+              "outputSha256": "2f28ba8996f7c3491c2fae4354fd615999b27e05cd234cf87e28b0a9e755ab70"
+            },
+            {
+              "source": "assets/brand/folko-horizontal-original.png",
+              "file": "assets/brand/folko-horizontal-display-transparent.png",
+              "receivedFilename": "Folko Logo 2.png",
+              "sha256": "09f51a4ef08dbca65c207ba591d1ea29953fab7e1e492f8184423b9ff8823c97",
+              "eye": [
+                630,
+                313,
+                28
+              ],
+              "usage": "header_feed",
+              "width": 1213,
+              "height": 780,
+              "sourceRect": [
+                241,
+                56,
+                1213,
+                780
+              ],
+              "visiblePixels": 348253,
+              "rgbPixelsChanged": 0,
+              "outputSha256": "9e5fa1d4badc5fecdca0c180124ba5a57585496996a52bea7ef4b12cf980691e"
+            }
+          ]
+        },
+        "followUps": [
+          {
+            "key": "login_logo_140",
+            "date": "2026-11-05",
+            "summary": "Login/cadastro com logo completo reduzido de 210 para 140 px, preservando proporção, alpha e arte original.",
+            "files": [
+              "src/shared/ui/BrandMark.tsx",
+              "assets/brand/README.md",
+              "output/testes/folko-login-logo-menor.png"
+            ],
+            "checks": [
+              "4 testes existentes da marca aprovados nos temas claro/escuro.",
+              "Formatação dos 133 arquivos novos/migrados e diff --check aprovados.",
+              "Login conferido no navegador em 390x844; campos, ações e logo inteiro visíveis. Viewport restaurado e sessão anterior preservada."
+            ],
+            "scope": "Ajuste de estilo validado na versão local de desenvolvimento."
+          }
+        ]
+      },
+      "previousLocalReviews": [
+        {
+          "summary": "Implementação local da família final Folko: três fontes preservadas byte a byte, horizontal na entrada/cadastro, composição vertical na abertura e ícone quadrado na marca compacta/app/PWA. Paletas claras/escuras com contraste e tokens de texto/ação próprios. Quatro assets Xolot sem referências removidos; primeiras duas artes descartadas não usadas.",
+          "files": [
+            "assets/brand/folko-logo.png",
+            "assets/brand/folko-horizontal.png",
+            "assets/brand/folko-stacked.png",
+            "assets/brand/provenance.json",
+            "assets/brand/README.md",
+            "src/shared/ui/BrandMark.tsx",
+            "src/shared/theme/tokens.ts",
+            "src/components/AppShell.tsx",
+            "scripts/prepare-brand-assets.mjs",
+            "tests/ui/brandMark.test.tsx",
+            "tests/brandPresentation.test.mts",
+            "output/testes/folko-entrada-mobile.png",
+            "output/testes/folko-cadastro-mobile.png",
+            "output/testes/folko-entrada-desktop.png",
+            "output/testes/folko-perfil-claro.png",
+            "output/testes/folko-perfil-escuro.png"
+          ],
+          "checks": [
+            {
+              "command": "Node 22 tsc --noEmit",
+              "exitCode": 0,
+              "result": "Cliente aprovado após aplicação das três artes e ajuste de proporção."
+            },
+            {
+              "command": "Node 22 scripts/lint.mjs",
+              "exitCode": 0,
+              "result": "23 diagnósticos legados; zero regressões."
+            },
+            {
+              "command": "Node 22 scripts/format.mjs",
+              "exitCode": 0,
+              "result": "131 arquivos novos/migrados aprovados; 186 caminhos legados registrados."
+            },
+            {
+              "command": "Node 22 --test tests/*.test.mts + revalidação de tests/brandPresentation.test.mts",
+              "exitCode": 0,
+              "result": "205 testes aprovados na execução integral; os 3 testes de marca foram ampliados para as três artes finais e revalidados."
+            },
+            {
+              "command": "Jest --runInBand + revalidações de accountSetup.test.tsx e brandMark.test.tsx",
+              "exitCode": 0,
+              "result": "21 testes na execução integral; 6 testes de cadastro/marca após as assinaturas adicionais e os 4 de marca revalidados após ajuste final de proporção."
+            },
+            {
+              "command": "pnpm run build:web (Node 22)",
+              "exitCode": 0,
+              "result": "Build final exportado: bundle 4,11 MB, precache de 16 URLs / 6,37 MB; sem deploy."
+            },
+            {
+              "command": "node tmp/verify-folko-build.mjs",
+              "exitCode": 0,
+              "result": "Título e manifesto Folko, três artes no precache, revisões dos ícones iguais aos bytes, bundle/shell com novas revisões entre dois builds; quatro assets Xolot ausentes dos consumidores."
+            },
+            {
+              "command": "Revisão CUA do app local",
+              "exitCode": 0,
+              "result": "Sessão existente restaurada, feed com vídeo e perfil preservados; tema claro/escuro conferidos e preferência original clara restaurada. Entrada/cadastro em 390x844 e entrada/perfil em 1280x720; screenshots salvos. Nenhum cadastro, upload ou envio de mensagem realizado."
+            },
+            {
+              "command": "node tmp/verify-folko.mjs",
+              "exitCode": 0,
+              "result": "Margens brancas conferidas em 458752 pixels do adaptive e 114688 do maskable; três originais e seis derivados rastreados; 78 documentos / 750 links e grafo de 92 tarefas válidos antes da remoção de P02."
+            }
+          ],
+          "removedAssets": [
+            {
+              "path": "C:\\Users\\barbe\\Desktop\\NextStar\\assets\\brand\\xolot-app-icon.png",
+              "bytes": 834250
+            },
+            {
+              "path": "C:\\Users\\barbe\\Desktop\\NextStar\\assets\\brand\\xolot-horizontal-wordmark.png",
+              "bytes": 477594
+            },
+            {
+              "path": "C:\\Users\\barbe\\Desktop\\NextStar\\assets\\brand\\xolot-symbol.png",
+              "bytes": 236875
+            },
+            {
+              "path": "C:\\Users\\barbe\\Desktop\\NextStar\\assets\\brand\\xolot-wordmark.png",
+              "bytes": 399354
+            }
+          ],
+          "artifactCheck": {
+            "title": "Folko",
+            "precache": 16,
+            "manifest": "Folko",
+            "oldBundle": "_expo/static/js/web/index-6a47b0b63db0a55ea13ac9001b0a8973.js",
+            "newBundle": "_expo/static/js/web/index-ae1d189caad8b950bee92cf8c9187a46.js",
+            "shellRevisionChanged": true,
+            "iconRevisionsMatchBytes": true,
+            "oldPublicIconUrlsRetained": true,
+            "scope": "Verificação de artefatos gerados; não comprova atualização de uma instalação PWA antiga."
+          },
+          "pendingAcceptance": [
+            "Validar ícones e splash em preview/release nativo num dispositivo.",
+            "Ensaiar atualização de uma instalação PWA já em cache, conforme O07/G03."
+          ],
+          "limitations": [
+            "Execução local, sem commit, push ou deploy.",
+            "Splash/ícones nativos configurados; aparência em preview/release de dispositivo ainda não validada.",
+            "Revisões do precache conferidas em artefatos de dois builds; atualização de uma instalação PWA antiga ainda requer ensaio. Chaves e três URLs públicas antigas de ícones conservadas.",
+            "Banco, Auth/OAuth, domínios, UIDs, chaves de cache e contratos/preços de cobrança preservados; eventuais textos enviados pelo provedor externo não foram alterados."
+          ]
+        },
+        {
+          "date": "2026-11-05",
+          "summary": "Pedido de tema escuro aplicado como padrão, mantendo preferência clara explícita. Recorte por cor autorizado após rejeitar tentativas automáticas; símbolo e assinatura usam os pixels originais da versão horizontal para preservar pena, bico e olho. Fundos opacos dos logos foram retirados dos consumidores. CTA principal amarelo com texto escuro, superfícies pretas/grafite e texto creme. Ícones e URLs de compatibilidade agora exibem Folko; textos próprios do backend atualizados sem mudar preços/IDs.",
+          "files": [
+            "scripts/extract-brand-artwork.mjs",
+            "assets/brand/presentation.json",
+            "assets/brand/provenance.json",
+            "assets/brand/folko-symbol-transparent.png",
+            "assets/brand/folko-horizontal-transparent.png",
+            "assets/brand/README.md",
+            "src/shared/theme/tokens.ts",
+            "src/shared/theme/ThemeProvider.tsx",
+            "src/shared/ui/BrandMark.tsx",
+            "src/components/AppShell.tsx",
+            "public/manifest.json",
+            "app.json",
+            "functions/src/mercadoPago.ts",
+            "functions/src/social.ts",
+            "output/testes/folko-demonstrativo-escuro.png",
+            "output/testes/folko-escuro-entrada-mobile.png",
+            "output/testes/folko-escuro-perfil-mobile.png",
+            "output/testes/folko-escuro-cadastro-mobile.png",
+            "output/testes/folko-escuro-entrada-desktop.png"
+          ],
+          "checks": [
+            {
+              "command": "Node 22 tsc --noEmit",
+              "exitCode": 0,
+              "result": "Cliente aprovado."
+            },
+            {
+              "command": "Node 22 tsc --project functions/tsconfig.json; node --test tests/backend/*.test.mjs",
+              "exitCode": 0,
+              "result": "Backend compilado; 25 testes aprovados, preço/moeda/referências/autoridade preservados."
+            },
+            {
+              "command": "Node 22 --test tests/*.test.mts",
+              "exitCode": 0,
+              "result": "205 testes aprovados. Recortes conferidos pixel a pixel contra a fonte RGB; alpha real, olho e ponta escura preservados. Contraste e normalização de tema escuro aprovados."
+            },
+            {
+              "command": "Jest --runInBand",
+              "exitCode": 0,
+              "result": "23 testes em 8 suítes aprovados, incluindo tema salvo, fallback escuro, cadastro e apresentação da marca."
+            },
+            {
+              "command": "Node 22 scripts/lint.mjs; scripts/format.mjs",
+              "exitCode": 0,
+              "result": "23 diagnósticos existentes, zero regressões; 132 arquivos novos/migrados formatados."
+            },
+            {
+              "command": "pnpm run build:web",
+              "exitCode": 0,
+              "result": "Build final: duas artes transparentes, bundle 4,11 MB e precache de 15 URLs / 5,05 MB; anterior 6,37 MB."
+            },
+            {
+              "command": "node tmp/finish-folko-dark.mjs",
+              "exitCode": 0,
+              "result": "458752 pixels transparentes de margem adaptive e 138240 pixels de margem escura maskable validados; URLs antigas entregam bytes Folko; HTML/manifesto escuros, hashes e artefatos conferidos."
+            },
+            {
+              "command": "Revisão visual CUA em 390x844 e 1280x720",
+              "exitCode": 0,
+              "result": "Entrada/cadastro escuros em origem sem preferência prévia; perfil com sessão preservada e escolha escura aplicada conforme pedido; logos sem moldura, campos e navegação legíveis. Viewport restaurado e app mantido aberto. Capturas reais usadas no demonstrativo; nenhum cadastro, upload, compra, mensagem ou aceite de termos realizado."
+            }
+          ],
+          "extraction": {
+            "source": "assets/brand/folko-horizontal.png",
+            "sourceSha256": "8a41364005a0cbb24872f6fd700390eb1ffba4d87322febf535c830dbb9db957",
+            "method": "Owner-authorized color extraction. Only alpha and framing change; RGB comes directly from the original horizontal art. AI cutouts rejected; original eye, feather and beak preserved.",
+            "background": [
+              0,
+              0,
+              0
+            ],
+            "threshold": 12,
+            "outputs": [
+              {
+                "role": "symbol",
+                "file": "assets/brand/folko-symbol-transparent.png",
+                "width": 780,
+                "height": 780,
+                "sourceRect": [
+                  231,
+                  56,
+                  780,
+                  780
+                ],
+                "visiblePixels": 215410,
+                "sha256": "e76282f1c449bb1caf5986a7d0afac7d89e44f0e8180f0a372875367690897cb",
+                "rgbPixelsChanged": 0
+              },
+              {
+                "role": "horizontal",
+                "file": "assets/brand/folko-horizontal-transparent.png",
+                "width": 1213,
+                "height": 780,
+                "sourceRect": [
+                  241,
+                  56,
+                  1213,
+                  780
+                ],
+                "visiblePixels": 348253,
+                "sha256": "9e5fa1d4badc5fecdca0c180124ba5a57585496996a52bea7ef4b12cf980691e",
+                "rgbPixelsChanged": 0
+              }
+            ]
+          },
+          "artifactCheck": {
+            "margins": [
+              {
+                "file": "assets/brand/folko-adaptive-icon.png",
+                "margin": 128,
+                "transparent": true,
+                "checked": 458752
+              },
+              {
+                "file": "public/icons/folko-maskable-512.png",
+                "margin": 80,
+                "transparent": false,
+                "checked": 138240
+              }
+            ],
+            "legacyIconUrlsNowFolko": true,
+            "precache": 15,
+            "bundle": "_expo/static/js/web/index-30e110a14b692614dac8574b7e5c9508.js",
+            "demo": "output/testes/folko-demonstrativo-escuro.png",
+            "webBuildValidated": true,
+            "nativePreviewValidated": false,
+            "installedPwaUpgradeValidated": false
+          },
+          "pendingAcceptance": [
+            "Validar splash/ícones em preview/release nativo num dispositivo.",
+            "Ensaiar atualização de uma instalação PWA já em cache, conforme O07/G03."
+          ],
+          "limitations": [
+            "Código e provas locais; sem deploy ou alteração de assinaturas existentes no provedor.",
+            "Chaves de preferências/cache, IDs, OAuth, URLs, banco e external_reference mantidos.",
+            "Abertura web observada; primeiro frame de captura vazio descartado. Isso não comprova splash nativo."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P04",
+      "title": "Versionar contratos do feed de texto, fotos e vídeos",
+      "status": "planejada",
+      "codeStatus": "planejado",
+      "rolloutStatus": "nao_promovido",
+      "dependencies": [
+        "P01",
+        "C02",
+        "D02",
+        "D03"
+      ],
+      "blocker": null,
+      "productRevision": 2
+    },
+    {
+      "id": "P05",
+      "title": "Publicar texto por comando autenticado e idempotente",
+      "status": "planejada",
+      "codeStatus": "planejado",
+      "rolloutStatus": "nao_promovido",
+      "dependencies": [
+        "P04",
+        "B03",
+        "G01"
+      ],
+      "blocker": null,
+      "productRevision": 2
+    },
+    {
+      "id": "P06",
+      "title": "Renderizar texto no feed, perfil e detalhes sem quebrar mídia",
+      "status": "planejada",
+      "codeStatus": "planejado",
+      "rolloutStatus": "nao_promovido",
+      "dependencies": [
+        "P05",
+        "U02",
+        "Q02"
+      ],
+      "blocker": null,
+      "productRevision": 2
+    },
+    {
+      "id": "P07",
+      "title": "Adicionar texto ao compositor existente de fotos e vídeos",
+      "status": "planejada",
+      "codeStatus": "planejado",
+      "rolloutStatus": "nao_promovido",
+      "dependencies": [
+        "P05",
+        "P06",
+        "U06"
+      ],
+      "blocker": null,
+      "productRevision": 2
+    },
+    {
+      "id": "P08",
+      "title": "Generalizar descoberta e exemplos sem remover interesses existentes",
+      "status": "planejada",
+      "codeStatus": "planejado",
+      "rolloutStatus": "nao_promovido",
+      "dependencies": [
+        "P01",
+        "Q03",
+        "Q08"
+      ],
+      "blocker": null,
+      "productRevision": 2
+    },
+    {
+      "id": "P09",
+      "title": "Validar a experiência Folko e as funcionalidades preservadas",
+      "status": "planejada",
+      "codeStatus": "planejado",
+      "rolloutStatus": "nao_promovido",
+      "dependencies": [
+        "P01",
+        "P02",
+        "P03",
+        "P07",
+        "P08",
+        "N05",
+        "O02"
+      ],
+      "blocker": null,
+      "productRevision": 2
+    },
+    {
+      "id": "B05",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Extrair avatar e enquadramento em módulo próprio",
+      "dependencies": [
+        "B02",
+        "B03",
+        "C07",
+        "P01"
+      ]
+    },
+    {
+      "id": "B06",
+      "status": "concluida",
+      "codeStatus": "validado",
+      "rolloutStatus": "local_sem_deploy",
+      "evidence": {
+        "summary": "Curtidas e visualizações extraídas em módulos com transições puras e porta de transação. A resposta recorded agora vem apenas da tentativa confirmada; concorrência e repetição não duplicam marcadores nem contadores.",
+        "files": [
+          "functions/src/modules/engagement/domain/engagement.ts",
+          "functions/src/modules/engagement/application/engagementService.ts",
+          "functions/src/modules/engagement/application/engagementRepository.ts",
+          "functions/src/modules/engagement/data/firestoreEngagement.ts",
+          "functions/src/modules/engagement/commands.ts",
+          "functions/src/modules/engagement/handlers.ts",
+          "functions/src/social.ts",
+          "functions/src/index.ts",
+          "tests/backend/engagement.test.mjs",
+          "tests/rules/engagementRepository.test.mts",
+          "docs/architecture/backend.md"
+        ],
+        "dependenciesVerified": [
+          "B02: cadastro e erro permission-denied reais conferidos",
+          "B03: UID deriva do contexto autenticado, comandos têm allowlist",
+          "D01: IDs físicos não renomeados; alias v1 preservado com dívida de inventário explícita"
+        ],
+        "checks": [
+          {
+            "command": "Node 22 build limpo de functions + --test tests/backend/*.test.mjs",
+            "exitCode": 0,
+            "result": "25 testes aprovados; 24 exports/metadados idênticos; caso de retry com primeira tentativa descartada retornando true e tentativa confirmada retornando false"
+          },
+          {
+            "command": "Node 22 --test tests/backend/engagement.test.mjs",
+            "exitCode": 0,
+            "result": "4 testes focados aprovados após conferir o código de negação de cadastro"
+          },
+          {
+            "command": "Node 22 scripts/test-rules.mjs",
+            "exitCode": 0,
+            "result": "31 testes aprovados; visualizações simultâneas têm um único recorded true, curtidas/descurtidas repetidas e duas contas preservam contagem/marcadores/shares; post ausente/draft e não cadastrado não escrevem"
+          },
+          {
+            "command": "Node 22 pnpm run test:package:functions",
+            "exitCode": 0,
+            "result": "267 dependências de produção; compilação nova e 24 exports carregados no pacote isolado sem tocar a instalação do app"
+          },
+          {
+            "command": "Node 22 scripts/lint.mjs",
+            "exitCode": 0,
+            "result": "23 diagnósticos legados, nenhuma regressão ou violação de arquitetura"
+          },
+          {
+            "command": "Node 22 scripts/format.mjs",
+            "exitCode": 0,
+            "result": "123 arquivos verificados, 186 caminhos legados registrados"
+          },
+          {
+            "command": "Node 22 --test tests/*.test.mts",
+            "exitCode": 0,
+            "result": "201 testes aprovados; asserção literal substituída por provas comportamentais da nova implementação"
+          },
+          {
+            "command": "Node 22 pnpm run build:web",
+            "exitCode": 0,
+            "result": "bundle web final e service worker aprovados; 12 URLs e 5,53 MB de precache"
+          }
+        ],
+        "pendingAcceptance": [],
+        "behaviorChanges": [
+          "recorded não herda estado de tentativa abortada.",
+          "Payload extra e alias vazio approved- são negados antes da transação; campos e respostas dos clientes atuais foram conferidos."
+        ],
+        "limitations": [
+          "Sem deploy; app local ainda chama o backend implantado. Novos handlers foram testados no emulador e por portas locais.",
+          "Alias v1 pode ser ambíguo para IDs físicos começando por approved-; mudança depende do inventário/migração G01.",
+          "Contadores continuam no documento v1; esta extração não promove sharding nem muda a definição de visualização."
+        ],
+        "recovery": "Recompor somente os dois exports e suas implementações a partir do diff específico; nenhum documento ou ID foi migrado.",
+        "rolloutStatus": "local_sem_deploy"
+      },
+      "blocker": null,
+      "title": "Isolar curtidas e visualizações idempotentes",
+      "dependencies": [
+        "B02",
+        "B03",
+        "D01"
+      ],
+      "subtasks": [
+        {
+          "id": "B06-a",
+          "title": "Extrair transições e adaptador atômico de curtidas/visualizações sem alterar contrato v1",
+          "status": "concluida"
+        },
+        {
+          "id": "B06-b",
+          "title": "Provar retry descartado, repetição e concorrência no emulador",
+          "status": "concluida"
+        }
+      ],
+      "completedAt": "2026-11-05T12:28:10.853Z"
+    },
+    {
+      "id": "B07",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Definir comandos protegidos de follow e comentário",
+      "dependencies": [
+        "B03",
+        "D02",
+        "F04",
+        "P01"
+      ]
+    },
+    {
+      "id": "B08",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Extrair o envio e recibos de mensagens existentes",
+      "dependencies": [
+        "B02",
+        "B03",
+        "D01",
+        "P01"
+      ]
+    },
+    {
+      "id": "B09",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Isolar catálogo de tags e sua projeção",
+      "dependencies": [
+        "B02",
+        "B03",
+        "P01"
+      ]
+    },
+    {
+      "id": "B10",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Isolar geração e leitura de notificações",
+      "dependencies": [
+        "B02",
+        "B03",
+        "P01"
+      ]
+    },
+    {
+      "id": "B11",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Extrair a integração de assinatura sem mudar cobrança",
+      "dependencies": [
+        "B02",
+        "B03",
+        "SEC01",
+        "P01"
+      ]
+    },
+    {
+      "id": "B12",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Extrair exclusão de conta e sua lista de recursos",
+      "dependencies": [
+        "B02",
+        "B03",
+        "B11",
+        "D02",
+        "P01"
+      ]
+    },
+    {
+      "id": "G01",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Criar o mecanismo de migração retomável",
+      "dependencies": [
+        "D02",
+        "D03",
+        "B02",
+        "O01",
+        "SEC01",
+        "P01"
+      ]
+    },
+    {
+      "id": "Q01",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Paginar o feed sem baixar toda a base",
+      "dependencies": [
+        "C02",
+        "D03",
+        "B04",
+        "P01",
+        "P04"
+      ]
+    },
+    {
+      "id": "Q02",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Consultar publicações por autor para a galeria",
+      "dependencies": [
+        "Q01",
+        "C07",
+        "D03",
+        "P01"
+      ]
+    },
+    {
+      "id": "Q03",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Substituir download global de perfis na descoberta geral",
+      "dependencies": [
+        "C07",
+        "D03",
+        "P01"
+      ]
+    },
+    {
+      "id": "Q04",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Limitar follows a seguidor ou perfil consultado",
+      "dependencies": [
+        "B07",
+        "D03",
+        "C07",
+        "P01"
+      ]
+    },
+    {
+      "id": "Q05",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Carregar métricas e seleção social somente para os posts necessários",
+      "dependencies": [
+        "B06",
+        "D03",
+        "Q01",
+        "P01"
+      ]
+    },
+    {
+      "id": "Q06",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Paginar comentários pelo post aberto",
+      "dependencies": [
+        "B07",
+        "D03",
+        "P01"
+      ]
+    },
+    {
+      "id": "Q07",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Ordenar e paginar notificações por destinatário",
+      "dependencies": [
+        "B10",
+        "D03",
+        "C06",
+        "P01"
+      ]
+    },
+    {
+      "id": "Q08",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Limitar catálogo e buscas de temas gerais",
+      "dependencies": [
+        "B09",
+        "D03",
+        "P01"
+      ]
+    },
+    {
+      "id": "M01",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Definir conversa individual e escrita v2 idempotente",
+      "dependencies": [
+        "B08",
+        "D02",
+        "D03",
+        "G01",
+        "P01"
+      ]
+    },
+    {
+      "id": "M02",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Preparar o backfill do histórico legado de mensagens",
+      "dependencies": [
+        "M01",
+        "G01",
+        "D01",
+        "P01"
+      ]
+    },
+    {
+      "id": "S01",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Separar preferências crescentes em documentos privados",
+      "dependencies": [
+        "M02",
+        "G01",
+        "D02",
+        "P01"
+      ]
+    },
+    {
+      "id": "S02",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Isolar cache e rascunhos por conta",
+      "dependencies": [
+        "S01",
+        "C06",
+        "G01",
+        "P01"
+      ]
+    },
+    {
+      "id": "S03",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Preservar modo profissional e autoridade das configurações",
+      "dependencies": [
+        "D02",
+        "C07",
+        "S02",
+        "G01",
+        "P01"
+      ]
+    },
+    {
+      "id": "S04",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Preservar campanhas e isolar funcionalidades simuladas",
+      "dependencies": [
+        "D02",
+        "S02",
+        "S03",
+        "P01"
+      ]
+    },
+    {
+      "id": "M03",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Ler a inbox privada sem carregar todo o histórico",
+      "dependencies": [
+        "M02",
+        "S01",
+        "S02",
+        "D03",
+        "P01"
+      ]
+    },
+    {
+      "id": "M04",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Paginar histórico somente da conversa ativa",
+      "dependencies": [
+        "M03",
+        "M01",
+        "D03",
+        "P01"
+      ]
+    },
+    {
+      "id": "M05",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Adicionar outbox local e recibos recuperáveis",
+      "dependencies": [
+        "M04",
+        "S02",
+        "B08",
+        "P01"
+      ]
+    },
+    {
+      "id": "U01",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Extrair o player e seu controlador",
+      "dependencies": [
+        "C02",
+        "C03",
+        "C04",
+        "F05",
+        "P01"
+      ]
+    },
+    {
+      "id": "U02",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Decompor o item e os overlays do feed",
+      "dependencies": [
+        "U01",
+        "Q01",
+        "C04",
+        "P01"
+      ]
+    },
+    {
+      "id": "U03",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Virtualizar o feed e limitar players ativos",
+      "dependencies": [
+        "U02",
+        "Q01",
+        "Q05",
+        "P01"
+      ]
+    },
+    {
+      "id": "U04",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Decompor perfil, galeria e configurações",
+      "dependencies": [
+        "C07",
+        "Q02",
+        "Q04",
+        "C03",
+        "C04",
+        "S03",
+        "P01"
+      ]
+    },
+    {
+      "id": "U05",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Separar lista de conversas e tela de conversa",
+      "dependencies": [
+        "M05",
+        "C03",
+        "C04",
+        "P01"
+      ]
+    },
+    {
+      "id": "U06",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Decompor o envio existente de fotos e vídeos",
+      "dependencies": [
+        "B04",
+        "B05",
+        "C03",
+        "C04",
+        "S02",
+        "P01"
+      ]
+    },
+    {
+      "id": "U07",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Decompor autenticação e onboarding geral preservando o contrato",
+      "dependencies": [
+        "C06",
+        "C07",
+        "C03",
+        "C04",
+        "P01"
+      ]
+    },
+    {
+      "id": "N01",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Introduzir um contrato de intenção de navegação",
+      "dependencies": [
+        "C06",
+        "C07",
+        "D01",
+        "F02",
+        "P01"
+      ]
+    },
+    {
+      "id": "N02",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Preparar o bootstrap do Expo Router sem corte de produto",
+      "dependencies": [
+        "N01",
+        "U02",
+        "U04",
+        "U05",
+        "U06",
+        "U07",
+        "P01"
+      ]
+    },
+    {
+      "id": "N03",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Migrar rotas de autenticação e onboarding",
+      "dependencies": [
+        "N02",
+        "C06",
+        "U07",
+        "P01"
+      ]
+    },
+    {
+      "id": "I01",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Tornar a finalização do upload repetível e recuperável",
+      "dependencies": [
+        "B04",
+        "B05",
+        "G01",
+        "U06",
+        "P01"
+      ]
+    },
+    {
+      "id": "I02",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Implementar verificação real de conteúdo em worker isolado",
+      "dependencies": [
+        "I01",
+        "O01",
+        "SEC01",
+        "P01"
+      ]
+    },
+    {
+      "id": "I03",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Conectar fila durável, processamento e publicação",
+      "dependencies": [
+        "I02",
+        "B04",
+        "G01",
+        "U06",
+        "O01",
+        "P01"
+      ]
+    },
+    {
+      "id": "I04",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Tornar exclusão de post e limpeza de órfãos recuperáveis",
+      "dependencies": [
+        "I03",
+        "B12",
+        "G01",
+        "P01"
+      ]
+    },
+    {
+      "id": "I05",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Persistir e reconciliar eventos de cobrança",
+      "dependencies": [
+        "B11",
+        "G01",
+        "O01",
+        "SEC01",
+        "P01"
+      ]
+    },
+    {
+      "id": "I06",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Unificar a projeção de identidade e benefícios",
+      "dependencies": [
+        "I05",
+        "C06",
+        "C07",
+        "G01",
+        "P01"
+      ]
+    },
+    {
+      "id": "I07",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Conciliar contadores e medir a necessidade de fragmentação",
+      "dependencies": [
+        "B06",
+        "B09",
+        "Q05",
+        "G01",
+        "O01",
+        "P01"
+      ]
+    },
+    {
+      "id": "I08",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Criar moderação e denúncias com autoridade server-side",
+      "dependencies": [
+        "B07",
+        "B03",
+        "G01",
+        "SEC01",
+        "P01",
+        "P05"
+      ]
+    },
+    {
+      "id": "I09",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Retomar exclusão de conta por etapas duráveis",
+      "dependencies": [
+        "B12",
+        "I04",
+        "M02",
+        "S01",
+        "I05",
+        "G01",
+        "P01"
+      ]
+    },
+    {
+      "id": "U08",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Separar a interface administrativa do domínio de decisão",
+      "dependencies": [
+        "I08",
+        "C03",
+        "C04",
+        "C06",
+        "P01"
+      ]
+    },
+    {
+      "id": "N04",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Migrar abas e telas de detalhe para rotas finas",
+      "dependencies": [
+        "N03",
+        "U08",
+        "U03",
+        "U04",
+        "U05",
+        "U06",
+        "P01"
+      ]
+    },
+    {
+      "id": "N05",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Concluir deep links e histórico web/native",
+      "dependencies": [
+        "N04",
+        "Q03",
+        "M04",
+        "P01"
+      ]
+    },
+    {
+      "id": "SEC02",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Versionar Rules dos novos caminhos e comandos",
+      "dependencies": [
+        "D03",
+        "B03",
+        "M01",
+        "S01",
+        "I03",
+        "I08",
+        "F04",
+        "P01"
+      ]
+    },
+    {
+      "id": "SEC03",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Preparar App Check, rate limits e proteção por plataforma",
+      "dependencies": [
+        "B03",
+        "C06",
+        "O01",
+        "F04",
+        "P01"
+      ]
+    },
+    {
+      "id": "O02",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Padronizar estados de falha e acessibilidade",
+      "dependencies": [
+        "U03",
+        "U04",
+        "U05",
+        "U06",
+        "U07",
+        "N04",
+        "O01",
+        "P01"
+      ]
+    },
+    {
+      "id": "O03",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Medir desempenho, concorrência e custo por sessão",
+      "dependencies": [
+        "U03",
+        "N05",
+        "M05",
+        "Q08",
+        "SEC02",
+        "I07",
+        "O01",
+        "P01"
+      ]
+    },
+    {
+      "id": "O04",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Ensaiar backup e restauração de dados e mídia",
+      "dependencies": [
+        "D00",
+        "G01",
+        "O01",
+        "SEC01",
+        "P01"
+      ]
+    },
+    {
+      "id": "O07",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Controlar atualização e cache do PWA",
+      "dependencies": [
+        "N05",
+        "S02",
+        "C06",
+        "SEC01",
+        "P01"
+      ]
+    },
+    {
+      "id": "O05",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Preparar release, recuperação e resposta a incidentes",
+      "dependencies": [
+        "F06",
+        "O04",
+        "O03",
+        "SEC03",
+        "O07",
+        "P01"
+      ]
+    },
+    {
+      "id": "G02",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Executar o ensaio integral de staging e migração",
+      "dependencies": [
+        "G01",
+        "I09",
+        "I06",
+        "I04",
+        "I08",
+        "S04",
+        "Q08",
+        "M05",
+        "N05",
+        "SEC02",
+        "O02",
+        "O04",
+        "O05",
+        "O07",
+        "P01",
+        "P09"
+      ]
+    },
+    {
+      "id": "G03",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Promover clientes e dados por coortes autorizadas",
+      "dependencies": [
+        "G02",
+        "O05",
+        "P01"
+      ]
+    },
+    {
+      "id": "G04",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Retirar compatibilidade e dados antigos após a janela",
+      "dependencies": [
+        "G03",
+        "P01"
+      ]
+    },
+    {
+      "id": "O06",
+      "status": "planejada",
+      "codeStatus": "nao_iniciado",
+      "rolloutStatus": "nao_aplicavel_ou_nao_iniciado",
+      "evidence": null,
+      "blocker": null,
+      "title": "Concluir documentação e manutenção contínua",
+      "dependencies": [
+        "G04",
+        "O02",
+        "O03",
+        "O05",
+        "N05",
+        "C05",
+        "SEC03",
+        "I06",
+        "I07",
+        "S04",
+        "B10",
+        "Q06",
+        "Q07",
+        "P01"
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-05",
+  "product": {
+    "name": "Folko",
+    "audience": "Rede social geral de divulgação no Brasil",
+    "preserveExistingFeatures": true,
+    "feedFormatsConfirmed": [
+      "text",
+      "image",
+      "video"
+    ],
+    "textPosts": "planejado_P04_a_P07",
+    "logo": "icone_e_duas_assinaturas_finais_recebidos_2026-11-05",
+    "scopeReference": "05-direcao-folko.md",
+    "legacyTechnicalIdentity": "Xolot/NextStar preservados onde são IDs, chaves e integrações",
+    "colors": {
+      "black": "#090A0F",
+      "yellow": "#FFD21F",
+      "orange": "#FF7800",
+      "green": "#00856A",
+      "cream": "#FFF5EC"
+    },
+    "logoSource": "assets/brand/folko-logo.png",
+    "logoSources": [
+      "assets/brand/folko-logo.png",
+      "assets/brand/folko-horizontal.png",
+      "assets/brand/folko-stacked.png"
+    ],
+    "brandInventory": "assets/brand/README.md",
+    "defaultTheme": "dark_preserva_escolha_clara_explicita",
+    "primaryLogoSource": "assets/brand/folko-primary-original.png",
+    "logoPresentation": "assets/brand/display-logos.json",
+    "presentationRevision": 3,
+    "uiSizing": {
+      "compactLogoWidth": 76,
+      "authLogoMaxWidth": 140
+    }
+  },
+  "revisions": [
+    {
+      "version": 2,
+      "date": "2026-11-05",
+      "reason": "Mudança de foco solicitada pelo proprietário, preservando o produto e incluindo texto/fotos/vídeos no destino do feed.",
+      "previousTasks": 83,
+      "previousCompleted": 25,
+      "addedTasks": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09"
+      ],
+      "evidenceReuse": {
+        "preserved": [
+          "F00",
+          "F01",
+          "F02",
+          "F03",
+          "F04",
+          "F05",
+          "F06",
+          "D00",
+          "D01",
+          "D02",
+          "D03",
+          "O01",
+          "SEC01",
+          "C01",
+          "C02",
+          "C03",
+          "C04",
+          "C05",
+          "C06",
+          "C07",
+          "B01",
+          "B02",
+          "B03",
+          "B04",
+          "B06"
+        ],
+        "newScopeValidation": [
+          "P01 para cadastro geral e compatibilidade de perfil",
+          "P04–P07 para novos contratos/fluxo de texto",
+          "P02/P03/P09 para marca e experiência geral"
+        ]
+      }
+    },
+    {
+      "version": 3,
+      "date": "2026-11-05",
+      "reason": "Proprietário corrigiu o nome definitivo para Folko, forneceu duas artes e solicitou cores conforme o logo; recursos e integrações preservados.",
+      "previousName": "Folclore",
+      "name": "Folko",
+      "providedAssets": [
+        "Folko WPP.png",
+        "Folko Logan.png"
+      ],
+      "finalLogo": {
+        "asset": "assets/brand/folko-logo.png",
+        "supersedesPreviousTwo": true,
+        "additionalAssets": [
+          "assets/brand/folko-horizontal.png",
+          "assets/brand/folko-stacked.png"
+        ],
+        "provenance": "assets/brand/provenance.json"
+      }
+    }
+  ]
+}

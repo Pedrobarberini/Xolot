@@ -1,5 +1,7 @@
 node_modules/
 .pnpm-store/
+.codex-deploy-*/
+.codex-remote-attachments/
 .expo/
 dist/
 build/
@@ -12,6 +14,10 @@ yarn-debug.log*
 yarn-error.log*
 expo-*.log
 expo-go-qr.png
+expo-go-url.txt
+tmp/
+output/
+docs/registro-nextstar/
 .DS_Store
 *.jks
 *.p8
@@ -22,3 +28,4 @@ expo-go-qr.png
 functions/lib/
 functions/.env*
 functions/.secret.local
+*-debug.log

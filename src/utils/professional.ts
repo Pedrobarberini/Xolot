@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import type {
   CampaignObjective,
   ProfessionalCategory,
@@ -24,7 +25,7 @@ export const PROFESSIONAL_PLAN_OPTIONS: Array<{
     description: "Assinatura dedicada ao selo de identidade verificada.",
     features: ["Identidade aprovada", "Selo no perfil", "Selo nas publicações"],
     id: "pro",
-    label: "Xolot Plus",
+    label: BRAND.subscriptionName,
     priceLabel: "R$ 9,90/mês"
   }
 ];

@@ -140,7 +140,7 @@ export async function startWebCameraRecording({
         }
 
         const extension = getWebVideoFileExtension(mimeType);
-        const fileName = `xolot-${Date.now()}.${extension}`;
+        const fileName = `folko-${Date.now()}.${extension}`;
         const file = new File([blob], fileName, { type: mimeType });
 
         resolve({

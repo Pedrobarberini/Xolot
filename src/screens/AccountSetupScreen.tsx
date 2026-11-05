@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React, { useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -34,9 +35,9 @@ import {
   normalizeUsername
 } from "../utils/userIdentity";
 import {
-  getSpecialtySuggestions,
-  getSportSuggestions
-} from "../utils/profileActivityCatalog";
+  getProfilePresentationSuggestions,
+  getProfileAreaSuggestions
+} from "../features/profiles";
 
 
 type AccountSetupProps = {
@@ -56,12 +57,12 @@ const SETUP_STEPS = [
   {
     label: "Você",
     title: "Vamos criar seu perfil",
-    subtitle: "Comece com as informações usadas para identificar você na Xolot."
+    subtitle: `Comece com as informações usadas para identificar você no ${BRAND.name}.`
   },
   {
-    label: "Atuação",
-    title: "Como você participa",
-    subtitle: "Informe sua modalidade e o papel que melhor descreve sua atuação."
+    label: "Seu espaço",
+    title: "Conte um pouco sobre você",
+    subtitle: "Apresente seu perfil e o que você quer compartilhar ou divulgar."
   },
   {
     label: "Interesses",
@@ -93,10 +94,10 @@ export function AccountSetupScreen({
   const [username, setUsername] = useState(user.username);
   const [bio, setBio] = useState(user.bio);
   const [ageText, setAgeText] = useState(user.age ? String(user.age) : "");
-  const [sport, setSport] = useState(user.sport);
-  const [position, setPosition] = useState(user.position);
+  const [area, setArea] = useState(user.sport);
+  const [presentation, setPresentation] = useState(user.position);
   const [city, setCity] = useState(user.city);
-  const [club, setClub] = useState(user.club);
+  const [organization, setOrganization] = useState(user.club);
   const [interestTags, setInterestTags] = useState(user.interestTags);
   const [selectedAvatar, setSelectedAvatar] = useState<ProfileAvatar | undefined>(
     avatar ??
@@ -118,15 +119,16 @@ export function AccountSetupScreen({
     cleanUsername,
     user.id
   );
+  // Compatibilidade do documento atual: área/apresentação/organização usam as chaves legadas.
   const cleanProfile: AccountProfile = {
     age: Number.isInteger(age) ? age : null,
     bio: bio.trim(),
     city: city.trim(),
-    club: club.trim(),
+    club: organization.trim(),
     interestTags,
     name: name.trim(),
-    position: position.trim(),
-    sport: sport.trim(),
+    position: presentation.trim(),
+    sport: area.trim(),
     username: cleanUsername
   };
   const identityValid =
@@ -146,8 +148,8 @@ export function AccountSetupScreen({
   const canSave = identityValid && activityValid && interestsValid;
   const isNarrow = width < 370;
   const step = SETUP_STEPS[currentStep];
-  const sportSuggestions = getSportSuggestions(sport);
-  const specialtySuggestions = getSpecialtySuggestions(sport, "");
+  const areaSuggestions = getProfileAreaSuggestions(area);
+  const presentationSuggestions = getProfilePresentationSuggestions();
 
   function animateToStep(nextStep: number) {
     if (
@@ -376,7 +378,7 @@ export function AccountSetupScreen({
                     {selectedAvatar ? (
                       <ProfileAvatarImage avatar={selectedAvatar} />
                     ) : (
-                      <UserRound color={colors.primary} size={34} />
+                      <UserRound color={colors.primaryText} size={34} />
                     )}
                   </View>
                   <View style={styles.accountSetupAvatarCopy}>
@@ -391,7 +393,7 @@ export function AccountSetupScreen({
                       onPress={pickProfilePhoto}
                       style={styles.accountSetupAvatarButton}
                     >
-                      <Camera color={colors.primary} size={16} />
+                      <Camera color={colors.primaryText} size={16} />
                       <Text style={styles.accountSetupAvatarButtonText}>
                         {selectedAvatar ? "Trocar foto" : "Escolher foto"}
                       </Text>
@@ -430,7 +432,7 @@ export function AccountSetupScreen({
                 >
                   {cleanUsername.length >= 3 && !usernameAvailable
                     ? "Este nome de usuário já está em uso ou não é válido."
-                    : "Seu @ único na Xolot."}
+                    : `Seu @ único no ${BRAND.name}.`}
                 </Text>
 
                 <View
@@ -469,26 +471,27 @@ export function AccountSetupScreen({
               <>
                 <LabeledInput
                   autoCapitalize="words"
-                  label="Modalidade"
+                  accessibilityLabel="Área de interesse"
+                  label="Área de interesse"
                   maxLength={40}
-                  onChangeText={setSport}
-                  placeholder="Futebol, vôlei, Valorant..."
-                  value={sport}
+                  onChangeText={setArea}
+                  placeholder="Arte, música, humor, tecnologia..."
+                  value={area}
                 />
                 <Text style={styles.accountSetupHint}>
-                  Pode ser um esporte tradicional ou um e-sport.
+                  Escolha um tema ou escreva o seu. Todo tipo de conteúdo tem espaço aqui.
                 </Text>
-                {sportSuggestions.length > 0 ? (
+                {areaSuggestions.length > 0 ? (
                   <View style={styles.accountSetupSuggestionBlock}>
                     <Text style={styles.accountSetupSuggestionLabel}>
                       Escolha rápida
                     </Text>
                     <View style={styles.accountSetupSuggestionList}>
-                      {sportSuggestions.map((suggestion) => (
+                      {areaSuggestions.map((suggestion) => (
                         <Pressable
                           accessibilityRole="button"
                           key={suggestion}
-                          onPress={() => setSport(suggestion)}
+                          onPress={() => setArea(suggestion)}
                           style={styles.accountSetupSuggestionChip}
                         >
                           <Text style={styles.accountSetupSuggestionChipText}>
@@ -502,28 +505,29 @@ export function AccountSetupScreen({
 
                 <LabeledInput
                   autoCapitalize="words"
-                  label="Função ou especialidade"
+                  accessibilityLabel="Como você se apresenta"
+                  label="Como você se apresenta"
                   maxLength={40}
-                  onChangeText={setPosition}
-                  placeholder="Ponta, levantador, duelista..."
-                  value={position}
+                  onChangeText={setPresentation}
+                  placeholder="Perfil pessoal, criador, artista, negócio..."
+                  value={presentation}
                 />
-                {specialtySuggestions.length > 0 ? (
+                {presentationSuggestions.length > 0 ? (
                   <View style={styles.accountSetupSuggestionBlock}>
                     <Text style={styles.accountSetupSuggestionLabel}>
-                      Sugestões para {sport}
+                      Você pode ser
                     </Text>
                     <View style={styles.accountSetupSuggestionList}>
-                      {specialtySuggestions.map((suggestion) => {
+                      {presentationSuggestions.map((suggestion) => {
                         const selected =
                           suggestion.toLocaleLowerCase("pt-BR") ===
-                          position.trim().toLocaleLowerCase("pt-BR");
+                          presentation.trim().toLocaleLowerCase("pt-BR");
                         return (
                           <Pressable
                             accessibilityRole="button"
                             accessibilityState={{ selected }}
                             key={suggestion}
-                            onPress={() => setPosition(suggestion)}
+                            onPress={() => setPresentation(suggestion)}
                             style={[
                               styles.accountSetupSuggestionChip,
                               selected
@@ -550,11 +554,12 @@ export function AccountSetupScreen({
 
                 <LabeledInput
                   autoCapitalize="words"
-                  label="Equipe, clube ou projeto (opcional)"
+                  accessibilityLabel="Marca, projeto ou organização (opcional)"
+                  label="Marca, projeto ou organização (opcional)"
                   maxLength={80}
-                  onChangeText={setClub}
-                  placeholder="Ex.: clube, time ou organização"
-                  value={club}
+                  onChangeText={setOrganization}
+                  placeholder="Nome da sua marca, projeto ou organização"
+                  value={organization}
                 />
 
                 <LabeledInput
@@ -648,12 +653,12 @@ export function AccountSetupScreen({
               ]}
             >
               {isSaving ? (
-                <ActivityIndicator color={colors.onPrimary} size="small" />
+                <ActivityIndicator color={colors.onAccent} size="small" />
               ) : currentStep === SETUP_STEPS.length - 1 ? (
-                <Check color={colors.onPrimary} size={19} strokeWidth={2.5} />
+                <Check color={colors.onAccent} size={19} strokeWidth={2.5} />
               ) : (
                 <ChevronRight
-                  color={colors.onPrimary}
+                  color={colors.onAccent}
                   size={19}
                   strokeWidth={2.5}
                 />

@@ -1,25 +1,12 @@
+import { BRAND } from "../config/brand.ts";
 import {
   createUsernameSlug,
   isValidUsername,
   normalizeUsername
 } from "./userIdentity.ts";
 
-export type PublicProfileDocument = {
-  age: number | null;
-  bio: string;
-  city: string;
-  club: string;
-  interestTags: string[];
-  name: string;
-  photoURL: string;
-  identityVerified: boolean;
-  plusActive: boolean;
-  sport: string;
-  position: string;
-  profileCompleted: true;
-  uid: string;
-  username: string;
-};
+import type { PublicProfileDocument } from "../features/profiles";
+export type { PublicProfileDocument } from "../features/profiles";
 
 function normalizeText(value: unknown, maximumLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maximumLength) : "";
@@ -70,7 +57,7 @@ export function normalizePublicProfileDocument(
     rawName.length >= 3
       ? rawName
       : allowLegacyFallback
-        ? "Perfil Xolot"
+        ? `Perfil ${BRAND.name}`
         : rawName;
   const rawUsername = normalizeUsername(normalizeText(data.username, 30));
   const username = isValidUsername(rawUsername)

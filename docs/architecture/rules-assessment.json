@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-04",
+  "score": 4,
+  "scope": "Avaliação parcial das Rules versionadas, em emuladores demo. Não é certificação do ambiente implantado.",
+  "summary": "Os casos de propriedade, consulta privada e concessão de benefícios possuem provas executáveis. Há uma limitação de sobrescrita do próprio objeto no caminho legado de Storage. Demais caminhos precisam ampliar cobertura nas tarefas de domínio e SEC02.",
+  "findings": [
+    {
+      "check": "The Update Bypass",
+      "severity": "minor",
+      "issue": "Um segundo upload válido do dono para posts/{uid}/{postId}/media é autorizado pela regra create. Negar update impede alteração isolada de metadados, mas não torna o conteúdo imutável. Outro UID e MIME inválido continuam negados.",
+      "recommendation": "Em SEC02/I01, definir e ensaiar a política de imutabilidade do caminho legado e do fluxo R2. Não usar allow update: false como prova de conteúdo imutável.",
+      "evidence": "tests/rules/permissions.test.mts",
+      "source": "https://github.com/firebase/firebase-tools/issues/10302",
+      "followUp": ["SEC02", "I01"]
+    }
+  ],
+  "checklist": {
+    "updateBypass": "Perfil não aceita escalada por create/update; sobrescrita do próprio objeto documentada como limitação.",
+    "authority": "UID vem do contexto autenticado; cliente não escreve assinatura nem identidade e não pode se conceder flags no perfil.",
+    "businessLogic": "Dono/participantes leem seus documentos; queries globais privadas falham. Leitura social permanece para contas registradas verificadas.",
+    "storageAbuse": "MIME inválido negado; limites de tamanho existem no fonte. Casos de fronteira de bytes e validação real do conteúdo ainda não cobertos.",
+    "typeSafety": "Tipo de idade, comprimento da bio e campos extras exercitados. Não se declara cobertura de todos os campos/coleções.",
+    "fieldAndIdentity": "Mesmo patch válido em perfil alheio é negado. Contas, métricas, mensagens e notificações privadas têm testes com outro UID e consultas sem escopo."
+  },
+  "limitations": [
+    "Rules implantadas, IAM, App Check e endpoints Admin não são avaliados por estes testes.",
+    "Nenhuma Rule ou configuração de produção foi modificada.",
+    "Cobertura de comentários, follows e preferências será ampliada junto de seus contratos."
+  ]
+}

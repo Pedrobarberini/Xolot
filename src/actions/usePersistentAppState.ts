@@ -13,6 +13,7 @@ import {
   loadLocalAppState,
   saveLocalAppState
 } from "../repositories/localRepository";
+import { reportOperationFailure } from "../shared/observability/logger";
 import {
   ProfessionalSettingsByUser,
   PromotionCampaign,
@@ -37,7 +38,8 @@ export function usePersistentAppState() {
           setAppState(storedState);
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        reportOperationFailure("cache.load", error);
         if (isMounted) {
           setAppState(fallback);
         }
@@ -59,7 +61,9 @@ export function usePersistentAppState() {
     }
 
     const saveTimer = setTimeout(() => {
-      saveLocalAppState(appState).catch(() => undefined);
+      saveLocalAppState(appState).catch((error: unknown) => {
+        reportOperationFailure("cache.save", error);
+      });
     }, 80);
 
     return () => clearTimeout(saveTimer);

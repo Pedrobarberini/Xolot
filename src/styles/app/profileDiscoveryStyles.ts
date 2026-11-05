@@ -27,7 +27,7 @@ export const profileDiscoveryStyles = {
     fontWeight: "800"
   },
   searchModeTabTextActive: {
-    color: colors.primary
+    color: colors.primaryText
   },
   searchInterestSection: {
     borderBottomColor: colors.border,
@@ -68,9 +68,6 @@ export const profileDiscoveryStyles = {
   searchTagSelected: {
     backgroundColor: colors.primary,
     borderColor: colors.primary
-  },
-  searchTagDisabled: {
-    opacity: 0.38
   },
   searchTagText: {
     color: colors.text,

@@ -28,6 +28,25 @@ export function requireRecord(value: unknown) {
   return value as Record<string, unknown>;
 }
 
+export function requireCommandRecord(value: unknown, allowedFields: readonly string[], maxBytes = 16_384) {
+  const record = requireRecord(value);
+  if (Object.keys(record).some((key) => !allowedFields.includes(key)))
+    throw new HttpsError("invalid-argument", "Campos não permitidos para esta operação.");
+  try {
+    if (Buffer.byteLength(JSON.stringify(record), "utf8") > maxBytes) throw new Error("oversized");
+  } catch {
+    throw new HttpsError("invalid-argument", "Dados da operação excedem o formato ou limite permitido.");
+  }
+  return record;
+}
+
+export function requireDocumentId(value: unknown, name: string, maximum = 128) {
+  const id = requireText(value, name, 1, maximum);
+  if (id !== value || /[\u0000-\u001f/]/.test(id) || id === "." || id === "..")
+    throw new HttpsError("invalid-argument", "Identificador inválido para esta operação.");
+  return id;
+}
+
 export function requireText(
   value: unknown,
   name: string,

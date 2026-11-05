@@ -36,7 +36,7 @@ export const professionalStyles = createThemedStyles(StyleSheet.create({
     lineHeight: 17
   },
   campaignStatus: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 11,
     fontWeight: "900",
     textTransform: "uppercase"
@@ -75,7 +75,7 @@ export const professionalStyles = createThemedStyles(StyleSheet.create({
     fontWeight: "800"
   },
   categoryOptionTextActive: {
-    color: colors.primary
+    color: colors.primaryText
   },
   content: {
     gap: 14,
@@ -237,7 +237,7 @@ export const professionalStyles = createThemedStyles(StyleSheet.create({
     textTransform: "uppercase"
   },
   metricValue: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 18,
     fontWeight: "900"
   },
@@ -301,7 +301,7 @@ export const professionalStyles = createThemedStyles(StyleSheet.create({
     lineHeight: 18
   },
   planPrice: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 13,
     fontWeight: "900"
   },
@@ -358,7 +358,7 @@ export const professionalStyles = createThemedStyles(StyleSheet.create({
     justifyContent: "center"
   },
   reachValue: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 28,
     fontWeight: "900"
   },
@@ -407,7 +407,7 @@ export const professionalStyles = createThemedStyles(StyleSheet.create({
     paddingHorizontal: 14
   },
   secondaryActionText: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 13,
     fontWeight: "900"
   },
@@ -418,7 +418,7 @@ export const professionalStyles = createThemedStyles(StyleSheet.create({
     color: colors.danger
   },
   checkoutPrice: {
-    color: colors.primary,
+    color: colors.primaryText,
     fontSize: 24,
     fontWeight: "900",
     marginTop: 12

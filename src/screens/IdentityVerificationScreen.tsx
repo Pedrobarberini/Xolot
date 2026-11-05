@@ -1,3 +1,4 @@
+import { BRAND } from "../config/brand.ts";
 import React from "react";
 import { BadgeCheck, Clock3, ShieldCheck, TriangleAlert } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -31,7 +32,7 @@ export function IdentityVerificationScreen({
       </View>
 
       <View style={s.hero}>
-        <Text style={s.heroEyebrow}>Xolot Plus</Text>
+        <Text style={s.heroEyebrow}>{BRAND.subscriptionName}</Text>
         <Text style={s.heroTitle}>Selo com identidade confirmada</Text>
         <Text style={s.heroDescription}>
           A assinatura sozinha não libera o selo. A identidade precisa ser
@@ -62,18 +63,18 @@ export function IdentityVerificationScreen({
             </Text>
           </View>
           {isApproved ? (
-            <BadgeCheck color={colors.primary} size={30} />
+            <BadgeCheck color={colors.primaryText} size={30} />
           ) : isPending ? (
-            <Clock3 color={colors.primary} size={30} />
+            <Clock3 color={colors.primaryText} size={30} />
           ) : (
-            <ShieldCheck color={colors.primary} size={30} />
+            <ShieldCheck color={colors.primaryText} size={30} />
           )}
         </View>
       </View>
 
       <View style={s.notice}>
         <Text style={s.noticeText}>
-          A Xolot não armazenará fotos de RG nem números completos de CPF no
+          A {BRAND.name} não armazenará fotos de RG nem números completos de CPF no
           banco público do aplicativo. A coleta será aberta somente após a
           integração com um provedor de verificação documental.
         </Text>
