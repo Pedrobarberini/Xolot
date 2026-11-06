@@ -79,10 +79,14 @@ function upsertMessageContact(
 
 export function useSocialActions({
   players,
+  notificationContent,
+  onNotificationCommentDeleted,
   user,
   users
 }: {
   players: Player[];
+  notificationContent?: import("../utils/notificationDestination").NotificationContent | null;
+  onNotificationCommentDeleted?: (commentId: string) => void;
   user: AppUser | null;
   users: AppUser[];
 }) {
@@ -105,7 +109,13 @@ export function useSocialActions({
     useState<SocialSelectionsByUser>({});
   const [viewedPlayerIdsByUser, setViewedPlayerIdsByUser] =
     useState<SocialSelectionsByUser>({});
-  const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
+  const [syncedDirectMessages, setDirectMessages] = useState<DirectMessage[]>([]);
+  const directMessages = useMemo(() => {
+    const message = notificationContent?.userId === user?.id ? notificationContent?.message : null;
+    return message && !syncedDirectMessages.some((item) => item.id === message.id)
+      ? [...syncedDirectMessages, message].sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+      : syncedDirectMessages;
+  }, [notificationContent, syncedDirectMessages, user?.id]);
   const [autoplayEnabled, setAutoplayEnabledState] = useState(true);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [
@@ -114,7 +124,13 @@ export function useSocialActions({
   ] = useState(false);
   const [deviceNotificationPermission, setDeviceNotificationPermission] =
     useState<DeviceNotificationPermission>(getDeviceNotificationPermission);
-  const [postComments, setPostComments] = useState<PostComment[]>([]);
+  const [syncedPostComments, setPostComments] = useState<PostComment[]>([]);
+  const postComments = useMemo(() => {
+    if (notificationContent?.userId !== user?.id || !notificationContent?.comments?.length) return syncedPostComments;
+    const comments = new Map(notificationContent.comments.map((comment) => [comment.id, comment]));
+    syncedPostComments.forEach((comment) => comments.set(comment.id, comment));
+    return [...comments.values()];
+  }, [notificationContent, syncedPostComments, user?.id]);
   const [isSocialStateLoaded, setIsSocialStateLoaded] = useState(false);
 
   const [remoteEngagementByPlayer, setRemoteEngagementByPlayer] = useState<
@@ -991,6 +1007,8 @@ export function useSocialActions({
     if (!user) {
       return;
     }
+
+    if (postComments.some((comment) => comment.id === commentId && comment.authorUserId === user.id)) onNotificationCommentDeleted?.(commentId);
 
     setPostComments((current) =>
       removeOwnedPostComment(current, commentId, user.id)

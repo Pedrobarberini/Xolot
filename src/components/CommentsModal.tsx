@@ -31,6 +31,7 @@ import {
 } from "../utils/submissionMetadata";
 import { MentionSuggestionsPopover } from "./MentionSuggestionsPopover";
 import { ProfileAvatarImage } from "./ProfileAvatarImage";
+import { useFocusedScroll } from "../shared/ui/useFocusedScroll";
 
 function getInitials(name: string) {
   return name
@@ -82,6 +83,8 @@ function renderMentionedCommentBody(
 export function CommentsModal({
   comments,
   currentUserId,
+  focusCommentId,
+  focusRequestId,
   onAddComment,
   onClose,
   onDeleteComment,
@@ -94,6 +97,8 @@ export function CommentsModal({
 }: {
   comments: PostComment[];
   currentUserId: string;
+  focusCommentId?: string;
+  focusRequestId?: number;
   onAddComment: (body: string, replyToCommentId?: string) => boolean;
   onClose: () => void;
   onDeleteComment: (commentId: string) => void;
@@ -104,6 +109,7 @@ export function CommentsModal({
   videoTitle: string;
   visible: boolean;
 }) {
+  const { onItemLayout, scrollRef, scrollToTarget } = useFocusedScroll(visible ? focusCommentId : undefined, focusRequestId);
   const [draft, setDraft] = useState("");
   const [pendingDeleteComment, setPendingDeleteComment] =
     useState<PostComment | null>(null);
@@ -158,6 +164,13 @@ export function CommentsModal({
       setExpandedThreadIds([]);
     }
   }, [videoId, visible]);
+
+  const focusedComment = comments.find((comment) => comment.id === focusCommentId);
+  useEffect(() => {
+    if (!visible || !focusedComment?.parentCommentId) return;
+    const parentId = focusedComment.parentCommentId;
+    setExpandedThreadIds((current) => current.includes(parentId) ? current : [...current, parentId]);
+  }, [focusedComment?.parentCommentId, focusRequestId, visible]);
 
   function submitComment() {
     const replyThreadId =
@@ -260,6 +273,8 @@ export function CommentsModal({
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
                 style={styles.commentsScroll}
+                ref={scrollRef}
+                onContentSizeChange={scrollToTarget}
               >
                 {orderedComments.map((comment) => {
                   const avatar = profileAvatars[comment.authorProfileId];
@@ -276,9 +291,12 @@ export function CommentsModal({
                   return (
                     <View
                       key={comment.id}
+                      onLayout={(event) => onItemLayout(comment.id, event.nativeEvent.layout.y)}
+                      testID={`comment-${comment.id}`}
                       style={[
                         styles.commentRow,
-                        isReply ? styles.commentReplyRow : null
+                        isReply ? styles.commentReplyRow : null,
+                        comment.id === focusCommentId ? { backgroundColor: colors.primarySoft, borderRadius: 12 } : null
                       ]}
                     >
                       <Pressable

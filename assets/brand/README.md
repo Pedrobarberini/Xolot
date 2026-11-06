@@ -11,7 +11,7 @@ O proprietário enviou `Folko logo 1.png` e `Folko Logo 2.png` e confirmou que o
 
 Execute `node scripts/prepare-display-logos.mjs` para reproduzir a remoção do fundo desses dois arquivos. [display-logos.json](display-logos.json) registra fontes, hashes, recortes e a comparação RGB: nenhum pixel visível alterado. Os espaços dentro das letras também têm alpha zero. O olho escuro é preservado.
 
-Após revisão do proprietário, o logo horizontal mede 76 px no cabeçalho e no feed, cerca de 39% menor que a versão de 124 px; o espaçamento vertical do header compacto é 8 px. A versão completa no login/cadastro usa largura máxima de 140 px, reduzida de 210 px para deixar mais espaço para o formulário. Ambos mantêm a proporção e usam contain.
+Em 2026-11-06, o proprietário pediu somente o mascote no cabeçalho e no feed. Esses locais usam `folko-symbol-transparent.png` em 48 × 48 px, sem o texto “olko”. O derivado existente foi reutilizado sem alterar o desenho. A versão completa no login/cadastro mantém largura máxima de 140 px. Todas as versões mantêm a proporção e usam contain.
 
 ## Histórico e geração dos ícones
 

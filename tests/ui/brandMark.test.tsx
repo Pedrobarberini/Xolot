@@ -7,9 +7,19 @@ import {
   FOLKO_PRIMARY_ASPECT_RATIO,
   FOLKO_HORIZONTAL,
   FOLKO_HORIZONTAL_ASPECT_RATIO,
+  FOLKO_SYMBOL,
 } from "../../src/constants/assets";
 import { ThemeContext } from "../../src/shared/theme/context";
 import { getThemeColors } from "../../src/shared/theme/legacy";
+
+test("cabeçalho compacto usa apenas o mascote transparente", () => {
+  const view = render(<BrandMark symbolOnly />);
+  expect(view.UNSAFE_getByType(Image).props.source).toBe(FOLKO_SYMBOL);
+  expect(screen.getByRole("image", { name: "Logo Folko" })).toHaveStyle({
+    width: 48,
+    aspectRatio: 1,
+  });
+});
 
 test.each(["light", "dark"] as const)(
   "header usa assinatura original sem texto recriado no tema %s",

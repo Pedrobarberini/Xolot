@@ -29,6 +29,7 @@ import {
 import { useAppNavigation } from "./src/app/useAppNavigation";
 import { useExpoBoot } from "./src/app/useExpoBoot";
 import type { MessageContact } from "./src/types";
+import type { NotificationContent } from "./src/utils/notificationDestination";
 import {
   createDefaultProfessionalSettings
 } from "./src/utils/professional";
@@ -36,6 +37,7 @@ import { selectShareContacts } from "./src/utils/socialSharing";
 
 export default function App() {
   const [isBrandLaunchVisible, setIsBrandLaunchVisible] = useState(true);
+  const [notificationContent, setNotificationContent] = useState<NotificationContent | null>(null);
   const hasRestoredInitialRoute = useRef(false);
   useExpoBoot();
   const {
@@ -78,6 +80,7 @@ export default function App() {
     setUser,
     user
   } = useFirebaseAccounts();
+  useEffect(() => { setNotificationContent(null); }, [user?.id]);
   const { isPostsLoaded } = useFirebasePosts(
     user,
     setSubmissions,
@@ -95,7 +98,13 @@ export default function App() {
     () => selectApprovedSubmissionPlayers(submissions, registeredUsers),
     [registeredUsers, submissions]
   );
-  const availablePlayers = approvedSubmissionPlayers;
+  const currentNotificationContent = notificationContent?.userId === user?.id ? notificationContent : null;
+  const availablePlayers = useMemo(() => {
+    const player = currentNotificationContent?.player;
+    return player && !approvedSubmissionPlayers.some((item) => item.id === player.id)
+      ? [...approvedSubmissionPlayers, player]
+      : approvedSubmissionPlayers;
+  }, [approvedSubmissionPlayers, currentNotificationContent]);
   const { profileAvatars, setProfileAvatar } = useProfileActions(user);
   const {
     addMessageContact,
@@ -143,6 +152,8 @@ export default function App() {
     viewCountsByPlayer
   } = useSocialActions({
     players: availablePlayers,
+    notificationContent: currentNotificationContent,
+    onNotificationCommentDeleted: (commentId) => setNotificationContent((content) => content ? { ...content, comments: content.comments?.filter((comment) => comment.id !== commentId) } : null),
     user,
     users: registeredUsers
   });
@@ -361,6 +372,7 @@ export default function App() {
       notificationsEnabled={notificationsEnabled}
       onBrandLaunchFinish={() => setIsBrandLaunchVisible(false)}
       onOpenMessagesForSelectedProfile={openMessagesForSelectedProfile}
+      onResolveNotificationContent={setNotificationContent}
       openCampaign={openCampaign}
       openPlayerProfile={openPlayerProfile}
       openReel={openReel}

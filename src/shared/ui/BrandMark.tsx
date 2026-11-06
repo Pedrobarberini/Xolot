@@ -6,19 +6,26 @@ import {
   FOLKO_PRIMARY_ASPECT_RATIO,
   FOLKO_HORIZONTAL,
   FOLKO_HORIZONTAL_ASPECT_RATIO,
+  FOLKO_SYMBOL,
 } from "../../constants/assets";
 
-export function BrandMark({ hero = false }: { hero?: boolean }) {
+export function BrandMark({
+  hero = false,
+  symbolOnly = false,
+}: {
+  hero?: boolean;
+  symbolOnly?: boolean;
+}) {
   return (
     <View
       accessible
       accessibilityRole="image"
       accessibilityLabel={`Logo ${BRAND.name}`}
-      style={[styles.mark, hero && styles.hero]}
+      style={[styles.mark, hero && styles.hero, symbolOnly && styles.symbol]}
     >
       <Image
         accessible={false}
-        source={hero ? FOLKO_PRIMARY : FOLKO_HORIZONTAL}
+        source={symbolOnly ? FOLKO_SYMBOL : hero ? FOLKO_PRIMARY : FOLKO_HORIZONTAL}
         resizeMode="contain"
         style={styles.image}
       />
@@ -28,6 +35,7 @@ export function BrandMark({ hero = false }: { hero?: boolean }) {
 const styles = StyleSheet.create({
   mark: { alignSelf: "flex-start", width: 76, aspectRatio: FOLKO_HORIZONTAL_ASPECT_RATIO },
   image: { width: "100%", height: "100%" },
+  symbol: { width: 48, aspectRatio: 1 },
   hero: {
     alignSelf: "center",
     width: "100%",

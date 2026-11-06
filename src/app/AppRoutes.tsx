@@ -1,5 +1,5 @@
 import { BRAND } from "../config/brand.ts";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, View } from "react-native";
 import {
@@ -45,6 +45,8 @@ import type {
 import type { Tab } from "../ui/types";
 import type { ReelReturnTarget } from "./useAppNavigation";
 import { getPlayerContentKey } from "../utils/feedEngagement";
+import { useNotificationNavigation } from "./useNotificationNavigation";
+import type { NotificationContent } from "../utils/notificationDestination";
 
 type AppRoutesProps = {
   activeCampaignPlayerIds: Set<string>;
@@ -123,6 +125,7 @@ type AppRoutesProps = {
   notificationsEnabled: boolean;
   onBrandLaunchFinish: () => void;
   onOpenMessagesForSelectedProfile: () => void;
+  onResolveNotificationContent: (content: NotificationContent) => void;
   openCampaign: (player: Player) => void;
   openPlayerProfile: (player: Player) => void;
   openReel: (player: Player, returnTarget?: ReelReturnTarget | null) => void;
@@ -222,6 +225,7 @@ export function AppRoutes(props: AppRoutesProps) {
     notificationsEnabled,
     onBrandLaunchFinish,
     onOpenMessagesForSelectedProfile,
+    onResolveNotificationContent,
     openCampaign,
     openPlayerProfile,
     openReel,
@@ -267,6 +271,44 @@ export function AppRoutes(props: AppRoutesProps) {
     user,
     viewCountsByPlayer
   } = props;
+
+  const notificationNavigation = useNotificationNavigation({
+    blockedProfileIds: blockedProfileIdSet,
+    commentsByPlayer,
+    currentUserId: user.id,
+    messages: directMessages,
+    onNotice: (title, body) => {
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        window.alert(`${title}\n\n${body}`);
+      } else {
+        Alert.alert(title, body);
+      }
+    },
+    onOpenConversation: (contactId) => {
+      openTab("messages");
+      setActiveMessageContactId(contactId);
+    },
+    onOpenPost: openReel,
+    onResolveContent: onResolveNotificationContent,
+    players: availablePlayers,
+    tab,
+    users: registeredUsers,
+  });
+  const notificationPost = notificationNavigation.postTarget;
+  const notificationMessage = notificationNavigation.messageTarget;
+  const feedPlayers = useMemo(() => {
+    if (!notificationPost || orderedFeedPlayers.some((player) => player.id === notificationPost.player.id)) return orderedFeedPlayers;
+    return [notificationPost.player, ...orderedFeedPlayers];
+  }, [notificationPost, orderedFeedPlayers]);
+  const messageContacts = useMemo(() => {
+    if (!notificationMessage || currentMessageContacts.some((contact) => contact.id === notificationMessage.contact.id)) return currentMessageContacts;
+    return [...currentMessageContacts, notificationMessage.contact];
+  }, [currentMessageContacts, notificationMessage]);
+  const conversationMessages = useMemo(() => {
+    const message = notificationMessage?.message;
+    if (!message || directMessages.some((item) => item.id === message.id)) return directMessages;
+    return [...directMessages, message].sort((left, right) => left.createdAt.localeCompare(right.createdAt));
+  }, [directMessages, notificationMessage]);
 
   useEffect(() => {
     if (tab !== "feed" && isFeedImmersive) {
@@ -418,7 +460,7 @@ export function AppRoutes(props: AppRoutesProps) {
                   autoplayEnabled={autoplayEnabled}
                   backLabel={reelReturnTarget?.type === "messages" ? "Voltar para mensagens" : "Voltar ao perfil"}
                   blockedProfileIds={blockedProfileIdSet}
-                  commentsByPlayer={commentsByPlayer}
+                  commentsByPlayer={notificationNavigation.commentsByPlayer}
                   currentUserId={user.id}
                   focusPlayerId={feedFocusPlayerId}
                   followingProfileIds={followingProfileIds}
@@ -428,20 +470,15 @@ export function AppRoutes(props: AppRoutesProps) {
                   shareCountsByPlayer={shareCountsByPlayer}
                   mutedContentKeys={mutedContentKeySet}
                   notifications={notifications}
+                  notificationTarget={notificationPost}
                   onMarkNotificationsRead={markNotificationsRead}
-                  onOpenNotification={(notification) => {
-                    if (notification.kind === "message" || notification.kind === "shared-post") {
-                      setActiveMessageContactId(notification.actorUserId);
-                      openTab("messages");
-                      return;
-                    }
-                    if (notification.playerId) {
-                      focusFeedPlayer(notification.playerId);
-                    }
-                  }}
+                  onOpenNotification={(notification) => { void notificationNavigation.openNotification(notification); }}
                   onAddComment={addPostComment}
                   onBackToProfile={reelReturnTarget ? returnToReelOrigin : undefined}
-                  onDeleteComment={deletePostComment}
+                  onDeleteComment={(commentId) => {
+                    notificationNavigation.removeComment(commentId);
+                    deletePostComment(commentId);
+                  }}
                   onImmersiveChange={setIsFeedImmersive}
                   onOpenPlayer={openAthleteProfile}
                   onOpenTaggedUser={openAccountProfile}
@@ -461,7 +498,7 @@ export function AppRoutes(props: AppRoutesProps) {
                   }}
                   onToggleLike={(player) => toggleLikePlayer(player.id)}
                   onToggleMutedContent={toggleMutedContent}
-                  players={orderedFeedPlayers}
+                  players={feedPlayers}
                   profileAvatars={profileAvatars}
                   shareContacts={shareContacts}
                   users={registeredUsers}
@@ -489,10 +526,12 @@ export function AppRoutes(props: AppRoutesProps) {
                 <ScreenFrame key={`messages-${activeMessageContactId ?? "list"}`}>
                   <MessagesScreen
                     activeContactId={activeMessageContactId}
-                    contacts={currentMessageContacts}
+                    contacts={messageContacts}
                     currentUserId={user.id}
                     followingProfileIds={followingProfileIds}
-                    messages={directMessages}
+                    messages={conversationMessages}
+                    focusMessageId={notificationMessage?.contact.id === activeMessageContactId ? notificationMessage.messageId : undefined}
+                    focusRequestId={notificationMessage?.requestId}
                     onMarkMessagesRead={markDirectMessagesRead}
                     mutedContactIds={mutedContactIds}
                     onDeleteConversation={deleteConversation}

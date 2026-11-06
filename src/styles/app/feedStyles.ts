@@ -1,7 +1,6 @@
 import { StyleSheet } from "react-native";
 import { TAB_BAR_CONTENT_PADDING } from "../../constants/layout";
 import { colors } from "../../theme";
-import { FOLKO_HORIZONTAL_ASPECT_RATIO } from "../../constants/assets";
 
 export const feedStyles = {
   feedPagerShell: {
@@ -20,9 +19,9 @@ export const feedStyles = {
   },
   feedBrandSlot: {
     alignItems: "center",
-    height: 76 / FOLKO_HORIZONTAL_ASPECT_RATIO,
+    height: 48,
     justifyContent: "center",
-    width: 76
+    width: 48
   },
   feedBrandSlotPressed: {
     opacity: 0.62,
@@ -297,8 +296,8 @@ export const feedStyles = {
     width: 12
   },
   feedReelBrandMark: {
-    height: 76 / FOLKO_HORIZONTAL_ASPECT_RATIO,
-    width: 76
+    height: 48,
+    width: 48
   },
   feedTextOverlay: {
     backgroundColor: colors.surface,

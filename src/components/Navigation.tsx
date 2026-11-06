@@ -52,7 +52,7 @@ export function Header({
         ]}
       >
         <View style={styles.headerTitleBlock}>
-          <BrandMark />
+          <BrandMark symbolOnly />
           <Text numberOfLines={1} style={styles.headerSubtitle}>
             {user.role} | @{user.username}
           </Text>

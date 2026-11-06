@@ -152,7 +152,7 @@ function normalizeSharedPost(value: unknown): SharedPostReference | undefined {
   };
 }
 
-function normalizeDirectMessage(
+export function normalizeDirectMessage(
   id: string,
   value: unknown
 ): DirectMessage | null {

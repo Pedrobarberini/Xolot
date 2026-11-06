@@ -36,6 +36,7 @@ import {
 import { canExchangeDirectMessages } from "../utils/socialAccess";
 import { MAX_PINNED_CONVERSATIONS } from "../utils/conversations";
 import { getSharedPostCaption } from "../utils/socialSharing";
+import { useFocusedScroll } from "../shared/ui/useFocusedScroll";
 import {
   formatDirectMessageTime,
   getDirectMessageReceiptState
@@ -73,6 +74,8 @@ export function MessagesScreen({
   contacts,
   currentUserId,
   followingProfileIds,
+  focusMessageId,
+  focusRequestId,
   messages,
   mutedContactIds,
   onDeleteConversation,
@@ -93,6 +96,8 @@ export function MessagesScreen({
   contacts: MessageContact[];
   currentUserId: string;
   followingProfileIds: string[];
+  focusMessageId?: string;
+  focusRequestId?: number;
   messages: DirectMessage[];
   mutedContactIds: string[];
   onDeleteConversation: (contactId: string) => void;
@@ -109,6 +114,7 @@ export function MessagesScreen({
   players: Player[];
   profileAvatars: ProfileAvatarsByProfile;
 }) {
+  const { onItemLayout, scrollRef, scrollToTarget } = useFocusedScroll(focusMessageId, focusRequestId);
   const [draft, setDraft] = useState("");
   const [contactQuery, setContactQuery] = useState("");
   const [actionContact, setActionContact] = useState<MessageContact | null>(
@@ -283,6 +289,8 @@ export function MessagesScreen({
         <ScrollView
           contentContainerStyle={styles.messagesThreadContent}
           keyboardShouldPersistTaps="handled"
+          onContentSizeChange={scrollToTarget}
+          ref={scrollRef}
         >
           {!hasConversationAccess && incomingRequestMessages.length > 0 ? (
             <View style={styles.messagesRequestGate}>
@@ -343,9 +351,12 @@ export function MessagesScreen({
               return (
                 <View
                   key={message.id}
+                  onLayout={(event) => onItemLayout(message.id, event.nativeEvent.layout.y)}
+                  testID={`message-${message.id}`}
                   style={[
                     styles.messageBubbleRow,
-                    isMine ? styles.messageBubbleRowMine : null
+                    isMine ? styles.messageBubbleRowMine : null,
+                    message.id === focusMessageId ? { backgroundColor: colors.primarySoft, borderRadius: 12 } : null
                   ]}
                 >
                   {message.sharedPost ? (

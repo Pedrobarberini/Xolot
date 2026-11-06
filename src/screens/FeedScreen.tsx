@@ -1,5 +1,5 @@
 import { BRAND } from "../config/brand.ts";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
@@ -28,6 +28,7 @@ import { BackButton } from "../components/Navigation";
 import { CommentsModal } from "../components/CommentsModal";
 import { FeedPostOptionsModal } from "../components/FeedPostOptionsModal";
 import { NotificationsPopover } from "../components/NotificationsPopover";
+import type { NotificationPostTarget } from "../app/useNotificationNavigation";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
 import {
   ProfileListModal,
@@ -35,7 +36,7 @@ import {
 } from "../components/ProfileListModal";
 import { SharePostModal } from "../components/SharePostModal";
 import { VideoVolumeControl } from "../components/VideoVolumeControl";
-import { FOLKO_HORIZONTAL } from "../constants/assets";
+import { FOLKO_SYMBOL } from "../constants/assets";
 import { FEED_TEXT_LIMIT_COMPACT, FEED_TEXT_LIMIT_WIDE, USE_CENTERED_WEB_LAYOUT } from "../constants/layout";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
@@ -80,6 +81,7 @@ export function FeedScreen({
   shareCountsByPlayer,
   mutedContentKeys,
   notifications,
+  notificationTarget,
   reportedPlayerIds,
   onAddComment,
   onBackToProfile,
@@ -117,6 +119,7 @@ export function FeedScreen({
   shareCountsByPlayer: Record<string, number>;
   mutedContentKeys: Set<string>;
   notifications: AppNotification[];
+  notificationTarget?: NotificationPostTarget | null;
   reportedPlayerIds: Set<string>;
   onAddComment: (
     playerId: string,
@@ -156,6 +159,7 @@ export function FeedScreen({
   const [isFeedNavigating, setIsFeedNavigating] = useState(false);
   const [isCleanView, setIsCleanView] = useState(false);
   const [commentPlayer, setCommentPlayer] = useState<Player | null>(null);
+  const [focusedCommentId, setFocusedCommentId] = useState<string | undefined>();
   const [preferencePlayer, setPreferencePlayer] = useState<Player | null>(null);
   const [sharePlayer, setSharePlayer] = useState<Player | null>(null);
   const [mentionedPlayer, setMentionedPlayer] = useState<Player | null>(null);
@@ -262,7 +266,7 @@ export function FeedScreen({
     immersiveChangeRef.current?.(active);
   }
 
-  function activateFeedIndex(index: number) {
+  const activateFeedIndex = useCallback((index: number) => {
     const safeIndex = Math.min(Math.max(index, 0), lastFeedIndex);
 
     if (activeFeedIndexRef.current === safeIndex) {
@@ -271,13 +275,13 @@ export function FeedScreen({
 
     activeFeedIndexRef.current = safeIndex;
     setActiveFeedIndex(safeIndex);
-  }
+  }, [lastFeedIndex]);
 
   useEffect(() => {
     if (activeFeedIndex > lastFeedIndex) {
       activateFeedIndex(lastFeedIndex);
     }
-  }, [activeFeedIndex, lastFeedIndex]);
+  }, [activeFeedIndex, activateFeedIndex, lastFeedIndex]);
 
   useEffect(() => {
     if (!focusPlayerId) {
@@ -303,8 +307,17 @@ export function FeedScreen({
     });
 
     return () => cancelAnimationFrame(frame);
-  }, [feedPlayers, focusPlayerId, pageHeight]);
+  }, [activateFeedIndex, feedPlayers, focusPlayerId, pageHeight, notificationTarget?.requestId]);
 
+
+  useEffect(() => {
+    if (!notificationTarget) return;
+    setCleanViewActive(false);
+    setFocusedCommentId(notificationTarget.commentId);
+    setCommentPlayer(notificationTarget.commentId ? notificationTarget.player : null);
+  // A new request must reopen the same comment even when its post ID is unchanged.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notificationTarget?.requestId]);
 
   function openNotifications() {
     setNotificationsVisible(true);
@@ -494,7 +507,7 @@ export function FeedScreen({
           <Image
             accessibilityLabel={BRAND.name}
             resizeMode="contain"
-            source={FOLKO_HORIZONTAL}
+            source={FOLKO_SYMBOL}
             style={styles.feedReelBrandMark}
           />
         </Pressable>
@@ -590,6 +603,8 @@ export function FeedScreen({
         visible={Boolean(preferencePlayer)}
       />
       <CommentsModal
+        focusCommentId={focusedCommentId}
+        focusRequestId={notificationTarget?.requestId}
         comments={commentPlayer ? commentsByPlayer[commentPlayer.id] ?? [] : []}
         currentUserId={currentUserId}
         onAddComment={(body, replyToCommentId) =>
@@ -597,7 +612,10 @@ export function FeedScreen({
             ? onAddComment(commentPlayer.id, body, replyToCommentId)
             : false
         }
-        onClose={() => setCommentPlayer(null)}
+        onClose={() => {
+          setCommentPlayer(null);
+          setFocusedCommentId(undefined);
+        }}
         onDeleteComment={onDeleteComment}
         onOpenAuthor={(authorUserId) => {
           const account = users.find((item) => item.id === authorUserId);
