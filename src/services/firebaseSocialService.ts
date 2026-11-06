@@ -1,4 +1,5 @@
 import { FirebaseError } from "firebase/app";
+import { operationMetrics } from "../config/operationMetrics";
 import {
   collection,
   deleteDoc,
@@ -484,23 +485,20 @@ export async function setFirebaseSocialPreferences(
   });
 }
 
-export async function setFirebasePostLike(
-  playerId: string,
-  liked: boolean
-) {
-  const setLike = httpsCallable<
-    { liked: boolean; playerId: string },
-    { liked: boolean }
-  >(getFirebaseFunctions(), "setPostLike");
-  return (await setLike({ liked, playerId })).data.liked;
+export async function setFirebasePostLike(playerId: string, liked: boolean) {
+  const setLike = httpsCallable<{ liked: boolean; playerId: string }, { liked: boolean }>(
+    getFirebaseFunctions(),
+    "setPostLike",
+  );
+  return operationMetrics.measure("post.like.confirm", async () => (await setLike({ liked, playerId })).data.liked);
 }
 
 export async function recordFirebasePostView(playerId: string) {
-  const recordView = httpsCallable<
-    { playerId: string },
-    { recorded: boolean }
-  >(getFirebaseFunctions(), "recordPostView");
-  return (await recordView({ playerId })).data.recorded;
+  const recordView = httpsCallable<{ playerId: string }, { recorded: boolean }>(
+    getFirebaseFunctions(),
+    "recordPostView",
+  );
+  return operationMetrics.measure("post.view.confirm", async () => (await recordView({ playerId })).data.recorded);
 }
 
 export async function saveFirebaseDirectMessage(message: DirectMessage) {
@@ -513,16 +511,14 @@ export async function saveFirebaseDirectMessage(message: DirectMessage) {
     },
     DirectMessage
   >(getFirebaseFunctions(), "sendDirectMessage");
-  return (
+  return operationMetrics.measure("message.send.confirm", async () => (
     await sendMessage({
       body: message.body,
       messageId: message.id,
       recipientUserId: message.recipientUserId,
-      ...(message.sharedPost?.playerId
-        ? { sharedPlayerId: message.sharedPost.playerId }
-        : {})
+      ...(message.sharedPost?.playerId ? { sharedPlayerId: message.sharedPost.playerId } : {}),
     })
-  ).data;
+  ).data);
 }
 
 export async function updateFirebaseDirectMessageReceipts(

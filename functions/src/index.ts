@@ -1,5 +1,7 @@
 import "./bootstrap/admin";
 
+export { ingestOperationMetrics } from "./observability/handlers";
+
 export { createMediaUpload, finalizeMediaUpload, deleteR2Post } from "./modules/posts/handlers";
 export {
   createAvatarUpload,

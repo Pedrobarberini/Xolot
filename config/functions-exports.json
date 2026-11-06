@@ -222,6 +222,20 @@
     "labels": {},
     "callableTrigger": {}
   },
+  "ingestOperationMetrics": {
+    "availableMemoryMb": null,
+    "timeoutSeconds": 15,
+    "minInstances": null,
+    "maxInstances": 5,
+    "ingressSettings": null,
+    "concurrency": 10,
+    "serviceAccountEmail": null,
+    "vpc": null,
+    "platform": "gcfv2",
+    "region": ["southamerica-east1"],
+    "labels": {},
+    "callableTrigger": {}
+  },
   "markNotificationsRead": {
     "availableMemoryMb": null,
     "timeoutSeconds": null,

@@ -1,3 +1,4 @@
+import { callableQuotaId } from "./platform/abuseProtection";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getAuth } from "firebase-admin/auth";
 import {
@@ -170,6 +171,7 @@ export async function cleanupAccountData(uid: string) {
   ]);
 
   const fixedReferences = [
+    database.doc(`callableRateLimits/${callableQuotaId("ingestOperationMetrics", uid)}`),
     database.doc(`accounts/${uid}`),
     database.doc(`pendingAccounts/${uid}`),
     database.doc(`profiles/${uid}`),

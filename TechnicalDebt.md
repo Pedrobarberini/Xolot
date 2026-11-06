@@ -2,6 +2,8 @@
 
 Inventário histórico de dívida técnica, com convenção de refatoração atualizada em 2026-11-01. As seções antigas descrevem fases anteriores; o diagnóstico atual e a execução ficam em `docs/refatoracao/` e `docs/architecture/`.
 
+Para entregas publicadas, implementação local, pendências e metas atuais, consultar a [consolidação de 06/11/2026](docs/refatoracao/06-status-metricas-e-evolucao.md). Não interpretar os estados históricos abaixo como uma nova auditoria ou como instrução para repetir etapas concluídas.
+
 ## Direção vigente
 
 Em 2026-11-05 o proprietário manteve os recursos existentes e mudou o público para uma rede social geral de divulgação no Brasil, chamada Folko. O cadastro deve deixar de exigir enquadramento esportivo. Texto no feed e nova marca têm fichas P próprias, sem apagar provas técnicas. Ver [direção Folko](docs/refatoracao/05-direcao-folko.md). As referências esportivas/profissionais e de páginas abaixo são histórico, não autorização para restaurar nicho ou remover recursos.

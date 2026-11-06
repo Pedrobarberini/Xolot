@@ -4,6 +4,7 @@ import { createAppActions } from "./src/actions/createAppActions";
 import { useFirebaseAccounts } from "./src/actions/useFirebaseAccounts";
 import { useFirebasePosts } from "./src/actions/useFirebasePosts";
 import { useFirebaseTagCatalog } from "./src/actions/useFirebaseTagCatalog";
+import { useOperationMetrics } from "./src/actions/useOperationMetrics";
 import { usePersistentAppState } from "./src/actions/usePersistentAppState";
 import { useProfileActions } from "./src/actions/useProfileActions";
 import { useSocialActions } from "./src/actions/useSocialActions";
@@ -80,6 +81,7 @@ export default function App() {
     setUser,
     user
   } = useFirebaseAccounts();
+  useOperationMetrics(user?.id);
   useEffect(() => { setNotificationContent(null); }, [user?.id]);
   const { isPostsLoaded } = useFirebasePosts(
     user,

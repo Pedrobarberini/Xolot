@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { operationMetrics } from "../config/operationMetrics";
 import type {
   AppNotification,
   AppUser,
@@ -72,6 +73,9 @@ export function useNotificationNavigation(options: Options) {
   }, [options.currentUserId]);
 
   async function openNotification(notification: AppNotification) {
+    const finishMetric = operationMetrics.begin("notification.resolve");
+    let metricOutcome: "success" | "failure" | "cancelled" = "cancelled";
+    let metricError: unknown;
     const operation = ++request.current;
     const { currentUserId, tab } = options;
     const isCurrent = () =>
@@ -82,6 +86,7 @@ export function useNotificationNavigation(options: Options) {
     setPostTarget(null);
     setMessageTarget(null);
     if (!destination) {
+      finishMetric("failure", { code: "not-found" });
       options.onNotice(
         "Destino indisponível",
         "Não foi possível localizar o conteúdo desta notificação.",
@@ -93,6 +98,8 @@ export function useNotificationNavigation(options: Options) {
       if (destination.type === "conversation") {
         const profileId = "profile-" + destination.contactId;
         if (options.blockedProfileIds.has(profileId)) {
+          metricOutcome = "failure";
+          metricError = { code: "permission-denied" };
           options.onNotice(
             "Perfil bloqueado",
             "Desbloqueie este perfil nas configurações para abrir a conversa.",
@@ -127,6 +134,8 @@ export function useNotificationNavigation(options: Options) {
         });
         options.onResolveContent?.({ userId: currentUserId, message });
         options.onOpenConversation(destination.contactId);
+        metricOutcome = message ? "success" : "failure";
+        metricError = message ? undefined : { code: "not-found" };
         if (!message)
           options.onNotice(
             "Mensagem indisponível",
@@ -140,6 +149,8 @@ export function useNotificationNavigation(options: Options) {
         (await loadNotificationPost(destination.playerId));
       if (!isCurrent()) return;
       if (!player) {
+        metricOutcome = "failure";
+        metricError = { code: "not-found" };
         options.onNotice(
           "Publicação indisponível",
           "Esta publicação foi removida ou não está mais disponível para sua conta.",
@@ -147,6 +158,8 @@ export function useNotificationNavigation(options: Options) {
         return;
       }
       if (latest.current.blockedProfileIds.has(player.profileId)) {
+        metricOutcome = "failure";
+        metricError = { code: "permission-denied" };
         options.onNotice(
           "Perfil bloqueado",
           "Desbloqueie este perfil nas configurações para abrir a publicação.",
@@ -174,17 +187,25 @@ export function useNotificationNavigation(options: Options) {
       setPostTarget({ player, commentId: destination.commentId, comments, requestId: operation });
       options.onResolveContent?.({ userId: currentUserId, player, comments });
       options.onOpenPost(player);
+      metricOutcome = commentUnavailable ? "failure" : "success";
+      metricError = commentUnavailable ? { code: "not-found" } : undefined;
       if (commentUnavailable)
         options.onNotice(
           "Comentário indisponível",
           "A publicação foi aberta, mas este comentário não está mais disponível.",
         );
-    } catch {
+    } catch (error) {
+      if (isCurrent()) {
+        metricOutcome = "failure";
+        metricError = error;
+      }
       if (isCurrent())
         options.onNotice(
           "Não foi possível abrir",
           "Verifique sua conexão e tente abrir a notificação novamente. O conteúdo também pode ter sido removido ou ter acesso restrito.",
         );
+    } finally {
+      finishMetric(metricOutcome, metricError);
     }
   }
 

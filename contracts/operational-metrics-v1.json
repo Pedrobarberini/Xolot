@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "callable": "ingestOperationMetrics",
+  "source": "client",
+  "operations": [
+    "feed.first_item",
+    "post.like.confirm",
+    "post.view.confirm",
+    "message.send.confirm",
+    "notification.resolve",
+    "media.publish",
+    "camera.preview",
+    "query.posts.documents"
+  ],
+  "sampleRate": 0.2,
+  "maxSamplesPerBatch": 20,
+  "maxQueuedSamplesPerClient": 80,
+  "maxSampleAgeMs": 300000,
+  "minFlushIntervalMs": 60000,
+  "maxRequestsPerUserPerMinute": 6,
+  "authentication": "verified Firebase Auth identity; optional App Check follows the existing enforcement policy",
+  "storage": "private Cloud Logging entry; no metrics collection in Firestore; existing callableRateLimits stores only a hashed quota key and counters",
+  "authority": "untrusted client diagnostics, never used for social counters, ranking, billing or permissions",
+  "rollout": "disabled by default; deploy and validate the new callable before enabling the client flag; log access, retention and budget must be reviewed",
+  "exportChange": "25 exports instead of 24; 18 callable budgets instead of 17"
+}

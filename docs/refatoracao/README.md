@@ -25,6 +25,8 @@ As etapas técnicas concluídas não voltam a zero. Mudanças de produto recebem
 | Referência | Conteúdo |
 |---|---|
 | [Direção Folko](05-direcao-folko.md) | Escopo aprovado, compatibilidade, marca, formatos de post e limites |
+| [Entregas, métricas e evolução](06-status-metricas-e-evolucao.md) | Publicado versus local/planejado, prioridades atuais, metas propostas e inventário completo das tarefas |
+| [Execução por categoria](07-execucao-por-categoria.md) | Etapas em andamento, armazenamento, método, justificativa e validação de cada entrega |
 | [Arquitetura](01-arquitetura.md) | Fronteiras, Clean Code, módulos, tipos e destino dos arquivos |
 | [Dados](02-dados.md) | Autoridades, schema candidato, queries e migrações |
 | [Qualidade e operação](03-validacao-operacao.md) | Testes, segurança, desempenho, recuperação e entrega |

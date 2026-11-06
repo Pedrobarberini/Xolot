@@ -1,3 +1,5 @@
+import { operationMetrics } from "../config/operationMetrics";
+import type { MetricFinish } from "../shared/observability/operationMetrics";
 import React, { useEffect, useRef, useState } from "react";
 import {
   CameraView,
@@ -51,6 +53,7 @@ export function SubmissionMediaStage({
   selectedMedia: SelectedSubmissionMedia | null;
 }) {
   const cameraRef = useRef<CameraView>(null);
+  const previewMetric = useRef<MetricFinish | null>(null);
   const cameraReadyRef = useRef(false);
   const cameraReadyResolverRef = useRef<((ready: boolean) => void) | null>(null);
   const cameraReadyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -76,6 +79,11 @@ export function SubmissionMediaStage({
   const [recordingMuted, setRecordingMuted] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const isBusy = isCapturing || isPreparingRecording || isRecording;
+  useEffect(() => {
+    if (!permission?.granted || selectedMedia) return;
+    previewMetric.current = operationMetrics.begin("camera.preview");
+    return () => { previewMetric.current?.("cancelled"); previewMetric.current = null; };
+  }, [cameraFacing, cameraMode, cameraSessionKey, permission?.granted, recordingMuted, selectedMedia]);
 
   useEffect(() => {
     if (!isRecording) {
@@ -110,6 +118,8 @@ export function SubmissionMediaStage({
   );
 
   function handleCameraReady() {
+    previewMetric.current?.();
+    previewMetric.current = null;
     cameraReadyRef.current = true;
     setIsCameraReady(true);
 
@@ -132,6 +142,10 @@ export function SubmissionMediaStage({
     return new Promise<boolean>((resolve) => {
       cameraReadyResolverRef.current = resolve;
       cameraReadyTimeoutRef.current = setTimeout(() => {
+        if (!cameraReadyRef.current) {
+          previewMetric.current?.("failure", { code: "deadline-exceeded" });
+          previewMetric.current = null;
+        }
         cameraReadyTimeoutRef.current = null;
         cameraReadyResolverRef.current = null;
         resolve(cameraReadyRef.current);
@@ -385,6 +399,7 @@ export function SubmissionMediaStage({
             mode={cameraMode}
             mute={recordingMuted}
             onCameraReady={handleCameraReady}
+            onMountError={() => { previewMetric.current?.("failure", { code: "unavailable" }); previewMetric.current = null; }}
             ref={cameraRef}
             style={styles.submissionCameraPreview}
           />

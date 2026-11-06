@@ -1,4 +1,6 @@
 import { BRAND } from "../config/brand.ts";
+import { operationMetrics } from "../config/operationMetrics";
+import type { MetricFinish } from "../shared/observability/operationMetrics";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
@@ -152,6 +154,11 @@ export function FeedScreen({
   users: AppUser[];
 }) {
   const { height } = useWindowDimensions();
+  const firstItemMetric = useRef<MetricFinish | null>(null);
+  useEffect(() => {
+    firstItemMetric.current = operationMetrics.begin("feed.first_item");
+    return () => { firstItemMetric.current?.("cancelled"); firstItemMetric.current = null; };
+  }, []);
   const [feedHeight, setFeedHeight] = useState(0);
   const [activeFeedIndex, setActiveFeedIndex] = useState(0);
   const [feedRefreshKey, setFeedRefreshKey] = useState(0);
@@ -176,6 +183,11 @@ export function FeedScreen({
   const pageHeight = feedHeight || height;
   const lastFeedIndex = Math.max(feedPlayers.length - 1, 0);
   const activePlayerId = feedPlayers[activeFeedIndex]?.id;
+  useEffect(() => {
+    if (!feedHeight || !activePlayerId) return;
+    const frame = requestAnimationFrame(() => { firstItemMetric.current?.(); firstItemMetric.current = null; });
+    return () => cancelAnimationFrame(frame);
+  }, [activePlayerId, feedHeight]);
   const unreadNotificationCount = notifications.filter(
     (notification) => !notification.readAt
   ).length;

@@ -1,4 +1,5 @@
 import { FirebaseError } from "firebase/app";
+import { operationMetrics } from "../config/operationMetrics";
 import {
   collection,
   deleteDoc,
@@ -125,6 +126,14 @@ function waitForUpload(
 export async function publishFirebasePost(
   submission: VideoSubmission,
   media: PublicationMediaInput,
+  onProgress?: (progress: number) => void,
+) {
+  return operationMetrics.measure("media.publish", () => publishFirebasePostImplementation(submission, media, onProgress));
+}
+
+async function publishFirebasePostImplementation(
+  submission: VideoSubmission,
+  media: PublicationMediaInput,
   onProgress?: (progress: number) => void
 ) {
   if (isR2MediaEnabled()) {
@@ -230,6 +239,7 @@ export function subscribeFirebasePosts(
   return onSnapshot(
     postsQuery,
     (snapshot) => {
+      operationMetrics.observePostDocuments(snapshot.size);
       const currentGeneration = ++deliveryGeneration;
       let invalidDocuments = 0;
       let unavailableMedia = 0;

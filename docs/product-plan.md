@@ -19,7 +19,7 @@ Manter um recurso não o promove de simulação para serviço real. Não alterar
 
 ## Mudança imediata: cadastro geral
 
-O cadastro apresenta identidade, seu espaço e interesses, com exemplos diversos. Modalidade, posição de jogador e equipe deixam de ser a linguagem do formulário. Área de interesse e apresentação aceitam texto livre, inclusive perfil pessoal; marca/projeto/organização continua opcional.
+O cadastro apresenta identidade, seu espaço e interesses, com exemplos diversos. Modalidade, posição de jogador e equipe deixam de ser a linguagem do formulário. A área textual duplicada de interesse foi retirada: a seleção existente de uma a seis hashtags é mantida no cadastro e na edição. A apresentação aceita texto livre, inclusive perfil pessoal; marca/projeto/organização continua opcional.
 
 Esta etapa preserva as chaves de dados existentes por compatibilidade. Não inventa dados para satisfazer o banco, não sobrescreve perfis antigos e não muda a política de idade/consentimento. Uma mudança futura de obrigatoriedade ou privacidade precisa de contrato, Rules e migração próprios.
 
@@ -49,3 +49,5 @@ Um post de texto não recebe vídeo vazio, URL fictícia nem upload obrigatório
 Calendário, público etário final, política de moderação, retenção e domínios definitivos precisam de definição própria; não inventar decisões comerciais ou jurídicas. Política atual de acesso não se torna pública/anônima por se tratar de uma rede social comum.
 
 O [plano executável](refatoracao/README.md), a [direção detalhada](refatoracao/05-direcao-folko.md) e o [controle de progresso](refatoracao/estado.json) são as referências de implementação. O [plano esportivo anterior](archive/product-plan-esportes.md) é apenas histórico.
+
+O [status consolidado](refatoracao/06-status-metricas-e-evolucao.md) distingue entregas publicadas, melhorias locais, pendências, métricas e propostas de inovação; não substitui os critérios de aceite das fichas.

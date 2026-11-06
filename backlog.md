@@ -1,5 +1,7 @@
 # Backlog técnico - Folko
 
+Situação consolidada em 06/11/2026: [entregas, pendências, métricas e evolução](docs/refatoracao/06-status-metricas-e-evolucao.md). As seções antigas abaixo preservam histórico e podem ter estados anteriores às publicações recentes; consultar a consolidação e as provas das fichas antes de executar ou repetir trabalho.
+
 Atualizado em 2026-07-27.
 
 Este arquivo é orientado a desenvolvimento. Cada item deve virar issue ou task rastreável antes de entrar em implementação.
