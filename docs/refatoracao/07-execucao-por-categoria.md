@@ -6,7 +6,7 @@ Início: 06/11/2026. O [levantamento consolidado](06-status-metricas-e-evolucao.
 
 | Etapa | Resultado esperado | Estado desta execução |
 | --- | --- | --- |
-| IM01 — Medição operacional inicial | Tempos, falhas e volume de resultados com coleta limitada, validação e relatório | Validada localmente em recorte isolado; aguarda aprovação/publicação; coleta publicada desativada |
+| IM01 — Medição operacional inicial | Tempos, falhas e volume de resultados com coleta limitada, validação e relatório | Publicada na web e no backend em `199ee64`; amostras autenticadas e baseline real ainda pendentes |
 | IM02 — Proteções e otimizações já preparadas | Rollout coordenado de cliente, backend, Rules e CAPTCHA | Preparadas parcialmente na auditoria anterior; publicação própria ainda necessária |
 | IM03 — Bloqueio, denúncia e privacidade | Autoridade do servidor e fila de moderação | Pendente; respeitar política de acesso e retenção |
 | IM04 — Acesso à infraestrutura | Menor privilégio por responsabilidade | Diagnóstico atualizado; nenhuma permissão alterada |
@@ -55,13 +55,21 @@ Consulta somente de leitura em 06/11/2026: bucket `_Default` ativo, retenção d
 
 A política do projeto não retornou binding público e mostrou três contas de serviço com papel Editor. Isso não substitui revisão de IAM herdado, views, sinks e políticas por recurso. A redução de privilégios pertence a IM04; nenhuma conta ou papel foi criado/removido nesta entrega. Resumo sem identidades pessoais: `output/testes/imediata-01-observabilidade/logging-settings.json`.
 
-### O que ainda falta para chamar IM01 de medição em produção
+### Publicação autorizada e verificada
 
-1. Checks locais e recorte isolado preparados. A referência de produção continua `dcf3622`; nenhuma publicação desta etapa foi feita.
-2. Revisar destino/acesso/retenção dos logs, orçamento, política de transparência e compatibilidade dos clientes suportados.
-3. Pedir confirmação para publicar. O acréscimo do callable e sua quota faz parte da proposta de publicação, não de um deploy já realizado.
-4. Publicar/validar o coletor e a limpeza da quota (`ingestOperationMetrics`, `deleteOwnAccount`, `cleanupDeletedAccount`); depois publicar o cliente com `EXPO_PUBLIC_OPERATION_METRICS_ENABLED=true` e release ID do build. No recorte, as funções antigas só recebem a referência da nova quota para limpeza, sem migração da auditoria anterior.
-5. Observar amostras reais e gerar o primeiro relatório de produção; ainda não existe uma afirmação de SLA ou redução de latência decorrente desta instrumentação.
+O proprietário autorizou a publicação em 06/11/2026. Código na `main`: `199ee642ec6cf162f2e13db0d59eddbaebf3c005`. Os três jobs da [CI](https://github.com/Pedrobarberini/Xolot/actions/runs/42282639027) passaram. A versão de Hosting `d426151d19342116` foi conferida no preview e promovida sem rebuild para `xolot.com.br` e `xolot.web.app`.
+
+Foram publicadas somente `ingestOperationMetrics`, `deleteOwnAccount` e `cleanupDeletedAccount`. As duas últimas receberam a limpeza da nova quota. As outras 22 funções e o ruleset Firestore permaneceram sem alteração. O coletor está ativo com cinco instâncias máximas, concorrência dez, timeout de 15 segundos e nenhum segredo vinculado. Dois testes negativos reais devolveram HTTP 401/`UNAUTHENTICATED`: sem autenticação e com token inválido. Nenhuma conta foi criada ou excluída para esses testes.
+
+A flag de coleta está habilitada apenas neste build web, identificado pelo SHA completo acima. Arquivo principal: 4.124.887 bytes; transporte sob demanda: 375 bytes. Hashes, cache, service worker e respostas HTTP 200 foram conferidos nos dois domínios. A tela de login renderizou sem erros de console observados; uma aba com service worker antigo precisou de duas recargas. Evidências: `output/testes/imediata-01-observabilidade/verificacao.json` e `site-publicado.jpg`.
+
+As consultas básicas confirmaram os sinks padrão ativos, sem exclusões, e o bucket `_Default` com retenção de 30 dias. Nenhum papel IAM, retenção ou configuração de CAPTCHA/App Check foi alterado. A inspeção não substitui a revisão de IAM herdado, views, orçamento, transparência e clientes nativos, que continuam no programa de segurança/operação.
+
+### O que ainda falta para concluir a medição operacional
+
+1. Observar uma sessão autenticada com operações reais e conferir seu lote sanitizado no log. A aba disponível estava no login; não foram extraídas credenciais nem criadas identidades para fabricar amostras.
+2. Formar uma amostra suficiente por operação, versão e plataforma; então estabelecer baseline e comparar o rollout IM02. Ainda não há afirmação de SLA ou redução de latência decorrente desta instrumentação.
+3. Completar medições de renderização no destinatário, custos oficiais, alertas, concorrência e estabilidade nativa nos aceites de O03/IM07. Oito sinais iniciais não encerram essas tarefas amplas.
 
 ### Validação executada nesta etapa
 
@@ -76,7 +84,7 @@ A política do projeto não retornou binding público e mostrou três contas de 
 | Web | Build isolado aprovado; JS principal de 4.124.858 bytes e transporte sob demanda de 375 bytes, com precache do segundo arquivo verificado |
 | Relatório autorizado | Consulta de leitura no projeto funcionou; zero lotes antes da ativação, não uma medição de latência igual a zero |
 
-As contagens das suítes se sobrepõem e não representam percentual de cobertura ou teste em aparelho. O candidato usa a marca `development`; a publicação deve identificar o build real. O candidato com a coleta habilitada foi compilado, mas não foi executado no navegador nem publicado antes da aprovação. Evidências e limitações ficam em `output/testes/imediata-01-observabilidade/`.
+As contagens das suítes se sobrepõem e não representam percentual de cobertura ou teste em aparelho. O candidato local original usava a marca `development`; o build publicado usa o SHA completo do commit. O candidato com coleta habilitada não foi executado no navegador nem publicado antes da aprovação. Evidências e limitações ficam em `output/testes/imediata-01-observabilidade/`.
 
 ## Categoria 2 — alta: desempenho e organização
 

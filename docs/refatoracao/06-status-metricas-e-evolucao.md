@@ -2,7 +2,7 @@
 
 Consolidação de 06/11/2026. Referência publicada: commit `dcf3622`, depois de `2d5a6d3` e `9a9847a`. Esta revisão organiza o trabalho; não publica código, altera infraestrutura nem autoriza executar as propostas de inovação.
 
-Execução posterior iniciada por solicitação do proprietário: consultar o [diário por categoria](07-execucao-por-categoria.md). IM01 tem implementação local de medição operacional; não foi ativada no site nem encerra as tarefas amplas O03/I07.
+Execução posterior iniciada por solicitação do proprietário: consultar o [diário por categoria](07-execucao-por-categoria.md). IM01 foi publicada na web e no backend em `199ee64`, após autorização, com coleta técnica limitada habilitada. Amostras autenticadas, baseline, custos oficiais e alertas continuam pendentes; a entrega não encerra as tarefas amplas O03/I07. As referências abaixo a `dcf3622` descrevem o levantamento anterior a essa instrumentação.
 
 ## 1. Plano vigente e leitura do progresso
 

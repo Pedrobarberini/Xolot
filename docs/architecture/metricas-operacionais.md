@@ -1,6 +1,6 @@
 # Métricas operacionais iniciais do Folko
 
-Implementação local de IM01. Relacionada a O01/O03/I07, sem concluir custo faturado, métricas nativas de crash, proteção completa ou o programa de observabilidade. O [diário por categoria](../refatoracao/07-execucao-por-categoria.md) explica entrega e armazenamento.
+Implementação inicial de IM01, publicada na web e no backend em 06/11/2026, commit `199ee64`, após autorização. Relacionada a O01/O03/I07, sem concluir custo faturado, métricas nativas de crash, proteção completa ou o programa de observabilidade. O [diário por categoria](../refatoracao/07-execucao-por-categoria.md) explica entrega, armazenamento, verificação e aceites restantes.
 
 ## O que é medido
 
