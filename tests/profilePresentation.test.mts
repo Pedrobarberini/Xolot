@@ -1,16 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  getProfileAreaSuggestions,
-  getProfilePresentationSuggestions,
-} from "../src/features/profiles/domain/presentationCatalog.ts";
+import { getProfilePresentationSuggestions } from "../src/features/profiles/domain/presentationCatalog.ts";
 
-test("cadastro sugere temas diversos com busca em português e limite", () => {
-  assert.deepEqual(getProfileAreaSuggestions("", 3), ["Arte e cultura", "Música", "Humor"]);
-  assert.deepEqual(getProfileAreaSuggestions("mus"), ["Música"]);
-  assert.deepEqual(getProfileAreaSuggestions("  MÚSICA  "), []);
-  assert.deepEqual(getProfileAreaSuggestions("area livre"), []);
-  assert.deepEqual(getProfileAreaSuggestions("", 0), []);
+test("cadastro sugere apresentações gerais com busca em português e limite", () => {
   assert.deepEqual(getProfilePresentationSuggestions("conteudo"), ["Criador de conteúdo"]);
+  assert.deepEqual(getProfilePresentationSuggestions("  NEGÓCIO  "), ["Negócio ou marca"]);
+  assert.deepEqual(getProfilePresentationSuggestions("", 1), ["Perfil pessoal"]);
+  assert.deepEqual(getProfilePresentationSuggestions("", 0), []);
   assert.ok(getProfilePresentationSuggestions().includes("Perfil pessoal"));
 });

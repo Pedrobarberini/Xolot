@@ -72,7 +72,7 @@ Campanhas simuladas não viram cobrança real durante esta refatoração. Decidi
 
 - `accounts`: `uid`, estado da conta, versão do cadastro, provedor, datas do servidor e referências/versionamento do aceite quando definidos pelo produto.
 - Email e credenciais continuam no Firebase Auth; não duplicar senhas ou tokens no Firestore.
-- `profiles`: `uid`, `username`, nome, bio, área de interesse e apresentação, cidade/organização, interesses limitados, referência de avatar, datas e campos sociais permitidos.
+- `profiles`: `uid`, `username`, nome, bio, apresentação, cidade/organização, interesses por hashtags limitados, área legada preservada (vazia em novos perfis), referência de avatar, datas e campos sociais permitidos.
 - `identityVerified` e `plusActive` são projeções exclusivas do servidor. Preservar a regra atual: o selo pago depende de identidade aprovada e assinatura autorizada.
 - P01 mantém as chaves legadas sport/position/club para área/apresentação/organização no formulário geral. Não converter registros nem impor um enum esportivo; renomeação física e mudança de obrigatoriedade seriam outra migração.
 - A idade exata hoje faz parte do perfil. Classificar esse dado antes da evolução: não inventar data de nascimento nem ampliar exposição. Qualquer substituição por faixa etária depende de decisão de produto/privacidade e de plano para os dados legados.

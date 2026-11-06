@@ -105,7 +105,8 @@ service cloud.firestore {
         && data.bio is string && data.bio.size() >= 10 && data.bio.size() <= 240
         && data.age is int && data.age >= 5 && data.age <= 100
         && data.position is string && data.position.size() >= 2 && data.position.size() <= 40
-        && data.sport is string && data.sport.size() >= 2 && data.sport.size() <= 40
+        && data.sport is string && data.sport.size() <= 40
+        && (data.sport.size() == 0 || data.sport.size() >= 2)
         && data.city is string && data.city.size() >= 2 && data.city.size() <= 80
         && data.club is string && data.club.size() <= 80
         && (data.club.size() == 0 || data.club.size() >= 2)

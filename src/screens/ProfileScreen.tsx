@@ -999,7 +999,7 @@ function SettingsView({
             <View style={styles.settingsRowBody}>
               <Text style={styles.settingsRowTitle}>Editar perfil</Text>
               <Text style={styles.settingsRowDescription}>
-                Nome, biografia, área de interesse, apresentação, cidade e organização.
+                Nome, biografia, apresentação, cidade, organização e hashtags de interesse.
               </Text>
             </View>
           </Pressable>

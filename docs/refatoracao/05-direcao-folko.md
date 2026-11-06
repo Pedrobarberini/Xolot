@@ -34,12 +34,14 @@ Esportes são um dos assuntos possíveis. Não eliminar posts, contas ou interes
 
 | Apresentação do formulário | Chave atual | Política nesta etapa |
 |---|---|---|
-| Área de interesse | sport | Texto livre com sugestões gerais; não é um enum esportivo |
+| Área legada (retirada do formulário) | sport | Preservar valores existentes; novas contas usam vazio; interesses são escolhidos em hashtags |
 | Como você se apresenta | position | Perfil pessoal, criador, artista, negócio, serviço ou descrição livre; não é role administrativa |
 | Marca, projeto ou organização | club | Opcional; conservar valor existente |
 | Nome, username, bio, idade, cidade, interesses e avatar | Chaves atuais | Conservar validações, consentimento e autoridade existentes |
 
-Os nomes legados são detalhe do adaptador; não aparecem como campos técnicos para o usuário. A compatibilidade evita exigir deploy/migração do banco para retirar o nicho do formulário. Não preencher campos escondidos com atleta, jogador ou valores fictícios. Não limpar sport/position/club dos registros antigos.
+Os nomes legados são detalhe do adaptador; não aparecem como campos técnicos para o usuário. A área de interesse textual foi retirada por solicitação do proprietário: a seleção existente de uma a seis hashtags é o único campo de interesses no cadastro e na edição. Não preencher campos escondidos com atleta, jogador ou valores fictícios. Não limpar sport/position/club dos registros antigos.
+
+Novas contas conservam a chave `sport` com texto vazio. A validação do cliente e o protótipo das Rules aceitam esse caso; a alteração de schema deve acompanhar a publicação do formulário. Não exige renomear campos nem migrar documentos existentes.
 
 A simplificação futura de campos obrigatórios ou a adoção de nomes físicos gerais exige versão, leitores, Rules e migração testada; este plano não declara essa migração pronta. A idade pública atual merece revisão de privacidade em SEC01/SEC02 antes de ampliar o lançamento, sem inventar outra política etária nesta tarefa.
 

@@ -18,7 +18,10 @@ const user: AppUser = onboardingAccount({
   photoURL: "",
   acceptedTerms: true,
 });
-const catalog = [{ key: "arte", label: "Arte", postCount: 0, creatorCount: 0 }];
+const catalog = [
+  { key: "arte", label: "Arte", postCount: 0, creatorCount: 0 },
+  { key: "tecnologia", label: "Tecnologia", postCount: 0, creatorCount: 0 },
+];
 beforeEach(() => jest.useFakeTimers());
 afterEach(() => jest.useRealTimers());
 
@@ -50,7 +53,7 @@ function fillIdentity() {
   fireEvent.changeText(screen.getByPlaceholderText("Cidade, UF"), "Recife, PE");
 }
 
-test("cadastro geral conclui as três etapas sem dados esportivos e mantém payload válido no banco atual", async () => {
+test("cadastro usa somente hashtags para interesses e conclui sem área duplicada", async () => {
   const save = jest.fn(async (profile: AccountProfile) => {
     normalizeProfileWrite(user.id, profile);
     return true;
@@ -64,7 +67,8 @@ test("cadastro geral conclui as três etapas sem dados esportivos e mantém payl
   expect(screen.queryByText("Modalidade")).toBeNull();
   expect(screen.queryByText("Função ou especialidade")).toBeNull();
   expect(screen.queryByText("Futebol")).toBeNull();
-  fireEvent.press(screen.getByRole("button", { name: "Arte e cultura" }));
+  expect(screen.queryByLabelText("Área de interesse")).toBeNull();
+  expect(screen.queryByText("Escolha rápida")).toBeNull();
   fireEvent.press(screen.getByRole("button", { name: "Perfil pessoal" }));
   fireEvent.changeText(
     screen.getByPlaceholderText("Conte brevemente quem você é e o que publica."),
@@ -74,14 +78,15 @@ test("cadastro geral conclui as três etapas sem dados esportivos e mantém payl
   expect(screen.getByText("Monte seu Para você")).toBeTruthy();
   expect(screen.getByRole("button", { name: "Concluir perfil" })).toBeDisabled();
   fireEvent.press(screen.getByRole("checkbox", { name: /#Arte/ }));
+  fireEvent.press(screen.getByRole("checkbox", { name: /#Tecnologia/ }));
   await act(async () => fireEvent.press(screen.getByRole("button", { name: "Concluir perfil" })));
   expect(save).toHaveBeenCalledTimes(1);
   expect(save.mock.calls[0][0]).toMatchObject({
     username: "ana.folko",
-    sport: "Arte e cultura",
+    sport: "",
     position: "Perfil pessoal",
     club: "",
-    interestTags: ["Arte"],
+    interestTags: ["Arte", "Tecnologia"],
   });
 });
 
@@ -101,18 +106,20 @@ test("edição preserva valores existentes e texto livre, erro de gravação man
   const save = jest.fn(async () => false);
   setup(save, account);
   await next();
-  expect(screen.getByLabelText("Área de interesse").props.value).toBe("Futebol");
+  expect(screen.queryByLabelText("Área de interesse")).toBeNull();
   expect(screen.getByLabelText("Como você se apresenta").props.value).toBe("Centroavante");
   expect(screen.getByLabelText("Marca, projeto ou organização (opcional)").props.value).toBe(
     "Projeto existente",
   );
-  fireEvent.changeText(screen.getByLabelText("Área de interesse"), "Artesanato independente");
   fireEvent.changeText(
     screen.getByLabelText("Como você se apresenta"),
     "Compartilho minhas criações",
   );
   await next();
   await act(async () => fireEvent.press(screen.getByRole("button", { name: "Concluir perfil" })));
+  expect(save).toHaveBeenCalledWith(
+    expect.objectContaining({ sport: "Futebol", interestTags: ["Arte"] }),
+  );
   expect(screen.getByRole("alert")).toHaveTextContent("Revise os dados e tente salvar novamente.");
   expect(screen.getByRole("button", { name: "Concluir perfil" })).toBeEnabled();
 });

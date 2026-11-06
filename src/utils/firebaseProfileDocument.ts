@@ -86,7 +86,7 @@ export function normalizePublicProfileDocument(
       normalizeText(data.position, 40) ||
       (allowLegacyFallback ? "Área não informada" : ""),
     profileCompleted: true,
-    sport: normalizeText(data.sport, 40) || "Modalidade não informada",
+    sport: normalizeText(data.sport, 40),
     uid,
     username
   };

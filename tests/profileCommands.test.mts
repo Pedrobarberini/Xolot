@@ -62,6 +62,17 @@ test("caso de uso normaliza uma projeção permitida e injeta o repositório sem
     assert.equal(field in injected, false);
 });
 
+test("perfil sem área usa somente hashtags e conserva valores legados quando presentes", () => {
+  const current = normalizeProfileWrite("Owner", {
+    ...profile,
+    sport: "  ",
+    interestTags: ["arte", "tecnologia"],
+  });
+  assert.equal(current.sport, "");
+  assert.deepEqual(current.interestTags, ["arte", "tecnologia"]);
+  assert.equal(normalizeProfileWrite("Owner", profile).sport, "Futebol");
+});
+
 test("sessão ausente, email não confirmado ou UID diferente não alcançam escrita", async () => {
   for (const currentIdentity of [
     () => null,

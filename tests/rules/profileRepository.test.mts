@@ -60,6 +60,24 @@ beforeEach(async () => {
   });
 });
 
+test("cadastro e edição aceitam área vazia com múltiplas hashtags sem alterar a reserva", async () => {
+  const alice = actor("alice");
+  await alice.save("alice", { ...form, sport: "", interestTags: ["arte", "tecnologia"] });
+  const created = await alice.repository.read("alice");
+  assert.equal(created?.sport, "");
+  assert.deepEqual(created?.interestTags, ["arte", "tecnologia"]);
+  await alice.save("alice", {
+    ...form,
+    sport: "",
+    interestTags: ["arte", "musica"],
+    bio: "Biografia atualizada sem categoria duplicada",
+  });
+  const updated = await alice.repository.read("alice");
+  assert.equal(updated?.sport, "");
+  assert.deepEqual(updated?.interestTags, ["arte", "musica"]);
+  assert.equal(updated?.username, form.username);
+});
+
 test("dois clientes disputam username: somente um perfil e uma reserva são gravados", async () => {
   const alice = actor("alice"),
     bruno = actor("bruno");

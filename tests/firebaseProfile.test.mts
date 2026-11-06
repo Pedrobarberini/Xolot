@@ -45,11 +45,16 @@ test("normaliza apenas os campos públicos permitidos", () => {
 
   assert.equal("passwordHash" in (normalized ?? {}), false);
 });
+test("área ausente ou vazia não recebe categoria artificial e preserva interesses", () => {
   const { sport: _sport, ...profileWithoutSport } = profile;
   assert.equal(
     normalizePublicProfileDocument(profile.uid, profileWithoutSport)?.sport,
-    "Modalidade não informada"
+    ""
   );
+  const emptyArea = normalizePublicProfileDocument(profile.uid, { ...profile, sport: "  " });
+  assert.equal(emptyArea?.sport, "");
+  assert.deepEqual(emptyArea?.interestTags, profile.interestTags);
+});
 
 
 test("aceita perfil concluído sem equipe, clube ou projeto", () => {
@@ -86,7 +91,7 @@ test("recupera identidade publica de um perfil legado incompleto", () => {
   assert.equal(recovered?.name, "Perfil Antigo");
   assert.equal(recovered?.username, "perfil.antigo");
   assert.equal(recovered?.position, "Área não informada");
-  assert.equal(recovered?.sport, "Modalidade não informada");
+  assert.equal(recovered?.sport, "");
   assert.equal(recovered?.city, "Local não informado");
   assert.equal(recovered?.age, null);
   assert.equal(

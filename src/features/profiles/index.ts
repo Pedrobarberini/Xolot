@@ -7,7 +7,4 @@ export type {
 } from "./application/profileRepository";
 export { createProfileCommands, normalizeProfileWrite } from "./application/saveProfile.ts";
 export { UsernameAlreadyInUseError, InvalidPublicProfileError } from "./domain/errors.ts";
-export {
-  getProfileAreaSuggestions,
-  getProfilePresentationSuggestions,
-} from "./domain/presentationCatalog.ts";
+export { getProfilePresentationSuggestions } from "./domain/presentationCatalog.ts";

@@ -39,7 +39,7 @@ export function normalizeProfileWrite(
     normalizedProfile.bio.length > 240 ||
     normalizedProfile.position.length < 2 ||
     normalizedProfile.position.length > 40 ||
-    normalizedProfile.sport.length < 2 ||
+    (normalizedProfile.sport.length > 0 && normalizedProfile.sport.length < 2) ||
     normalizedProfile.sport.length > 40 ||
     normalizedProfile.city.length < 2 ||
     normalizedProfile.city.length > 80 ||

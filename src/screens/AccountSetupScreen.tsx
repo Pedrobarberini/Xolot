@@ -1,14 +1,7 @@
 import { BRAND } from "../config/brand.ts";
 import React, { useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import {
-  Camera,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-  UserRound
-} from "lucide-react-native";
+import { Camera, Check, ChevronLeft, ChevronRight, LogOut, UserRound } from "lucide-react-native";
 import {
   ActivityIndicator,
   Alert,
@@ -21,7 +14,7 @@ import {
   ScrollView,
   Text,
   useWindowDimensions,
-  View
+  View,
 } from "react-native";
 import { BackButton, LabeledInput } from "../components/Navigation";
 import { ProfileAvatarImage } from "../components/ProfileAvatarImage";
@@ -30,15 +23,8 @@ import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import type { AccountProfile, AppUser, ProfileAvatar, TagCatalogEntry } from "../types";
 import { DEFAULT_AVATAR_CROP_SCALE } from "../utils/avatarFocus";
-import {
-  isUsernameAvailable,
-  normalizeUsername
-} from "../utils/userIdentity";
-import {
-  getProfilePresentationSuggestions,
-  getProfileAreaSuggestions
-} from "../features/profiles";
-
+import { isUsernameAvailable, normalizeUsername } from "../utils/userIdentity";
+import { getProfilePresentationSuggestions } from "../features/profiles";
 
 type AccountSetupProps = {
   accounts: AppUser[];
@@ -57,18 +43,18 @@ const SETUP_STEPS = [
   {
     label: "Você",
     title: "Vamos criar seu perfil",
-    subtitle: `Comece com as informações usadas para identificar você no ${BRAND.name}.`
+    subtitle: `Comece com as informações usadas para identificar você no ${BRAND.name}.`,
   },
   {
     label: "Seu espaço",
     title: "Conte um pouco sobre você",
-    subtitle: "Apresente seu perfil e o que você quer compartilhar ou divulgar."
+    subtitle: "Apresente seu perfil e o que você quer compartilhar ou divulgar.",
   },
   {
     label: "Interesses",
     title: "Monte seu Para você",
-    subtitle: "Escolha temas para priorizar conteúdos relevantes desde o primeiro acesso."
-  }
+    subtitle: "Escolha temas para priorizar conteúdos relevantes desde o primeiro acesso.",
+  },
 ] as const;
 
 export function AccountSetupScreen({
@@ -81,7 +67,7 @@ export function AccountSetupScreen({
   onSave,
   onSignOut,
   tagCatalog,
-  user
+  user,
 }: AccountSetupProps) {
   const { width } = useWindowDimensions();
   const scrollRef = useRef<ScrollView>(null);
@@ -94,7 +80,6 @@ export function AccountSetupScreen({
   const [username, setUsername] = useState(user.username);
   const [bio, setBio] = useState(user.bio);
   const [ageText, setAgeText] = useState(user.age ? String(user.age) : "");
-  const [area, setArea] = useState(user.sport);
   const [presentation, setPresentation] = useState(user.position);
   const [city, setCity] = useState(user.city);
   const [organization, setOrganization] = useState(user.club);
@@ -106,20 +91,16 @@ export function AccountSetupScreen({
             cropScale: DEFAULT_AVATAR_CROP_SCALE,
             focusX: 50,
             focusY: 50,
-            uri: user.photoURL
+            uri: user.photoURL,
           }
-        : undefined)
+        : undefined),
   );
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const age = Number(ageText);
   const cleanUsername = normalizeUsername(username);
-  const usernameAvailable = isUsernameAvailable(
-    accounts,
-    cleanUsername,
-    user.id
-  );
-  // Compatibilidade do documento atual: área/apresentação/organização usam as chaves legadas.
+  const usernameAvailable = isUsernameAvailable(accounts, cleanUsername, user.id);
+  // Área legada é preservada; os interesses são escolhidos apenas por hashtags.
   const cleanProfile: AccountProfile = {
     age: Number.isInteger(age) ? age : null,
     bio: bio.trim(),
@@ -128,8 +109,8 @@ export function AccountSetupScreen({
     interestTags,
     name: name.trim(),
     position: presentation.trim(),
-    sport: area.trim(),
-    username: cleanUsername
+    sport: user.sport.trim(),
+    username: cleanUsername,
   };
   const identityValid =
     cleanProfile.name.length >= 3 &&
@@ -139,7 +120,6 @@ export function AccountSetupScreen({
     cleanProfile.age <= 100 &&
     cleanProfile.city.length >= 2;
   const activityValid =
-    cleanProfile.sport.length >= 2 &&
     cleanProfile.position.length >= 2 &&
     cleanProfile.bio.length >= 10 &&
     cleanProfile.bio.length <= 240;
@@ -148,7 +128,6 @@ export function AccountSetupScreen({
   const canSave = identityValid && activityValid && interestsValid;
   const isNarrow = width < 370;
   const step = SETUP_STEPS[currentStep];
-  const areaSuggestions = getProfileAreaSuggestions(area);
   const presentationSuggestions = getProfilePresentationSuggestions();
 
   function animateToStep(nextStep: number) {
@@ -168,20 +147,20 @@ export function AccountSetupScreen({
         duration: currentStep === 0 || nextStep === 0 ? 240 : 120,
         easing: Easing.out(Easing.cubic),
         toValue: nextStep > 0 ? 1 : 0,
-        useNativeDriver: false
+        useNativeDriver: false,
       }),
       Animated.timing(stepOpacity, {
         duration: 120,
         easing: Easing.in(Easing.cubic),
         toValue: 0,
-        useNativeDriver: true
+        useNativeDriver: true,
       }),
       Animated.timing(stepTranslateX, {
         duration: 120,
         easing: Easing.in(Easing.cubic),
         toValue: -18 * direction,
-        useNativeDriver: true
-      })
+        useNativeDriver: true,
+      }),
     ]).start(({ finished }) => {
       if (!finished) {
         setIsTransitioning(false);
@@ -193,19 +172,18 @@ export function AccountSetupScreen({
       stepTranslateX.setValue(18 * direction);
       requestAnimationFrame(() => {
         Animated.parallel([
-
           Animated.timing(stepOpacity, {
             duration: 210,
             easing: Easing.out(Easing.cubic),
             toValue: 1,
-            useNativeDriver: true
+            useNativeDriver: true,
           }),
           Animated.timing(stepTranslateX, {
             duration: 210,
             easing: Easing.out(Easing.cubic),
             toValue: 0,
-            useNativeDriver: true
-          })
+            useNativeDriver: true,
+          }),
         ]).start(() => setIsTransitioning(false));
       });
     });
@@ -258,12 +236,11 @@ export function AccountSetupScreen({
   async function pickProfilePhoto() {
     try {
       if (Platform.OS !== "web") {
-        const permission =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!permission.granted) {
           Alert.alert(
             "Permissão necessária",
-            "Autorize o acesso às fotos para escolher uma imagem de perfil."
+            "Autorize o acesso às fotos para escolher uma imagem de perfil.",
           );
           return;
         }
@@ -273,7 +250,7 @@ export function AccountSetupScreen({
         allowsEditing: false,
         base64: true,
         mediaTypes: ["images"],
-        quality: 0.6
+        quality: 0.6,
       });
       if (result.canceled || !result.assets[0]) {
         return;
@@ -288,13 +265,10 @@ export function AccountSetupScreen({
         sourceWidth: asset.width,
         uri: asset.base64
           ? `data:${asset.mimeType ?? "image/jpeg"};base64,${asset.base64}`
-          : asset.uri
+          : asset.uri,
       });
     } catch {
-      Alert.alert(
-        "Não foi possível abrir a galeria",
-        "Tente novamente ou escolha outra imagem."
-      );
+      Alert.alert("Não foi possível abrir a galeria", "Tente novamente ou escolha outra imagem.");
     }
   }
 
@@ -306,10 +280,7 @@ export function AccountSetupScreen({
       <View style={styles.accountSetupHeader}>
         {!isInitialSetup ? (
           <View style={styles.profileSubviewHeader}>
-            <BackButton
-              accessibilityLabel="Voltar para configurações"
-              onPress={goBack}
-            />
+            <BackButton accessibilityLabel="Voltar para configurações" onPress={goBack} />
             <Text style={styles.profileSubviewTitle}>Editar perfil</Text>
             <View style={styles.profileSubviewSpacer} />
           </View>
@@ -329,17 +300,13 @@ export function AccountSetupScreen({
               <View
                 style={[
                   styles.accountSetupProgressBar,
-                  index <= currentStep
-                    ? styles.accountSetupProgressBarActive
-                    : null
+                  index <= currentStep ? styles.accountSetupProgressBarActive : null,
                 ]}
               />
               <Text
                 style={[
                   styles.accountSetupProgressLabel,
-                  index === currentStep
-                    ? styles.accountSetupProgressLabelActive
-                    : null
+                  index === currentStep ? styles.accountSetupProgressLabelActive : null,
                 ]}
               >
                 {item.label}
@@ -347,7 +314,6 @@ export function AccountSetupScreen({
             </View>
           ))}
         </View>
-
       </View>
 
       <Animated.View
@@ -355,8 +321,8 @@ export function AccountSetupScreen({
           styles.accountSetupStepViewport,
           {
             opacity: stepOpacity,
-            transform: [{ translateX: stepTranslateX }]
-          }
+            transform: [{ translateX: stepTranslateX }],
+          },
         ]}
       >
         <ScrollView
@@ -368,7 +334,7 @@ export function AccountSetupScreen({
           <View
             style={[
               styles.accountSetupSection,
-              isInitialSetup ? styles.accountSetupSectionInitial : null
+              isInitialSetup ? styles.accountSetupSectionInitial : null,
             ]}
           >
             {currentStep === 0 ? (
@@ -382,9 +348,7 @@ export function AccountSetupScreen({
                     )}
                   </View>
                   <View style={styles.accountSetupAvatarCopy}>
-                    <Text style={styles.accountSetupInterestTitle}>
-                      Foto de perfil
-                    </Text>
+                    <Text style={styles.accountSetupInterestTitle}>Foto de perfil</Text>
                     <Text style={styles.accountSetupHint}>
                       Opcional agora. Você poderá ajustar o enquadramento depois.
                     </Text>
@@ -416,9 +380,7 @@ export function AccountSetupScreen({
                   label="Nome de usuário"
                   maxLength={30}
                   onChangeText={(value) =>
-                    setUsername(
-                      value.replace(/^@+/, "").replace(/[^a-zA-Z0-9._]/g, "")
-                    )
+                    setUsername(value.replace(/^@+/, "").replace(/[^a-zA-Z0-9._]/g, ""))
                   }
                   placeholder="seu.username"
                   value={username}
@@ -438,7 +400,7 @@ export function AccountSetupScreen({
                 <View
                   style={[
                     styles.accountSetupFieldRow,
-                    isNarrow ? styles.accountSetupFieldRowNarrow : null
+                    isNarrow ? styles.accountSetupFieldRowNarrow : null,
                   ]}
                 >
                   <View style={styles.accountSetupAgeField}>
@@ -446,9 +408,7 @@ export function AccountSetupScreen({
                       keyboardType="number-pad"
                       label="Idade"
                       maxLength={3}
-                      onChangeText={(value) =>
-                        setAgeText(value.replace(/\D/g, ""))
-                      }
+                      onChangeText={(value) => setAgeText(value.replace(/\D/g, ""))}
                       placeholder="18"
                       value={ageText}
                     />
@@ -471,40 +431,6 @@ export function AccountSetupScreen({
               <>
                 <LabeledInput
                   autoCapitalize="words"
-                  accessibilityLabel="Área de interesse"
-                  label="Área de interesse"
-                  maxLength={40}
-                  onChangeText={setArea}
-                  placeholder="Arte, música, humor, tecnologia..."
-                  value={area}
-                />
-                <Text style={styles.accountSetupHint}>
-                  Escolha um tema ou escreva o seu. Todo tipo de conteúdo tem espaço aqui.
-                </Text>
-                {areaSuggestions.length > 0 ? (
-                  <View style={styles.accountSetupSuggestionBlock}>
-                    <Text style={styles.accountSetupSuggestionLabel}>
-                      Escolha rápida
-                    </Text>
-                    <View style={styles.accountSetupSuggestionList}>
-                      {areaSuggestions.map((suggestion) => (
-                        <Pressable
-                          accessibilityRole="button"
-                          key={suggestion}
-                          onPress={() => setArea(suggestion)}
-                          style={styles.accountSetupSuggestionChip}
-                        >
-                          <Text style={styles.accountSetupSuggestionChipText}>
-                            {suggestion}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </View>
-                ) : null}
-
-                <LabeledInput
-                  autoCapitalize="words"
                   accessibilityLabel="Como você se apresenta"
                   label="Como você se apresenta"
                   maxLength={40}
@@ -514,9 +440,7 @@ export function AccountSetupScreen({
                 />
                 {presentationSuggestions.length > 0 ? (
                   <View style={styles.accountSetupSuggestionBlock}>
-                    <Text style={styles.accountSetupSuggestionLabel}>
-                      Você pode ser
-                    </Text>
+                    <Text style={styles.accountSetupSuggestionLabel}>Você pode ser</Text>
                     <View style={styles.accountSetupSuggestionList}>
                       {presentationSuggestions.map((suggestion) => {
                         const selected =
@@ -530,17 +454,13 @@ export function AccountSetupScreen({
                             onPress={() => setPresentation(suggestion)}
                             style={[
                               styles.accountSetupSuggestionChip,
-                              selected
-                                ? styles.accountSetupSuggestionChipSelected
-                                : null
+                              selected ? styles.accountSetupSuggestionChipSelected : null,
                             ]}
                           >
                             <Text
                               style={[
                                 styles.accountSetupSuggestionChipText,
-                                selected
-                                  ? styles.accountSetupSuggestionChipTextSelected
-                                  : null
+                                selected ? styles.accountSetupSuggestionChipTextSelected : null,
                               ]}
                             >
                               {suggestion}
@@ -572,12 +492,8 @@ export function AccountSetupScreen({
                   value={bio}
                 />
                 <View style={styles.accountSetupBioMeta}>
-                  <Text style={styles.accountSetupHint}>
-                    Mínimo de 10 caracteres
-                  </Text>
-                  <Text style={styles.accountSetupCounter}>
-                    {bio.length}/240
-                  </Text>
+                  <Text style={styles.accountSetupHint}>Mínimo de 10 caracteres</Text>
+                  <Text style={styles.accountSetupCounter}>{bio.length}/240</Text>
                 </View>
               </>
             ) : null}
@@ -609,14 +525,14 @@ export function AccountSetupScreen({
               {
                 flexGrow: backButtonProgress.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [0, 3]
+                  outputRange: [0, 3],
                 }),
                 marginRight: backButtonProgress.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [0, 9]
+                  outputRange: [0, 9],
                 }),
-                opacity: backButtonProgress
-              }
+                opacity: backButtonProgress,
+              },
             ]}
           >
             <Pressable
@@ -635,9 +551,9 @@ export function AccountSetupScreen({
               {
                 flexGrow: backButtonProgress.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [10, 7]
-                })
-              }
+                  outputRange: [10, 7],
+                }),
+              },
             ]}
           >
             <Pressable
@@ -647,9 +563,7 @@ export function AccountSetupScreen({
               style={[
                 styles.primaryButton,
                 styles.accountSetupContinueButton,
-                !stepValid || isSaving || isTransitioning
-                  ? styles.primaryButtonDisabled
-                  : null
+                !stepValid || isSaving || isTransitioning ? styles.primaryButtonDisabled : null,
               ]}
             >
               {isSaving ? (
@@ -657,11 +571,7 @@ export function AccountSetupScreen({
               ) : currentStep === SETUP_STEPS.length - 1 ? (
                 <Check color={colors.onAccent} size={19} strokeWidth={2.5} />
               ) : (
-                <ChevronRight
-                  color={colors.onAccent}
-                  size={19}
-                  strokeWidth={2.5}
-                />
+                <ChevronRight color={colors.onAccent} size={19} strokeWidth={2.5} />
               )}
               <Text style={styles.primaryButtonText}>
                 {currentStep === SETUP_STEPS.length - 1
@@ -694,10 +604,7 @@ export function AccountSetupScreen({
   );
 }
 
-export function AccountSetupModal({
-  visible,
-  ...props
-}: AccountSetupProps & { visible: boolean }) {
+export function AccountSetupModal({ visible, ...props }: AccountSetupProps & { visible: boolean }) {
   return (
     <Modal
       animationType="fade"
