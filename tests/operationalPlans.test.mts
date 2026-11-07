@@ -79,7 +79,13 @@ test("IAM reduz só os dois runtimes e preserva etag, condições, proprietário
 test("orçamento BRL 50 usa só os dois canais aprovados; dashboard não confunde leituras com reais", () => {
   const budget = costBudget(policy, channels);
   assert.equal(budget.amount.specifiedAmount.units, "50");
-  assert.equal(budget.allUpdatesRule.disableDefaultIamRecipients, true);
+  assert.equal(budget.notificationsRule.disableDefaultIamRecipients, true);
+  assert.deepEqual(budget.notificationsRule.monitoringNotificationChannels, channels);
+  assert.equal(
+    "allUpdatesRule" in budget,
+    false,
+    "v1 usa notificationsRule, sem o campo legado v1beta1",
+  );
   assert.deepEqual(
     budget.thresholdRules.map((rule) => rule.thresholdPercent),
     [0.5, 0.8, 1],

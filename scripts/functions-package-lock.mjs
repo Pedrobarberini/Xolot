@@ -1,3 +1,16 @@
+export function functionsPackageWorkspace(lockfile, workspace) {
+  if (!workspace || typeof workspace !== "object")
+    throw new Error("Política do workspace ausente.");
+  return {
+    packages: ["."],
+    nodeLinker: "isolated",
+    overrides: structuredClone(lockfile.overrides ?? {}),
+    allowBuilds: structuredClone(workspace.allowBuilds ?? {}),
+    strictDepBuilds: true,
+    minimumReleaseAge: workspace.minimumReleaseAge ?? 10080,
+  };
+}
+
 export function functionsPackageLock(lockfile) {
   if (lockfile.lockfileVersion !== "9.0" || !lockfile.importers?.functions)
     throw new Error("Formato de lockfile ou importer Functions não suportado.");

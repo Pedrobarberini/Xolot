@@ -6,7 +6,7 @@ import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
-import { functionsPackageLock } from "./functions-package-lock.mjs";
+import { functionsPackageLock, functionsPackageWorkspace } from "./functions-package-lock.mjs";
 
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const pnpm = process.env.npm_execpath;
@@ -21,7 +21,7 @@ function run(binary, args, cwd) {
     const child = spawn(binary, args, {
       cwd,
       stdio: "inherit",
-      env: { ...process.env, NODE_PATH: "", npm_config_ignore_scripts: "true" },
+      env: { ...process.env, NODE_PATH: "", npm_config_ignore_scripts: "false" },
     });
     child.on("error", reject);
     child.on("exit", (code) =>
@@ -41,22 +41,15 @@ try {
     },
   });
   const sourceLock = YAML.parse(readFileSync(join(repository, "pnpm-lock.yaml"), "utf8"));
+  const sourceWorkspace = YAML.parse(readFileSync(join(repository, "pnpm-workspace.yaml"), "utf8"));
   writeFileSync(join(portable, "pnpm-lock.yaml"), YAML.stringify(functionsPackageLock(sourceLock)));
   writeFileSync(
     join(portable, "pnpm-workspace.yaml"),
-    YAML.stringify({
-      packages: ["."],
-      nodeLinker: "isolated",
-      overrides: sourceLock.overrides ?? {},
-    }),
+    YAML.stringify(functionsPackageWorkspace(sourceLock, sourceWorkspace)),
   );
   const binary = /\.[cm]?js$/.test(pnpm) ? process.execPath : pnpm;
   const prefix = binary === process.execPath ? [pnpm] : [];
-  await run(
-    binary,
-    [...prefix, "install", "--frozen-lockfile", "--ignore-scripts", "--prod"],
-    portable,
-  );
+  await run(binary, [...prefix, "install", "--frozen-lockfile", "--prod"], portable);
   // O compilador é ferramenta; imports e tipos precisam resolver a partir do pacote isolado.
   await run(
     process.execPath,
@@ -73,7 +66,12 @@ try {
     portable,
   );
   const requirePortable = createRequire(join(portable, "package.json"));
-  for (const dependency of ["firebase-admin/app", "firebase-functions/v2/https", "mercadopago"])
+  for (const dependency of [
+    "firebase-admin/app",
+    "firebase-functions/v2/https",
+    "@google-cloud/functions-framework",
+    "mercadopago",
+  ])
     assert.ok(requirePortable.resolve(dependency));
   console.log("Functions: compilação e carga isoladas aprovadas, sem executar handlers.");
 } finally {

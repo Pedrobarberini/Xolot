@@ -1,8 +1,14 @@
 {
   "name": "xolot-functions",
   "private": true,
+  "packageManager": "pnpm@11.25.0",
   "main": "lib/index.js",
-  "files": ["lib", "src", "scripts", "tsconfig.json"],
+  "files": [
+    "lib",
+    "src",
+    "scripts",
+    "tsconfig.json"
+  ],
   "engines": {
     "node": "22"
   },
@@ -14,6 +20,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.883.0",
     "@aws-sdk/s3-request-presigner": "^3.883.0",
+    "@google-cloud/functions-framework": "5.0.5",
     "firebase-admin": "^13.5.0",
     "firebase-functions": "^6.4.0",
     "mercadopago": "3.2.1"

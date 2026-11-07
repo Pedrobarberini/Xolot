@@ -1,6 +1,24 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { functionsPackageLock } from "../scripts/functions-package-lock.mjs";
+import {
+  functionsPackageLock,
+  functionsPackageWorkspace,
+} from "../scripts/functions-package-lock.mjs";
+
+test("pacote portátil mantém a política explícita de scripts usada pelo Cloud Build e não leva patches de frontend", () => {
+  const workspace = {
+    allowBuilds: { "@firebase/util": false, protobufjs: false },
+    minimumReleaseAge: 10080,
+    patchedDependencies: { "metro@0.83.7": "app-only.patch" },
+  };
+  const result = functionsPackageWorkspace({ overrides: { "sdk@^1": "1.2.3" } }, workspace);
+  assert.deepEqual(result.allowBuilds, workspace.allowBuilds);
+  assert.equal(result.strictDepBuilds, true);
+  assert.equal(result.minimumReleaseAge, 10080);
+  assert.equal("patchedDependencies" in result, false);
+  result.allowBuilds.protobufjs = true;
+  assert.equal(workspace.allowBuilds.protobufjs, false);
+});
 
 test("pacote Functions conserva versões congeladas e exclui o importer do frontend", () => {
   const source = {

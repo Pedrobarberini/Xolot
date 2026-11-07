@@ -27,6 +27,8 @@ export async function googleOperatorClient() {
       headers: {
         Authorization: `Bearer ${token.access_token}`,
         "Content-Type": "application/json",
+        // APIs de cobrança usam o projeto de quota, não o projeto interno do cliente OAuth.
+        "x-goog-user-project": "xolot-384e9",
       },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       signal: AbortSignal.timeout(30000),

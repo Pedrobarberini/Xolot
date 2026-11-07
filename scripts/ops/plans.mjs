@@ -267,6 +267,9 @@ export function costBudget(policy, channels) {
       thresholdPercent,
       spendBasis: "CURRENT_SPEND",
     })),
-    allUpdatesRule: { disableDefaultIamRecipients: true, monitoringNotificationChannels: channels },
+    notificationsRule: {
+      disableDefaultIamRecipients: true,
+      monitoringNotificationChannels: channels,
+    },
   };
 }

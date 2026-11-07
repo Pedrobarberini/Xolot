@@ -61,11 +61,18 @@ async function deleteR2Objects(bucket: string, keys: Set<string>) {
   }
 }
 
-export async function deleteLegacyStorage(uid: string, bucket = getStorage().bucket()) {
+export async function deleteLegacyStorage(
+  uid: string,
+  bucket?: ReturnType<ReturnType<typeof getStorage>["bucket"]>,
+) {
+  // Projetos R2-only não devem depender de acesso a um bucket Firebase inexistente.
+  const configuredBucket = process.env.LEGACY_FIREBASE_STORAGE_BUCKET?.trim();
+  if (!bucket && !configuredBucket) return;
+  const legacyBucket = bucket ?? getStorage().bucket(configuredBucket);
   try {
     await Promise.all([
-      bucket.deleteFiles({ prefix: `posts/${uid}/` }),
-      bucket.file(`avatars/${uid}/profile`).delete({ ignoreNotFound: true }),
+      legacyBucket.deleteFiles({ prefix: `posts/${uid}/` }),
+      legacyBucket.file(`avatars/${uid}/profile`).delete({ ignoreNotFound: true }),
     ]);
   } catch (error) {
     // R2-only projects may never have provisioned the optional legacy bucket.
