@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "interactionAuthority": "Firestore transaction reads of both private socialPreferences; Rules enforce follows/comments; unlikes and historical messages remain accessible under existing ownership rules",
+  "reports": {
+    "collection": "moderationReports",
+    "key": "SHA-256(reporterUid + NUL + canonical postId)",
+    "reasons": ["spam", "harassment", "violence", "sexual", "fraud", "other"],
+    "statuses": ["open", "withdrawn", "resolved"],
+    "access": "No direct client read/write; verified reporter callable; admin custom claim for queue/review; list omits reporter identity",
+    "retention": "No automatic TTL or deletion; policy review required before bulk disposal",
+    "sideEffects": "Review does not delete content or grant moderator access"
+  },
+  "exportChange": "28 exports instead of 25; 21 callable budgets instead of 18",
+  "publication": "Requires owner approval and coordinated backend/Rules/web rollout"
+}

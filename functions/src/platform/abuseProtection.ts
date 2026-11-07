@@ -34,6 +34,9 @@ export const callableBudgets = {
   cancelPlusSubscription: 5,
   deleteOwnAccount: 3,
   ingestOperationMetrics: 6,
+  setPostReport: 10,
+  listModerationReports: 30,
+  resolveModerationReport: 30,
 } as const;
 export type CallableOperation = keyof typeof callableBudgets;
 export const callableQuotaId = (operation: CallableOperation, uid: string) =>
@@ -124,7 +127,7 @@ export function protectedOnCall<Data = Record<string, unknown>, Result = unknown
 ) {
   return onCall(
     {
-      maxInstances: 20,
+      maxInstances: 5,
       concurrency: 40,
       timeoutSeconds: 60,
       ...options,

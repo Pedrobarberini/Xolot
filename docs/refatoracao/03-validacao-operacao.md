@@ -2,6 +2,10 @@
 
 A [direção Folko](05-direcao-folko.md) atualiza a matriz de produto sem dispensar as provas técnicas anteriores.
 
+A [auditoria de otimização e segurança de 2026-11-05](../architecture/otimizacao-seguranca-2026-11.md)
+registra as correções, medições locais, índices adicionados e pendências de CAPTCHA/IAM.
+Ela não marca como concluídas as tarefas maiores de paginação, migração ou rollout nativo.
+
 ## 1. O que já foi verificado e o que falta
 
 Antes deste plano, a base local passou em 164 testes Node, TypeScript do app/backend e build web. A navegação web foi observada no feed, player, busca, mensagens, perfil, seguidores, abertura de envio e restauração de sessão. As evidências estão em `output/testes/`.

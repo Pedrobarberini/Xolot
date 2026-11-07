@@ -6,9 +6,10 @@ import {
   HiddenPlayerIdsByUser,
   MessageContactsByUser,
   PostComment,
-  SocialSelectionsByUser
+  SocialSelectionsByUser,
 } from "../types";
 import { normalizePostComments } from "../utils/postComments";
+import { socialStateForUser, socialStorageKey } from "../utils/socialSession";
 
 const SOCIAL_STORAGE_KEY = "@xolot/social-state-v1";
 const LEGACY_SOCIAL_STORAGE_KEY = "@nextstar/social-state-v1";
@@ -40,7 +41,7 @@ export const emptySocialState: SocialState = {
   mutedContentKeysByUser: {},
   postComments: [],
   reportedPlayerIdsByUser: {},
-  viewedPlayerIdsByUser: {}
+  viewedPlayerIdsByUser: {},
 };
 
 function normalizeStringArray(value: unknown) {
@@ -49,9 +50,7 @@ function normalizeStringArray(value: unknown) {
     : [];
 }
 
-function normalizeConversationPreferences(
-  value: unknown
-): ConversationPreferencesByUser {
+function normalizeConversationPreferences(value: unknown): ConversationPreferencesByUser {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
   }
@@ -68,9 +67,8 @@ function normalizeConversationPreferences(
         !Array.isArray(normalized.deletedAtByContactId)
           ? Object.fromEntries(
               Object.entries(normalized.deletedAtByContactId).filter(
-                ([contactId, deletedAt]) =>
-                  contactId.length > 0 && typeof deletedAt === "string"
-              )
+                ([contactId, deletedAt]) => contactId.length > 0 && typeof deletedAt === "string",
+              ),
             )
           : {};
 
@@ -79,12 +77,10 @@ function normalizeConversationPreferences(
         {
           deletedAtByContactId,
           mutedContactIds: normalizeStringArray(normalized.mutedContactIds),
-          pinnedContactIds: normalizeStringArray(
-            normalized.pinnedContactIds
-          ).slice(0, 3)
-        }
+          pinnedContactIds: normalizeStringArray(normalized.pinnedContactIds).slice(0, 3),
+        },
       ];
-    })
+    }),
   );
 }
 
@@ -94,18 +90,18 @@ function normalizeSelectionsByUser(value: unknown): SocialSelectionsByUser {
   }
 
   return Object.fromEntries(
-    Object.entries(value).map(([userId, selections]) => [
-      userId,
-      normalizeStringArray(selections)
-    ])
+    Object.entries(value).map(([userId, selections]) => [userId, normalizeStringArray(selections)]),
   );
 }
 
-export async function loadSocialState(): Promise<SocialState> {
+export async function loadSocialState(uid: string): Promise<SocialState> {
+  const key = socialStorageKey(uid);
   try {
-    const currentState = await AsyncStorage.getItem(SOCIAL_STORAGE_KEY);
+    const currentState = await AsyncStorage.getItem(key);
     const storedState =
-      currentState ?? await AsyncStorage.getItem(LEGACY_SOCIAL_STORAGE_KEY);
+      currentState ??
+      (await AsyncStorage.getItem(SOCIAL_STORAGE_KEY)) ??
+      (await AsyncStorage.getItem(LEGACY_SOCIAL_STORAGE_KEY));
 
     if (!storedState) {
       return emptySocialState;
@@ -114,85 +110,59 @@ export async function loadSocialState(): Promise<SocialState> {
     const parsedState = JSON.parse(storedState) as Partial<SocialState>;
 
     const normalizedState = {
-      blockedProfileIdsByUser: normalizeSelectionsByUser(
-        parsedState.blockedProfileIdsByUser
-      ),
+      blockedProfileIdsByUser: normalizeSelectionsByUser(parsedState.blockedProfileIdsByUser),
       conversationPreferencesByUser: normalizeConversationPreferences(
-        parsedState.conversationPreferencesByUser
+        parsedState.conversationPreferencesByUser,
       ),
-      directMessages: Array.isArray(parsedState.directMessages)
-        ? parsedState.directMessages
-        : [],
+      directMessages: Array.isArray(parsedState.directMessages) ? parsedState.directMessages : [],
       followingByUser:
-        parsedState.followingByUser &&
-        typeof parsedState.followingByUser === "object"
+        parsedState.followingByUser && typeof parsedState.followingByUser === "object"
           ? parsedState.followingByUser
           : {},
       hiddenPlayerIdsByUser:
-        parsedState.hiddenPlayerIdsByUser &&
-        typeof parsedState.hiddenPlayerIdsByUser === "object"
+        parsedState.hiddenPlayerIdsByUser && typeof parsedState.hiddenPlayerIdsByUser === "object"
           ? Object.fromEntries(
-              Object.entries(parsedState.hiddenPlayerIdsByUser).map(
-                ([userId, playerIds]) => [
-                  userId,
-                  normalizeStringArray(playerIds)
-                ]
-              )
+              Object.entries(parsedState.hiddenPlayerIdsByUser).map(([userId, playerIds]) => [
+                userId,
+                normalizeStringArray(playerIds),
+              ]),
             )
           : {},
       interestedContentKeysByUser: normalizeSelectionsByUser(
-        parsedState.interestedContentKeysByUser
+        parsedState.interestedContentKeysByUser,
       ),
-      likedPlayerIdsByUser: normalizeSelectionsByUser(
-        parsedState.likedPlayerIdsByUser
-      ),
+      likedPlayerIdsByUser: normalizeSelectionsByUser(parsedState.likedPlayerIdsByUser),
       messageContactsByUser:
-        parsedState.messageContactsByUser &&
-        typeof parsedState.messageContactsByUser === "object"
+        parsedState.messageContactsByUser && typeof parsedState.messageContactsByUser === "object"
           ? parsedState.messageContactsByUser
           : {},
-      mutedContentKeysByUser: normalizeSelectionsByUser(
-        parsedState.mutedContentKeysByUser
-      ),
+      mutedContentKeysByUser: normalizeSelectionsByUser(parsedState.mutedContentKeysByUser),
       postComments: normalizePostComments(parsedState.postComments),
-      reportedPlayerIdsByUser: normalizeSelectionsByUser(
-        parsedState.reportedPlayerIdsByUser
-      ),
-      viewedPlayerIdsByUser: normalizeSelectionsByUser(
-        parsedState.viewedPlayerIdsByUser
-      )
+      reportedPlayerIdsByUser: normalizeSelectionsByUser(parsedState.reportedPlayerIdsByUser),
+      viewedPlayerIdsByUser: normalizeSelectionsByUser(parsedState.viewedPlayerIdsByUser),
     };
 
+    const ownState = socialStateForUser(normalizedState, uid);
     if (!currentState) {
-      await AsyncStorage.setItem(
-        SOCIAL_STORAGE_KEY,
-        JSON.stringify(normalizedState)
-      );
+      await AsyncStorage.setItem(key, JSON.stringify(ownState));
     }
 
-    return normalizedState;
+    return ownState;
   } catch {
     return emptySocialState;
   }
 }
 
-export async function saveSocialState(state: SocialState) {
-  await AsyncStorage.setItem(SOCIAL_STORAGE_KEY, JSON.stringify(state));
+export async function saveSocialState(uid: string, state: SocialState) {
+  await AsyncStorage.setItem(socialStorageKey(uid), JSON.stringify(socialStateForUser(state, uid)));
 }
 
-
-const SOCIAL_CLOUD_MIGRATION_KEY_PREFIX =
-  "@xolot/social-firestore-migrated-v1:";
+const SOCIAL_CLOUD_MIGRATION_KEY_PREFIX = "@xolot/social-firestore-migrated-v1:";
 
 export async function hasCompletedSocialCloudMigration(uid: string) {
-  return (
-    await AsyncStorage.getItem(`${SOCIAL_CLOUD_MIGRATION_KEY_PREFIX}${uid}`)
-  ) === "true";
+  return (await AsyncStorage.getItem(`${SOCIAL_CLOUD_MIGRATION_KEY_PREFIX}${uid}`)) === "true";
 }
 
 export async function markSocialCloudMigrationCompleted(uid: string) {
-  await AsyncStorage.setItem(
-    `${SOCIAL_CLOUD_MIGRATION_KEY_PREFIX}${uid}`,
-    "true"
-  );
+  await AsyncStorage.setItem(`${SOCIAL_CLOUD_MIGRATION_KEY_PREFIX}${uid}`, "true");
 }

@@ -18,12 +18,10 @@ export type WebCameraRecordingSession = {
 const WEB_VIDEO_MIME_TYPES = [
   "video/webm;codecs=vp9,opus",
   "video/webm;codecs=vp8,opus",
-  "video/webm"
+  "video/webm",
 ];
 
-export function selectSupportedWebVideoMimeType(
-  isTypeSupported: (mimeType: string) => boolean
-) {
+export function selectSupportedWebVideoMimeType(isTypeSupported: (mimeType: string) => boolean) {
   return WEB_VIDEO_MIME_TYPES.find(isTypeSupported) ?? "";
 }
 
@@ -32,11 +30,7 @@ export function getWebVideoFileExtension(mimeType: string) {
 }
 
 export function getFirstLiveVideoTrack(source: unknown) {
-  if (
-    !source ||
-    typeof (source as { getVideoTracks?: unknown }).getVideoTracks !==
-      "function"
-  ) {
+  if (!source || typeof (source as { getVideoTracks?: unknown }).getVideoTracks !== "function") {
     return null;
   }
 
@@ -46,10 +40,12 @@ export function getFirstLiveVideoTrack(source: unknown) {
 
 export async function startWebCameraRecording({
   cameraTestId,
-  maxDurationMs
+  maxDurationMs,
+  signal,
 }: {
   cameraTestId: string;
   maxDurationMs: number;
+  signal?: AbortSignal;
 }): Promise<WebCameraRecordingSession> {
   if (
     typeof document === "undefined" ||
@@ -58,6 +54,9 @@ export async function startWebCameraRecording({
   ) {
     throw new Error("A gravação de vídeo não é suportada neste navegador.");
   }
+  if (!Number.isFinite(maxDurationMs) || maxDurationMs <= 0 || maxDurationMs > 120_000)
+    throw new Error("Duração de gravação inválida.");
+  if (signal?.aborted) throw new Error("Gravação cancelada.");
 
   const cameraRoot =
     document.getElementById(cameraTestId) ??
@@ -66,13 +65,8 @@ export async function startWebCameraRecording({
     cameraRoot instanceof HTMLVideoElement
       ? cameraRoot
       : (cameraRoot?.querySelector("video") as HTMLVideoElement | null);
-  const previewCandidates = [
-    scopedPreview,
-    ...Array.from(document.querySelectorAll("video"))
-  ].filter((candidate): candidate is HTMLVideoElement => Boolean(candidate));
-  const preview = previewCandidates.find((candidate) =>
-    getFirstLiveVideoTrack(candidate.srcObject)
-  );
+  // Nunca reutilizar a câmera de outro componente/vídeo da página.
+  const preview = scopedPreview;
   const previewStream = preview?.srcObject as MediaStream | null;
   const previewVideoTrack = getFirstLiveVideoTrack(previewStream);
 
@@ -87,21 +81,37 @@ export async function startWebCameraRecording({
   } catch {
     audioStream = null;
   }
+  if (signal?.aborted) {
+    audioStream?.getTracks().forEach((track) => track.stop());
+    throw new Error("Gravação cancelada.");
+  }
 
-  const recordingTracks = [
-    previewVideoTrack.clone(),
-    ...(audioStream?.getAudioTracks() ?? [])
-  ];
-  const recordingStream = new MediaStream(recordingTracks);
-  const preferredMimeType = selectSupportedWebVideoMimeType((mimeType) =>
-    MediaRecorder.isTypeSupported(mimeType)
-  );
-  const recorder = preferredMimeType
-    ? new MediaRecorder(recordingStream, { mimeType: preferredMimeType })
-    : new MediaRecorder(recordingStream);
+  const recordingTracks = [...(audioStream?.getAudioTracks() ?? [])];
+  try {
+    recordingTracks.unshift(previewVideoTrack.clone());
+  } catch (error) {
+    recordingTracks.forEach((track) => track.stop());
+    throw error;
+  }
+  let preferredMimeType = "";
+  let recorder: MediaRecorder;
+  try {
+    preferredMimeType = selectSupportedWebVideoMimeType((mimeType) =>
+      MediaRecorder.isTypeSupported(mimeType),
+    );
+    const recordingStream = new MediaStream(recordingTracks);
+    recorder = preferredMimeType
+      ? new MediaRecorder(recordingStream, { mimeType: preferredMimeType })
+      : new MediaRecorder(recordingStream);
+  } catch (error) {
+    recordingTracks.forEach((track) => track.stop());
+    throw error;
+  }
   const chunks: Blob[] = [];
   const startedAt = Date.now();
   let stopTimer: ReturnType<typeof setTimeout> | null = null;
+  let settled = false;
+  let abortRecording: (() => void) | undefined;
 
   const cleanup = () => {
     if (stopTimer) {
@@ -110,9 +120,21 @@ export async function startWebCameraRecording({
     }
 
     recordingTracks.forEach((track) => track.stop());
+    if (abortRecording) signal?.removeEventListener("abort", abortRecording);
   };
 
   const result = new Promise<WebCameraRecordingResult>((resolve, reject) => {
+    const fail = (message: string) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error(message));
+    };
+    abortRecording = () => {
+      fail("Gravação cancelada.");
+      if (recorder.state !== "inactive") recorder.stop();
+    };
+    signal?.addEventListener("abort", abortRecording, { once: true });
     recorder.addEventListener("dataavailable", (event) => {
       if (event.data.size > 0) {
         chunks.push(event.data);
@@ -121,21 +143,21 @@ export async function startWebCameraRecording({
     recorder.addEventListener(
       "error",
       () => {
-        cleanup();
-        reject(new Error("O navegador não conseguiu gravar o vídeo."));
+        fail("O navegador não conseguiu gravar o vídeo.");
       },
-      { once: true }
+      { once: true },
     );
     recorder.addEventListener(
       "stop",
       () => {
+        if (settled) return;
         cleanup();
 
         const mimeType = recorder.mimeType || preferredMimeType || "video/webm";
         const blob = new Blob(chunks, { type: mimeType });
 
         if (blob.size <= 0) {
-          reject(new Error("A gravação ficou vazia. Tente novamente."));
+          fail("A gravação ficou vazia. Tente novamente.");
           return;
         }
 
@@ -143,6 +165,7 @@ export async function startWebCameraRecording({
         const fileName = `folko-${Date.now()}.${extension}`;
         const file = new File([blob], fileName, { type: mimeType });
 
+        settled = true;
         resolve({
           durationMs: Math.min(Date.now() - startedAt, maxDurationMs),
           file,
@@ -152,19 +175,20 @@ export async function startWebCameraRecording({
           mediaType: "video",
           mimeType,
           uri: URL.createObjectURL(blob),
-          width: preview?.videoWidth || undefined
+          width: preview?.videoWidth || undefined,
         });
       },
-      { once: true }
+      { once: true },
     );
-  });
-
-  recorder.start(250);
-  stopTimer = setTimeout(() => {
-    if (recorder.state !== "inactive") {
-      recorder.stop();
+    try {
+      recorder.start(250);
+      stopTimer = setTimeout(() => {
+        if (recorder.state !== "inactive") recorder.stop();
+      }, maxDurationMs);
+    } catch {
+      fail("O navegador não conseguiu iniciar a gravação.");
     }
-  }, maxDurationMs);
+  });
 
   return {
     result,
@@ -172,6 +196,6 @@ export async function startWebCameraRecording({
       if (recorder.state !== "inactive") {
         recorder.stop();
       }
-    }
+    },
   };
 }

@@ -1,20 +1,18 @@
+import { protectedOnCall } from "./platform/abuseProtection";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
-import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { HttpsError } from "firebase-functions/v2/https";
 import { requireVerifiedUser, verifyRegisteredUser } from "./auth";
 import { REGION } from "./config";
 import { requireRecord, requireText } from "./validation";
 
 const callableOptions = { region: REGION };
-const MAX_TAG_CREATIONS_PER_MINUTE = 20;
 const MAX_TAG_LENGTH = 40;
 
 type CatalogTag = { key: string; label: string };
 
 function normalizedCount(value: unknown) {
-  return typeof value === "number" && Number.isSafeInteger(value) && value > 0
-    ? value
-    : 0;
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0 ? value : 0;
 }
 
 function normalizeTagKey(value: string) {
@@ -58,37 +56,13 @@ function getPublishedTags(data: Record<string, unknown> | undefined) {
   return tags;
 }
 
-async function applyTagCreationRateLimit(uid: string) {
-  const database = getFirestore();
-  const reference = database.doc(`tagRateLimits/${uid}`);
-  const now = Date.now();
-  await database.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(reference);
-    const data = snapshot.data();
-    const startedAt =
-      typeof data?.windowStartedAtMs === "number" ? data.windowStartedAtMs : 0;
-    const currentWindow = now - startedAt < 60_000;
-    const count = currentWindow ? normalizedCount(data?.count) : 0;
-    if (count >= MAX_TAG_CREATIONS_PER_MINUTE) {
-      throw new HttpsError(
-        "resource-exhausted",
-        "Muitas hashtags criadas em pouco tempo. Aguarde um minuto."
-      );
-    }
-    transaction.set(reference, {
-      count: count + 1,
-      updatedAt: FieldValue.serverTimestamp(),
-      windowStartedAtMs: currentWindow ? startedAt : now
-    });
-  });
-}
-
-export const ensureTagCatalogEntry = onCall(
+export const ensureTagCatalogEntry = protectedOnCall(
+  "ensureTagCatalogEntry",
   callableOptions,
   async (request) => {
     const uid = requireVerifiedUser(request);
     await verifyRegisteredUser(uid);
-    await applyTagCreationRateLimit(uid);
+
     const data = requireRecord(request.data);
     const requestedLabel = requireText(data.label, "Hashtag", 1, MAX_TAG_LENGTH);
     const tag = normalizeTag(requestedLabel);
@@ -108,19 +82,18 @@ export const ensureTagCatalogEntry = onCall(
           key: tag.key,
           label: tag.label,
           postCount: 0,
-          updatedAt: FieldValue.serverTimestamp()
+          updatedAt: FieldValue.serverTimestamp(),
         });
       }
       return {
         creatorCount: normalizedCount(current?.creatorCount),
         key: tag.key,
-        label:
-          typeof current?.label === "string" ? current.label : tag.label,
-        postCount: normalizedCount(current?.postCount)
+        label: typeof current?.label === "string" ? current.label : tag.label,
+        postCount: normalizedCount(current?.postCount),
       };
     });
     return result;
-  }
+  },
 );
 
 async function syncTagUsage({
@@ -128,7 +101,7 @@ async function syncTagUsage({
   label,
   postId,
   shouldExist,
-  tagKey
+  tagKey,
 }: {
   authorId: string;
   label: string;
@@ -138,24 +111,18 @@ async function syncTagUsage({
 }) {
   const database = getFirestore();
   const catalogReference = database.doc(`tagCatalog/${tagKey}`);
-  const markerReference = database.doc(
-    `tagCatalog/${tagKey}/posts/${postId}`
-  );
+  const markerReference = database.doc(`tagCatalog/${tagKey}/posts/${postId}`);
 
   await database.runTransaction(async (transaction) => {
     const marker = await transaction.get(markerReference);
     if (marker.exists === shouldExist) return;
 
     const markerAuthorId =
-      typeof marker.data()?.authorId === "string"
-        ? marker.data()?.authorId as string
-        : authorId;
-    const usageReference = database.doc(
-      `tagCatalog/${tagKey}/users/${markerAuthorId}`
-    );
+      typeof marker.data()?.authorId === "string" ? (marker.data()?.authorId as string) : authorId;
+    const usageReference = database.doc(`tagCatalog/${tagKey}/users/${markerAuthorId}`);
     const [catalog, usage] = await Promise.all([
       transaction.get(catalogReference),
-      transaction.get(usageReference)
+      transaction.get(usageReference),
     ]);
     const catalogData = catalog.data();
     const currentPosts = normalizedCount(catalogData?.postCount);
@@ -166,30 +133,27 @@ async function syncTagUsage({
       transaction.set(markerReference, {
         authorId,
         createdAt: FieldValue.serverTimestamp(),
-        postId
+        postId,
       });
       transaction.set(usageReference, {
         authorId,
         createdAt: usage.exists
-          ? usage.data()?.createdAt ?? FieldValue.serverTimestamp()
+          ? (usage.data()?.createdAt ?? FieldValue.serverTimestamp())
           : FieldValue.serverTimestamp(),
         postCount: userPosts + 1,
-        updatedAt: FieldValue.serverTimestamp()
+        updatedAt: FieldValue.serverTimestamp(),
       });
       transaction.set(
         catalogReference,
         {
-          ...(catalog.exists
-            ? {}
-            : { createdAt: FieldValue.serverTimestamp() }),
+          ...(catalog.exists ? {} : { createdAt: FieldValue.serverTimestamp() }),
           creatorCount: currentCreators + (userPosts === 0 ? 1 : 0),
           key: tagKey,
-          label:
-            typeof catalogData?.label === "string" ? catalogData.label : label,
+          label: typeof catalogData?.label === "string" ? catalogData.label : label,
           postCount: currentPosts + 1,
-          updatedAt: FieldValue.serverTimestamp()
+          updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
       return;
     }
@@ -201,9 +165,9 @@ async function syncTagUsage({
         usageReference,
         {
           postCount: userPosts - 1,
-          updatedAt: FieldValue.serverTimestamp()
+          updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
     }
     transaction.set(
@@ -211,9 +175,9 @@ async function syncTagUsage({
       {
         creatorCount: Math.max(0, currentCreators - (userPosts <= 1 ? 1 : 0)),
         postCount: Math.max(0, currentPosts - 1),
-        updatedAt: FieldValue.serverTimestamp()
+        updatedAt: FieldValue.serverTimestamp(),
       },
-      { merge: true }
+      { merge: true },
     );
   });
 }
@@ -225,10 +189,8 @@ export const syncPostTagCatalog = onDocumentWritten(
     const afterData = event.data?.after.data();
     const beforeTags = getPublishedTags(beforeData);
     const afterTags = getPublishedTags(afterData);
-    const beforeAuthorId =
-      typeof beforeData?.authorId === "string" ? beforeData.authorId : "";
-    const afterAuthorId =
-      typeof afterData?.authorId === "string" ? afterData.authorId : "";
+    const beforeAuthorId = typeof beforeData?.authorId === "string" ? beforeData.authorId : "";
+    const afterAuthorId = typeof afterData?.authorId === "string" ? afterData.authorId : "";
     const postId = event.params.postId;
     const tagKeys = new Set([...beforeTags.keys(), ...afterTags.keys()]);
 
@@ -243,8 +205,8 @@ export const syncPostTagCatalog = onDocumentWritten(
         label: afterTags.get(tagKey) ?? beforeTags.get(tagKey) ?? tagKey,
         postId,
         shouldExist,
-        tagKey
+        tagKey,
       });
     }
-  }
+  },
 );

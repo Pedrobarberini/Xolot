@@ -5,6 +5,7 @@ import { StatusPill, SubmissionVideoPreview } from "../components/SubmissionComp
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
 import { VideoSubmission, VideoSubmissionStatus } from "../types";
+import { ModerationQueue } from "../components/ModerationQueue";
 
 export function AdminScreen({
   onReview,
@@ -36,6 +37,8 @@ export function AdminScreen({
           aos critérios da plataforma.
         </Text>
       </View>
+
+      <ModerationQueue />
 
       <View style={styles.metricGrid}>
         <SummaryMetric label="Pendentes" value={String(pending)} />

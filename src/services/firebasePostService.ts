@@ -10,33 +10,31 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  setDoc
+  setDoc,
+  where,
 } from "firebase/firestore";
 import {
   deleteObject,
   getDownloadURL,
   ref,
   uploadBytesResumable,
-  type UploadTaskSnapshot
+  type UploadTaskSnapshot,
 } from "firebase/storage";
 import {
   getFirebaseFirestore,
   getFirebaseStorage,
   isFirebaseStorageConfigured,
-  isR2MediaEnabled
+  isR2MediaEnabled,
 } from "../config/firebase";
-import type {
-  PublicationMediaInput,
-  VideoSubmission
-} from "../types";
+import type { PublicationMediaInput, VideoSubmission } from "../types";
 import { MAX_POST_TAGS, normalizeTagList } from "../utils/tagCatalog";
 import {
   firebasePostToSubmission,
-  normalizeFirebasePostDocument
+  normalizeFirebasePostDocument,
 } from "../utils/firebasePostDocument";
 import {
   getPublicationMediaValidationMessage,
-  normalizeMediaMimeType
+  normalizeMediaMimeType,
 } from "../utils/publicationMedia";
 import { getCurrentFirebaseUser } from "./firebaseAccountService";
 import {
@@ -45,7 +43,7 @@ import {
   getR2MediaUrl,
   getSafeR2PostMessage,
   isR2StoredPost,
-  publishR2Post
+  publishR2Post,
 } from "./r2PostService";
 
 const POSTS_COLLECTION = "posts";
@@ -53,9 +51,7 @@ const MAX_FEED_POSTS = 50;
 
 export class FirebaseMediaUnavailableError extends Error {
   constructor() {
-    super(
-      "O armazenamento de mídia ainda não está disponível. Verifique o Firebase Storage."
-    );
+    super("O armazenamento de mídia ainda não está disponível. Verifique o Firebase Storage.");
     this.name = "FirebaseMediaUnavailableError";
   }
 }
@@ -96,7 +92,7 @@ async function readMediaBlob(media: PublicationMediaInput) {
   const response = await fetch(media.uri);
   if (!response.ok) {
     throw new InvalidPublicationMediaError(
-      "Não foi possível ler a mídia selecionada. Escolha o arquivo novamente."
+      "Não foi possível ler a mídia selecionada. Escolha o arquivo novamente.",
     );
   }
 
@@ -105,20 +101,18 @@ async function readMediaBlob(media: PublicationMediaInput) {
 
 function waitForUpload(
   task: ReturnType<typeof uploadBytesResumable>,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
 ) {
   return new Promise<UploadTaskSnapshot>((resolve, reject) => {
     task.on(
       "state_changed",
       (snapshot) => {
         const progress =
-          snapshot.totalBytes > 0
-            ? snapshot.bytesTransferred / snapshot.totalBytes
-            : 0;
+          snapshot.totalBytes > 0 ? snapshot.bytesTransferred / snapshot.totalBytes : 0;
         onProgress?.(Math.min(Math.max(progress, 0), 1));
       },
       reject,
-      () => resolve(task.snapshot)
+      () => resolve(task.snapshot),
     );
   });
 }
@@ -134,7 +128,7 @@ export async function publishFirebasePost(
 async function publishFirebasePostImplementation(
   submission: VideoSubmission,
   media: PublicationMediaInput,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
 ) {
   if (isR2MediaEnabled()) {
     return publishR2Post(submission, media, onProgress);
@@ -142,15 +136,8 @@ async function publishFirebasePostImplementation(
 
   const user = assertPublishingUser(submission.userId);
   const blob = await readMediaBlob(media);
-  const mimeType = normalizeMediaMimeType(
-    media.mediaType,
-    media.mimeType || blob.type
-  );
-  const validationMessage = getPublicationMediaValidationMessage(
-    media,
-    blob.size,
-    mimeType
-  );
+  const mimeType = normalizeMediaMimeType(media.mediaType, media.mimeType || blob.type);
+  const validationMessage = getPublicationMediaValidationMessage(media, blob.size, mimeType);
 
   if (validationMessage) {
     throw new InvalidPublicationMediaError(validationMessage);
@@ -159,7 +146,7 @@ async function publishFirebasePostImplementation(
   const postId = submission.id.trim();
   if (!postId || postId.length > 128) {
     throw new InvalidPublicationMediaError(
-      "Não foi possível gerar um identificador seguro para a publicação."
+      "Não foi possível gerar um identificador seguro para a publicação.",
     );
   }
 
@@ -172,8 +159,8 @@ async function publishFirebasePostImplementation(
     customMetadata: {
       mediaType: media.mediaType,
       ownerUid: user.uid,
-      postId
-    }
+      postId,
+    },
   });
 
   await waitForUpload(uploadTask, onProgress);
@@ -185,10 +172,7 @@ async function publishFirebasePostImplementation(
       authorId: user.uid,
       createdAt: serverTimestamp(),
       description: submission.highlight.trim(),
-      durationMs:
-        media.mediaType === "video"
-          ? Math.max(0, Math.round(media.durationMs ?? 0))
-          : 0,
+      durationMs: media.mediaType === "video" ? Math.max(0, Math.round(media.durationMs ?? 0)) : 0,
       fileName: media.fileName.trim().slice(0, 160) || "media",
       fileSize: blob.size,
       height: Math.max(0, Math.round(media.height ?? 0)),
@@ -200,7 +184,7 @@ async function publishFirebasePostImplementation(
       tags: normalizeTagList(submission.tags ?? [], MAX_POST_TAGS),
       title: submission.videoTitle.trim(),
       updatedAt: serverTimestamp(),
-      width: Math.max(0, Math.round(media.width ?? 0))
+      width: Math.max(0, Math.round(media.width ?? 0)),
     });
   } catch (error) {
     await deleteObject(mediaReference).catch(() => undefined);
@@ -220,25 +204,29 @@ async function publishFirebasePostImplementation(
     storagePath: mediaPath,
     submittedAt: now,
     videoFileSize: blob.size,
-    videoLink: mediaURL
+    videoLink: mediaURL,
   };
 }
 
 export function subscribeFirebasePosts(
   onPosts: (posts: VideoSubmission[]) => void,
   onError?: (error: Error) => void,
-  onWarning?: (warning: Error) => void
+  onWarning?: (warning: Error) => void,
 ) {
   const postsQuery = query(
     collection(getFirebaseFirestore(), POSTS_COLLECTION),
+    where("status", "==", "published"),
     orderBy("createdAt", "desc"),
-    limit(MAX_FEED_POSTS)
+    limit(MAX_FEED_POSTS),
   );
   let deliveryGeneration = 0;
+  let active = true;
+  const mediaUrls = new Map<string, Promise<string>>();
 
-  return onSnapshot(
+  const unsubscribe = onSnapshot(
     postsQuery,
     (snapshot) => {
+      if (!active) return;
       operationMetrics.observePostDocuments(snapshot.size);
       const currentGeneration = ++deliveryGeneration;
       let invalidDocuments = 0;
@@ -246,60 +234,66 @@ export function subscribeFirebasePosts(
 
       Promise.all(
         snapshot.docs.map(async (postSnapshot) => {
-          const post = normalizeFirebasePostDocument(
-            postSnapshot.id,
-            postSnapshot.data()
-          );
+          const post = normalizeFirebasePostDocument(postSnapshot.id, postSnapshot.data());
           if (!post) {
             invalidDocuments += 1;
             return null;
           }
 
           try {
-            const mediaURL =
-              post.storageProvider === "r2"
-                ? getR2MediaUrl(post.mediaKey)
-                : await getDownloadURL(
-                    ref(getFirebaseStorage(), post.mediaPath)
-                  );
-            return firebasePostToSubmission(
-              postSnapshot.id,
-              post,
-              mediaURL
-            );
+            const key = post.storageProvider === "r2" ? post.mediaKey : post.mediaPath;
+            let pending = mediaUrls.get(key);
+            if (!pending) {
+              pending =
+                post.storageProvider === "r2"
+                  ? Promise.resolve(getR2MediaUrl(post.mediaKey))
+                  : getDownloadURL(ref(getFirebaseStorage(), post.mediaPath));
+              mediaUrls.set(key, pending);
+              void pending.catch(() => {
+                if (mediaUrls.get(key) === pending) mediaUrls.delete(key);
+              });
+            }
+            const mediaURL = await pending;
+            return firebasePostToSubmission(postSnapshot.id, post, mediaURL);
           } catch {
             unavailableMedia += 1;
             return null;
           }
-        })
+        }),
       )
         .then((posts) => {
-          if (currentGeneration === deliveryGeneration) {
-            onPosts(
-              posts.filter((post): post is VideoSubmission => Boolean(post))
-            );
+          if (active && currentGeneration === deliveryGeneration) {
+            onPosts(posts.filter((post): post is VideoSubmission => Boolean(post)));
             const skippedPosts = invalidDocuments + unavailableMedia;
             if (skippedPosts > 0) {
               const details = [
-                invalidDocuments > 0
-                  ? `${invalidDocuments} com dados incompatíveis`
-                  : "",
-                unavailableMedia > 0
-                  ? `${unavailableMedia} com mídia indisponível`
-                  : ""
+                invalidDocuments > 0 ? `${invalidDocuments} com dados incompatíveis` : "",
+                unavailableMedia > 0 ? `${unavailableMedia} com mídia indisponível` : "",
               ]
                 .filter(Boolean)
                 .join(" e ");
               onWarning?.(
-                new Error(`${skippedPosts} publicação(ões) não puderam ser sincronizadas: ${details}.`)
+                new Error(
+                  `${skippedPosts} publicação(ões) não puderam ser sincronizadas: ${details}.`,
+                ),
               );
             }
           }
         })
-        .catch((error: Error) => onError?.(error));
+        .catch((error: Error) => {
+          if (active) onError?.(error);
+        });
     },
-    (error) => onError?.(error)
+    (error) => {
+      if (active) onError?.(error);
+    },
   );
+  return () => {
+    active = false;
+    deliveryGeneration += 1;
+    mediaUrls.clear();
+    unsubscribe();
+  };
 }
 
 export function getSafeFirebasePostSyncMessage(error: unknown) {
@@ -325,11 +319,7 @@ export async function deleteFirebasePost(submission: VideoSubmission) {
   }
 
   const user = assertPublishingUser(submission.userId);
-  const postReference = doc(
-    getFirebaseFirestore(),
-    POSTS_COLLECTION,
-    submission.id
-  );
+  const postReference = doc(getFirebaseFirestore(), POSTS_COLLECTION, submission.id);
   const snapshot = await getDoc(postReference);
 
   if (!snapshot.exists() || snapshot.data().authorId !== user.uid) {
@@ -358,9 +348,7 @@ export async function deleteFirebasePost(submission: VideoSubmission) {
 export function isFirebaseStoredPost(submission: VideoSubmission) {
   return (
     isR2StoredPost(submission) ||
-    Boolean(
-      submission.storagePath?.startsWith(`posts/${submission.userId}/`)
-    )
+    Boolean(submission.storagePath?.startsWith(`posts/${submission.userId}/`))
   );
 }
 

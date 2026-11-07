@@ -1,6 +1,7 @@
 import { FieldValue, type Firestore } from "firebase-admin/firestore";
 import type { EngagementRepository } from "../application/engagementRepository";
 import { normalizedCount } from "../domain/engagement";
+import { assertInteractionAllowed } from "../../safety/data/interactionPolicy";
 
 export function createFirestoreEngagementRepository(
   database: () => Firestore,
@@ -30,6 +31,13 @@ export function createFirestoreEngagementRepository(
             views: normalizedCount(data?.views),
           },
         });
+        // Removal remains available so blocking cannot trap a user's own existing like.
+        if (post.exists && change.mutation?.edge === "create") {
+          const authorId = post.data()?.authorId;
+          if (typeof authorId !== "string" || !authorId)
+            throw new Error("Publicação sem autor válido.");
+          await assertInteractionAllowed(transaction, db, key.uid, authorId);
+        }
         if (change.mutation) {
           if (change.mutation.edge === "create")
             transaction.set(edgeReference, {

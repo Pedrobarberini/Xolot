@@ -1,28 +1,15 @@
+import React, { useEffect, useRef, useState } from "react";
+import { CameraView, useCameraPermissions, useMicrophonePermissions } from "expo-camera";
 import { operationMetrics } from "../config/operationMetrics";
 import type { MetricFinish } from "../shared/observability/operationMetrics";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  CameraView,
-  useCameraPermissions,
-  useMicrophonePermissions
-} from "expo-camera";
 import { VideoView, useVideoPlayer } from "expo-video";
-import {
-  ArrowRight,
-  Camera,
-  Images,
-  ShieldAlert,
-  SwitchCamera,
-  X
-} from "lucide-react-native";
+import { ArrowRight, Camera, Images, ShieldAlert, SwitchCamera, X } from "lucide-react-native";
 import { Alert, Image, Platform, Pressable, Text, View } from "react-native";
 import { startWebCameraRecording } from "../actions/webCameraRecorder";
 import { BackButton } from "./Navigation";
 import { styles } from "../styles/appStyles";
 import { colors } from "../theme";
-import type {
-  PublicationMediaInput
-} from "../types";
+import type { PublicationMediaInput } from "../types";
 import { SubmissionMediaPreview } from "./SubmissionComponents";
 
 const CAMERA_TEST_ID = "submission-camera-preview";
@@ -42,7 +29,7 @@ export function SubmissionMediaStage({
   onClear,
   onContinue,
   onOpenGallery,
-  selectedMedia
+  selectedMedia,
 }: {
   galleryMedia: SelectedSubmissionMedia | null;
   onBack: () => void;
@@ -56,21 +43,20 @@ export function SubmissionMediaStage({
   const previewMetric = useRef<MetricFinish | null>(null);
   const cameraReadyRef = useRef(false);
   const cameraReadyResolverRef = useRef<((ready: boolean) => void) | null>(null);
-  const cameraReadyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
+  const cameraReadyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ignorePressAfterLongRef = useRef(false);
   const recordingStartedAtRef = useRef(0);
   const recordingTriggerRef = useRef<RecordingTrigger | null>(null);
   const stopAfterPreparationRef = useRef(false);
   const stopWebRecordingRef = useRef<(() => void) | null>(null);
+  const captureAbortRef = useRef<AbortController | null>(null);
+  const stopNativeRecordingRef = useRef<(() => void) | null>(null);
+  const mountedRef = useRef(true);
   const [permission, requestPermission] = useCameraPermissions();
-  const [microphonePermission, requestMicrophonePermission] =
-    useMicrophonePermissions();
+  const [microphonePermission, requestMicrophonePermission] = useMicrophonePermissions();
   const [captureMode, setCaptureMode] = useState<CaptureMode>("photo");
   const [cameraFacing, setCameraFacing] = useState<"back" | "front">("back");
-  const [cameraMode, setCameraMode] =
-    useState<CameraOutputMode>("picture");
+  const [cameraMode, setCameraMode] = useState<CameraOutputMode>("picture");
   const [cameraSessionKey, setCameraSessionKey] = useState(0);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -95,8 +81,8 @@ export function SubmissionMediaStage({
       setRecordingSeconds(
         Math.min(
           Math.floor((Date.now() - recordingStartedAtRef.current) / 1000),
-          MAX_RECORDING_DURATION_SECONDS
-        )
+          MAX_RECORDING_DURATION_SECONDS,
+        ),
       );
     };
     const timer = setInterval(updateElapsedTime, 250);
@@ -105,17 +91,20 @@ export function SubmissionMediaStage({
     return () => clearInterval(timer);
   }, [isRecording]);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      captureAbortRef.current?.abort();
       if (cameraReadyTimeoutRef.current) {
         clearTimeout(cameraReadyTimeoutRef.current);
       }
-
+      cameraReadyResolverRef.current?.(false);
+      cameraReadyResolverRef.current = null;
       stopWebRecordingRef.current?.();
-      cameraRef.current?.stopRecording();
-    },
-    []
-  );
+      stopNativeRecordingRef.current?.();
+    };
+  }, []);
 
   function handleCameraReady() {
     previewMetric.current?.();
@@ -184,12 +173,7 @@ export function SubmissionMediaStage({
   }
 
   async function capturePhoto() {
-    if (
-      !cameraRef.current ||
-      !isCameraReady ||
-      isBusy ||
-      cameraMode !== "picture"
-    ) {
+    if (!cameraRef.current || !isCameraReady || isBusy || cameraMode !== "picture") {
       return;
     }
 
@@ -198,7 +182,7 @@ export function SubmissionMediaStage({
     try {
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.9 });
 
-      if (!photo?.uri) {
+      if (!mountedRef.current || !photo?.uri) {
         return;
       }
 
@@ -208,25 +192,21 @@ export function SubmissionMediaStage({
         mediaType: "image",
         mimeType: "image/jpeg",
         uri: photo.uri,
-        width: photo.width
+        width: photo.width,
       });
     } catch {
+      if (!mountedRef.current) return;
       Alert.alert(
         "Não foi possível capturar a foto",
-        "Verifique a permissão da câmera e tente novamente."
+        "Verifique a permissão da câmera e tente novamente.",
       );
     } finally {
-      setIsCapturing(false);
+      if (mountedRef.current) setIsCapturing(false);
     }
   }
 
   async function startVideoRecording(trigger: RecordingTrigger) {
-    if (
-      !cameraRef.current ||
-      !permission?.granted ||
-      !isCameraReady ||
-      isBusy
-    ) {
+    if (!cameraRef.current || !permission?.granted || !isCameraReady || isBusy) {
       return;
     }
 
@@ -240,9 +220,11 @@ export function SubmissionMediaStage({
       let recordingResult: Promise<SelectedSubmissionMedia>;
 
       if (Platform.OS === "web") {
+        captureAbortRef.current = new AbortController();
         const session = await startWebCameraRecording({
           cameraTestId: CAMERA_TEST_ID,
-          maxDurationMs: MAX_RECORDING_DURATION_MS
+          maxDurationMs: MAX_RECORDING_DURATION_MS,
+          signal: captureAbortRef.current.signal,
         });
 
         stopWebRecordingRef.current = session.stop;
@@ -254,13 +236,15 @@ export function SubmissionMediaStage({
         const shouldMute = !nextMicrophonePermission.granted;
         const cameraReady = await remountCameraForRecording(shouldMute);
 
-        if (!cameraReady || !cameraRef.current) {
+        if (!mountedRef.current || !cameraReady || !cameraRef.current) {
           throw new Error("A câmera ainda não está pronta para gravar.");
         }
 
         const startedAt = Date.now();
-        const nativeRecording = cameraRef.current.recordAsync({
-          maxDuration: MAX_RECORDING_DURATION_SECONDS
+        const recordingCamera = cameraRef.current;
+        stopNativeRecordingRef.current = () => recordingCamera.stopRecording();
+        const nativeRecording = recordingCamera.recordAsync({
+          maxDuration: MAX_RECORDING_DURATION_SECONDS,
         });
 
         if (!nativeRecording) {
@@ -273,14 +257,11 @@ export function SubmissionMediaStage({
           }
 
           return {
-            durationMs: Math.min(
-              Date.now() - startedAt,
-              MAX_RECORDING_DURATION_MS
-            ),
+            durationMs: Math.min(Date.now() - startedAt, MAX_RECORDING_DURATION_MS),
             fileName: `folko-${Date.now()}.mp4`,
             mediaType: "video",
             mimeType: "video/mp4",
-            uri: result.uri
+            uri: result.uri,
           };
         });
       }
@@ -294,21 +275,28 @@ export function SubmissionMediaStage({
       }
 
       const media = await recordingResult;
+      if (!mountedRef.current) {
+        if (Platform.OS === "web" && media.uri.startsWith("blob:")) URL.revokeObjectURL(media.uri);
+        return;
+      }
       onCapture(media);
     } catch (error) {
+      if (!mountedRef.current) return;
       const message =
-        error instanceof Error
-          ? error.message
-          : "Verifique as permissões e tente novamente.";
+        error instanceof Error ? error.message : "Verifique as permissões e tente novamente.";
 
       Alert.alert("Não foi possível gravar o vídeo", message);
     } finally {
       stopWebRecordingRef.current = null;
+      captureAbortRef.current = null;
+      stopNativeRecordingRef.current = null;
       recordingTriggerRef.current = null;
       stopAfterPreparationRef.current = false;
-      setIsPreparingRecording(false);
-      setIsRecording(false);
-      restoreSelectedCameraMode(captureModeAtStart);
+      if (mountedRef.current) {
+        setIsPreparingRecording(false);
+        setIsRecording(false);
+        restoreSelectedCameraMode(captureModeAtStart);
+      }
     }
   }
 
@@ -376,8 +364,7 @@ export function SubmissionMediaStage({
     : captureMode === "video"
       ? "Iniciar gravação"
       : "Capturar foto";
-  const shutterDisabled =
-    !permission?.granted || (!isCameraReady && !isRecording) || isCapturing;
+  const shutterDisabled = !permission?.granted || (!isCameraReady && !isRecording) || isCapturing;
 
   return (
     <View style={styles.submissionCaptureScreen}>
@@ -408,9 +395,7 @@ export function SubmissionMediaStage({
             <View style={styles.submissionCameraPermissionIcon}>
               <ShieldAlert color={colors.onPrimary} size={28} />
             </View>
-            <Text style={styles.submissionCameraPermissionTitle}>
-              Permitir câmera
-            </Text>
+            <Text style={styles.submissionCameraPermissionTitle}>Permitir câmera</Text>
             <Text style={styles.submissionCameraPermissionBody}>
               Autorize o acesso para fotografar e gravar com a câmera traseira.
             </Text>
@@ -420,9 +405,7 @@ export function SubmissionMediaStage({
               style={styles.submissionCameraPermissionButton}
             >
               <Camera color={colors.onPrimary} size={18} />
-              <Text style={styles.submissionCameraPermissionButtonText}>
-                Ativar câmera
-              </Text>
+              <Text style={styles.submissionCameraPermissionButtonText}>Ativar câmera</Text>
             </Pressable>
           </View>
         )}
@@ -461,7 +444,7 @@ export function SubmissionMediaStage({
         <View
           style={[
             styles.submissionCameraControls,
-            selectedMedia ? styles.submissionCameraControlsSelected : null
+            selectedMedia ? styles.submissionCameraControlsSelected : null,
           ]}
         >
           <GalleryButton media={galleryMedia} onPress={onOpenGallery} />
@@ -492,16 +475,14 @@ export function SubmissionMediaStage({
               style={[
                 styles.submissionShutterOuter,
                 isRecording ? styles.submissionShutterOuterRecording : null,
-                shutterDisabled ? styles.submissionShutterDisabled : null
+                shutterDisabled ? styles.submissionShutterDisabled : null,
               ]}
             >
               <View
                 style={[
                   styles.submissionShutterInner,
-                  captureMode === "video"
-                    ? styles.submissionShutterInnerVideo
-                    : null,
-                  isRecording ? styles.submissionShutterInnerRecording : null
+                  captureMode === "video" ? styles.submissionShutterInnerVideo : null,
+                  isRecording ? styles.submissionShutterInnerRecording : null,
                 ]}
               />
             </Pressable>
@@ -512,16 +493,14 @@ export function SubmissionMediaStage({
           ) : (
             <Pressable
               accessibilityLabel={
-                cameraFacing === "back"
-                  ? "Usar câmera frontal"
-                  : "Usar câmera traseira"
+                cameraFacing === "back" ? "Usar câmera frontal" : "Usar câmera traseira"
               }
               accessibilityRole="button"
               disabled={isBusy}
               onPress={toggleCameraFacing}
               style={[
                 styles.submissionCameraSwitchButton,
-                isBusy ? styles.submissionShutterDisabled : null
+                isBusy ? styles.submissionShutterDisabled : null,
               ]}
             >
               <SwitchCamera color={colors.onPrimary} size={23} />
@@ -554,7 +533,7 @@ function CaptureModeButton({
   active,
   disabled,
   label,
-  onPress
+  onPress,
 }: {
   active: boolean;
   disabled: boolean;
@@ -572,7 +551,7 @@ function CaptureModeButton({
       <Text
         style={[
           styles.submissionCaptureModeText,
-          active ? styles.submissionCaptureModeTextActive : null
+          active ? styles.submissionCaptureModeTextActive : null,
         ]}
       >
         {label}
@@ -580,7 +559,7 @@ function CaptureModeButton({
       <View
         style={[
           styles.submissionCaptureModeIndicator,
-          active ? styles.submissionCaptureModeIndicatorActive : null
+          active ? styles.submissionCaptureModeIndicatorActive : null,
         ]}
       />
     </Pressable>
@@ -589,7 +568,7 @@ function CaptureModeButton({
 
 function GalleryButton({
   media,
-  onPress
+  onPress,
 }: {
   media: SelectedSubmissionMedia | null;
   onPress: () => void;

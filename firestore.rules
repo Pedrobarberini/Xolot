@@ -1,4 +1,13 @@
 rules_version = '2';
+// Contratos v1: accounts/pendingAccounts e preferências são privados por UID;
+// profiles contém somente apresentação social validada por validProfile;
+// posts: authorId/status são imutáveis pelo cliente; createdAt/updatedAt timestamps.
+// Publicações sociais exigem status=published; o autor também lê seus próprios
+// documentos pendentes. Mensagens/recibos são restritos aos participantes.
+// Métricas, quotas, intenção de upload, assinatura e identidade são do servidor.
+// moderationReports: fila privada, escrita/revisão somente por callables;
+// reporterUid/postAuthorUid/postId/reason/status e timestamps não são públicos.
+// Schemas completos: contracts/v1/data.json e validadores abaixo.
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() {
@@ -54,6 +63,24 @@ service cloud.firestore {
 
     function owns(uid) {
       return registeredVerifiedUser() && request.auth.uid == uid;
+    }
+
+    function permitsInteraction(uid, otherUid) {
+      let path = /databases/$(database)/documents/socialPreferences/$(uid);
+      return !exists(path) || (
+        get(path).data.get('ownerUid', uid) == uid
+        && get(path).data.get('blockedProfileIds', []) is list
+        && get(path).data.get('blockedProfileIds', []).size() <= 500
+        && !('profile-' + otherUid in get(path).data.get('blockedProfileIds', []))
+      );
+    }
+
+    function canInteractWith(otherUid) {
+      return otherUid is string && otherUid.size() >= 1 && otherUid.size() <= 128
+        && (request.auth.uid == otherUid || (
+          permitsInteraction(request.auth.uid, otherUid)
+          && permitsInteraction(otherUid, request.auth.uid)
+        ));
     }
 
     function validUsername(username) {
@@ -377,7 +404,9 @@ service cloud.firestore {
     }
 
     match /posts/{postId} {
-      allow get, list: if registeredVerifiedUser();
+      allow read: if registeredVerifiedUser()
+        && (resource.data.status == 'published'
+          || resource.data.authorId == request.auth.uid);
       allow create: if registeredVerifiedUser()
         && request.resource.data.authorId == request.auth.uid
         && validPost(postId, request.resource.data)
@@ -434,7 +463,8 @@ service cloud.firestore {
         )
         && exists(
           /databases/$(database)/documents/profiles/$(request.resource.data.targetUid)
-        );
+        )
+        && canInteractWith(request.resource.data.targetUid);
       allow update: if false;
       allow delete: if registeredVerifiedUser()
         && resource.data.followerUid == request.auth.uid;
@@ -474,10 +504,24 @@ service cloud.firestore {
         )
         && get(
           /databases/$(database)/documents/posts/$(request.resource.data.postId)
-        ).data.status == 'published';
+        ).data.status == 'published'
+        && canInteractWith(get(
+          /databases/$(database)/documents/posts/$(request.resource.data.postId)
+        ).data.authorId)
+        && (!('replyToUserId' in request.resource.data)
+          || canInteractWith(request.resource.data.replyToUserId))
+        && (!('parentCommentId' in request.resource.data) || (
+          exists(/databases/$(database)/documents/postComments/$(request.resource.data.parentCommentId))
+          && get(/databases/$(database)/documents/postComments/$(request.resource.data.parentCommentId)).data.postId
+            == request.resource.data.postId
+        ));
       allow update: if false;
       allow delete: if registeredVerifiedUser()
         && resource.data.authorUserId == request.auth.uid;
+    }
+
+    match /moderationReports/{reportId} {
+      allow read, write: if false;
     }
 
     match /{document=**} {

@@ -1,21 +1,18 @@
+import { protectedOnCall } from "./platform/abuseProtection";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
-import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { HttpsError } from "firebase-functions/v2/https";
 import { requireVerifiedUser, verifyRegisteredUser } from "./auth";
 import { REGION } from "./config";
 import { requireRecord } from "./validation";
+import { assertInteractionAllowed } from "./modules/safety/data/interactionPolicy";
 
 const callableOptions = { region: REGION };
 const triggerOptions = { region: REGION };
 const NOTIFICATIONS_COLLECTION = "notifications";
 const MAX_NOTIFICATION_IDS = 100;
 
-type NotificationKind =
-  | "comment"
-  | "like"
-  | "message"
-  | "reply"
-  | "shared-post";
+type NotificationKind = "comment" | "like" | "message" | "reply" | "shared-post";
 
 type NotificationInput = {
   actorName?: string;
@@ -32,9 +29,7 @@ type NotificationInput = {
 };
 
 function cleanText(value: unknown, fallback = "") {
-  return typeof value === "string" && value.trim()
-    ? value.trim()
-    : fallback;
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
 function previewText(value: unknown) {
@@ -49,34 +44,35 @@ async function loadActor(actorUserId: string) {
 
   return {
     actorName: cleanText(data?.name, "Alguém"),
-    actorUsername: cleanText(data?.username)
+    actorUsername: cleanText(data?.username),
   };
 }
 
 async function createNotification(input: NotificationInput) {
-  if (
-    !input.actorUserId ||
-    !input.recipientUserId ||
-    input.actorUserId === input.recipientUserId
-  ) {
+  if (!input.actorUserId || !input.recipientUserId || input.actorUserId === input.recipientUserId) {
     return;
   }
 
   const database = getFirestore();
-  const reference = database.doc(
-    NOTIFICATIONS_COLLECTION + "/" + input.id
-  );
+  const reference = database.doc(NOTIFICATIONS_COLLECTION + "/" + input.id);
   const actor =
     input.actorName && input.actorUsername
       ? {
           actorName: input.actorName,
-          actorUsername: input.actorUsername
+          actorUsername: input.actorUsername,
         }
       : await loadActor(input.actorUserId);
 
   await database.runTransaction(async (transaction) => {
     if ((await transaction.get(reference)).exists) {
       return;
+    }
+
+    try {
+      await assertInteractionAllowed(transaction, database, input.actorUserId, input.recipientUserId);
+    } catch (error) {
+      if (error instanceof HttpsError && ["permission-denied", "failed-precondition"].includes(error.code)) return;
+      throw error;
     }
 
     transaction.create(reference, {
@@ -90,7 +86,7 @@ async function createNotification(input: NotificationInput) {
       sourceId: input.sourceId,
       ...(input.mediaType ? { mediaType: input.mediaType } : {}),
       ...(input.playerId ? { playerId: input.playerId } : {}),
-      ...(input.preview ? { preview: input.preview } : {})
+      ...(input.preview ? { preview: input.preview } : {}),
     });
   });
 }
@@ -98,7 +94,7 @@ async function createNotification(input: NotificationInput) {
 export const notifyDirectMessage = onDocumentCreated(
   {
     document: "directMessages/{messageId}",
-    ...triggerOptions
+    ...triggerOptions,
   },
   async (event) => {
     const message = event.data?.data();
@@ -116,8 +112,7 @@ export const notifyDirectMessage = onDocumentCreated(
         ? (message.sharedPost as Record<string, unknown>)
         : undefined;
     const playerId = cleanText(sharedPost?.playerId);
-    const mediaType =
-      sharedPost?.mediaType === "image" ? "image" : "video";
+    const mediaType = sharedPost?.mediaType === "image" ? "image" : "video";
 
     await createNotification({
       actorUserId,
@@ -127,23 +122,23 @@ export const notifyDirectMessage = onDocumentCreated(
       ...(sharedPost ? { mediaType, playerId } : {}),
       preview: previewText(message?.body),
       recipientUserId,
-      sourceId: messageId
+      sourceId: messageId,
     });
-  }
+  },
 );
 
 export const notifyPostLike = onDocumentCreated(
   {
     document: "userPostLikes/{actorUid}/posts/{playerId}",
-    ...triggerOptions
+    ...triggerOptions,
   },
   async (event) => {
     const actorUserId = event.params.actorUid;
     const playerId = event.params.playerId;
-    const postId = playerId.startsWith("approved-")
-      ? playerId.slice("approved-".length)
-      : playerId;
-    const post = await getFirestore().doc("posts/" + postId).get();
+    const postId = playerId.startsWith("approved-") ? playerId.slice("approved-".length) : playerId;
+    const post = await getFirestore()
+      .doc("posts/" + postId)
+      .get();
     const recipientUserId = cleanText(post.data()?.authorId);
     if (!post.exists || !recipientUserId) {
       return;
@@ -156,15 +151,15 @@ export const notifyPostLike = onDocumentCreated(
       kind: "like",
       playerId,
       recipientUserId,
-      sourceId: actorUserId + "-" + playerId
+      sourceId: actorUserId + "-" + playerId,
     });
-  }
+  },
 );
 
 export const notifyPostComment = onDocumentCreated(
   {
     document: "postComments/{commentId}",
-    ...triggerOptions
+    ...triggerOptions,
   },
   async (event) => {
     const comment = event.data?.data();
@@ -176,13 +171,13 @@ export const notifyPostComment = onDocumentCreated(
       return;
     }
 
-    const post = await getFirestore().doc("posts/" + postId).get();
+    const post = await getFirestore()
+      .doc("posts/" + postId)
+      .get();
     const postOwnerId = cleanText(post.data()?.authorId);
     const replyToUserId = cleanText(comment?.replyToUserId);
     const recipientUserId =
-      replyToUserId && replyToUserId !== actorUserId
-        ? replyToUserId
-        : postOwnerId;
+      replyToUserId && replyToUserId !== actorUserId ? replyToUserId : postOwnerId;
     if (!recipientUserId) {
       return;
     }
@@ -197,12 +192,13 @@ export const notifyPostComment = onDocumentCreated(
       playerId,
       preview: previewText(comment?.body),
       recipientUserId,
-      sourceId: commentId
+      sourceId: commentId,
     });
-  }
+  },
 );
 
-export const markNotificationsRead = onCall(
+export const markNotificationsRead = protectedOnCall(
+  "markNotificationsRead",
   callableOptions,
   async (request) => {
     const uid = requireVerifiedUser(request);
@@ -213,30 +209,24 @@ export const markNotificationsRead = onCall(
           new Set(
             data.notificationIds.filter(
               (value): value is string =>
-                typeof value === "string" &&
-                /^[A-Za-z0-9_-]+$/.test(value) &&
-                value.length <= 256
-            )
-          )
+                typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value) && value.length <= 256,
+            ),
+          ),
         ).slice(0, MAX_NOTIFICATION_IDS)
       : [];
 
     if (notificationIds.length === 0) {
-      throw new HttpsError(
-        "invalid-argument",
-        "Nenhuma notificação válida foi informada."
-      );
+      throw new HttpsError("invalid-argument", "Nenhuma notificação válida foi informada.");
     }
 
     const database = getFirestore();
     const references = notificationIds.map((notificationId) =>
-      database.doc(NOTIFICATIONS_COLLECTION + "/" + notificationId)
+      database.doc(NOTIFICATIONS_COLLECTION + "/" + notificationId),
     );
-    let updated = 0;
-
-    await database.runTransaction(async (transaction) => {
+    const updated = await database.runTransaction(async (transaction) => {
+      let changed = 0;
       const snapshots = await Promise.all(
-        references.map((reference) => transaction.get(reference))
+        references.map((reference) => transaction.get(reference)),
       );
 
       snapshots.forEach((snapshot, index) => {
@@ -246,13 +236,14 @@ export const markNotificationsRead = onCall(
           !snapshot.data()?.readAt
         ) {
           transaction.update(references[index], {
-            readAt: FieldValue.serverTimestamp()
+            readAt: FieldValue.serverTimestamp(),
           });
-          updated += 1;
+          changed += 1;
         }
       });
+      return changed;
     });
 
     return { updated };
-  }
+  },
 );

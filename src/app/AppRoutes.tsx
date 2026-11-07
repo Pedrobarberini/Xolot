@@ -47,8 +47,13 @@ import type { ReelReturnTarget } from "./useAppNavigation";
 import { getPlayerContentKey } from "../utils/feedEngagement";
 import { useNotificationNavigation } from "./useNotificationNavigation";
 import type { NotificationContent } from "../utils/notificationDestination";
+import type { FeedAnchor } from "../utils/feedSession";
 
 type AppRoutesProps = {
+  feedAnchor?: FeedAnchor | null;
+  feedEntryKeys?: string[];
+  onFeedAnchorChange?: (anchor: FeedAnchor) => void;
+  onRefreshFeed?: () => void;
   activeCampaignPlayerIds: Set<string>;
   activeMessageContactId: string | null;
   autoplayEnabled: boolean;
@@ -197,7 +202,6 @@ export function AppRoutes(props: AppRoutesProps) {
     deletePostComment,
     directMessages,
     feedFocusPlayerId,
-    focusFeedPlayer,
     followersByProfile,
     followerUserIdsByProfile,
     followingCountsByUser,
@@ -300,6 +304,9 @@ export function AppRoutes(props: AppRoutesProps) {
     if (!notificationPost || orderedFeedPlayers.some((player) => player.id === notificationPost.player.id)) return orderedFeedPlayers;
     return [notificationPost.player, ...orderedFeedPlayers];
   }, [notificationPost, orderedFeedPlayers]);
+  const feedEntryKeys = feedPlayers === orderedFeedPlayers
+    ? props.feedEntryKeys
+    : [`notification:${notificationPost!.player.id}`, ...(props.feedEntryKeys ?? orderedFeedPlayers.map((player) => player.id))];
   const messageContacts = useMemo(() => {
     if (!notificationMessage || currentMessageContacts.some((contact) => contact.id === notificationMessage.contact.id)) return currentMessageContacts;
     return [...currentMessageContacts, notificationMessage.contact];
@@ -456,6 +463,9 @@ export function AppRoutes(props: AppRoutesProps) {
 
               {tab === "feed" ? (
                 <FeedScreen
+                  initialAnchor={props.feedAnchor}
+                  entryKeys={feedEntryKeys}
+                  onAnchorChange={props.onFeedAnchorChange}
                   activeCampaignPlayerIds={activeCampaignPlayerIds}
                   autoplayEnabled={autoplayEnabled}
                   backLabel={reelReturnTarget?.type === "messages" ? "Voltar para mensagens" : "Voltar ao perfil"}
@@ -483,17 +493,15 @@ export function AppRoutes(props: AppRoutesProps) {
                   onOpenPlayer={openAthleteProfile}
                   onOpenTaggedUser={openAccountProfile}
                   onRecordView={recordPlayerView}
-                  onRefreshFeed={() => openTab("feed")}
+                  onRefreshFeed={() => { openTab("feed"); props.onRefreshFeed?.(); }}
                   onReportPlayer={(player) => setPlayerReported(player.id, true)}
                   reportedPlayerIds={reportedPlayerIdSet}
                   onShare={(player, contact, message) => sendSharedPost(contact, player, message)}
                   onToggleFollow={(player) => {
-                    focusFeedPlayer(player.id);
                     toggleFollowProfile(player.profileId);
                   }}
                   onToggleBlockProfile={(player) => toggleBlockedProfile(player.profileId)}
                   onToggleInterest={(player) => {
-                    focusFeedPlayer(player.id);
                     toggleInterestedContent(getPlayerContentKey(player));
                   }}
                   onToggleLike={(player) => toggleLikePlayer(player.id)}

@@ -1,5 +1,5 @@
+import { protectedOnCall } from "../../platform/abuseProtection";
 import { randomUUID } from "node:crypto";
-import { onCall } from "firebase-functions/v2/https";
 import { getVerifiedRequestContext, verifyRegisteredUser } from "../../auth";
 import {
   MAX_UPLOAD_INTENTS_PER_MINUTE,
@@ -67,6 +67,10 @@ export function createMediaCommandHandlers(
   };
 }
 const handlers = createMediaCommandHandlers(service, verifyRegisteredUser);
-export const createMediaUpload = onCall(options, handlers.create);
-export const finalizeMediaUpload = onCall(options, handlers.finalize);
-export const deleteR2Post = onCall(options, handlers.delete);
+export const createMediaUpload = protectedOnCall("createMediaUpload", options, handlers.create);
+export const finalizeMediaUpload = protectedOnCall(
+  "finalizeMediaUpload",
+  options,
+  handlers.finalize,
+);
+export const deleteR2Post = protectedOnCall("deleteR2Post", options, handlers.delete);

@@ -1,6 +1,7 @@
 import "./bootstrap/admin";
 
 export { ingestOperationMetrics } from "./observability/handlers";
+export { setPostReport, listModerationReports, resolveModerationReport } from "./modules/safety/reports";
 
 export { createMediaUpload, finalizeMediaUpload, deleteR2Post } from "./modules/posts/handlers";
 export {

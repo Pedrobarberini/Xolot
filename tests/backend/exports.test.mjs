@@ -20,7 +20,7 @@ test("entrypoint conserva todos os endpoints, triggers, regiÃµes, segredos e opÃ
       .map(([name, fn]) => [name, JSON.parse(JSON.stringify(fn.__endpoint ?? fn.__trigger))]),
   );
   assert.deepEqual(actual, before);
-  assert.equal(Object.keys(actual).length, 25);
+  assert.equal(Object.keys(actual).length, 28);
 });
 
 test("bootstrap pode ser recarregado sem criar outro Admin App", () => {

@@ -36,6 +36,12 @@ explícito; uma resposta parcial do cache não prova fim da lista. O cache de UI
 é outro contrato e não deve falsificar `hasMore: false`.
 [Referência do SDK](https://firebase.google.com/docs/reference/js/firestore#getdocsfromserver).
 
+Atualização de 2026-11-05: foram adicionados os quatro índices de `feed`,
+`messagesSent`, `messagesReceived` e `notifications`. A confirmação de READY e os
+novos listeners de métricas/marcadores por IDs estão na
+[auditoria de otimização](otimizacao-seguranca-2026-11.md). Os outros quatro índices
+permanecem candidatos para os consumidores futuros.
+
 Oito índices compostos candidatos estão em `firestore.indexes.json` e são
 conferidos por `pnpm run test:queries:config`. Todos têm escopo COLLECTION.
 O desempate por ID usa a direção implícita do último campo ordenado do índice.
@@ -44,7 +50,8 @@ isenção de campos/TTL adicionada nesta etapa.
 
 Emuladores comprovam resultado e autorização, mas não obrigam criar os mesmos
 índices compostos que o serviço real. Antes de ativar um consumidor, conferir
-o índice em staging e aguardar READY. Esta etapa não implantou índices.
+o índice em staging e aguardar READY. A etapa original D03 não implantou índices;
+as quatro adições posteriores estão registradas acima.
 
 `orderBy` exclui documentos sem o campo ordenado. Datas legadas ausentes ou de
 outro tipo precisam de inventário e backfill/diagnóstico explícitos; não inventar

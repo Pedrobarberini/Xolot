@@ -1,5 +1,6 @@
+import { protectedOnCall } from "./platform/abuseProtection";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
-import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { HttpsError } from "firebase-functions/v2/https";
 import { requireVerifiedUser } from "./auth";
 import { REGION } from "./config";
 
@@ -15,22 +16,19 @@ function getSignInProvider(token: Record<string, unknown>) {
   return typeof provider === "string" ? provider : "";
 }
 
-export const finalizeAccountRegistration = onCall(
+export const finalizeAccountRegistration = protectedOnCall(
+  "finalizeAccountRegistration",
   callableOptions,
   async (request) => {
     const uid = requireVerifiedUser(request);
     const signInProvider = getSignInProvider(request.auth?.token ?? {});
     const authProvider =
-      signInProvider === "google.com"
-        ? "google"
-        : signInProvider === "password"
-          ? "password"
-          : "";
+      signInProvider === "google.com" ? "google" : signInProvider === "password" ? "password" : "";
 
     if (!authProvider) {
       throw new HttpsError(
         "failed-precondition",
-        "Este método de autenticação não pode concluir o cadastro."
+        "Este método de autenticação não pode concluir o cadastro.",
       );
     }
 
@@ -42,7 +40,7 @@ export const finalizeAccountRegistration = onCall(
     const created = await database.runTransaction(async (transaction) => {
       const [account, pending] = await Promise.all([
         transaction.get(accountReference),
-        transaction.get(pendingReference)
+        transaction.get(pendingReference),
       ]);
 
       if (account.exists) {
@@ -59,7 +57,7 @@ export const finalizeAccountRegistration = onCall(
       if (!hasValidPendingAccount && !acceptedTerms) {
         throw new HttpsError(
           "failed-precondition",
-          "Aceite os Termos de Uso para concluir o cadastro desta identidade."
+          "Aceite os Termos de Uso para concluir o cadastro desta identidade.",
         );
       }
 
@@ -80,5 +78,5 @@ export const finalizeAccountRegistration = onCall(
     });
 
     return { created };
-  }
+  },
 );

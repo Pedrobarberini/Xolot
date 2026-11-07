@@ -77,8 +77,8 @@ test("requisição sem identidade/CAPTCHA, token consumido e payload enorme não
   assert.equal(await guard({ ...request(), app: { appId: "app" } }), 1);
   assert.equal(reads, 1);
 });
-test("todos os 18 comandos têm orçamento e erro de quota impede o efeito", async () => {
-  assert.equal(Object.keys(callableBudgets).length, 18);
+test("todos os 21 comandos têm orçamento e erro de quota impede o efeito", async () => {
+  assert.equal(Object.keys(callableBudgets).length, 21);
   const denied = guardCallable(
     "sendDirectMessage",
     () => assert.fail("não executar"),

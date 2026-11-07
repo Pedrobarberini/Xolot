@@ -1,19 +1,21 @@
+import { reportOperationFailure } from "./platform/logger";
+import { protectedOnCall } from "./platform/abuseProtection";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import {
   InvalidWebhookSignatureError,
   MercadoPagoConfig,
   PreApproval,
-  WebhookSignatureValidator
+  WebhookSignatureValidator,
 } from "mercadopago";
 import { createHash, randomUUID } from "node:crypto";
-import { HttpsError, onCall, onRequest } from "firebase-functions/v2/https";
+import { HttpsError, onRequest } from "firebase-functions/v2/https";
 import { requireVerifiedUser, verifyRegisteredUser } from "./auth";
 import {
   REGION,
   mercadoPagoAccessToken,
   mercadoPagoEnvironment,
   mercadoPagoTestPayerEmail,
-  mercadoPagoWebhookSecret
+  mercadoPagoWebhookSecret,
 } from "./config";
 
 const PLUS_AMOUNT = 9.9;
@@ -55,7 +57,7 @@ type MercadoPagoApiError = {
 function readMercadoPagoApiError(error: unknown): MercadoPagoApiError {
   if (!error || typeof error !== "object") {
     return {
-      message: error instanceof Error ? error.message : "Erro desconhecido"
+      message: error instanceof Error ? error.message : "Erro desconhecido",
     };
   }
 
@@ -64,10 +66,7 @@ function readMercadoPagoApiError(error: unknown): MercadoPagoApiError {
     cause: Array.isArray(candidate.cause)
       ? candidate.cause.map((item) => ({
           code: typeof item?.code === "string" ? item.code : undefined,
-          description:
-            typeof item?.description === "string"
-              ? item.description
-              : undefined
+          description: typeof item?.description === "string" ? item.description : undefined,
         }))
       : undefined,
     error: typeof candidate.error === "string" ? candidate.error : undefined,
@@ -77,7 +76,7 @@ function readMercadoPagoApiError(error: unknown): MercadoPagoApiError {
         : error instanceof Error
           ? error.message
           : "Erro desconhecido",
-    status: typeof candidate.status === "number" ? candidate.status : undefined
+    status: typeof candidate.status === "number" ? candidate.status : undefined,
   };
 }
 
@@ -85,20 +84,16 @@ function toCheckoutError(error: unknown) {
   const details = readMercadoPagoApiError(error);
   const normalizedMessage = details.message?.toLowerCase() ?? "";
 
-  if (
-    normalizedMessage.includes(
-      "both payer and collector must be real or test users"
-    )
-  ) {
+  if (normalizedMessage.includes("both payer and collector must be real or test users")) {
     return new HttpsError(
       "failed-precondition",
-      "O teste do Mercado Pago está usando contas incompatíveis. Configure o Access Token de produção da conta vendedora de teste e mantenha o comprador de teste."
+      "O teste do Mercado Pago está usando contas incompatíveis. Configure o Access Token de produção da conta vendedora de teste e mantenha o comprador de teste.",
     );
   }
 
   return new HttpsError(
     "unavailable",
-    "Não foi possível abrir o pagamento agora. Tente novamente em instantes."
+    "Não foi possível abrir o pagamento agora. Tente novamente em instantes.",
   );
 }
 
@@ -106,8 +101,8 @@ function getClient() {
   return new PreApproval(
     new MercadoPagoConfig({
       accessToken: mercadoPagoAccessToken.value(),
-      options: { timeout: 10_000 }
-    })
+      options: { timeout: 10_000 },
+    }),
   );
 }
 
@@ -139,7 +134,7 @@ function assertExpectedSubscription(subscription: MercadoPagoSubscription) {
   if (
     typeof amount !== "number" ||
     ![PLUS_AMOUNT, ...LEGACY_PLUS_AMOUNTS].some(
-      (expected) => Math.abs(amount - expected) <= 0.001
+      (expected) => Math.abs(amount - expected) <= 0.001,
     ) ||
     currency !== PLUS_CURRENCY
   ) {
@@ -150,7 +145,7 @@ function assertExpectedSubscription(subscription: MercadoPagoSubscription) {
 async function saveSubscription(
   uid: string,
   subscription: MercadoPagoSubscription,
-  context: CheckoutContext = {}
+  context: CheckoutContext = {},
 ) {
   assertExpectedSubscription(subscription);
 
@@ -168,7 +163,7 @@ async function saveSubscription(
     const [snapshot, profileSnapshot, identitySnapshot] = await Promise.all([
       transaction.get(reference),
       transaction.get(profileReference),
-      transaction.get(identityReference)
+      transaction.get(identityReference),
     ]);
     const payload: Record<string, unknown> = {
       amount: subscription.auto_recurring?.transaction_amount ?? PLUS_AMOUNT,
@@ -180,18 +175,14 @@ async function saveSubscription(
       provider: "mercado_pago",
       providerSubscriptionId: subscription.id,
       status,
-      updatedAt: FieldValue.serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
     const previousStatus = snapshot.data()?.status;
     if (status === "authorized" && previousStatus !== "authorized") {
       payload.authorizedAt = FieldValue.serverTimestamp();
     }
-    if (
-      status === "canceled" &&
-      previousStatus !== "canceled" &&
-      previousStatus !== "cancelled"
-    ) {
+    if (status === "canceled" && previousStatus !== "canceled" && previousStatus !== "cancelled") {
       payload.canceledAt = FieldValue.serverTimestamp();
     }
 
@@ -212,9 +203,7 @@ async function saveSubscription(
     if (profileSnapshot.exists) {
       transaction.update(profileReference, {
         identityVerified: identitySnapshot.data()?.status === "approved",
-        plusActive:
-          status === "authorized" &&
-          identitySnapshot.data()?.status === "approved"
+        plusActive: status === "authorized" && identitySnapshot.data()?.status === "approved",
       });
     }
   });
@@ -236,9 +225,7 @@ export async function cancelPlusSubscriptionForAccountDeletion(uid: string) {
   }
 
   const currentSubscription = await loadProviderSubscription(subscriptionId);
-  const externalUid = getUidFromExternalReference(
-    currentSubscription.external_reference
-  );
+  const externalUid = getUidFromExternalReference(currentSubscription.external_reference);
 
   if (externalUid !== uid) {
     throw new Error("A assinatura não pertence à conta excluída.");
@@ -247,13 +234,12 @@ export async function cancelPlusSubscriptionForAccountDeletion(uid: string) {
   if (normalizeStatus(currentSubscription.status) !== "canceled") {
     await getClient().update({
       body: { status: "canceled" },
-      id: subscriptionId
+      id: subscriptionId,
     });
 
     const updatedSubscription = await loadProviderSubscription(subscriptionId);
     if (
-      getUidFromExternalReference(updatedSubscription.external_reference) !==
-        uid ||
+      getUidFromExternalReference(updatedSubscription.external_reference) !== uid ||
       normalizeStatus(updatedSubscription.status) !== "canceled"
     ) {
       throw new Error("O Mercado Pago não confirmou o cancelamento da conta.");
@@ -271,14 +257,11 @@ function getPaymentEnvironment(): MercadoPagoEnvironment {
 
   throw new HttpsError(
     "failed-precondition",
-    "O ambiente de pagamento não está configurado corretamente."
+    "O ambiente de pagamento não está configurado corretamente.",
   );
 }
 
-function getPayerEmail(
-  accountEmail: string,
-  environment: MercadoPagoEnvironment
-) {
+function getPayerEmail(accountEmail: string, environment: MercadoPagoEnvironment) {
   if (environment === "production") {
     return accountEmail;
   }
@@ -287,7 +270,7 @@ function getPayerEmail(
   if (!/^[^\s@]+@testuser\.com$/i.test(testEmail)) {
     throw new HttpsError(
       "failed-precondition",
-      "O comprador de teste do Mercado Pago não está configurado corretamente."
+      "O comprador de teste do Mercado Pago não está configurado corretamente.",
     );
   }
 
@@ -296,219 +279,207 @@ function getPayerEmail(
 
 const callableOptions = {
   region: REGION,
-  secrets: [mercadoPagoAccessToken]
+  secrets: [mercadoPagoAccessToken],
 };
 
 const createSubscriptionOptions = {
   region: REGION,
-  secrets: [mercadoPagoAccessToken, mercadoPagoTestPayerEmail]
+  secrets: [mercadoPagoAccessToken, mercadoPagoTestPayerEmail],
 };
 
-export const createPlusSubscription = onCall(createSubscriptionOptions, async (request) => {
-  const uid = requireVerifiedUser(request);
-  await verifyRegisteredUser(uid);
+export const createPlusSubscription = protectedOnCall(
+  "createPlusSubscription",
+  createSubscriptionOptions,
+  async (request) => {
+    const uid = requireVerifiedUser(request);
+    await verifyRegisteredUser(uid);
 
-  const identity = await getFirestore().doc(`identityVerifications/${uid}`).get();
-  if (identity.data()?.status !== "approved") {
-    throw new HttpsError(
-      "failed-precondition",
-      "Conclua a verificação de identidade antes de assinar o selo Folko Plus."
-    );
-  }
+    const identity = await getFirestore().doc(`identityVerifications/${uid}`).get();
+    if (identity.data()?.status !== "approved") {
+      throw new HttpsError(
+        "failed-precondition",
+        "Conclua a verificação de identidade antes de assinar o selo Folko Plus.",
+      );
+    }
 
-  const accountEmail =
-    typeof request.auth?.token.email === "string"
-      ? request.auth.token.email.trim().toLowerCase()
-      : "";
+    const accountEmail =
+      typeof request.auth?.token.email === "string"
+        ? request.auth.token.email.trim().toLowerCase()
+        : "";
 
-  if (!accountEmail) {
-    throw new HttpsError(
-      "failed-precondition",
-      "Sua conta precisa ter um e-mail válido para assinar o Folko Plus."
-    );
-  }
+    if (!accountEmail) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Sua conta precisa ter um e-mail válido para assinar o Folko Plus.",
+      );
+    }
 
-  const paymentEnvironment = getPaymentEnvironment();
-  const payerEmail = getPayerEmail(accountEmail, paymentEnvironment);
-  const payerEmailHash = createHash("sha256").update(payerEmail).digest("hex");
+    const paymentEnvironment = getPaymentEnvironment();
+    const payerEmail = getPayerEmail(accountEmail, paymentEnvironment);
+    const payerEmailHash = createHash("sha256").update(payerEmail).digest("hex");
 
-  const reference = getFirestore().doc(`subscriptions/${uid}`);
-  const existing = await reference.get();
-  const existingData = existing.data();
+    const reference = getFirestore().doc(`subscriptions/${uid}`);
+    const existing = await reference.get();
+    const existingData = existing.data();
 
-  if (existingData?.status === "authorized") {
-    return { checkoutUrl: null, status: "authorized" as const };
-  }
+    if (existingData?.status === "authorized") {
+      return { checkoutUrl: null, status: "authorized" as const };
+    }
 
-  if (
-    existingData?.status === "pending" &&
-    existingData.paymentEnvironment === paymentEnvironment &&
-    existingData.payerEmailHash === payerEmailHash &&
-    typeof existingData.checkoutUrl === "string" &&
-    existingData.checkoutUrl.startsWith("https://")
-  ) {
-    return {
-      checkoutUrl: existingData.checkoutUrl,
-      status: "pending" as const
+    if (
+      existingData?.status === "pending" &&
+      existingData.paymentEnvironment === paymentEnvironment &&
+      existingData.payerEmailHash === payerEmailHash &&
+      typeof existingData.checkoutUrl === "string" &&
+      existingData.checkoutUrl.startsWith("https://")
+    ) {
+      return {
+        checkoutUrl: existingData.checkoutUrl,
+        status: "pending" as const,
+      };
+    }
+
+    const checkoutAttemptId = randomUUID();
+    const externalReference = `xolot_plus:${uid}:${checkoutAttemptId}`;
+    const body = {
+      auto_recurring: {
+        currency_id: PLUS_CURRENCY,
+        frequency: 1,
+        frequency_type: "months",
+        transaction_amount: PLUS_AMOUNT,
+      },
+      back_url: CHECKOUT_RETURN_URL,
+      external_reference: externalReference,
+      notification_url: WEBHOOK_URL,
+      payer_email: payerEmail,
+      reason: PLUS_REASON,
+      status: "pending",
     };
-  }
 
-  const checkoutAttemptId = randomUUID();
-  const externalReference = `xolot_plus:${uid}:${checkoutAttemptId}`;
-  const body = {
-    auto_recurring: {
-      currency_id: PLUS_CURRENCY,
-      frequency: 1,
-      frequency_type: "months",
-      transaction_amount: PLUS_AMOUNT
-    },
-    back_url: CHECKOUT_RETURN_URL,
-    external_reference: externalReference,
-    notification_url: WEBHOOK_URL,
-    payer_email: payerEmail,
-    reason: PLUS_REASON,
-    status: "pending"
-  };
+    try {
+      const subscription = (await getClient().create({
+        body,
+        requestOptions: { idempotencyKey: checkoutAttemptId },
+      })) as MercadoPagoSubscription;
 
-  try {
-    const subscription = (await getClient().create({
-      body,
-      requestOptions: { idempotencyKey: checkoutAttemptId }
-    })) as MercadoPagoSubscription;
+      const status = await saveSubscription(uid, subscription, {
+        checkoutAttemptId,
+        paymentEnvironment,
+        payerEmailHash,
+      });
 
-    const status = await saveSubscription(uid, subscription, {
-      checkoutAttemptId,
-      paymentEnvironment,
-      payerEmailHash
-    });
+      if (!subscription.init_point) {
+        throw new Error("O Mercado Pago não retornou o link de pagamento.");
+      }
 
-    if (!subscription.init_point) {
-      throw new Error("O Mercado Pago não retornou o link de pagamento.");
+      return {
+        checkoutUrl: subscription.init_point,
+        status,
+      };
+    } catch (error) {
+      reportOperationFailure("billing.create", error);
+      throw toCheckoutError(error);
+    }
+  },
+);
+
+export const syncPlusSubscription = protectedOnCall(
+  "syncPlusSubscription",
+  callableOptions,
+  async (request) => {
+    const uid = requireVerifiedUser(request);
+    await verifyRegisteredUser(uid);
+
+    const reference = getFirestore().doc(`subscriptions/${uid}`);
+    const snapshot = await reference.get();
+    const subscriptionId = snapshot.data()?.providerSubscriptionId;
+
+    if (typeof subscriptionId !== "string" || !subscriptionId) {
+      return { status: "pending" as const, synced: false };
     }
 
-    return {
-      checkoutUrl: subscription.init_point,
-      status
-    };
-  } catch (error) {
-    const details = readMercadoPagoApiError(error);
-    console.error("Falha ao criar assinatura Folko Plus.", {
-      causeCodes: details.cause
-        ?.map((item) => item.code)
-        .filter((code): code is string => Boolean(code)),
-      error: details.error,
-      message: details.message,
-      status: details.status,
-      uid
-    });
-    throw toCheckoutError(error);
-  }
-});
+    try {
+      const subscription = await loadProviderSubscription(subscriptionId);
+      const externalUid = getUidFromExternalReference(subscription.external_reference);
 
-export const syncPlusSubscription = onCall(callableOptions, async (request) => {
-  const uid = requireVerifiedUser(request);
-  await verifyRegisteredUser(uid);
+      if (externalUid !== uid) {
+        throw new Error("A assinatura não pertence à conta conectada.");
+      }
 
-  const reference = getFirestore().doc(`subscriptions/${uid}`);
-  const snapshot = await reference.get();
-  const subscriptionId = snapshot.data()?.providerSubscriptionId;
+      const status = await saveSubscription(uid, subscription);
+      return { status, synced: true };
+    } catch (error) {
+      reportOperationFailure("billing.sync", error);
+      throw new HttpsError("unavailable", "Não foi possível atualizar a assinatura agora.");
+    }
+  },
+);
 
-  if (typeof subscriptionId !== "string" || !subscriptionId) {
-    return { status: "pending" as const, synced: false };
-  }
+export const cancelPlusSubscription = protectedOnCall(
+  "cancelPlusSubscription",
+  callableOptions,
+  async (request) => {
+    const uid = requireVerifiedUser(request);
+    await verifyRegisteredUser(uid);
 
-  try {
-    const subscription = await loadProviderSubscription(subscriptionId);
-    const externalUid = getUidFromExternalReference(
-      subscription.external_reference
-    );
+    const reference = getFirestore().doc(`subscriptions/${uid}`);
+    const snapshot = await reference.get();
+    const subscriptionId = snapshot.data()?.providerSubscriptionId;
 
-    if (externalUid !== uid) {
-      throw new Error("A assinatura não pertence à conta conectada.");
+    if (typeof subscriptionId !== "string" || !subscriptionId) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Nenhuma assinatura foi encontrada para esta conta.",
+      );
     }
 
-    const status = await saveSubscription(uid, subscription);
-    return { status, synced: true };
-  } catch (error) {
-    console.error("Falha ao sincronizar assinatura Folko Plus.", {
-      message: error instanceof Error ? error.message : "Erro desconhecido",
-      uid
-    });
-    throw new HttpsError(
-      "unavailable",
-      "Não foi possível atualizar a assinatura agora."
-    );
-  }
-});
+    try {
+      const currentSubscription = await loadProviderSubscription(subscriptionId);
+      const externalUid = getUidFromExternalReference(currentSubscription.external_reference);
 
-export const cancelPlusSubscription = onCall(callableOptions, async (request) => {
-  const uid = requireVerifiedUser(request);
-  await verifyRegisteredUser(uid);
+      if (externalUid !== uid) {
+        throw new Error("A assinatura não pertence à conta conectada.");
+      }
 
-  const reference = getFirestore().doc(`subscriptions/${uid}`);
-  const snapshot = await reference.get();
-  const subscriptionId = snapshot.data()?.providerSubscriptionId;
+      if (normalizeStatus(currentSubscription.status) === "canceled") {
+        const status = await saveSubscription(uid, currentSubscription);
+        return { status };
+      }
 
-  if (typeof subscriptionId !== "string" || !subscriptionId) {
-    throw new HttpsError(
-      "failed-precondition",
-      "Nenhuma assinatura foi encontrada para esta conta."
-    );
-  }
+      await getClient().update({
+        body: { status: "canceled" },
+        id: subscriptionId,
+      });
 
-  try {
-    const currentSubscription = await loadProviderSubscription(subscriptionId);
-    const externalUid = getUidFromExternalReference(
-      currentSubscription.external_reference
-    );
+      const updatedSubscription = await loadProviderSubscription(subscriptionId);
+      const updatedUid = getUidFromExternalReference(updatedSubscription.external_reference);
 
-    if (externalUid !== uid) {
-      throw new Error("A assinatura não pertence à conta conectada.");
-    }
+      if (updatedUid !== uid) {
+        throw new Error("A assinatura atualizada não pertence à conta conectada.");
+      }
 
-    if (normalizeStatus(currentSubscription.status) === "canceled") {
-      const status = await saveSubscription(uid, currentSubscription);
+      const status = await saveSubscription(uid, updatedSubscription);
+      if (status !== "canceled") {
+        throw new Error("O Mercado Pago não confirmou o cancelamento.");
+      }
+
       return { status };
+    } catch (error) {
+      reportOperationFailure("billing.cancel", error);
+      throw new HttpsError(
+        "unavailable",
+        "Não foi possível cancelar a assinatura agora. Tente novamente.",
+      );
     }
-
-    await getClient().update({
-      body: { status: "canceled" },
-      id: subscriptionId
-    });
-
-    const updatedSubscription = await loadProviderSubscription(subscriptionId);
-    const updatedUid = getUidFromExternalReference(
-      updatedSubscription.external_reference
-    );
-
-    if (updatedUid !== uid) {
-      throw new Error("A assinatura atualizada não pertence à conta conectada.");
-    }
-
-    const status = await saveSubscription(uid, updatedSubscription);
-    if (status !== "canceled") {
-      throw new Error("O Mercado Pago não confirmou o cancelamento.");
-    }
-
-    return { status };
-  } catch (error) {
-    console.error("Falha ao cancelar assinatura Folko Plus.", {
-      message: error instanceof Error ? error.message : "Erro desconhecido",
-      uid
-    });
-    throw new HttpsError(
-      "unavailable",
-      "Não foi possível cancelar a assinatura agora. Tente novamente."
-    );
-  }
-});
+  },
+);
 
 export const mercadoPagoWebhook = onRequest(
   {
     cors: false,
     invoker: "public",
     region: REGION,
-    secrets: [mercadoPagoAccessToken, mercadoPagoWebhookSecret]
+    secrets: [mercadoPagoAccessToken, mercadoPagoWebhookSecret],
   },
   async (request, response) => {
     if (request.method !== "POST") {
@@ -532,21 +503,17 @@ export const mercadoPagoWebhook = onRequest(
         dataId,
         secret: mercadoPagoWebhookSecret.value(),
         xRequestId: request.headers["x-request-id"],
-        xSignature: request.headers["x-signature"]
+        xSignature: request.headers["x-signature"],
       });
     } catch (error) {
       console.warn("Webhook Mercado Pago rejeitado.", {
-        reason:
-          error instanceof InvalidWebhookSignatureError
-            ? error.reason
-            : "validation_error"
+        reason: error instanceof InvalidWebhookSignatureError ? error.reason : "validation_error",
       });
       response.status(401).send("Invalid signature");
       return;
     }
 
-    const eventType =
-      typeof request.body?.type === "string" ? request.body.type : "";
+    const eventType = typeof request.body?.type === "string" ? request.body.type : "";
 
     if (eventType !== "subscription_preapproval" || typeof dataId !== "string") {
       response.status(200).send("Ignored");
@@ -565,11 +532,8 @@ export const mercadoPagoWebhook = onRequest(
       await saveSubscription(uid, subscription);
       response.status(200).send("OK");
     } catch (error) {
-      console.error("Falha ao processar webhook Mercado Pago.", {
-        dataId,
-        message: error instanceof Error ? error.message : "Erro desconhecido"
-      });
+      reportOperationFailure("billing.webhook", error);
       response.status(500).send("Retry");
     }
-  }
+  },
 );

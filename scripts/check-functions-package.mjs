@@ -42,7 +42,14 @@ try {
   });
   const sourceLock = YAML.parse(readFileSync(join(repository, "pnpm-lock.yaml"), "utf8"));
   writeFileSync(join(portable, "pnpm-lock.yaml"), YAML.stringify(functionsPackageLock(sourceLock)));
-  writeFileSync(join(portable, "pnpm-workspace.yaml"), "packages: ['.']\nnodeLinker: isolated\n");
+  writeFileSync(
+    join(portable, "pnpm-workspace.yaml"),
+    YAML.stringify({
+      packages: ["."],
+      nodeLinker: "isolated",
+      overrides: sourceLock.overrides ?? {},
+    }),
+  );
   const binary = /\.[cm]?js$/.test(pnpm) ? process.execPath : pnpm;
   const prefix = binary === process.execPath ? [pnpm] : [];
   await run(

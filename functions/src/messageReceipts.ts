@@ -1,5 +1,6 @@
+import { protectedOnCall } from "./platform/abuseProtection";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
-import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { HttpsError } from "firebase-functions/v2/https";
 import { requireVerifiedUser, verifyRegisteredUser } from "./auth";
 import { REGION } from "./config";
 import { requireRecord, requireText } from "./validation";
@@ -19,13 +20,14 @@ function normalizeMessageIds(value: unknown) {
           typeof messageId === "string" &&
           messageId.length > 0 &&
           messageId.length <= 128 &&
-          /^[A-Za-z0-9_-]+$/.test(messageId)
-      )
-    )
+          /^[A-Za-z0-9_-]+$/.test(messageId),
+      ),
+    ),
   ).slice(0, MAX_RECEIPTS_PER_REQUEST);
 }
 
-export const updateDirectMessageReceipts = onCall(
+export const updateDirectMessageReceipts = protectedOnCall(
+  "updateDirectMessageReceipts",
   callableOptions,
   async (request) => {
     const uid = requireVerifiedUser(request);
@@ -42,12 +44,10 @@ export const updateDirectMessageReceipts = onCall(
     }
 
     const database = getFirestore();
-    let updated = 0;
-    await database.runTransaction(async (transaction) => {
+    const updated = await database.runTransaction(async (transaction) => {
+      let changed = 0;
       const snapshots = await Promise.all(
-        messageIds.map((messageId) =>
-          transaction.get(database.doc(`directMessages/${messageId}`))
-        )
+        messageIds.map((messageId) => transaction.get(database.doc(`directMessages/${messageId}`))),
       );
 
       snapshots.forEach((snapshot) => {
@@ -59,7 +59,7 @@ export const updateDirectMessageReceipts = onCall(
         if (message?.recipientUserId !== uid) {
           throw new HttpsError(
             "permission-denied",
-            "Você não pode alterar o recibo desta mensagem."
+            "Você não pode alterar o recibo desta mensagem.",
           );
         }
 
@@ -72,11 +72,12 @@ export const updateDirectMessageReceipts = onCall(
         }
         if (Object.keys(receipt).length > 0) {
           transaction.update(snapshot.ref, receipt);
-          updated += 1;
+          changed += 1;
         }
       });
+      return changed;
     });
 
     return { updated };
-  }
+  },
 );

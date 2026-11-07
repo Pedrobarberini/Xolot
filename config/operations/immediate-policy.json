@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "projectId": "xolot-384e9",
+  "projectNumber": "239260393879",
+  "databaseId": "(default)",
+  "locationId": "southamerica-east1",
+  "budget": { "currencyCode": "BRL", "units": "50", "thresholds": [0.5, 0.8, 1] },
+  "recovery": { "pitrEnabled": true, "dailyRetentionSeconds": 1209600 },
+  "runtime": { "maxInstances": 5, "concurrency": 40, "minInstances": 0, "deletionMaxInstances": 1 },
+  "iam": {
+    "replacementProjectRoles": ["roles/datastore.user", "roles/firebaseauth.admin"],
+    "preserveGoogleServiceAgents": true
+  },
+  "publication": "Owner approval required; dry-run is the default. Budget alerts are not a hard spending cap."
+}

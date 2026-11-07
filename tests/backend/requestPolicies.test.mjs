@@ -117,16 +117,15 @@ test("payload tem limite UTF-8 e identificadores não atravessam caminhos", () =
   assert.throws(() => requireDocumentId("a".repeat(81), "Upload", 80), codeIs("invalid-argument"));
 });
 
-test("callable de exclusão usa UID autenticado e não chama Auth em sessão inválida", async (t) => {
-  const { deleteOwnAccount } = require("../../functions/lib/index.js");
-  const { getAuth } = require("firebase-admin/auth");
+test("exclusão usa UID autenticado e não chama a porta Auth em sessão inválida", async () => {
+  const { createDeleteOwnAccountHandler } = require("../../functions/lib/accountDeletion.js");
   const deleted = [];
-  t.mock.method(getAuth(), "deleteUser", async (uid) => {
+  const deleteOwnAccount = createDeleteOwnAccountHandler(async (uid) => {
     deleted.push(uid);
   });
   const now = Math.floor(Date.now() / 1000);
   assert.deepEqual(
-    await deleteOwnAccount.run(request({ auth_time: now }, { uid: "another", role: "Admin" })),
+    await deleteOwnAccount(request({ auth_time: now }, { uid: "another", role: "Admin" })),
     { deleted: true },
   );
   assert.deepEqual(deleted, ["CaseUID"]);
@@ -135,6 +134,6 @@ test("callable de exclusão usa UID autenticado e não chama Auth em sessão inv
     request({ email_verified: false }),
     {},
   ])
-    await assert.rejects(deleteOwnAccount.run(invalid));
+    await assert.rejects(deleteOwnAccount(invalid));
   assert.deepEqual(deleted, ["CaseUID"]);
 });

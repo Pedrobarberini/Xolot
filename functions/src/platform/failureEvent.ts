@@ -11,8 +11,23 @@ const expectedCodes = new Set([
   "unauthenticated",
   "unavailable",
 ]);
-const operations = new Set(["cache.load", "cache.save", "media.upload.sign"]);
-export type OperationName = "cache.load" | "cache.save" | "media.upload.sign";
+const operations = new Set([
+  "cache.load",
+  "cache.save",
+  "media.upload.sign",
+  "billing.create",
+  "billing.sync",
+  "billing.cancel",
+  "billing.webhook",
+]);
+export type OperationName =
+  | "cache.load"
+  | "cache.save"
+  | "media.upload.sign"
+  | "billing.create"
+  | "billing.sync"
+  | "billing.cancel"
+  | "billing.webhook";
 
 export function failureEvent(operation: OperationName, error: unknown, correlationId: string) {
   const rawCode = error && typeof error === "object" && "code" in error ? error.code : undefined;

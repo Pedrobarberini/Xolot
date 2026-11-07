@@ -7,50 +7,38 @@ import {
   getDoc,
   limit,
   onSnapshot,
+  orderBy,
+  documentId,
   query,
   serverTimestamp,
   setDoc,
-  where
+  where,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
-import {
-  getFirebaseFirestore,
-  getFirebaseFunctions
-} from "../config/firebase";
+import { getFirebaseFirestore, getFirebaseFunctions } from "../config/firebase";
 import type {
   AppNotification,
   ConversationPreferences,
   DirectMessage,
   FollowingByUser,
   PostComment,
-  SharedPostReference
+  SharedPostReference,
 } from "../types";
 import { EMPTY_CONVERSATION_PREFERENCES } from "../utils/conversations";
 import { normalizePostComments } from "../utils/postComments";
-import {
-  normalizeAppNotification,
-  sortNotificationsNewestFirst
-} from "../utils/notifications";
+import { normalizeAppNotification, sortNotificationsNewestFirst } from "../utils/notifications";
 import { getCurrentFirebaseUser } from "./firebaseAccountService";
 import type { SocialState } from "./socialStorage";
 
 const FOLLOWS_COLLECTION = "follows";
-const ENGAGEMENT_COLLECTION = "postEngagement";
 const DIRECT_MESSAGES_COLLECTION = "directMessages";
 const POST_COMMENTS_COLLECTION = "postComments";
 const SOCIAL_PREFERENCES_COLLECTION = "socialPreferences";
 const NOTIFICATIONS_COLLECTION = "notifications";
 const MAX_FOLLOWS = 5_000;
-const MAX_ENGAGEMENT_DOCUMENTS = 2_000;
 const MAX_MESSAGES_PER_DIRECTION = 500;
 const MAX_COMMENTS = 2_000;
 const MAX_NOTIFICATIONS = 100;
-
-type EngagementCounts = {
-  likes: number;
-  shares: number;
-  views: number;
-};
 
 export type FirebaseSocialPreferences = ConversationPreferences & {
   autoplayEnabled: boolean;
@@ -64,13 +52,12 @@ export type FirebaseSocialPreferences = ConversationPreferences & {
 
 export type FirebaseSocialSnapshot = {
   directMessages: DirectMessage[];
-  engagementByPlayer: Record<string, EngagementCounts>;
+
   followingByUser: FollowingByUser;
-  likedPlayerIds: string[];
+
   notifications: AppNotification[];
   postComments: PostComment[];
   preferences: FirebaseSocialPreferences;
-  viewedPlayerIds: string[];
 };
 
 const emptyPreferences: FirebaseSocialPreferences = {
@@ -81,7 +68,7 @@ const emptyPreferences: FirebaseSocialPreferences = {
   interestedContentKeys: [],
   mutedContentKeys: [],
   notificationsEnabled: false,
-  reportedPlayerIds: []
+  reportedPlayerIds: [],
 };
 
 function assertCurrentUser(uid: string) {
@@ -98,8 +85,8 @@ function normalizeStringArray(value: unknown, maximum = 500) {
           value
             .filter((item): item is string => typeof item === "string")
             .map((item) => item.trim())
-            .filter(Boolean)
-        )
+            .filter(Boolean),
+        ),
       ).slice(0, maximum)
     : [];
 }
@@ -149,14 +136,11 @@ function normalizeSharedPost(value: unknown): SharedPostReference | undefined {
     mediaType: data.mediaType as "image" | "video",
     playerId: data.playerId,
     profileId: data.profileId,
-    title: data.title
+    title: data.title,
   };
 }
 
-export function normalizeDirectMessage(
-  id: string,
-  value: unknown
-): DirectMessage | null {
+export function normalizeDirectMessage(id: string, value: unknown): DirectMessage | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return null;
   }
@@ -179,7 +163,7 @@ export function normalizeDirectMessage(
     ...(readAt ? { readAt } : {}),
     recipientUserId: data.recipientUserId,
     senderUserId: data.senderUserId,
-    ...(sharedPost ? { sharedPost } : {})
+    ...(sharedPost ? { sharedPost } : {}),
   };
 }
 
@@ -194,15 +178,13 @@ function normalizePreferences(value: unknown): FirebaseSocialPreferences {
     !Array.isArray(data.deletedAtByContactId)
       ? Object.fromEntries(
           Object.entries(data.deletedAtByContactId).filter(
-            ([contactId, deletedAt]) =>
-              contactId.length > 0 && typeof deletedAt === "string"
-          )
+            ([contactId, deletedAt]) => contactId.length > 0 && typeof deletedAt === "string",
+          ),
         )
       : {};
 
   return {
-    autoplayEnabled:
-      typeof data.autoplayEnabled === "boolean" ? data.autoplayEnabled : true,
+    autoplayEnabled: typeof data.autoplayEnabled === "boolean" ? data.autoplayEnabled : true,
     blockedProfileIds: normalizeStringArray(data.blockedProfileIds),
     deletedAtByContactId,
     hiddenPlayerIds: normalizeStringArray(data.hiddenPlayerIds),
@@ -210,59 +192,49 @@ function normalizePreferences(value: unknown): FirebaseSocialPreferences {
     mutedContactIds: normalizeStringArray(data.mutedContactIds),
     mutedContentKeys: normalizeStringArray(data.mutedContentKeys),
     notificationsEnabled:
-      typeof data.notificationsEnabled === "boolean"
-        ? data.notificationsEnabled
-        : false,
+      typeof data.notificationsEnabled === "boolean" ? data.notificationsEnabled : false,
     pinnedContactIds: normalizeStringArray(data.pinnedContactIds, 3),
-    reportedPlayerIds: normalizeStringArray(data.reportedPlayerIds)
+    reportedPlayerIds: normalizeStringArray(data.reportedPlayerIds),
   };
 }
 
-function normalizedMetric(value: unknown) {
-  return typeof value === "number" && Number.isSafeInteger(value) && value > 0
-    ? value
-    : 0;
-}
-
-function mergeMessages(
-  outgoing: DirectMessage[],
-  incoming: DirectMessage[]
-) {
+function mergeMessages(outgoing: DirectMessage[], incoming: DirectMessage[]) {
   return Array.from(
-    new Map([...outgoing, ...incoming].map((message) => [message.id, message])).values()
+    new Map([...outgoing, ...incoming].map((message) => [message.id, message])).values(),
   ).sort((left, right) => left.createdAt.localeCompare(right.createdAt));
 }
 
 export function subscribeFirebaseSocialState(
   uid: string,
   onChange: (snapshot: FirebaseSocialSnapshot) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ) {
   assertCurrentUser(uid);
   const firestore = getFirebaseFirestore();
   let followingByUser: FollowingByUser = {};
-  let engagementByPlayer: Record<string, EngagementCounts> = {};
-  let likedPlayerIds: string[] = [];
-  let viewedPlayerIds: string[] = [];
+
   let outgoingMessages: DirectMessage[] = [];
   let incomingMessages: DirectMessage[] = [];
   const pendingDeliveryReceiptIds = new Set<string>();
+  let active = true;
   let postComments: PostComment[] = [];
   let notifications: AppNotification[] = [];
   let preferences = emptyPreferences;
 
   const emit = () =>
+    active &&
     onChange({
       directMessages: mergeMessages(outgoingMessages, incomingMessages),
-      engagementByPlayer,
+
       followingByUser,
-      likedPlayerIds,
+
       notifications,
       postComments,
       preferences,
-      viewedPlayerIds
     });
-  const reportError = (error: Error) => onError?.(error);
+  const reportError = (error: Error) => {
+    if (active) onError?.(error);
+  };
 
   const unsubscribeFollows = onSnapshot(
     query(collection(firestore, FOLLOWS_COLLECTION), limit(MAX_FOLLOWS)),
@@ -270,64 +242,24 @@ export function subscribeFirebaseSocialState(
       const next: FollowingByUser = {};
       snapshot.docs.forEach((follow) => {
         const data = follow.data();
-        if (
-          typeof data.followerUid === "string" &&
-          typeof data.targetProfileId === "string"
-        ) {
+        if (typeof data.followerUid === "string" && typeof data.targetProfileId === "string") {
           next[data.followerUid] = Array.from(
-            new Set([...(next[data.followerUid] ?? []), data.targetProfileId])
+            new Set([...(next[data.followerUid] ?? []), data.targetProfileId]),
           );
         }
       });
       followingByUser = next;
       emit();
     },
-    reportError
-  );
-  const unsubscribeEngagement = onSnapshot(
-    query(
-      collection(firestore, ENGAGEMENT_COLLECTION),
-      limit(MAX_ENGAGEMENT_DOCUMENTS)
-    ),
-    (snapshot) => {
-      engagementByPlayer = Object.fromEntries(
-        snapshot.docs.map((engagement) => {
-          const data = engagement.data();
-          return [
-            engagement.id,
-            {
-              likes: normalizedMetric(data.likes),
-              shares: normalizedMetric(data.shares),
-              views: normalizedMetric(data.views)
-            }
-          ];
-        })
-      );
-      emit();
-    },
-    reportError
-  );
-  const unsubscribeLikes = onSnapshot(
-    collection(firestore, "userPostLikes", uid, "posts"),
-    (snapshot) => {
-      likedPlayerIds = snapshot.docs.map((like) => like.id);
-      emit();
-    },
-    reportError
-  );
-  const unsubscribeViews = onSnapshot(
-    collection(firestore, "userPostViews", uid, "posts"),
-    (snapshot) => {
-      viewedPlayerIds = snapshot.docs.map((view) => view.id);
-      emit();
-    },
-    reportError
+    reportError,
   );
   const unsubscribeOutgoing = onSnapshot(
     query(
       collection(firestore, DIRECT_MESSAGES_COLLECTION),
       where("senderUserId", "==", uid),
-      limit(MAX_MESSAGES_PER_DIRECTION)
+      orderBy("createdAt", "desc"),
+      orderBy(documentId(), "desc"),
+      limit(MAX_MESSAGES_PER_DIRECTION),
     ),
     (snapshot) => {
       outgoingMessages = snapshot.docs.flatMap((message) => {
@@ -336,43 +268,38 @@ export function subscribeFirebaseSocialState(
       });
       emit();
     },
-    reportError
+    reportError,
   );
   const unsubscribeIncoming = onSnapshot(
     query(
       collection(firestore, DIRECT_MESSAGES_COLLECTION),
       where("recipientUserId", "==", uid),
-      limit(MAX_MESSAGES_PER_DIRECTION)
+      orderBy("createdAt", "desc"),
+      orderBy(documentId(), "desc"),
+      limit(MAX_MESSAGES_PER_DIRECTION),
     ),
     (snapshot) => {
+      if (!active) return;
       incomingMessages = snapshot.docs.flatMap((message) => {
         const normalized = normalizeDirectMessage(message.id, message.data());
         return normalized ? [normalized] : [];
       });
       emit();
       const undeliveredMessageIds = incomingMessages
-        .filter(
-          (message) =>
-            !message.deliveredAt && !pendingDeliveryReceiptIds.has(message.id)
-        )
+        .filter((message) => !message.deliveredAt && !pendingDeliveryReceiptIds.has(message.id))
         .map((message) => message.id);
       if (undeliveredMessageIds.length > 0) {
-        undeliveredMessageIds.forEach((messageId) =>
-          pendingDeliveryReceiptIds.add(messageId)
-        );
-        void updateFirebaseDirectMessageReceipts(
-          undeliveredMessageIds,
-          "delivered"
-        )
+        undeliveredMessageIds.forEach((messageId) => pendingDeliveryReceiptIds.add(messageId));
+        void updateFirebaseDirectMessageReceipts(undeliveredMessageIds, "delivered")
           .catch(reportError)
           .finally(() => {
             undeliveredMessageIds.forEach((messageId) =>
-              pendingDeliveryReceiptIds.delete(messageId)
+              pendingDeliveryReceiptIds.delete(messageId),
             );
           });
       }
     },
-    reportError
+    reportError,
   );
   const unsubscribeComments = onSnapshot(
     query(collection(firestore, POST_COMMENTS_COLLECTION), limit(MAX_COMMENTS)),
@@ -381,32 +308,31 @@ export function subscribeFirebaseSocialState(
         snapshot.docs.map((comment) => ({
           ...comment.data(),
           createdAt: normalizeDate(comment.data().createdAt),
-          id: comment.id
-        }))
+          id: comment.id,
+        })),
       );
       emit();
     },
-    reportError
+    reportError,
   );
   const unsubscribeNotifications = onSnapshot(
     query(
       collection(firestore, NOTIFICATIONS_COLLECTION),
       where("recipientUserId", "==", uid),
-      limit(MAX_NOTIFICATIONS)
+      orderBy("createdAt", "desc"),
+      orderBy(documentId(), "desc"),
+      limit(MAX_NOTIFICATIONS),
     ),
     (snapshot) => {
       notifications = sortNotificationsNewestFirst(
         snapshot.docs.flatMap((notification) => {
-          const normalized = normalizeAppNotification(
-            notification.id,
-            notification.data()
-          );
+          const normalized = normalizeAppNotification(notification.id, notification.data());
           return normalized ? [normalized] : [];
-        })
+        }),
       );
       emit();
     },
-    reportError
+    reportError,
   );
   const unsubscribePreferences = onSnapshot(
     doc(firestore, SOCIAL_PREFERENCES_COLLECTION, uid),
@@ -414,14 +340,13 @@ export function subscribeFirebaseSocialState(
       preferences = normalizePreferences(snapshot.data());
       emit();
     },
-    reportError
+    reportError,
   );
 
   return () => {
+    active = false;
     unsubscribeFollows();
-    unsubscribeEngagement();
-    unsubscribeLikes();
-    unsubscribeViews();
+
     unsubscribeOutgoing();
     unsubscribeIncoming();
     unsubscribeComments();
@@ -430,11 +355,7 @@ export function subscribeFirebaseSocialState(
   };
 }
 
-export async function setFirebaseFollow(
-  uid: string,
-  targetProfileId: string,
-  following: boolean
-) {
+export async function setFirebaseFollow(uid: string, targetProfileId: string, following: boolean) {
   assertCurrentUser(uid);
   const targetUid = targetProfileId.startsWith("profile-")
     ? targetProfileId.slice("profile-".length)
@@ -442,11 +363,7 @@ export async function setFirebaseFollow(
   if (!targetUid || targetUid === uid) {
     return;
   }
-  const reference = doc(
-    getFirebaseFirestore(),
-    FOLLOWS_COLLECTION,
-    `${uid}_${targetUid}`
-  );
+  const reference = doc(getFirebaseFirestore(), FOLLOWS_COLLECTION, `${uid}_${targetUid}`);
   if (!following) {
     await deleteDoc(reference);
     return;
@@ -458,13 +375,13 @@ export async function setFirebaseFollow(
     createdAt: serverTimestamp(),
     followerUid: uid,
     targetProfileId: `profile-${targetUid}`,
-    targetUid
+    targetUid,
   });
 }
 
 export async function setFirebaseSocialPreferences(
   uid: string,
-  preferences: FirebaseSocialPreferences
+  preferences: FirebaseSocialPreferences,
 ) {
   assertCurrentUser(uid);
   await setDoc(doc(getFirebaseFirestore(), SOCIAL_PREFERENCES_COLLECTION, uid), {
@@ -472,16 +389,14 @@ export async function setFirebaseSocialPreferences(
     blockedProfileIds: normalizeStringArray(preferences.blockedProfileIds),
     deletedAtByContactId: preferences.deletedAtByContactId,
     hiddenPlayerIds: normalizeStringArray(preferences.hiddenPlayerIds),
-    interestedContentKeys: normalizeStringArray(
-      preferences.interestedContentKeys
-    ),
+    interestedContentKeys: normalizeStringArray(preferences.interestedContentKeys),
     mutedContactIds: normalizeStringArray(preferences.mutedContactIds),
     mutedContentKeys: normalizeStringArray(preferences.mutedContentKeys),
     notificationsEnabled: preferences.notificationsEnabled,
     ownerUid: uid,
     pinnedContactIds: normalizeStringArray(preferences.pinnedContactIds, 3),
     reportedPlayerIds: normalizeStringArray(preferences.reportedPlayerIds),
-    updatedAt: serverTimestamp()
+    updatedAt: serverTimestamp(),
   });
 }
 
@@ -523,19 +438,23 @@ export async function saveFirebaseDirectMessage(message: DirectMessage) {
 
 export async function updateFirebaseDirectMessageReceipts(
   messageIds: string[],
-  status: "delivered" | "read"
+  status: "delivered" | "read",
 ) {
   const updateReceipts = httpsCallable<
     { messageIds: string[]; status: "delivered" | "read" },
     { updated: number }
   >(getFirebaseFunctions(), "updateDirectMessageReceipts");
-  return (await updateReceipts({ messageIds, status })).data.updated;
+  const ids = [...new Set(messageIds)];
+  let updated = 0;
+  // O servidor aceita no máximo 100; não descartar recibos além do primeiro lote.
+  for (let index = 0; index < ids.length; index += 100)
+    updated += (await updateReceipts({ messageIds: ids.slice(index, index + 100), status })).data
+      .updated;
+  return updated;
 }
 
 function getPostDocumentId(playerId: string) {
-  return playerId.startsWith("approved-")
-    ? playerId.slice("approved-".length)
-    : playerId;
+  return playerId.startsWith("approved-") ? playerId.slice("approved-".length) : playerId;
 }
 
 export async function saveFirebasePostComment(comment: PostComment) {
@@ -543,11 +462,7 @@ export async function saveFirebasePostComment(comment: PostComment) {
   if (!user || user.uid !== comment.authorUserId) {
     throw new Error("Sua sessão não pode publicar este comentário.");
   }
-  const reference = doc(
-    getFirebaseFirestore(),
-    POST_COMMENTS_COLLECTION,
-    comment.id
-  );
+  const reference = doc(getFirebaseFirestore(), POST_COMMENTS_COLLECTION, comment.id);
   if ((await getDoc(reference)).exists()) {
     return;
   }
@@ -560,33 +475,22 @@ export async function saveFirebasePostComment(comment: PostComment) {
     createdAt: serverTimestamp(),
     playerId: comment.playerId,
     postId: getPostDocumentId(comment.playerId),
-    ...(comment.parentCommentId
-      ? { parentCommentId: comment.parentCommentId }
-      : {}),
-    ...(comment.replyToUserId
-      ? { replyToUserId: comment.replyToUserId }
-      : {}),
-    ...(comment.replyToUsername
-      ? { replyToUsername: comment.replyToUsername }
-      : {})
+    ...(comment.parentCommentId ? { parentCommentId: comment.parentCommentId } : {}),
+    ...(comment.replyToUserId ? { replyToUserId: comment.replyToUserId } : {}),
+    ...(comment.replyToUsername ? { replyToUsername: comment.replyToUsername } : {}),
   });
 }
 
-export async function deleteFirebasePostComment(
-  uid: string,
-  commentId: string
-) {
+export async function deleteFirebasePostComment(uid: string, commentId: string) {
   assertCurrentUser(uid);
-  await deleteDoc(
-    doc(getFirebaseFirestore(), POST_COMMENTS_COLLECTION, commentId)
-  );
+  await deleteDoc(doc(getFirebaseFirestore(), POST_COMMENTS_COLLECTION, commentId));
 }
 
 export async function migrateLocalFirebaseSocialState(
   uid: string,
   state: SocialState,
   validPlayerIds: string[],
-  validUserIds: string[]
+  validUserIds: string[],
 ) {
   assertCurrentUser(uid);
   const allowedPlayers = new Set(validPlayerIds);
@@ -594,35 +498,26 @@ export async function migrateLocalFirebaseSocialState(
   const localPreferences: FirebaseSocialPreferences = {
     autoplayEnabled: true,
     blockedProfileIds: state.blockedProfileIdsByUser[uid] ?? [],
-    deletedAtByContactId:
-      state.conversationPreferencesByUser[uid]?.deletedAtByContactId ?? {},
+    deletedAtByContactId: state.conversationPreferencesByUser[uid]?.deletedAtByContactId ?? {},
     hiddenPlayerIds: state.hiddenPlayerIdsByUser[uid] ?? [],
     interestedContentKeys: state.interestedContentKeysByUser[uid] ?? [],
-    mutedContactIds:
-      state.conversationPreferencesByUser[uid]?.mutedContactIds ?? [],
+    mutedContactIds: state.conversationPreferencesByUser[uid]?.mutedContactIds ?? [],
     mutedContentKeys: state.mutedContentKeysByUser[uid] ?? [],
     notificationsEnabled: false,
-    pinnedContactIds:
-      state.conversationPreferencesByUser[uid]?.pinnedContactIds ?? [],
-    reportedPlayerIds: state.reportedPlayerIdsByUser[uid] ?? []
+    pinnedContactIds: state.conversationPreferencesByUser[uid]?.pinnedContactIds ?? [],
+    reportedPlayerIds: state.reportedPlayerIdsByUser[uid] ?? [],
   };
   const hasLocalPreferences = Object.values(localPreferences).some((value) =>
     Array.isArray(value)
       ? value.length > 0
       : typeof value === "object" && value !== null
         ? Object.keys(value).length > 0
-        : false
+        : false,
   );
 
   if (hasLocalPreferences) {
-    const preferenceReference = doc(
-      getFirebaseFirestore(),
-      SOCIAL_PREFERENCES_COLLECTION,
-      uid
-    );
-    const remotePreferences = normalizePreferences(
-      (await getDoc(preferenceReference)).data()
-    );
+    const preferenceReference = doc(getFirebaseFirestore(), SOCIAL_PREFERENCES_COLLECTION, uid);
+    const remotePreferences = normalizePreferences((await getDoc(preferenceReference)).data());
     const mergeSelection = (remote: string[], local: string[], maximum = 500) =>
       Array.from(new Set([...remote, ...local])).slice(0, maximum);
 
@@ -630,45 +525,43 @@ export async function migrateLocalFirebaseSocialState(
       autoplayEnabled: remotePreferences.autoplayEnabled,
       blockedProfileIds: mergeSelection(
         remotePreferences.blockedProfileIds,
-        localPreferences.blockedProfileIds
+        localPreferences.blockedProfileIds,
       ),
       deletedAtByContactId: {
         ...localPreferences.deletedAtByContactId,
-        ...remotePreferences.deletedAtByContactId
+        ...remotePreferences.deletedAtByContactId,
       },
       hiddenPlayerIds: mergeSelection(
         remotePreferences.hiddenPlayerIds,
-        localPreferences.hiddenPlayerIds
+        localPreferences.hiddenPlayerIds,
       ),
       interestedContentKeys: mergeSelection(
         remotePreferences.interestedContentKeys,
-        localPreferences.interestedContentKeys
+        localPreferences.interestedContentKeys,
       ),
       mutedContactIds: mergeSelection(
         remotePreferences.mutedContactIds,
-        localPreferences.mutedContactIds
+        localPreferences.mutedContactIds,
       ),
       mutedContentKeys: mergeSelection(
         remotePreferences.mutedContentKeys,
-        localPreferences.mutedContentKeys
+        localPreferences.mutedContentKeys,
       ),
       notificationsEnabled: remotePreferences.notificationsEnabled,
       pinnedContactIds: mergeSelection(
         remotePreferences.pinnedContactIds,
         localPreferences.pinnedContactIds,
-        3
+        3,
       ),
       reportedPlayerIds: mergeSelection(
         remotePreferences.reportedPlayerIds,
-        localPreferences.reportedPlayerIds
-      )
+        localPreferences.reportedPlayerIds,
+      ),
     });
   }
 
   for (const profileId of (state.followingByUser[uid] ?? []).slice(0, 500)) {
-    const targetUid = profileId.startsWith("profile-")
-      ? profileId.slice("profile-".length)
-      : "";
+    const targetUid = profileId.startsWith("profile-") ? profileId.slice("profile-".length) : "";
     if (allowedUsers.has(targetUid) && targetUid !== uid) {
       await setFirebaseFollow(uid, profileId, true);
     }
@@ -691,33 +584,28 @@ export async function migrateLocalFirebaseSocialState(
       (item) =>
         item.senderUserId === uid &&
         allowedUsers.has(item.recipientUserId) &&
-        /^[A-Za-z0-9_-]{1,128}$/.test(item.id)
+        /^[A-Za-z0-9_-]{1,128}$/.test(item.id),
     )
     .slice(-50)) {
     await saveFirebaseDirectMessage(message);
   }
 
   for (const comment of state.postComments
-    .filter(
-      (item) =>
-        item.authorUserId === uid && allowedPlayers.has(item.playerId)
-    )
+    .filter((item) => item.authorUserId === uid && allowedPlayers.has(item.playerId))
     .slice(-100)) {
     await saveFirebasePostComment(comment);
   }
 }
 
-export async function markFirebaseNotificationsRead(
-  notificationIds: string[]
-) {
+export async function markFirebaseNotificationsRead(notificationIds: string[]) {
   if (notificationIds.length === 0) {
     return;
   }
 
-  const callable = httpsCallable<
-    { notificationIds: string[] },
-    { updated: number }
-  >(getFirebaseFunctions(), "markNotificationsRead");
+  const callable = httpsCallable<{ notificationIds: string[] }, { updated: number }>(
+    getFirebaseFunctions(),
+    "markNotificationsRead",
+  );
   await callable({ notificationIds });
 }
 export function getSafeFirebaseSocialMessage(error: unknown) {

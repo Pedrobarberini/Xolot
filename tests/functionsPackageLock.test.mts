@@ -30,3 +30,17 @@ test("formato inesperado e dependência local sem pacote são recusados", () => 
     }),
   );
 });
+
+test("patch exclusivo do Metro não entra no pacote Functions; patch transitivo do backend exige arquivo próprio", () => {
+  const source = {
+    lockfileVersion: "9.0",
+    importers: { functions: { dependencies: { sdk: { specifier: "^1", version: "1.0.0" } } } },
+    patchedDependencies: { "metro@0.83.7": "synthetic-hash" },
+    snapshots: { "sdk@1.0.0": { dependencies: { peer: "2.0.0" } }, "peer@2.0.0": {} },
+  };
+  assert.equal("patchedDependencies" in functionsPackageLock(source), false);
+  assert.ok(source.patchedDependencies["metro@0.83.7"]);
+  assert.throws(() =>
+    functionsPackageLock({ ...source, patchedDependencies: { "peer@2.0.0": "hash" } }),
+  );
+});

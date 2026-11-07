@@ -5,6 +5,7 @@ import { useFirebaseAccounts } from "./src/actions/useFirebaseAccounts";
 import { useFirebasePosts } from "./src/actions/useFirebasePosts";
 import { useFirebaseTagCatalog } from "./src/actions/useFirebaseTagCatalog";
 import { useOperationMetrics } from "./src/actions/useOperationMetrics";
+import { useFeedSession } from "./src/actions/useFeedSession";
 import { usePersistentAppState } from "./src/actions/usePersistentAppState";
 import { useProfileActions } from "./src/actions/useProfileActions";
 import { useSocialActions } from "./src/actions/useSocialActions";
@@ -173,7 +174,7 @@ export default function App() {
     () => selectActiveCampaignPlayerIds(campaigns),
     [campaigns]
   );
-  const orderedFeedPlayers = useMemo(
+  const rankedFeedPlayers = useMemo(
     () =>
       selectOrderedFeedPlayers(
         visibleFeedPlayers,
@@ -192,6 +193,8 @@ export default function App() {
       visibleFeedPlayers
     ]
   );
+  const feedSession = useFeedSession(user?.id, rankedFeedPlayers, isPostsLoaded && isAppStateLoaded && isSessionLoaded);
+  const orderedFeedPlayers = feedSession.players;
   const shareContacts = useMemo(
     () => selectShareContacts({
       contacts: currentMessageContacts,
@@ -295,7 +298,7 @@ export default function App() {
     handleSignOut();
   }
 
-  if (!isAppStateLoaded || !isSessionLoaded || !isPostsLoaded) {
+  if (!isAppStateLoaded || !isSessionLoaded || !isPostsLoaded || !feedSession.loaded) {
     return <LoadingAppShell isVisible={isBrandLaunchVisible} onFinish={() => setIsBrandLaunchVisible(false)} />;
   }
 
@@ -328,6 +331,10 @@ export default function App() {
 
   return (
     <AppRoutes
+      feedAnchor={feedSession.anchor}
+      feedEntryKeys={feedSession.entryKeys}
+      onFeedAnchorChange={feedSession.saveAnchor}
+      onRefreshFeed={feedSession.refresh}
       activeCampaignPlayerIds={activeCampaignPlayerIds}
       activeMessageContactId={activeMessageContactId}
       autoplayEnabled={autoplayEnabled}

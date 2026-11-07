@@ -14,9 +14,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CI: 'true'
-  EXPO_NO_TELEMETRY: '1'
-  EXPO_NO_DOTENV: '1'
+  CI: "true"
+  EXPO_NO_TELEMETRY: "1"
+  EXPO_NO_DOTENV: "1"
   GCLOUD_PROJECT: demo-xolot-rules
 
 jobs:
@@ -38,6 +38,7 @@ jobs:
       - run: pnpm run lint
       - run: pnpm run format:check
       - run: pnpm run test:queries:config
+      - run: pnpm run security:scan
       - run: pnpm run typecheck
       - run: pnpm run typecheck:functions
       - run: pnpm test
@@ -60,7 +61,7 @@ jobs:
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
-          java-version: '21.0.13+9'
+          java-version: "21.0.13+9"
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm run test:rules
 

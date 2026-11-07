@@ -16,6 +16,7 @@
     "test:ui": "jest --runInBand",
     "test:rules": "node scripts/test-rules.mjs",
     "test:queries:config": "node scripts/check-query-indexes.mjs",
+    "security:scan": "node scripts/security-scan.mjs",
     "test:package:functions": "node scripts/check-functions-package.mjs",
     "test:backend": "pnpm --dir functions run build && node --test tests/backend/*.test.mjs",
     "web": "expo start --web",

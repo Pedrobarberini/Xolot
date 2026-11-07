@@ -143,7 +143,9 @@ test("resultado de tentativa descartada não vaza para resposta da tentativa con
         const transaction = {
           get: async (ref) => {
             if (ref.path.startsWith("posts/"))
-              return { exists: true, data: () => ({ status: "published" }) };
+              return { exists: true, data: () => ({ status: "published", authorId: "bruno" }) };
+            if (ref.path.startsWith("socialPreferences/"))
+              return { exists: false, data: () => undefined };
             if (ref.path.startsWith("userPostViews/"))
               return { exists: viewExists, data: () => ({}) };
             return { exists: true, data: () => ({ likes: 2, shares: 3, views: 4 }) };

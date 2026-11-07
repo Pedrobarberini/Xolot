@@ -1,5 +1,5 @@
+import { protectedOnCall } from "../../platform/abuseProtection";
 import { getFirestore } from "firebase-admin/firestore";
-import { onCall } from "firebase-functions/v2/https";
 import { getVerifiedRequestContext, verifyRegisteredUser } from "../../auth";
 import { REGION } from "../../config";
 import type { RequestInput } from "../accounts/domain/requestContext";
@@ -39,5 +39,9 @@ const handlers = createEngagementCommandHandlers(
   createEngagementService(createFirestoreEngagementRepository(getFirestore)),
   verifyRegisteredUser,
 );
-export const setPostLike = onCall({ region: REGION }, handlers.setLike);
-export const recordPostView = onCall({ region: REGION }, handlers.recordView);
+export const setPostLike = protectedOnCall("setPostLike", { region: REGION }, handlers.setLike);
+export const recordPostView = protectedOnCall(
+  "recordPostView",
+  { region: REGION },
+  handlers.recordView,
+);
