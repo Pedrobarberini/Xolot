@@ -22,6 +22,7 @@ import {
 } from "lucide-react-native";
 import {
   Animated,
+  AppState,
   Easing,
   Image,
   PanResponder,
@@ -72,6 +73,8 @@ import {
 } from "../utils/mediaTapGesture";
 
 export function FeedScreen({
+  syncError,
+  onRetrySync,
   initialAnchor = null,
   entryKeys: suppliedEntryKeys,
   onAnchorChange,
@@ -113,6 +116,8 @@ export function FeedScreen({
   shareContacts,
   users,
 }: {
+  syncError?: string;
+  onRetrySync?: () => void;
   initialAnchor?: FeedAnchor | null;
   entryKeys?: string[];
   onAnchorChange?: (anchor: FeedAnchor) => void;
@@ -306,8 +311,29 @@ export function FeedScreen({
     feedScrollRef.current?.scrollTo({ animated: false, y: latestFeedOffsetRef.current });
   }, [entryScope, feedHeight]);
 
-  useEffect(() => () => {
-    if (anchorRef.current) anchorChangeRef.current?.(anchorRef.current);
+  useEffect(() => {
+    const savePosition = () => {
+      if (anchorRef.current) anchorChangeRef.current?.(anchorRef.current);
+    };
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state !== "active") savePosition();
+    });
+    const saveWhenHidden = () => {
+      if (document.visibilityState === "hidden") savePosition();
+    };
+    const web = Platform.OS === "web" && typeof window !== "undefined";
+    if (web) {
+      window.addEventListener("pagehide", savePosition);
+      document.addEventListener("visibilitychange", saveWhenHidden);
+    }
+    return () => {
+      subscription.remove();
+      if (web) {
+        window.removeEventListener("pagehide", savePosition);
+        document.removeEventListener("visibilitychange", saveWhenHidden);
+      }
+      savePosition();
+    };
   }, []);
 
   const focusIndex = focusPlayerId ? feedPlayers.findIndex((player) => player.id === focusPlayerId) : -1;
@@ -490,10 +516,17 @@ export function FeedScreen({
             <View style={styles.feedEmptyStateIcon}>
               <SlidersHorizontal color={colors.primaryText} size={26} />
             </View>
-            <Text style={styles.feedEmptyStateTitle}>Nenhuma publicação disponível</Text>
-            <Text style={styles.feedEmptyStateBody}>
-              Novas publicações aparecerão aqui assim que forem enviadas.
+            <Text style={styles.feedEmptyStateTitle}>
+              {syncError ? "Não foi possível atualizar o feed" : "Nenhuma publicação disponível"}
             </Text>
+            <Text style={styles.feedEmptyStateBody}>
+              {syncError || "Novas publicações aparecerão aqui assim que forem enviadas."}
+            </Text>
+            {syncError && onRetrySync ? (
+              <Pressable accessibilityRole="button" onPress={onRetrySync}>
+                <Text style={styles.feedSyncRetry}>Tentar novamente</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : (
           feedPlayers.map((player, index) => (
@@ -537,6 +570,16 @@ export function FeedScreen({
           ))
         )}
       </ScrollView>
+      {syncError && feedPlayers.length > 0 ? (
+        <View style={styles.feedSyncNotice}>
+          <Text accessibilityRole="alert" style={styles.feedEmptyStateBody}>{syncError}</Text>
+          {onRetrySync ? (
+            <Pressable accessibilityRole="button" onPress={onRetrySync}>
+              <Text style={styles.feedSyncRetry}>Tentar novamente</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
       <Animated.View
         pointerEvents={isCleanView ? "none" : "auto"}
         style={[styles.feedTopNavigation, { opacity: feedChromeOpacity }]}

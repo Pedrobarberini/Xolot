@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isFirebaseMediaEnabled } from "../config/firebase";
 import {
   getSafeFirebasePostSyncMessage,
@@ -12,27 +12,36 @@ export function useFirebasePosts(
   setSubmissions: Dispatch<SetStateAction<VideoSubmission[]>>,
   isLocalStateLoaded: boolean
 ) {
+  const uid = user?.id;
   const [loadedUserId, setLoadedUserId] = useState("");
   const [postsError, setPostsError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const postsOwner = useRef<string | undefined>(undefined);
+  const retryPosts = useCallback(() => setAttempt((current) => current + 1), []);
 
   useEffect(() => {
     if (!isLocalStateLoaded) {
       return;
     }
 
-    if (!user || !isFirebaseMediaEnabled()) {
+    if (!uid || !isFirebaseMediaEnabled()) {
+      postsOwner.current = undefined;
       setLoadedUserId("");
       setPostsError("");
-      if (!user) {
+      if (!uid) {
         setSubmissions([]);
       }
       return;
     }
 
     let isMounted = true;
-    setLoadedUserId("");
+    if (postsOwner.current !== uid) {
+      // O cache de publicações legado não é separado por conta.
+      setSubmissions([]);
+      setLoadedUserId("");
+      postsOwner.current = uid;
+    }
     setPostsError("");
-    setSubmissions([]);
 
     const unsubscribe = subscribeFirebasePosts(
       (posts) => {
@@ -40,15 +49,18 @@ export function useFirebasePosts(
           return;
         }
         setSubmissions(posts);
-        setLoadedUserId(user.id);
+        setPostsError("");
+        setLoadedUserId(uid);
       },
       (error) => {
         if (!isMounted) {
           return;
         }
-        setSubmissions([]);
+        if ("code" in error && (error.code === "permission-denied" || error.code === "unauthenticated")) {
+          setSubmissions([]);
+        }
         setPostsError(getSafeFirebasePostSyncMessage(error));
-        setLoadedUserId(user.id);
+        setLoadedUserId(uid);
       },
       (warning) => {
         if (isMounted) {
@@ -61,11 +73,12 @@ export function useFirebasePosts(
       isMounted = false;
       unsubscribe();
     };
-  }, [isLocalStateLoaded, setSubmissions, user?.id]);
+  }, [attempt, isLocalStateLoaded, setSubmissions, uid]);
 
   return {
     isPostsLoaded:
       !user || !isFirebaseMediaEnabled() || loadedUserId === user.id,
-    postsError
+    postsError,
+    retryPosts
   };
 }

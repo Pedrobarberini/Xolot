@@ -45,3 +45,69 @@ test("restaura ordem e posição por UID, sem expor cache da conta anterior na t
   expect(hook.result.current.anchor).toBeNull();
   hook.unmount();
 });
+
+test("posts que chegam após uma resposta vazia recuperam o feed e persistem no reload", async () => {
+  await AsyncStorage.setItem(feedSessionStorageKey("alice"), JSON.stringify(createFeedSession([])));
+  const hook = renderHook(({ players }) => useFeedSession("alice", players, true), {
+    initialProps: { players: [] as Player[] },
+  });
+  await waitFor(() => expect(hook.result.current.loaded).toBe(true));
+  hook.rerender({ players: [post("published"), post("older")] });
+  await waitFor(() =>
+    expect(hook.result.current.players.map((item) => item.id)).toEqual(["published", "older"]),
+  );
+  await waitFor(async () =>
+    expect(
+      JSON.parse((await AsyncStorage.getItem(feedSessionStorageKey("alice")))!).entries,
+    ).toHaveLength(2),
+  );
+  hook.unmount();
+  const reloaded = renderHook(() =>
+    useFeedSession("alice", [post("older"), post("published")], true),
+  );
+  await waitFor(() => expect(reloaded.result.current.loaded).toBe(true));
+  expect(reloaded.result.current.players.map((item) => item.id)).toEqual(["published", "older"]);
+  reloaded.unmount();
+});
+
+test("primeira consulta vazia sem cache não bloqueia posts posteriores", async () => {
+  const hook = renderHook(({ players, ready }) => useFeedSession("alice", players, ready), {
+    initialProps: { players: [] as Player[], ready: false },
+  });
+  hook.rerender({ players: [], ready: true });
+  await waitFor(() => expect(hook.result.current.loaded).toBe(true));
+  hook.rerender({ players: [post("first")], ready: true });
+  await waitFor(() =>
+    expect(hook.result.current.players.map((item) => item.id)).toEqual(["first"]),
+  );
+  hook.unmount();
+});
+
+test("a última âncora começa a persistir sem aguardar o debounce de cache", async () => {
+  const hook = renderHook(() => useFeedSession("alice", [post("a"), post("b")], true));
+  await waitFor(() => expect(hook.result.current.loaded).toBe(true));
+  const anchor = { entryKey: "0:b", progress: 0.5 };
+  act(() => hook.result.current.saveAnchor(anchor));
+  expect(JSON.parse((await AsyncStorage.getItem(feedSessionStorageKey("alice")))!).anchor).toEqual(
+    anchor,
+  );
+  hook.unmount();
+});
+
+test("histórico fora da janela se recupera, mas resposta vazia transitória preserva a âncora", async () => {
+  const previous = createFeedSession(["outside-window"]);
+  previous.anchor = { entryKey: "0:outside-window", progress: 0.4 };
+  await AsyncStorage.setItem(feedSessionStorageKey("alice"), JSON.stringify(previous));
+  const hook = renderHook(({ players }) => useFeedSession("alice", players, true), {
+    initialProps: { players: [] as Player[] },
+  });
+  await waitFor(() => expect(hook.result.current.loaded).toBe(true));
+  expect(hook.result.current.anchor).toEqual(previous.anchor);
+  hook.rerender({ players: [post("recent")] });
+  await waitFor(() =>
+    expect(hook.result.current.players.map((item) => item.id)).toEqual(["recent"]),
+  );
+  hook.rerender({ players: [post("outside-window"), post("recent")] });
+  expect(hook.result.current.players.map((item) => item.id)).toEqual(["recent", "outside-window"]);
+  hook.unmount();
+});

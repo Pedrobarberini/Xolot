@@ -50,6 +50,8 @@ import type { NotificationContent } from "../utils/notificationDestination";
 import type { FeedAnchor } from "../utils/feedSession";
 
 type AppRoutesProps = {
+  feedSyncError?: string;
+  onRetryFeedSync?: () => void;
   feedAnchor?: FeedAnchor | null;
   feedEntryKeys?: string[];
   onFeedAnchorChange?: (anchor: FeedAnchor) => void;
@@ -463,6 +465,8 @@ export function AppRoutes(props: AppRoutesProps) {
 
               {tab === "feed" ? (
                 <FeedScreen
+                  syncError={props.feedSyncError}
+                  onRetrySync={props.onRetryFeedSync}
                   initialAnchor={props.feedAnchor}
                   entryKeys={feedEntryKeys}
                   onAnchorChange={props.onFeedAnchorChange}

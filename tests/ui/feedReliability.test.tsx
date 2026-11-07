@@ -1,5 +1,6 @@
 import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { AppState, type AppStateStatus } from "react-native";
 import { FeedScreen } from "../../src/screens/FeedScreen";
 import type { Player } from "../../src/types";
 let mockMediaMounts = 0;
@@ -112,6 +113,51 @@ test("reset do feed conserva a mídia montada e saída cancela a visualização 
   act(() => jest.advanceTimersByTime(1000));
   expect(input.onRecordView).not.toHaveBeenCalled();
   expect(mockMediaUnmounts).toBe(1);
+});
+
+test("erro de sincronização aparece com retry e não se passa por feed vazio", () => {
+  const retry = jest.fn();
+  const input = props();
+  const ui = render(
+    <FeedScreen {...input} players={[]} syncError="Sem conexão" onRetrySync={retry} />,
+  );
+  expect(screen.getByText("Não foi possível atualizar o feed")).toBeTruthy();
+  expect(screen.queryByText("Nenhuma publicação disponível")).toBeNull();
+  fireEvent.press(screen.getByText("Tentar novamente"));
+  expect(retry).toHaveBeenCalledTimes(1);
+  ui.rerender(<FeedScreen {...input} syncError="Sem conexão" onRetrySync={retry} />);
+  expect(screen.getByRole("alert")).toBeTruthy();
+  expect(mockMediaMounts).toBe(1);
+  ui.unmount();
+});
+
+test("ir para segundo plano salva a posição mesmo antes de terminar o scroll", () => {
+  let changeState: ((state: AppStateStatus) => void) | undefined;
+  const remove = jest.fn();
+  jest.spyOn(AppState, "addEventListener").mockImplementation((_type, listener) => {
+    changeState = listener;
+    return { remove };
+  });
+  const anchor = jest.fn();
+  const input = props();
+  const ui = render(
+    <FeedScreen
+      {...input}
+      players={[post, { ...post, id: "second" }]}
+      entryKeys={["0:first", "0:second"]}
+      onAnchorChange={anchor}
+    />,
+  );
+  fireEvent(screen.getByTestId("feed-pager-shell"), "layout", {
+    nativeEvent: { layout: { height: 600 } },
+  });
+  fireEvent.scroll(screen.getByTestId("feed-pager-scroll"), {
+    nativeEvent: { contentOffset: { y: 750 } },
+  });
+  act(() => changeState?.("background"));
+  expect(anchor).toHaveBeenLastCalledWith({ entryKey: "0:second", progress: 0.25 });
+  ui.unmount();
+  expect(remove).toHaveBeenCalledTimes(1);
 });
 
 test("retorno restaura o post e salva posição relativa; contadores não fazem o scroll voltar ao início", () => {

@@ -84,7 +84,7 @@ export default function App() {
   } = useFirebaseAccounts();
   useOperationMetrics(user?.id);
   useEffect(() => { setNotificationContent(null); }, [user?.id]);
-  const { isPostsLoaded } = useFirebasePosts(
+  const { isPostsLoaded, postsError, retryPosts } = useFirebasePosts(
     user,
     setSubmissions,
     isAppStateLoaded
@@ -331,6 +331,8 @@ export default function App() {
 
   return (
     <AppRoutes
+      feedSyncError={postsError}
+      onRetryFeedSync={retryPosts}
       feedAnchor={feedSession.anchor}
       feedEntryKeys={feedSession.entryKeys}
       onFeedAnchorChange={feedSession.saveAnchor}

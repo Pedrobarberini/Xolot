@@ -44,6 +44,46 @@ test("resposta antiga não preenche posts de outra conta; erro não vira sucesso
   expect(setPosts).not.toHaveBeenCalled();
   act(() => subscribe.mock.calls[1][1]?.(new Error("Sem conexão")));
   expect(hook.result.current.postsError).toBe("Sem conexão");
+  expect(setPosts).not.toHaveBeenCalled();
+  hook.unmount();
+});
+
+test("falha não apaga posts já sincronizados; tentar novamente assina sem limpar o feed", () => {
+  const unsubscribe = jest.fn();
+  subscribe.mockReturnValue(unsubscribe);
+  const setPosts = jest.fn();
+  const hook = renderHook(() => useFirebasePosts(user, setPosts, true));
+  const posts = [{ id: "published" }] as VideoSubmission[];
+  act(() => subscribe.mock.calls[0][0](posts));
+  setPosts.mockClear();
+  act(() => subscribe.mock.calls[0][1]?.(new Error("Sem conexão")));
+  expect(setPosts).not.toHaveBeenCalled();
+  expect(hook.result.current.postsError).toBe("Sem conexão");
+  act(() => hook.result.current.retryPosts());
+  expect(unsubscribe).toHaveBeenCalledTimes(1);
+  expect(subscribe).toHaveBeenCalledTimes(2);
+  expect(setPosts).not.toHaveBeenCalled();
+  expect(hook.result.current.isPostsLoaded).toBe(true);
+  act(() => subscribe.mock.calls[0][0]([]));
+  expect(setPosts).not.toHaveBeenCalled();
+  act(() => subscribe.mock.calls[1][0](posts));
+  expect(setPosts).toHaveBeenLastCalledWith(posts);
+  expect(hook.result.current.postsError).toBe("");
+  hook.unmount();
+});
+
+test("acesso revogado limpa posts da conta em vez de conservar conteúdo sem autorização", () => {
+  subscribe.mockReturnValue(jest.fn());
+  const setPosts = jest.fn();
+  const hook = renderHook(() => useFirebasePosts(user, setPosts, true));
+  act(() => subscribe.mock.calls[0][0]([{ id: "published" }] as VideoSubmission[]));
+  setPosts.mockClear();
+  act(() =>
+    subscribe.mock.calls[0][1]?.(
+      Object.assign(new Error("Acesso revogado"), { code: "permission-denied" }),
+    ),
+  );
   expect(setPosts).toHaveBeenLastCalledWith([]);
+  expect(hook.result.current.postsError).toBe("Acesso revogado");
   hook.unmount();
 });

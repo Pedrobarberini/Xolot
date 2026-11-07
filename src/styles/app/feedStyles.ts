@@ -59,6 +59,23 @@ export const feedStyles = {
     maxWidth: 300,
     textAlign: "center"
   },
+  feedSyncNotice: {
+    alignItems: "center",
+    backgroundColor: colors.media,
+    borderRadius: 12,
+    left: 12,
+    padding: 12,
+    position: "absolute",
+    right: 12,
+    top: 70,
+    zIndex: 8
+  },
+  feedSyncRetry: {
+    color: colors.primaryText,
+    fontSize: 14,
+    fontWeight: "700",
+    padding: 12
+  },
   feedReel: {
     alignSelf: "stretch",
     backgroundColor: colors.media,
